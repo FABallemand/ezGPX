@@ -21,3 +21,6 @@ Easy to use Python GPX library.
 ### Creating a Python Library
 - Medium: [How to create a Python library](https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f)
 - Towards Data Science: [Deep dive: Create and publish your first Python library](https://towardsdatascience.com/deep-dive-create-and-publish-your-first-python-library-f7f618719e14)
+
+### Other Python GPX Library
+- [gpxpy](https://github.com/tkrajina/gpxpy)
