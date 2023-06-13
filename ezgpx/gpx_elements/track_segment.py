@@ -6,4 +6,4 @@ class TrackSegment():
     """
     
     def __init__(self, track_points: list[TrackPoint] = []):
-        self.track_points = track_points
+        self.track_points: list[TrackPoint] = track_points

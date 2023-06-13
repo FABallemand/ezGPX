@@ -6,5 +6,5 @@ class Track():
     """
 
     def __init__(self, name: str = "", track_segments: list[TrackSegment] = []):
-        self.name = name
-        self.track_segments = track_segments
+        self.name: str = name
+        self.track_segments: list[TrackSegment] = track_segments

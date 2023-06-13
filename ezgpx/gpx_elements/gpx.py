@@ -9,8 +9,8 @@ class Gpx():
     """
 
     def __init__(self, metadata: Metadata = None, tracks: list[Track] = []):
-        self.metadata = metadata
-        self.tracks = tracks
+        self.metadata: Metadata = metadata
+        self.tracks: list[Track]  = tracks
 
     def to_dataframe(self) -> pd.DataFrame:
         """
@@ -30,3 +30,12 @@ class Gpx():
                     })
         df = pd.DataFrame(route_info)
         return df
+
+    def remove_points(self, remove_factor: int = 2):
+        count = 0
+        for track in self.tracks:
+            for track_segment in track.track_segments:
+                for track_point in track_segment.track_points:
+                    if count % remove_factor == 0:
+                        track_segment.track_points.remove(track_point)
+                        count += 1
