@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1"
+    xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"
+    xmlns:gpxtrkx="http://www.garmin.com/xmlschemas/TrackStatsExtension/v1"
+    xmlns:wptx1="http://www.garmin.com/xmlschemas/WaypointExtension/v1"
+    xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" creator="eTrex 32x"
+    version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd
+                        http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd
+                        http://www.garmin.com/xmlschemas/TrackStatsExtension/v1 http://www8.garmin.com/xmlschemas/TrackStatsExtension.xsd
+                        http://www.garmin.com/xmlschemas/WaypointExtension/v1 http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd
+                        http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd">
+    <metadata>
+        <link href="http://www.garmin.com">
+            <text>Garmin International</text>
+        </link>
+        <time>2023-04-29T16:36:52Z</time>
+    </metadata>
+    <trk>
+        <name>29_04_2023</name>
+        <trkseg>
+            <trkpt lat="0" lon="0">
+                <ele>100.0</ele>
+                <time>2023-04-29T09:49:52Z</time>
+            </trkpt>
+            <trkpt lat="0" lon="1">
+                <ele>100.0</ele>
+                <time>2023-04-29T09:49:53Z</time>
+            </trkpt>
+            <trkpt lat="1" lon="1">
+                <ele>100.0</ele>
+                <time>2023-04-29T09:50:14Z</time>
+            </trkpt>
+            <trkpt lat="1" lon="0">
+                <ele>100.0</ele>
+                <time>2023-04-29T09:50:16Z</time>
+            </trkpt>
+        </trkseg>
+    </trk>
+</gpx>

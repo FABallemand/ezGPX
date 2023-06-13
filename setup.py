@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent'
     ],
-    packages=find_packages(include=['ezGPX']),
+    packages=find_packages(include=['ezgpx']),
     include_package_data=True,
     install_requires=[],
     setup_requires=['pytest-runner'],
