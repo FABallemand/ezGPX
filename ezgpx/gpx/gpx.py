@@ -1,6 +1,7 @@
-from typing import *
 import pandas as pd
 import matplotlib.pyplot as plt
+
+import logging
 
 from ..gpx_elements import Gpx
 from ..gpx_parser import Parser
@@ -28,6 +29,15 @@ class GPX():
             for track_segment in track.track_segments:
                 nb_pts += len(track_segment.track_points)
         return nb_pts
+    
+    def distance(self):
+        """
+        Returns the distance (meters) of the tracks contained in the GPX.
+
+        Returns:
+            float: Distance (meters).
+        """
+        return self.gpx.distance()
 
     def to_string(self) -> str:
         return self.writer.gpx_to_string(self.gpx)
@@ -44,71 +54,45 @@ class GPX():
         """
         return self.gpx.to_dataframe()
     
-    # def removeGPSErrors(gpx, error_distance=1000):
-    #     """
-    #     Remove GPS errors.
+    def remove_metadata(self):
+        """
+        Remove metadata (ie: metadata will not be written when saving the GPX object as a .gpx file).
+        """
+        self.writer.metadata = False
+    
+    def remove_elevation(self):
+        """
+        Remove elevation data (ie: elevation data will not be written when saving the GPX object as a .gpx file).
+        """
+        self.writer.ele = False
 
-    #     Args:
-    #         gpx (GPX): GPX object.
-    #         error_distance (int, optional): GPS error threshold distance (in meters) between two points. Defaults to 1000.
+    def remove_time(self):
+        """
+        Remove time data (ie: time data will not be written when saving the GPX object as a .gpx file).
+        """
+        self.writer.time = False
+    
+    def remove_gps_errors(self):
+        self.gpx.remove_gps_errors()
 
-    #     Returns:
-    #         GPX: GPX object without GPS error.
-    #         list: List of removed points (GPS errors).
-    #     """
-    #     # Create new "file"
-    #     cleaned_gpx = gpxpy.gpx.GPX()
+    def compress(self, compression_method: str = "Ramer-Douglas-Peucker algorithm"):
+        """
+        Compress GPX by removing points.
 
-    #     previous_point = None
-    #     GPS_errors = []
-
-    #     for track in gpx.tracks:
-    #         # Create track
-    #         gpx_track = gpxpy.gpx.GPXTrack()
-    #         cleaned_gpx.tracks.append(gpx_track)
-    #         for segment in track.segments:
-    #             # Create segment
-    #             gpx_segment = gpxpy.gpx.GPXTrackSegment()
-    #             gpx_track.segments.append(gpx_segment)
-    #             for point in segment.points:
-    #                 # Create points
-    #                 if previous_point is None or gpxpy.geo.haversine_distance(previous_point.latitude,
-    #                                                                         previous_point.longitude,
-    #                                                                         point.latitude,
-    #                                                                         point.longitude) < error_distance:
-    #                     gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(point.latitude, point.longitude, elevation=point.elevation))
-    #                     previous_point = point
-    #                 else:
-    #                     GPS_errors.append(point)
-    #     return cleaned_gpx, GPS_errors
-
-    # def compressFile(gpx, compression_method="Ramer-Douglas-Peucker algorithm", vertical_smooth=True, horizontal_smooth=True):
-    #     """
-    #     Compress GPX file.
-
-    #     Args:
-    #         gpx (GPX): GPX object.
-    #         compression_method (str, optional): Method used to compress GPX. Defaults to "RPD".
-    #         vertical_smooth (bool, optional): Vertical smoothing. Defaults to True.
-    #         horizontal_smooth (bool, optional): Horizontal smoothing. Defaults to True.
-
-    #     Returns:
-    #         GPX: Compressed GPX object.
-    #     """
-    #     # Smoothing
-    #     gpx.smooth(vertical=vertical_smooth, horizontal=horizontal_smooth)
-
-    #     # Compression
-    #     if compression_method == "Ramer-Douglas-Peucker algorithm":
-    #         gpx.simplify()
-    #     elif compression_method == "Remove 25% points":
-    #         gpx.reduce_points(int(gpx.get_track_points_no() * 0.75))
-    #     elif compression_method == "Remove 50% points":
-    #         gpx.reduce_points(int(gpx.get_track_points_no() * 0.5))
-    #     elif compression_method == "Remove 75% points":
-    #         gpx.reduce_points(int(gpx.get_track_points_no() * 0.25))
-            
-    #     return gpx
+        Args:
+            compression_method (str, optional): Method used to compress GPX. Defaults to "Ramer-Douglas-Peucker algorithm".
+        """
+        if compression_method == "Ramer-Douglas-Peucker algorithm":
+            logging.debug("Ramer-Douglas-Peucker algorithm is not implemented yet")
+            pass
+        elif compression_method == "Remove 25% points":
+            self.gpx.remove_points(4)
+        elif compression_method == "Remove 50% points":
+            self.gpx.remove_points(2)
+        elif compression_method == "Remove 75% points":
+            pass
+        elif compression_method == "Remove elevation":
+            logging.debug("Removing elevation is not implemented yet")
 
     def plot(self, title: str = "Track", base_color: str = "#101010", start_stop: bool = False, elevation_color: bool = False, file_path: str = None,):
 
