@@ -1,0 +1,25 @@
+name: ci
+on: [push]
+
+jobs:
+  activate:
+    runs-on: self-ubuntu-22.04
+    if: |
+      github.repository == 'FABallemand/ezGPX' &&
+      !startsWith(github.event.head_commit.message, 'Release ') &&
+      !contains(github.event.head_commit.message, 'ci skip')
+    steps:
+    - run: echo ready
+  
+  tests:
+    needs: activate
+    runs-on: self-ubuntu-22.04
+    steps:
+      - name: install and upgrade necessary packages
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install pytest pandas
+      - name: tests
+        run: |
+          python3 -c"import sys; print(sys.path)"
+          python3 -m pytest -s

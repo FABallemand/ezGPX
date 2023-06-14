@@ -1,4 +1,4 @@
-from track_extensions import *
+from .track_extensions import *
 from .track_segment import *
 
 class Track():
