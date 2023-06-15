@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -17,7 +19,7 @@ class GPX():
         self.gpx: Gpx = self.parser.gpx
         self.writer: Writer = Writer()
 
-    def nb_points(self):
+    def nb_points(self) -> int:
         """
         Compute the number of points in the GPX.
 
@@ -30,7 +32,7 @@ class GPX():
                 nb_pts += len(track_segment.track_points)
         return nb_pts
     
-    def distance(self):
+    def distance(self) -> float:
         """
         Returns the distance (meters) of the tracks contained in the GPX.
 
@@ -38,11 +40,95 @@ class GPX():
             float: Distance (meters).
         """
         return self.gpx.distance()
+    
+    def ascent(self) -> float:
+        """
+        Returns the ascent (meters) of the tracks contained in the GPX.
+
+        Returns:
+            float: Ascent (meters).
+        """
+        return self.gpx.ascent()
+    
+    def descent(self) -> float:
+        """
+        Returns the descent (meters) of the tracks contained in the GPX.
+
+        Returns:
+            float: Descent (meters).
+        """
+        return self.gpx.descent()
+
+    def min_elevation(self) -> float:
+        """
+        Returns the minimum elevation (meters) in the tracks contained in the GPX.
+
+        Returns:
+            float: Minimum elevation (meters).
+        """
+        return self.gpx.min_elevation()
+    
+    def max_elevation(self) -> float:
+        """
+        Returns the maximum elevation (meters) in the tracks contained in the GPX.
+
+        Returns:
+            float: Maximum elevation (meters).
+        """
+        return self.gpx.max_elevation()
+    
+    def start_time(self) -> datetime:
+        """
+        Return the activity start time.
+
+        Returns:
+            datetime: Start time.
+        """
+        return self.gpx.start_time()
+    
+    def stop_time(self) -> datetime:
+        """
+        Return the activity stop time.
+
+        Returns:
+            datetime: Stop time.
+        """
+        return self.gpx.stop_time()
+    
+    def total_elapsed_time(self) -> datetime:
+        """
+        Return the total elapsed time during the activity.
+
+        Returns:
+            datetime: Total elapsed time.
+        """
+        return self.gpx.total_elapsed_time()
+    
+    def avg_speed(self) -> float:
+        """
+        Return average speed (kilometers per hour) during the activity.
+
+        Returns:
+            float: Average speed (kilometers per hour).
+        """
+        return self.gpx.avg_speed()
 
     def to_string(self) -> str:
+        """
+        Convert the GPX object to a string.
+
+        Returns:
+            str: String representingth GPX object.
+        """
         return self.writer.gpx_to_string(self.gpx)
 
     def to_gpx(self, path: str):
+        """
+        Write the GPX object to a .gpx file.
+
+        Args:
+            path (str): Path to the .gpx file.
+        """
         self.writer.write(self.gpx, path)
 
     def to_dataframe(self) -> pd.DataFrame:

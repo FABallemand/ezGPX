@@ -21,19 +21,15 @@
         <trkseg>
             <trkpt lat="0" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="1">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:53Z</time>
             </trkpt>
             <trkpt lat="1" lon="1">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:50:14Z</time>
             </trkpt>
             <trkpt lat="1" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:50:16Z</time>
             </trkpt>
         </trkseg>
     </trk>

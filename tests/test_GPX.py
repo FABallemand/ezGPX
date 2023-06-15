@@ -16,26 +16,67 @@ from ezgpx import GPX
 
 class TestGPX():
 
-    def test_plot(self, remove_tmp: bool = True):
-        # Create temporary folder
-        rmtree("tmp", True)
-        os.makedirs(os.path.dirname(__file__) + "/tmp")
+    def __init__(self, gpx_path: str = "../test_files/files/strava_running_1.gpx"):
+        self.test_gpx = GPX(gpx_path)
 
+    def _test_plot_1(self):
         # Plot
-        test_gpx = GPX("../test_files/files/strava_running_1.gpx")
-        test_gpx.plot(start_stop=True, elevation_color=True, file_path="tmp/strava_running_1_start_stop_elevation.png")
+        self.test_gpx.plot(start_stop=False, elevation_color=False, file_path="tmp/strava_running_1.png")
+
+        # Load images
+        test_img = plt.imread("tmp/strava_running_1.png")
+        ref_img = plt.imread("../test_files/reference_files/strava_running_1.png")
+
+        # Compare images
+        return np.array_equal(test_img, ref_img)
+    
+    def _test_plot_2(self):
+        # Plot
+        self.test_gpx.plot(start_stop=True, elevation_color=False, file_path="tmp/strava_running_1_start_stop.png")
+
+        # Load images
+        test_img = plt.imread("tmp/strava_running_1_start_stop.png")
+        ref_img = plt.imread("../test_files/reference_files/strava_running_1_start_stop.png")
+
+        # Compare images
+        return np.array_equal(test_img, ref_img)
+    
+    def _test_plot_3(self):
+        # Plot
+        self.test_gpx.plot(start_stop=False, elevation_color=False, file_path="tmp/strava_running_1_elevation.png")
+
+        # Load images
+        test_img = plt.imread("tmp/strava_running_1_elevation.png")
+        ref_img = plt.imread("../test_files/reference_files/strava_running_1_elevation.png")
+
+        # Compare images
+        return np.array_equal(test_img, ref_img)
+    
+    def _test_plot_4(self):
+        # Plot
+        self.test_gpx.plot(start_stop=True, elevation_color=True, file_path="tmp/strava_running_1_start_stop_elevation.png")
 
         # Load images
         test_img = plt.imread("tmp/strava_running_1_start_stop_elevation.png")
         ref_img = plt.imread("../test_files/reference_files/strava_running_1_start_stop_elevation.png")
 
-        res = np.array_equal(test_img, ref_img)
+        # Compare images
+        return np.array_equal(test_img, ref_img)
 
+    def test_plot(self, remove_tmp: bool = True):
         # Create temporary folder
+        rmtree("tmp", True)
+        os.makedirs(os.path.dirname(__file__) + "/tmp")
+
+        # Tests
+        assert(self._test_plot_1())
+        assert(self._test_plot_2())
+        assert(self._test_plot_3())
+        assert(self._test_plot_4())
+
+        # Remove temporary folder
         if remove_tmp:
             rmtree("tmp")
-
-        assert(res)
 
     @pytest.mark.skip(reason="test") # https://docs.pytest.org/en/7.3.x/how-to/skipping.html
     def test_test(self):

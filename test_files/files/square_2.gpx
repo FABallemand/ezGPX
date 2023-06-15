@@ -21,83 +21,63 @@
         <trkseg>
             <trkpt lat="0" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="2">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="4">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="6">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="8">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="0" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="2" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="4" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="6" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="8" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="10">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="8">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="6">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="4">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="2">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="10" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="8" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="6" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="4" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
             <trkpt lat="2" lon="0">
                 <ele>100.0</ele>
-                <time>2023-04-29T09:49:52Z</time>
             </trkpt>
         </trkseg>
     </trk>

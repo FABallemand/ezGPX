@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import pandas as pd
 
 from .metadata import *
@@ -14,9 +16,9 @@ class Gpx():
         self.metadata: Metadata = metadata
         self.tracks: list[Track]  = tracks
 
-    def distance(self):
+    def distance(self) -> float:
         """
-        Compute the total distance (in meters) of the tracks contained in the Gpx element.
+        Compute the total distance (meters) of the tracks contained in the Gpx element.
 
         Returns:
             float: Distance (meters)
@@ -31,6 +33,131 @@ class Gpx():
                     previous_latitude = track_point.latitude
                     previous_longitude = track_point.longitude
         return dst
+    
+    def ascent(self) -> float:
+        """
+        Compute the total ascent (meters) of the tracks contained in the Gpx element.
+
+        Returns:
+            float: Ascent (meters)
+        """
+        ascent = 0
+        previous_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        for track in self.tracks:
+            for track_segment in track.track_segments:
+                for track_point in track_segment.track_points:
+                    if track_point.elevation > previous_elevation:
+                        ascent += track_point.elevation - previous_elevation
+                    previous_elevation = track_point.elevation
+        return ascent
+    
+    def descent(self) -> float:
+        """
+        Compute the total descent (meters) of the tracks contained in the Gpx element.
+
+        Returns:
+            float: Descent (meters)
+        """
+        descent = 0
+        previous_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        for track in self.tracks:
+            for track_segment in track.track_segments:
+                for track_point in track_segment.track_points:
+                    if track_point.elevation < previous_elevation:
+                        descent += previous_elevation - track_point.elevation
+                    previous_elevation = track_point.elevation
+        return descent
+    
+    def min_elevation(self) -> float:
+        """
+        Compute minimum elevation (meters) in the tracks contained in the Gpx element.
+
+        Returns:
+            float: Minimum elevation (meters).
+        """
+        min_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        for track in self.tracks:
+            for track_segment in track.track_segments:
+                for track_point in track_segment.track_points:
+                    if track_point.elevation < min_elevation:
+                        min_elevation = track_point.elevation
+        return min_elevation
+    
+    def max_elevation(self) -> float:
+        """
+        Compute maximum elevation (meters) in the tracks contained in the Gpx element.
+
+        Returns:
+            float: Maximum elevation (meters).
+        """
+        max_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        for track in self.tracks:
+            for track_segment in track.track_segments:
+                for track_point in track_segment.track_points:
+                    if track_point.elevation > max_elevation:
+                        max_elevation = track_point.elevation
+        return max_elevation
+    
+    def utc_start_time(self) -> datetime:
+        """
+        Return the activity UTC starting time.
+
+        Returns:
+            datetime: UTC start time.
+        """
+        return self.tracks[0].track_segments[0].track_points[0].time
+    
+    def utc_stop_time(self):
+        """
+        Return the activity UTC stopping time.
+
+        Returns:
+            datetime: UTC stop time.
+        """
+        return self.tracks[-1].track_segments[-1].track_points[-1].time
+    
+    def start_time(self) -> datetime:
+        """
+        Return the activity starting time.
+
+        Returns:
+            datetime: Start time.
+        """
+        return self.tracks[0].track_segments[0].track_points[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+    
+    def stop_time(self):
+        """
+        Return the activity stopping time.
+
+        Returns:
+            datetime: Stop time.
+        """
+        return self.tracks[-1].track_segments[-1].track_points[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+    
+    def total_elapsed_time(self) -> datetime:
+        """
+        Compute the total elapsed time.
+
+        Returns:
+            datetime: Total elapsed time.
+        """
+        return self.stop_time() - self.start_time()
+    
+    def avg_speed(self) -> float:
+        """
+        Compute the average speed (kilometers per second) during the activity.
+
+        Returns:
+            float: Average speed (kilometers per seconds)
+        """
+        # Compute and convert total elapsed time
+        total_elapsed_time = self.total_elapsed_time()
+        total_elapsed_time = total_elapsed_time.total_seconds() / 3600
+
+        # Compute and convert distance
+        distance = self.distance() / 1000
+
+        return distance/total_elapsed_time
 
     def to_dataframe(self) -> pd.DataFrame:
         """

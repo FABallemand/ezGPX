@@ -1,5 +1,5 @@
 import logging
-from typing import *
+from datetime import datetime
 
 import xml.etree.ElementTree as ET
 
@@ -50,7 +50,7 @@ class Parser():
                     gpx_point = TrackPoint(float(point.get("lat")),
                                            float(point.get("lon")),
                                            float(elevation.text),
-                                           time.text)
+                                           datetime.strptime(time.text, "%Y-%m-%dT%H:%M:%SZ"))
 
                     gpx_segment.track_points.append(gpx_point)
 
