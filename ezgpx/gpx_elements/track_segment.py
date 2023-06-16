@@ -1,9 +1,14 @@
-from .track_point import *
+from .extensions import Extensions
+from .track_point import TrackPoint
 
 class TrackSegment():
     """
     Track segment (trkseg) in GPX file.
     """
     
-    def __init__(self, track_points: list[TrackPoint] = []):
-        self.track_points: list[TrackPoint] = track_points
+    def __init__(
+            self,
+            trkpt: list[TrackPoint] = [],
+            extensions: Extensions = None):
+        self.trkpt: list[TrackPoint] = trkpt
+        self.extensions: Extensions = extensions

@@ -3,7 +3,7 @@ from datetime import datetime
 
 import xml.etree.ElementTree as ET
 
-from ..gpx_elements import Gpx, Metadata, Track, TrackSegment, TrackPoint
+from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, TrackPoint, TrackSegment, Track
 
 class Parser():
 
@@ -20,8 +20,45 @@ class Parser():
     def check_schema(self):
         pass
 
+    def parse_link(self, link) -> Link:
+        href = link.get("href")
+        text = link.find("topo:text", self.name_space)
+        type = link.find("topo:type", self.name_space)
+        return Link(href, text, type)
+    
+    def parse_copyright(self, copyright) -> Copyright:
+        author = copyright.get("author")
+        year = copyright.find("topo:year", self.name_space)
+        licence = copyright.find("topo:licence", self.name_space)
+        return Copyright(author, year, licence)
+    
+    def parse_email(self, email) -> Email:
+        id = email.get("id")
+        domain = email.get("domain")
+        return Email(id, domain)
+    
+    def parse_bounds(self, bounds) -> Bounds:
+        minlat = bounds.get("minlat")
+        minlon = bounds.get("minlon")
+        maxlat = bounds.get("maxlat")
+        maxlon = bounds.get("maxlon")
+        return Bounds(minlat, minlon, maxlat, maxlon)
+
     def parse_metadata(self):
-        pass
+        
+        metadata = self.gpx_root.find("topo:metadata", self.name_space)
+
+        name = metadata.find("topo:name", self.name_space)
+        desc = metadata.find("topo:desc", self.name_space)
+        author = metadata.find("topo:author", self.name_space)
+        copyright = self.parse_copyright(metadata.find("topo:copyright", self.name_space))
+        link = self.parse_link(metadata.find("topo:link", self.name_space))
+        time = metadata.find("topo:time", self.name_space)
+        keywords = metadata.find("topo:keywords", self.name_space)
+        bounds = self.parse_bounds(metadata.find("topo:bounds", self.name_space))
+        extensions = metadata.find("topo:extensions", self.name_space)
+
+        self.gpx.metadata = Metadata(name, desc, author, copyright, link, time, keywords, bounds, extensions)
 
     def parse_tracks(self):
 

@@ -1,5 +1,5 @@
 
-class TrackExtensions():
+class Extensions():
     """
     Track extensions.
     """
