@@ -41,3 +41,15 @@ test_gpx.plot(start_stop=True, elevation_color=True)
 - Fabien ALLEMAND
 
 ## 📝 TO DO LIST !!
+- Complete gpx
+```xml
+<gpx
+version="1.1 [1] ?"
+creator="xsd:string [1] ?">
+<metadata> metadataType </metadata> [0..1] ?
+<wpt> wptType </wpt> [0..*] ?
+<rte> rteType </rte> [0..*] ?
+<trk> trkType </trk> [0..*] ?
+<extensions> extensionsType </extensions> [0..1] ?
+</gpx>
+```

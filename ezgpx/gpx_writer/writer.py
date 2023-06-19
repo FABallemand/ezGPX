@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from ..gpx_elements import Gpx
+from ..gpx_elements import Gpx, Metadata, Track
 
 class Writer():
 
@@ -15,25 +15,25 @@ class Writer():
         self.ele = ele
         self.time = time
 
-    def write(self, gpx: Gpx = None, path: str = "", metadata: bool = True, ele: bool = True, time: bool = True):
-        
-        if gpx is not None:
-            self.gpx = gpx
+    def add_subelement(self, element, sub_element, text):
+        """
+        Add sub-element to GPX element.
 
-        if path != "":
-            self.path = path
+        Args:
+            element (???): GPX element.
+            sub_element (str): GPX sub-element.
+            text (str): GPX sub-element text.
 
-        if self.gpx is not None:
-            self.gpx_to_string()
+        Returns:
+            ???: GPX element.
+        """
+        if text is not None:
+            sub_elmnt = ET.SubElement(element, sub_element)
+            sub_elmnt.text = text
+        return element
 
-        # Is it smart ??
-        self.metadata = metadata
-        self.ele = ele
-        self.time = time
-
-        if self.path != "": # + Check if path is correct
-            self.write_gpx()
-
+    def metadata_to_string(self, metadata: Metadata):
+        pass
 
     def gpx_to_string(self, gpx: Gpx = None, metadata: bool = True, ele: bool = True, time: bool = True) -> str:
 
@@ -46,12 +46,43 @@ class Writer():
         self.time = time
 
         if self.gpx is not None:
+            # Reset string
+            self.gpx_string = ""
+
             # Root
             gpx_root = ET.Element("gpx")
 
             # Metadata
             if self.metadata:
-                pass
+                # self.gpx_string += self.metadata_to_string(self.gpx.metadata)
+                metadata = ET.SubElement(gpx_root, "metadata")
+
+                metadata = self.add_subelement(metadata, "name", self.gpx.metadata.name)
+                metadata = self.add_subelement(metadata, "desc", self.gpx.metadata.desc)
+
+                if self.gpx.metadata.author is not None:
+                    author = ET.SubElement(metadata, "author")
+                    author = self.add_subelement(author, "name", self.gpx.metadata.author.name)
+                    # Add email and link
+
+                if self.gpx.metadata.copyright is not None:
+                    # Add copyright
+                    pass
+
+                if self.gpx.metadata.link is not None:
+                    # Add link
+                    pass
+
+                metadata = self.add_subelement(metadata, "time", self.gpx.metadata.time)
+                metadata = self.add_subelement(metadata, "keywords", self.gpx.metadata.keywords)
+
+                if self.gpx.metadata.bounds is not None:
+                    # Add bounds
+                    pass
+
+                if self.gpx.metadata.extensions is not None:
+                    # Add extensions
+                    pass
 
             # Tracks
             for gpx_track in self.gpx.tracks:
@@ -75,7 +106,6 @@ class Writer():
                             time = ET.SubElement(point, "time")
                             time.text = gpx_point.time
 
-
             # Convert data to string
             self.gpx_string = ET.tostring(gpx_root)
 
@@ -91,4 +121,23 @@ class Writer():
             with open(self.path, "wb") as f:
                 f.write(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
                 f.write(self.gpx_string)
+
+    def write(self, gpx: Gpx = None, path: str = "", metadata: bool = True, ele: bool = True, time: bool = True):
+        
+        if gpx is not None:
+            self.gpx = gpx
+
+        if path != "":
+            self.path = path
+
+        if self.gpx is not None:
+            self.gpx_to_string()
+
+        # Is it smart ??
+        self.metadata = metadata
+        self.ele = ele
+        self.time = time
+
+        if self.path != "": # + Check if path is correct
+            self.write_gpx()
 
