@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from .link import Link
+from .person import Person
 
 class Metadata():
     """
@@ -11,7 +12,7 @@ class Metadata():
             self,
             name: str = None,
             desc: str = None,
-            author: str = None,
+            author: Person = None,
             copyright: str = None,
             link: Link = None,
             time: datetime = None,
@@ -20,7 +21,7 @@ class Metadata():
             extensions: str = None):
         self.name: str = name,
         self.desc: str = desc,
-        self.author: str = author,
+        self.author: Person = author,
         self.copyright: str = copyright,
         self.link: Link = link,
         self.time: datetime = time,

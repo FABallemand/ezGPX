@@ -1,3 +1,5 @@
+import logging
+from datetime import datetime
 import xml.etree.ElementTree as ET
 
 from ..gpx_elements import Gpx, Metadata, Track
@@ -46,6 +48,7 @@ class Writer():
         self.time = time
 
         if self.gpx is not None:
+            logging.debug("Start convertion from GPX to string")
             # Reset string
             self.gpx_string = ""
 
@@ -54,15 +57,19 @@ class Writer():
 
             # Metadata
             if self.metadata:
-                # self.gpx_string += self.metadata_to_string(self.gpx.metadata)
-                metadata = ET.SubElement(gpx_root, "metadata")
+                logging.debug("Converting metadata to string...")
 
-                metadata = self.add_subelement(metadata, "name", self.gpx.metadata.name)
-                metadata = self.add_subelement(metadata, "desc", self.gpx.metadata.desc)
+                # self.gpx_string += self.metadata_to_string(self.gpx.metadata)
+
+                # metadata = ET.SubElement(gpx_root, "metadata")
+
+                # metadata = self.add_subelement(metadata, "name", self.gpx.metadata.name)
+                # metadata = self.add_subelement(metadata, "desc", self.gpx.metadata.desc)
 
                 if self.gpx.metadata.author is not None:
-                    author = ET.SubElement(metadata, "author")
-                    author = self.add_subelement(author, "name", self.gpx.metadata.author.name)
+                    pass
+                    # author = ET.SubElement(metadata, "author")
+                    # author = self.add_subelement(author, "name", self.gpx.metadata.author.name)
                     # Add email and link
 
                 if self.gpx.metadata.copyright is not None:
@@ -73,8 +80,8 @@ class Writer():
                     # Add link
                     pass
 
-                metadata = self.add_subelement(metadata, "time", self.gpx.metadata.time)
-                metadata = self.add_subelement(metadata, "keywords", self.gpx.metadata.keywords)
+                # metadata = self.add_subelement(metadata, "time", self.gpx.metadata.time)
+                # metadata = self.add_subelement(metadata, "keywords", self.gpx.metadata.keywords)
 
                 if self.gpx.metadata.bounds is not None:
                     # Add bounds
@@ -85,29 +92,33 @@ class Writer():
                     pass
 
             # Tracks
+            logging.debug("Converting tracks to string...")
+
             for gpx_track in self.gpx.tracks:
                 track = ET.SubElement(gpx_root, "trk")
-                name = ET.SubElement(track, "name")
-                name.text = gpx_track.name
+                # name = ET.SubElement(track, "name")
+                # name.text = gpx_track.name
 
                 # Track segments
-                for gpx_segment in gpx_track.track_segments:
+                for gpx_segment in gpx_track.trkseg:
                     segment = ET.SubElement(track, "trkseg")
 
                     # Track points
-                    for gpx_point in gpx_segment.track_points:
+                    for gpx_point in gpx_segment.trkpt:
                         point = ET.SubElement(segment, "trkpt")
-                        point.set("lat", gpx_point.latitude)
-                        point.set("lon", gpx_point.longitude)
+                        point.set("lat", str(gpx_point.latitude))
+                        point.set("lon", str(gpx_point.longitude))
                         if self.ele:
                             ele = ET.SubElement(point, "ele")
                             ele.text = str(gpx_point.elevation)
                         if self.time:
                             time = ET.SubElement(point, "time")
-                            time.text = gpx_point.time
+                            time.text = gpx_point.time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             # Convert data to string
             self.gpx_string = ET.tostring(gpx_root)
+
+            logging.debug("GPX successfully converted to string")
 
             return self.gpx_string
 
