@@ -6,6 +6,9 @@ import xml.etree.ElementTree as ET
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, TrackPoint, TrackSegment, Track
 
 class Parser():
+    """
+    GPX file parser.
+    """
 
     def __init__(self, file_path: str = ""):
         self.file_path = file_path
@@ -33,6 +36,7 @@ class Parser():
         """
         try:
             text = element.get(sub_element).text
+            # logging.debug(f"{text} - {type(text)}")
         except:
             logging.DEBUG(f"{element} has no attribute {sub_element}")
             text = None
@@ -51,9 +55,10 @@ class Parser():
         """
         try:
             text = element.find(sub_element, self.name_space).text
+            # logging.debug(f"{text} - {type(text)}")
         except:
-            logging.debug(f"{element} has no attribute {sub_element}")
             text = None
+            logging.debug(f"{element} has no attribute {sub_element}")
         return text
 
     def parse_bounds(self, bounds) -> Bounds:
