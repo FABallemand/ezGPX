@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import logging
 from datetime import datetime
 
@@ -5,23 +6,66 @@ import xml.etree.ElementTree as ET
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, TrackPoint, TrackSegment, Track
 
+DEFAULT_PRECISION = 2
+
 class Parser():
     """
     GPX file parser.
     """
 
     def __init__(self, file_path: str = ""):
-        self.file_path = file_path
-        self.gpx_tree = None
-        self.gpx_root = None
-        self.name_space = {"topo": "http://www.topografix.com/GPX/1/1"}
-        self.gpx = Gpx()
+        self.file_path: str = file_path
+        self.gpx_tree: ET.ElementTree = None
+        self.gpx_root: ET.Element = None
+        self.name_space: dict = {"topo": "http://www.topografix.com/GPX/1/1"}
+        self.precisions: dict = {"lat_lon": DEFAULT_PRECISION,
+                                "elevation": DEFAULT_PRECISION,
+                                "distance": DEFAULT_PRECISION,
+                                "duration": DEFAULT_PRECISION,
+                                "speed": DEFAULT_PRECISION,
+                                "rate": DEFAULT_PRECISION}
+        self.gpx: Gpx = Gpx()
 
         if self.file_path != "":
             self.parse()
 
     def check_schema(self):
         pass
+
+    def find_precision(self, number: str) -> int:
+
+        if number is None:
+            return DEFAULT_PRECISION
+        
+        try:
+            test = float(number)
+
+            if "." in number:
+                _, decimal = number.split(sep=".")
+                return len(decimal)
+            else:
+                return 0
+        except:
+            logging.error(f"Unable to find precision of number: {number}")
+            raise
+
+    def find_precisions(self):
+        # Point
+        track = self.gpx_root.findall("topo:trk", self.name_space)[0]
+        segment = track.findall("topo:trkseg", self.name_space)[0]
+        point = segment.findall("topo:trkpt", self.name_space)[0]
+
+        self.precisions["lat_lon"] = self.find_precision(point.get("lat"))
+        self.precisions["elevation"] = self.find_precision(self.find_text(point, "topo:ele"))
+
+        # Extensions
+        extensions = segment.find("topo:extensions", self.name_space)
+
+        if extensions is not None:
+            self.precisions["distance"] = self.find_precision(self.find_text(extensions, "topo:Distance"))
+            self.precisions["duration"] = self.find_precision(self.find_text(extensions, "topo:TotalElapsedTime"))
+            self.precisions["speed"] = self.find_precision(self.find_text(extensions, "topo:MovingSpeed"))
+            self.precisions["rate"] = self.find_precision(self.find_text(extensions, "topo:AvgAscentRate"))
 
     def get_text(self, element, sub_element: str) -> str:
         """
@@ -35,10 +79,10 @@ class Parser():
             str: Text from sub-element.
         """
         try:
-            text = element.get(sub_element).text
-            # logging.debug(f"{text} - {type(text)}")
+            text = element.get(sub_element)
+            logging.debug(f"{text} - {type(text)}")
         except:
-            logging.DEBUG(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}")
             text = None
         return text
     
@@ -60,6 +104,14 @@ class Parser():
             text = None
             logging.debug(f"{element} has no attribute {sub_element}")
         return text
+    
+    def parse_properties(self):
+
+        self.gpx.creator = self.gpx_root.attrib["creator"]
+        self.gpx.version = self.gpx_root.attrib["version"]
+        self.gpx.xmlns = self.gpx_root.tag[1:-4]
+        name_spaces = self.gpx_root.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
+        self.gpx.xsi_schema_location = [x for x in name_spaces if x != ""]
 
     def parse_bounds(self, bounds) -> Bounds:
         """
@@ -227,6 +279,7 @@ class Parser():
         except:
             logging.error(f"{point} contains invalid elevation: {self.find_text(point, 'topo:ele')}")
             elevation = None
+
         time = datetime.strptime(self.find_text(point, "topo:time"), "%Y-%m-%dT%H:%M:%SZ")
         
         return TrackPoint(lat, lon, elevation, time)
@@ -315,6 +368,13 @@ class Parser():
         except:
             logging.exception("Unable to parse GPX file")
             raise
+
+        # Parse properties
+        try:
+            self.parse_properties()
+        except:
+            logging.exception("Unable to parse properties in GPX file")
+            raise
         
         # Parse metadata
         try:
@@ -329,6 +389,9 @@ class Parser():
         except:
             logging.exception("Unable to parse tracks in GPX file")
             raise
+
+        # Find precision
+        self.find_precisions()
 
         logging.debug("Parsing complete")
         return self.gpx

@@ -12,7 +12,30 @@ class Gpx():
     Gpx (gpx) element in GPX file.
     """
 
-    def __init__(self, metadata: Metadata = None, tracks: list[Track] = []):
+    def __init__(
+            self,
+            creator: str = None,
+            xmlns: str = None,
+            version: str = None,
+            xmlns_xsi: str = None,
+            xsi_schema_location: list[str] = None,
+            xmlns_gpxtpx: str = None,
+            xmlns_gpxx: str = None,
+            xmlns_gpxtrk: str = None,
+            xmlns_wptx1: str = None,
+            metadata: Metadata = None,
+            tracks: list[Track] = []):
+        self.creator: str = creator
+        self.xmlns: str = xmlns
+        self.version: str = version
+
+        self.xmlns_xsi: str = xmlns_xsi
+        self.xsi_schema_location: str = xsi_schema_location
+        self.xmlns_gpxtpx: str = xmlns_gpxtpx
+        self.xmlns_gpxx: str = xmlns_gpxx
+        self.xmlns_gpxtrk: str = xmlns_gpxtrk
+        self.xmlns_wptx1: str = xmlns_wptx1
+
         self.metadata: Metadata = metadata
         self.tracks: list[Track]  = tracks
 

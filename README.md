@@ -53,3 +53,4 @@ creator="xsd:string [1] ?">
 <extensions> extensionsType </extensions> [0..1] ?
 </gpx>
 ```
+- Garmin extensions

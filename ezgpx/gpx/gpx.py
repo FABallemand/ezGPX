@@ -17,7 +17,7 @@ class GPX():
         self.file_path: str = file_path
         self.parser: Parser = Parser(file_path)
         self.gpx: Gpx = self.parser.gpx
-        self.writer: Writer = Writer()
+        self.writer: Writer = Writer(self.gpx, precisions=self.parser.precisions)
 
     def nb_points(self) -> int:
         """
@@ -129,7 +129,7 @@ class GPX():
         Args:
             path (str): Path to the .gpx file.
         """
-        self.writer.write(self.gpx, path)
+        self.writer.write(path)
 
     def to_dataframe(self) -> pd.DataFrame:
         """
