@@ -54,3 +54,4 @@ creator="xsd:string [1] ?">
 </gpx>
 ```
 - Garmin extensions
+- Compute length properly
