@@ -1,11 +1,11 @@
-from datetime import datetime, timezone
-
+import logging
 import pandas as pd
+from datetime import datetime, timezone
 
 from .metadata import *
 from .track import *
 
-from ..utils import haversine_distance
+from ..utils import haversine_distance, ramer_douglas_peucker
 
 class Gpx():
     """
@@ -47,11 +47,11 @@ class Gpx():
             float: Distance (meters)
         """
         dst = 0
-        previous_latitude = self.tracks[0].track_segments[0].track_points[0].latitude
-        previous_longitude = self.tracks[0].track_segments[0].track_points[0].longitude
+        previous_latitude = self.tracks[0].trkseg[0].trkpt[0].latitude
+        previous_longitude = self.tracks[0].trkseg[0].trkpt[0].longitude
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     dst += haversine_distance(previous_latitude, previous_longitude, track_point.latitude, track_point.longitude)
                     previous_latitude = track_point.latitude
                     previous_longitude = track_point.longitude
@@ -65,10 +65,10 @@ class Gpx():
             float: Ascent (meters)
         """
         ascent = 0
-        previous_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     if track_point.elevation > previous_elevation:
                         ascent += track_point.elevation - previous_elevation
                     previous_elevation = track_point.elevation
@@ -82,10 +82,10 @@ class Gpx():
             float: Descent (meters)
         """
         descent = 0
-        previous_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     if track_point.elevation < previous_elevation:
                         descent += previous_elevation - track_point.elevation
                     previous_elevation = track_point.elevation
@@ -98,10 +98,10 @@ class Gpx():
         Returns:
             float: Minimum elevation (meters).
         """
-        min_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        min_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     if track_point.elevation < min_elevation:
                         min_elevation = track_point.elevation
         return min_elevation
@@ -113,10 +113,10 @@ class Gpx():
         Returns:
             float: Maximum elevation (meters).
         """
-        max_elevation = self.tracks[0].track_segments[0].track_points[0].elevation
+        max_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     if track_point.elevation > max_elevation:
                         max_elevation = track_point.elevation
         return max_elevation
@@ -128,7 +128,7 @@ class Gpx():
         Returns:
             datetime: UTC start time.
         """
-        return self.tracks[0].track_segments[0].track_points[0].time
+        return self.tracks[0].trkseg[0].trkpt[0].time
     
     def utc_stop_time(self):
         """
@@ -137,7 +137,7 @@ class Gpx():
         Returns:
             datetime: UTC stop time.
         """
-        return self.tracks[-1].track_segments[-1].track_points[-1].time
+        return self.tracks[-1].trkseg[-1].trkpt[-1].time
     
     def start_time(self) -> datetime:
         """
@@ -146,7 +146,7 @@ class Gpx():
         Returns:
             datetime: Start time.
         """
-        return self.tracks[0].track_segments[0].track_points[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+        return self.tracks[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
     
     def stop_time(self):
         """
@@ -155,7 +155,7 @@ class Gpx():
         Returns:
             datetime: Stop time.
         """
-        return self.tracks[-1].track_segments[-1].track_points[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+        return self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
     
     def total_elapsed_time(self) -> datetime:
         """
@@ -191,8 +191,8 @@ class Gpx():
         """
         route_info = []
         for track in self.tracks:
-            for segment in track.track_segments:
-                for point in segment.track_points:
+            for segment in track.trkseg:
+                for point in segment.trkpt:
                     route_info.append({
                         "latitude": point.latitude,
                         "longitude": point.longitude,
@@ -215,15 +215,15 @@ class Gpx():
         gps_errors = []
 
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     # Create points
                     if previous_point is not None and haversine_distance(previous_point.latitude,
                                                                          previous_point.longitude,
                                                                          track_point.latitude,
                                                                          track_point.longitude) < error_distance:
                         gps_errors.append(track_point)
-                        track_segment.track_points.remove(track_point)
+                        track_segment.trkpt.remove(track_point)
                     else:
                         previous_point = track_point    
         return gps_errors
@@ -231,8 +231,20 @@ class Gpx():
     def remove_points(self, remove_factor: int = 2):
         count = 0
         for track in self.tracks:
-            for track_segment in track.track_segments:
-                for track_point in track_segment.track_points:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
                     if count % remove_factor == 0:
-                        track_segment.track_points.remove(track_point)
+                        track_segment.trkpt.remove(track_point)
                         count += 1
+
+    def simplify(self, epsilon):
+        """
+        Simplify GPX tracks using Rameur-Douglas-Peucker algorithm.
+
+        Args:
+            epsilon (float): Tolerance.
+        """
+        logging.info("Simplify 2")
+        for track in self.tracks:
+            for segment in track.trkseg:
+                segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)

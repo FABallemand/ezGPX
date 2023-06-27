@@ -1,4 +1,5 @@
 import math as m
+import logging
 
 # latitude/longitude in GPX files is always in WGS84 datum
 # WGS84 defined the Earth semi-major axis with 6378.137 km
@@ -30,3 +31,46 @@ def haversine_distance(latitude_1: float, longitude_1: float, latitude_2: float,
 
     return d
 
+def perpendicular_distance(start_point, end_point, point):
+    """
+    Distance between a point and a line.
+
+    Args:
+        start_point (TrackPoint): A point on the line.
+        end_point (TrackPoint): A point on the line.
+        point (TrackPoint): A point to measure the distance from.
+
+    Returns:
+        float: Perpendicular distance between the point *point* and the line defined by *start_point* and *end_point*.
+    """
+
+    def line_coefficients(point_1, point_2):
+        """
+        Compute the coefficients of a line equation of the form: ax+by+c=0.
+
+        Args:
+            point_1 (TrackPoint): A point on the line.
+            point_2 (TrackPoint): A point on the line.
+
+        Returns:
+            tuple: Coefficients of the line equation.
+        """
+        delta_x = point_1.longitude - point_2.longitude
+        delta_y = point_1.latitude - point_2.latitude
+        try:
+            a = delta_y / delta_x
+            b = -1
+            c = point_1.latitude - a * point_1.longitude
+        except:
+            a = 1
+            b = 0
+            c = point_1.longitude  
+            logging.warning("Vertical line")
+            
+        return a, b, c
+
+    a, b, c = line_coefficients(start_point, end_point)
+
+    d = abs(a*point.longitude + b*point.latitude + c) / m.sqrt(a*a + b*b)
+    logging.info(f"perpendicular_distance = {d}")
+    return d

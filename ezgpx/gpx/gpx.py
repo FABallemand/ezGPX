@@ -28,8 +28,8 @@ class GPX():
         """
         nb_pts = 0
         for track in self.gpx.tracks:
-            for track_segment in track.track_segments:
-                nb_pts += len(track_segment.track_points)
+            for track_segment in track.trkseg:
+                nb_pts += len(track_segment.trkpt)
         return nb_pts
     
     def distance(self) -> float:
@@ -159,7 +159,20 @@ class GPX():
         self.writer.time = False
     
     def remove_gps_errors(self):
+        """
+        Remove GPS errors.
+        """
         self.gpx.remove_gps_errors()
+
+    def simplify(self, epsilon: float = 1):
+        """
+        Simplify the tracks using Rameur-Douglas-Peucker algorithm.
+
+        Args:
+            epsilon (float, optional): Tolerance. Defaults to 1.
+        """
+        logging.info("Simplify 1")
+        self.gpx.simplify(epsilon)
 
     def compress(self, compression_method: str = "Ramer-Douglas-Peucker algorithm"):
         """

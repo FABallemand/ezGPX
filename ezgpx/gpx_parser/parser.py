@@ -279,9 +279,12 @@ class Parser():
         except:
             logging.error(f"{point} contains invalid elevation: {self.find_text(point, 'topo:ele')}")
             elevation = None
+        try:
+            time = datetime.strptime(self.find_text(point, "topo:time"), "%Y-%m-%dT%H:%M:%SZ")
+        except:
+            logging.error(f"{point} contains invalid time: {self.find_text(point, 'topo:time')}")
+            time = None
 
-        time = datetime.strptime(self.find_text(point, "topo:time"), "%Y-%m-%dT%H:%M:%SZ")
-        
         return TrackPoint(lat, lon, elevation, time)
 
     def parse_segment(self, segment) -> TrackSegment:
