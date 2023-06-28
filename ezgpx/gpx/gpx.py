@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+from math import degrees
 import matplotlib.pyplot as plt
 
 import logging
@@ -8,6 +9,7 @@ import logging
 from ..gpx_elements import Gpx
 from ..gpx_parser import Parser
 from ..gpx_writer import Writer
+from ..utils import EARTH_RADIUS
 
 class GPX():
     """
@@ -164,14 +166,13 @@ class GPX():
         """
         self.gpx.remove_gps_errors()
 
-    def simplify(self, epsilon: float = 1):
+    def simplify(self, epsilon: float = degrees(2/EARTH_RADIUS)):
         """
-        Simplify the tracks using Rameur-Douglas-Peucker algorithm.
+        Simplify the tracks using Ramer-Douglas-Peucker algorithm.
 
         Args:
             epsilon (float, optional): Tolerance. Defaults to 1.
         """
-        logging.info("Simplify 1")
         self.gpx.simplify(epsilon)
 
     def compress(self, compression_method: str = "Ramer-Douglas-Peucker algorithm"):
@@ -193,7 +194,20 @@ class GPX():
         elif compression_method == "Remove elevation":
             logging.debug("Removing elevation is not implemented yet")
 
-    def plot(self, title: str = "Track", base_color: str = "#101010", start_stop: bool = False, elevation_color: bool = False, file_path: str = None,):
+    def plot(self, title: str = "Track", base_color: str = "#101010", start_stop: bool = False, elevation_color: bool = False, file_path: str = None, projection: str = None):
+
+        # Handle projection
+        if projection in ["Web Mercator"]:
+            logging.info("-> Handling projection")
+            # Project points
+            self.gpx.project()
+
+            # Select dataframe columns to use
+            column_x = "x"
+            column_y = "y"
+        else:
+            column_x = "longitude"
+            column_y = "latitude"
 
         # Create dataframe containing data from the GPX file
         gpx_df = self.to_dataframe()
@@ -201,17 +215,17 @@ class GPX():
         # Visualize GPX file
         plt.figure(figsize=(14, 8))
         if elevation_color:
-            plt.scatter(gpx_df["longitude"], gpx_df["latitude"], c=gpx_df["elevation"])
+            plt.scatter(gpx_df[column_x], gpx_df[column_y], c=gpx_df["elevation"])
         else:
-            plt.scatter(gpx_df["longitude"], gpx_df["latitude"], color=base_color)
+            plt.scatter(gpx_df[column_x], gpx_df[column_y], color=base_color)
         
         if start_stop:
-            plt.scatter(gpx_df["longitude"][0], gpx_df["latitude"][0], color="#00FF00")
-            plt.scatter(gpx_df["longitude"][len(gpx_df["longitude"])-1], gpx_df["latitude"][len(gpx_df["longitude"])-1], color="#FF0000")
+            plt.scatter(gpx_df[column_x][0], gpx_df[column_y][0], color="#00FF00")
+            plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-1], gpx_df[column_y][len(gpx_df[column_x])-1], color="#FF0000")
         
         plt.title(title, size=20)
-        plt.xticks([min(gpx_df["longitude"]), max(gpx_df["longitude"])])
-        plt.yticks([min(gpx_df["latitude"]), max(gpx_df["latitude"])])
+        plt.xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
+        plt.yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
 
 
         if file_path is not None:

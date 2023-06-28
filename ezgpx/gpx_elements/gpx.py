@@ -47,14 +47,12 @@ class Gpx():
             float: Distance (meters)
         """
         dst = 0
-        previous_latitude = self.tracks[0].trkseg[0].trkpt[0].latitude
-        previous_longitude = self.tracks[0].trkseg[0].trkpt[0].longitude
+        previous_point = self.tracks[0].trkseg[0].trkpt[0]
         for track in self.tracks:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    dst += haversine_distance(previous_latitude, previous_longitude, track_point.latitude, track_point.longitude)
-                    previous_latitude = track_point.latitude
-                    previous_longitude = track_point.longitude
+                    dst += haversine_distance(previous_point, track_point)
+                    previous_point = track_point
         return dst
     
     def ascent(self) -> float:
@@ -196,10 +194,16 @@ class Gpx():
                     route_info.append({
                         "latitude": point.latitude,
                         "longitude": point.longitude,
-                        "elevation": point.elevation
+                        "elevation": point.elevation,
+                        "x": point._x,
+                        "y": point._y
                     })
         df = pd.DataFrame(route_info)
         return df
+    
+    def project(self):
+        for track in self.tracks:
+            track.project()
     
     def remove_gps_errors(self, error_distance=1000):
         """
@@ -218,10 +222,8 @@ class Gpx():
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     # Create points
-                    if previous_point is not None and haversine_distance(previous_point.latitude,
-                                                                         previous_point.longitude,
-                                                                         track_point.latitude,
-                                                                         track_point.longitude) < error_distance:
+                    if previous_point is not None and haversine_distance(previous_point,
+                                                                         track_point) < error_distance:
                         gps_errors.append(track_point)
                         track_segment.trkpt.remove(track_point)
                     else:
@@ -239,12 +241,11 @@ class Gpx():
 
     def simplify(self, epsilon):
         """
-        Simplify GPX tracks using Rameur-Douglas-Peucker algorithm.
+        Simplify GPX tracks using Ramer-Douglas-Peucker algorithm.
 
         Args:
             epsilon (float): Tolerance.
         """
-        logging.info("Simplify 2")
         for track in self.tracks:
             for segment in track.trkseg:
                 segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)

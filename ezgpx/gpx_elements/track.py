@@ -27,3 +27,7 @@ class Track():
         self.type: str = type
         self.extensions: Extensions = extensions
         self.trkseg: list[TrackSegment] = trkseg
+
+    def project(self):
+        for segment in self.trkseg:
+            segment.project()

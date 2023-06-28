@@ -12,3 +12,7 @@ class TrackSegment():
             extensions: Extensions = None):
         self.trkpt: list[TrackPoint] = trkpt
         self.extensions: Extensions = extensions
+
+    def project(self):
+        for point in self.trkpt:
+            point.project()

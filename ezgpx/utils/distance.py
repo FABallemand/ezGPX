@@ -6,32 +6,46 @@ import logging
 # https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
 EARTH_RADIUS = 6378.137 * 1000
 
-def haversine_distance(latitude_1: float, longitude_1: float, latitude_2: float, longitude_2: float) -> float:
+def haversine_distance(point_1, point_2) -> float:
     """
-    Compute Haversine distance between to points.
+    Compute Haversine distance (meters) between to points.
     https://en.wikipedia.org/wiki/Haversine_formula
 
     Args:
-        latitude_1 (float): Latitude of the first point.
-        longitude_1 (float): Longitude of the first point.
-        latitude_2 (float): Latitude of the second point.
-        longitude_2 (float): Longitude of the second point.
+        point_1 (TrackPoint): First point.
+        point_2 (TrackPoint): Second point.
 
     Returns:
         float: Haversine distance between the points.
     """
     # Delta and conversion to radians
-    delta_lat = m.radians(latitude_1 - latitude_2)
-    delta_long = m.radians(longitude_1 - longitude_2)
+    delta_lat = m.radians(point_1.latitude - point_2.latitude)
+    delta_long = m.radians(point_1.longitude - point_2.longitude)
 
     sin_1 = m.sin(delta_lat/2)
     sin_2 = m.sin(delta_long/2)
-    a = m.sqrt(sin_1 * sin_1 + m.cos(latitude_1) * m.cos(latitude_2) * sin_2 * sin_2)
+    a = m.sqrt(sin_1 * sin_1 + m.cos(point_1.latitude) * m.cos(point_2.latitude) * sin_2 * sin_2)
     d = 2 * EARTH_RADIUS * m.asin(a)
 
     return d
 
-def perpendicular_distance(start_point, end_point, point):
+def distance(point_1, point_2) -> float:
+    """
+    Euclidian distance between two points.
+
+    Args:
+        point_1 (TrackPoint): First point.
+        point_2 (TrackPoint): Second point.
+
+    Returns:
+        float: Distance between the points.
+    """
+    delta_lat = point_1.latitude - point_2.latitude
+    delta_long = point_1.longitude - point_2.longitude
+    return m.sqrt(delta_lat*delta_lat + delta_long*delta_long)
+
+
+def perpendicular_distance(start_point, end_point, point) -> float:
     """
     Distance between a point and a line.
 
@@ -57,6 +71,7 @@ def perpendicular_distance(start_point, end_point, point):
         """
         delta_x = point_1.longitude - point_2.longitude
         delta_y = point_1.latitude - point_2.latitude
+
         try:
             a = delta_y / delta_x
             b = -1
@@ -72,5 +87,5 @@ def perpendicular_distance(start_point, end_point, point):
     a, b, c = line_coefficients(start_point, end_point)
 
     d = abs(a*point.longitude + b*point.latitude + c) / m.sqrt(a*a + b*b)
-    logging.info(f"perpendicular_distance = {d}")
+    
     return d

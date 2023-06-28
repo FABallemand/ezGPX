@@ -1,15 +1,17 @@
 import logging
 
-from .distance import perpendicular_distance
+from math import degrees
 
-def ramer_douglas_peucker(points: list, epsilon: float = 1):
+from .distance import EARTH_RADIUS, perpendicular_distance
+
+def ramer_douglas_peucker(points: list, epsilon: float = degrees(2/EARTH_RADIUS)):
     """
     Simplify a curve using the Ramer-Douglas-Peucker algorithm.
     Source: https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
     
     Args:
         points (list[TrackPoint]): List of points defining the curve.
-        epsilon (float, optional): _description_. Defaults to 1.
+        epsilon (float, optional): _description_. Defaults to degrees(2/EARTH_RADIUS) (ie: the angle corresponding to a distance of 2 meters at the surface of the earth).
 
     Returns:
         list[TrackPoint]: List of points defining the simplified curve.
@@ -27,14 +29,13 @@ def ramer_douglas_peucker(points: list, epsilon: float = 1):
             d_max = d
             i_max = i
 
-    logging.info(f"d_max = {d_max}")
+    # logging.info(f"i_max = {i_max} | d_max = {d_max}")
 
     result = []
 
     # If max distance is greater than epsilon, recursively simplify
     if d_max > epsilon:
         # Recursive call
-        logging.info("rec")
         result_1 = ramer_douglas_peucker(points[0:i_max+1], epsilon)
         result_2 = ramer_douglas_peucker(points[i_max: len(points)], epsilon)
 
