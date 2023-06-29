@@ -37,7 +37,7 @@ class Gpx():
         self.xmlns_wptx1: str = xmlns_wptx1
 
         self.metadata: Metadata = metadata
-        self.tracks: list[Track]  = tracks
+        self.tracks: list[Track] = tracks
 
     def distance(self) -> float:
         """
@@ -229,6 +229,40 @@ class Gpx():
                     else:
                         previous_point = track_point    
         return gps_errors
+    
+    def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):
+        """
+        Remove points that are to close together.
+
+        Args:
+            min_dist (float, optional): Minimal distance between two points. Defaults to 1.
+            max_dist (float, optional): Maximal distance between two points. Defaults to 10.
+        """
+        point_1 = None
+        point_2 = None
+        
+        for track in self.tracks:
+            for segment in track.trkseg:
+
+                new_trkpt = []
+
+                for point in segment.trkpt:
+                    if point_1 is None:
+                        point_1 = point
+                        new_trkpt.append(point_1)
+                    elif point_2 is None:
+                        point_2 = point
+                    else:
+                        if ((haversine_distance(point_1, point_2) < min_dist
+                             or haversine_distance(point_2, point) < min_dist)
+                            and haversine_distance(point_1, point) < max_dist):
+                            point_2 = point
+                        else:
+                            new_trkpt.append(point_2)
+                            point_1 = point_2
+                            point_2 = point
+
+                segment.trkpt = new_trkpt
 
     def remove_points(self, remove_factor: int = 2):
         count = 0

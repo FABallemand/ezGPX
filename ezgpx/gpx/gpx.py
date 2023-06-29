@@ -15,6 +15,7 @@ class GPX():
     """
     High level GPX object.
     """
+
     def __init__(self, file_path: str):
         self.file_path: str = file_path
         self.parser: Parser = Parser(file_path)
@@ -166,35 +167,41 @@ class GPX():
         """
         self.gpx.remove_gps_errors()
 
-    def simplify(self, epsilon: float = degrees(2/EARTH_RADIUS)):
+    def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):
+        """
+        Remove points that are to close together.
+
+        Args:
+            min_dist (float, optional): Minimal distance between two points. Defaults to 1.
+            max_dist (float, optional): Maximal distance between two points. Defaults to 10.
+        """
+        self.gpx.remove_close_points(min_dist, max_dist)
+
+    def simplify(self, tolerance: float = 2):
         """
         Simplify the tracks using Ramer-Douglas-Peucker algorithm.
 
         Args:
-            epsilon (float, optional): Tolerance. Defaults to 1.
+            tolerance (float, optional): Tolerance (meters). Corresponds to the
+            minimum distance between the point and the track before the point
+            is removed. Defaults to 2.
         """
+        epsilon = degrees(tolerance/EARTH_RADIUS)
         self.gpx.simplify(epsilon)
 
-    def compress(self, compression_method: str = "Ramer-Douglas-Peucker algorithm"):
-        """
-        Compress GPX by removing points.
-
-        Args:
-            compression_method (str, optional): Method used to compress GPX. Defaults to "Ramer-Douglas-Peucker algorithm".
-        """
-        if compression_method == "Ramer-Douglas-Peucker algorithm":
-            logging.debug("Ramer-Douglas-Peucker algorithm is not implemented yet")
-            pass
-        elif compression_method == "Remove 25% points":
-            self.gpx.remove_points(4)
-        elif compression_method == "Remove 50% points":
-            self.gpx.remove_points(2)
-        elif compression_method == "Remove 75% points":
-            pass
-        elif compression_method == "Remove elevation":
-            logging.debug("Removing elevation is not implemented yet")
-
-    def plot(self, title: str = "Track", base_color: str = "#101010", start_stop: bool = False, elevation_color: bool = False, file_path: str = None, projection: str = None):
+    def plot(
+            self,
+            projection: str = None,
+            title: str = "Track",
+            base_color: str = "#101010",
+            start_stop: bool = False,
+            elevation_color: bool = False,
+            duration: bool = None,
+            distance: bool = None,
+            ascent: bool = None,
+            pace: bool = None,
+            speed: bool = None,
+            file_path: str = None):
 
         # Handle projection
         if projection in ["Web Mercator"]:
@@ -213,7 +220,7 @@ class GPX():
         gpx_df = self.to_dataframe()
 
         # Visualize GPX file
-        plt.figure(figsize=(14, 8))
+        fig = plt.figure(figsize=(14, 8))
         if elevation_color:
             plt.scatter(gpx_df[column_x], gpx_df[column_y], c=gpx_df["elevation"])
         else:
@@ -223,6 +230,22 @@ class GPX():
             plt.scatter(gpx_df[column_x][0], gpx_df[column_y][0], color="#00FF00")
             plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-1], gpx_df[column_y][len(gpx_df[column_x])-1], color="#FF0000")
         
+        text_kwargs = dict(ha='center', va='center', fontsize=10, transform=fig.axes[0].transAxes)
+
+        if duration:
+            plt.text(0, 0, f"Duration:\n{self.total_elapsed_time()}", **text_kwargs)
+
+        if distance:
+            plt.text(0.5, 0, f"Distance:\n{self.distance()/1000:.2f} km", **text_kwargs)
+
+        if ascent:
+            plt.text(1, 0, f"Ascent:\n{self.ascent():.2f} m", **text_kwargs)
+        elif pace:
+            # plt.text(1, 0, f"Pace:\n{self.pace()}", **text_kwargs)
+            pass
+        elif speed:
+            plt.text(1, 0, f"Speed:\n{self.avg_speed():.2f} km/h", **text_kwargs)
+
         plt.title(title, size=20)
         plt.xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
         plt.yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
