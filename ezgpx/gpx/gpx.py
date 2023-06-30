@@ -107,6 +107,24 @@ class GPX():
         """
         return self.gpx.total_elapsed_time()
     
+    def stopped_time(self) -> datetime:
+        """
+        Return the stopped time during the activity.
+
+        Returns:
+            datetime: Stopped time.
+        """
+        return self.gpx.stopped_time()
+    
+    def moving_time(self) -> datetime:
+        """
+        Return the moving time during the activity.
+
+        Returns:
+            datetime: Moving time.
+        """
+        return self.gpx.moving_time()
+    
     def avg_speed(self) -> float:
         """
         Return average speed (kilometers per hour) during the activity.
@@ -115,6 +133,37 @@ class GPX():
             float: Average speed (kilometers per hour).
         """
         return self.gpx.avg_speed()
+    
+    def avg_moving_speed(self) -> float:
+        """
+        Return average moving speed (kilometers per hour) during the activity.
+
+        Returns:
+            float: Average moving speed (kilometers per hour).
+        """
+        return self.gpx.avg_moving_speed()
+    
+    def max_speed(self) -> float:
+        # TODO
+        pass
+
+    def avg_pace(self) -> float:
+        """
+        Return average pace (minutes per kilometer) during the activity.
+
+        Returns:
+            float: Average pace (minutes per kilometer).
+        """
+        return self.gpx.avg_pace()
+    
+    def avg_moving_pace(self) -> float:
+        """
+        Return average moving pace (minutes per kilometer) during the activity.
+
+        Returns:
+            float: Average moving pace (minutes per kilometer).
+        """
+        return self.gpx.avg_moving_pace()
 
     def to_string(self) -> str:
         """
@@ -229,8 +278,11 @@ class GPX():
         if start_stop:
             plt.scatter(gpx_df[column_x][0], gpx_df[column_y][0], color="#00FF00")
             plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-1], gpx_df[column_y][len(gpx_df[column_x])-1], color="#FF0000")
+            # plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-2], gpx_df[column_y][len(gpx_df[column_x])-2], color="#0000FF")
+            # plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-3], gpx_df[column_y][len(gpx_df[column_x])-3], color="#FF00FF")
+
         
-        text_kwargs = dict(ha='center', va='center', fontsize=10, transform=fig.axes[0].transAxes)
+        text_kwargs = dict(ha='center', va='center', fontsize=10, transform=fig.axes[0].transAxes, bbox=dict(facecolor='gray', alpha=0.5))
 
         if duration:
             plt.text(0, 0, f"Duration:\n{self.total_elapsed_time()}", **text_kwargs)
@@ -241,8 +293,7 @@ class GPX():
         if ascent:
             plt.text(1, 0, f"Ascent:\n{self.ascent():.2f} m", **text_kwargs)
         elif pace:
-            # plt.text(1, 0, f"Pace:\n{self.pace()}", **text_kwargs)
-            pass
+            plt.text(1, 0, f"Pace:\n{self.avg_pace():.2f}", **text_kwargs)
         elif speed:
             plt.text(1, 0, f"Speed:\n{self.avg_speed():.2f} km/h", **text_kwargs)
 

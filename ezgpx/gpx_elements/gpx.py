@@ -153,7 +153,7 @@ class Gpx():
         Returns:
             datetime: Stop time.
         """
-        return self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+        return self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
     
     def total_elapsed_time(self) -> datetime:
         """
@@ -164,12 +164,44 @@ class Gpx():
         """
         return self.stop_time() - self.start_time()
     
-    def avg_speed(self) -> float:
+    def stopped_time(self, tolerance: float = 2.45) -> datetime:
         """
-        Compute the average speed (kilometers per second) during the activity.
+        Compute the stopped time during activity.
+
+        Args:
+            tolerance (float, optional): Maximal distance between two points for movement. Defaults to 2.45. (According to my tests with strava_run_1 and the data on Strava).
 
         Returns:
-            float: Average speed (kilometers per seconds)
+            datetime: Stopped time.
+        """
+        stopped_time = self.start_time() - self.start_time() # Better way to do it?
+
+        previous_point = self.tracks[0].trkseg[0].trkpt[0]
+
+        for track in self.tracks:
+            for segment in track.trkseg:
+                for point in segment.trkpt:
+                    if haversine_distance(previous_point, point) < tolerance:
+                        stopped_time += point.time - previous_point.time
+                    previous_point = point
+
+        return stopped_time
+    
+    def moving_time(self) -> datetime:
+        """
+        Compute the moving time during the activity.
+
+        Returns:
+            datetime: Moving time.
+        """
+        return self.total_elapsed_time() - self.stopped_time()
+    
+    def avg_speed(self) -> float:
+        """
+        Compute the average speed (kilometers per hour) during the activity.
+
+        Returns:
+            float: Average speed (kilometers per hour).
         """
         # Compute and convert total elapsed time
         total_elapsed_time = self.total_elapsed_time()
@@ -179,6 +211,40 @@ class Gpx():
         distance = self.distance() / 1000
 
         return distance/total_elapsed_time
+    
+    def avg_moving_speed(self) -> float:
+        """
+        Compute the average moving speed (kilometers per hour) during the activity.
+
+        Returns:
+            float: Average moving speed (kilometers per hour).
+        """
+        # Compute and convert moving time
+        moving_time = self.moving_time()
+        moving_time = moving_time.total_seconds() / 3600
+
+        # Compute and convert distance
+        distance = self.distance() / 1000
+
+        return distance / moving_time
+    
+    def avg_pace(self) -> float:
+        """
+        Compute the average pace (minute per kilometer) during the activity.
+
+        Returns:
+            float: Average pace (minute per kilometer).
+        """
+        return 60 / self.avg_speed()
+    
+    def avg_moving_pace(self) -> float:
+        """
+        Compute the average moving pace (minute per kilometer) during the activity.
+
+        Returns:
+            float: Average moving pace (minute per kilometer).
+        """
+        return 60 / self.avg_moving_speed()
 
     def to_dataframe(self) -> pd.DataFrame:
         """
@@ -205,12 +271,12 @@ class Gpx():
         for track in self.tracks:
             track.project()
     
-    def remove_gps_errors(self, error_distance=1000):
+    def remove_gps_errors(self, error_distance=100):
         """
         Remove GPS errors.
 
         Args:
-            error_distance (int, optional): GPS error threshold distance (meters) between two points. Defaults to 1000.
+            error_distance (int, optional): Error threshold distance (meters) between two points. Defaults to 1000.
 
         Returns:
             list: List of removed points (GPS errors).
@@ -220,14 +286,22 @@ class Gpx():
 
         for track in self.tracks:
             for track_segment in track.trkseg:
+
+                new_trkpt = []
+
                 for track_point in track_segment.trkpt:
-                    # Create points
+                    # GPS error
                     if previous_point is not None and haversine_distance(previous_point,
-                                                                         track_point) < error_distance:
+                                                                         track_point) > error_distance:
+                        logging.warning(f"Point {track_point} has been removed (GPS error)")
                         gps_errors.append(track_point)
-                        track_segment.trkpt.remove(track_point)
+                    # No GPS error
                     else:
-                        previous_point = track_point    
+                        new_trkpt.append(track_point)
+                        previous_point = track_point
+
+                track_segment.trkpt = new_trkpt
+
         return gps_errors
     
     def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):

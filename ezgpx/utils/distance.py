@@ -24,7 +24,7 @@ def haversine_distance(point_1, point_2) -> float:
 
     sin_1 = m.sin(delta_lat/2)
     sin_2 = m.sin(delta_long/2)
-    a = m.sqrt(sin_1 * sin_1 + m.cos(point_1.latitude) * m.cos(point_2.latitude) * sin_2 * sin_2)
+    a = m.sqrt(sin_1 * sin_1 + m.cos(m.radians(point_1.latitude)) * m.cos(m.radians(point_2.latitude)) * sin_2 * sin_2)
     d = 2 * EARTH_RADIUS * m.asin(a)
 
     return d
