@@ -18,6 +18,20 @@ class Track():
             type: str = None,
             extensions: Extensions = None,
             trkseg: list[TrackSegment] = []):
+        """
+        Initialize Track instance.
+
+        Args:
+            name (str, optional): Name. Defaults to None.
+            cmt (str, optional): Comment. Defaults to None.
+            desc (str, optional): Description. Defaults to None.
+            src (str, optional): Source. Defaults to None.
+            link (Link, optional): Link. Defaults to None.
+            number (int, optional): Number. Defaults to None.
+            type (str, optional): Type. Defaults to None.
+            extensions (Extensions, optional): Extensions. Defaults to None.
+            trkseg (list[TrackSegment], optional): List of track segments. Defaults to [].
+        """
         self.name: str = name
         self.cmt: str = cmt
         self.desc: str = desc

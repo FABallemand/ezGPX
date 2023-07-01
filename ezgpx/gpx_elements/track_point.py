@@ -13,6 +13,15 @@ class TrackPoint():
             longitude: float = None,
             elevation: float = None,
             time: datetime = None) -> None:
+        """
+        Initialize TrackPoint instance.
+
+        Args:
+            latitude (float, optional): Latitude. Defaults to None.
+            longitude (float, optional): Longitude. Defaults to None.
+            elevation (float, optional): Elevation. Defaults to None.
+            time (datetime, optional): Time. Defaults to None.
+        """
         self.latitude: float = latitude
         self.longitude: float = longitude
         self.elevation: float = elevation

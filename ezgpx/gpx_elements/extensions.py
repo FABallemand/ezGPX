@@ -21,6 +21,26 @@ class Extensions():
             max_ascent_rate: float = None,
             avg_descent_rate: float = None,
             max_descent_rate: float = None) -> None:
+        """
+        Initialize Extensions instance.
+
+        Args:
+            display_color (str, optional): Display color. Defaults to "Cyan".
+            distance (float, optional): Distance. Defaults to None.
+            total_elapsed_time (float, optional): Total elapsed time. Defaults to None.
+            moving_time (float, optional): Moving time. Defaults to None.
+            stopped_time (float, optional): Stopped time. Defaults to None.
+            moving_speed (float, optional): Moving speed. Defaults to None.
+            max_speed (float, optional): Maximum speed. Defaults to None.
+            max_elevation (float, optional): Maximum elevation. Defaults to None.
+            min_elevation (float, optional): Minimum elevation. Defaults to None.
+            ascent (float, optional): Ascent. Defaults to None.
+            descent (float, optional): Descent. Defaults to None.
+            avg_ascent_rate (float, optional): Average ascent rate. Defaults to None.
+            max_ascent_rate (float, optional): Maximum ascent rate. Defaults to None.
+            avg_descent_rate (float, optional): Average descent rate. Defaults to None.
+            max_descent_rate (float, optional): Maximum descent rate. Defaults to None.
+        """
         self.display_color: str = display_color
         self.distance: float = distance
         self.total_elapsed_time: float = total_elapsed_time # int?

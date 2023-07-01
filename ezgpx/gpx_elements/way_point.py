@@ -1,7 +1,8 @@
 import logging
 import datetime
 
-from ..gpx_elements import Extensions, Link
+from .extensions import Extensions
+from .link import Link
 from ..utils import web_mercator_projection
 
 class WayPoint():
@@ -15,8 +16,8 @@ class WayPoint():
             lon: float = None,
             ele: float = None,
             time: datetime = None,
-            mag_var: float = None,
-            geoid_height: float = None,
+            mag_var: float = None, # 0 <= value < 360
+            geo_id_height: float = None,
             name: str = None,
             cmt: str = None,
             desc: str = None,
@@ -25,19 +26,43 @@ class WayPoint():
             sym: str = None,
             type: str = None,
             fix: str = None, # none, 2d, 3d, dgps, pps
-            sat: int = None, # non negative
+            sat: int = None, # non negative integer
             hdop: float = None,
             vdop: float = None,
             pdop: float = None,
             age_of_gps_data: float = None,
-            dgpsid: int = None, # 0<=value<=1023
+            dgpsid: int = None, # 0 <= value <= 1023
             extensions: Extensions = None) -> None:
+        """
+        Initialize WayPoint instance.
+
+        Args:
+            lat (float, optional): Latitude. Defaults to None.
+            lon (float, optional): Longitude. Defaults to None.
+            ele (float, optional): Elevation. Defaults to None.
+            time (datetime, optional): Time. Defaults to None.
+            mag_var (float, optional): _description_. Defaults to None.
+            geo_id_height (float, optional): _description_. Defaults to None.
+            name (str, optional): Name. Defaults to None.
+            cmt (str, optional): Comment. Defaults to None.
+            desc (str, optional): Description. Defaults to None.
+            src (str, optional): Source. Defaults to None.
+            link (Link, optional): link. Defaults to None.
+            sym (str, optional): _description_. Defaults to None.
+            type (str, optional): Type. Defaults to None.
+            fix (str, optional): _description_. Defaults to None.
+            ppssat (int, optional): _description_. Defaults to None.
+            vdop (float, optional): _description_. Defaults to None.
+            pdop (float, optional): _description_. Defaults to None.
+            age_of_gps_data (float, optional): Age of GPS data. Defaults to None.
+            dgpsid (int, optional): _description_. Defaults to None.
+        """
         self.lat: float = lat
         self.lon: float = lon
         self.ele: float = ele
         self.time: datetime = time
         self.mag_var: float = mag_var
-        self.geoid_height: float = geoid_height
+        self.geo_id_height: float = geo_id_height
         self.name: str = name
         self.cmt: str = cmt
         self.desc: str = desc
@@ -58,4 +83,4 @@ class WayPoint():
         self._y: int = None
 
     def project(self):
-        self._x, self._y = web_mercator_projection(self.latitude, self.longitude)
+        self._x, self._y = web_mercator_projection(self.lat, self.lon)

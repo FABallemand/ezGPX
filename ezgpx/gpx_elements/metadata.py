@@ -18,7 +18,21 @@ class Metadata():
             time: datetime = None,
             keywords: str = None,
             bounds: str = None,
-            extensions: str = None):
+            extensions: str = None) -> None:
+        """
+        Initialize Metadata instance.
+
+        Args:
+            name (str, optional): Name. Defaults to None.
+            desc (str, optional): Description. Defaults to None.
+            author (Person, optional): Author. Defaults to None.
+            copyright (str, optional): Copyright. Defaults to None.
+            link (Link, optional): Link. Defaults to None.
+            time (datetime, optional): Time. Defaults to None.
+            keywords (str, optional): Keywords. Defaults to None.
+            bounds (str, optional): Bounds. Defaults to None.
+            extensions (str, optional): Extensions. Defaults to None.
+        """
         self.name: str = name
         self.desc: str = desc
         self.author: Person = author

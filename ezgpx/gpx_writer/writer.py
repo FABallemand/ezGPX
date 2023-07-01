@@ -18,9 +18,23 @@ class Writer():
             path: str = "",
             properties: bool = True,
             metadata: bool = True,
+            waypoints: bool = True,
             ele: bool = True,
             time: bool = True,
             precisions: dict = None) -> None:
+        """
+        Initialize Writer instance.
+
+        Args:
+            gpx (Gpx, optional): Gpx instance to write. Defaults to None.
+            path (str, optional): Path to the file to write. Defaults to "".
+            properties (bool, optional): Toggle properties writting. Defaults to True.
+            metadata (bool, optional): Toggle metadata writting. Defaults to True.
+            waypoint (bool, optional): Toggle way points writting. Defaults to True.
+            ele (bool, optional): Toggle elevation writting. Defaults to True.
+            time (bool, optional): Toggle time writting. Defaults to True.
+            precisions (dict, optional): Decimal precision for each type of value. Defaults to None.
+        """
         self.gpx: Gpx = gpx
         self.path: str = path
         self.gpx_string: str = ""
@@ -28,6 +42,7 @@ class Writer():
         # Parameters
         self.properties: bool = properties
         self.metadata: bool = metadata
+        self.waypoints: bool = waypoints
         self.ele: bool = ele
         self.time: bool = time
 
@@ -256,6 +271,72 @@ class Writer():
 
         return gpx_root
     
+    def waypoints_to_string(self, gpx_root: ET.Element) -> ET.Element:
+
+        logging.info("Preparing way points...")
+
+        for gpx_way_point in self.gpx.wpt:
+            way_point = ET.SubElement(gpx_root, "wpt")
+            way_point.set("lat", "{:.{}f}".format(gpx_way_point.lat, self.precisions["lat_lon"]))
+            way_point.set("lon", "{:.{}f}".format(gpx_way_point.lon, self.precisions["lat_lon"]))
+            if gpx_way_point.ele is not None:
+                ele = ET.SubElement(way_point, "ele")
+                ele.text = "{:.{}f}".format(gpx_way_point.ele, self.precisions["elevation"])
+            if gpx_way_point.time is not None:
+                time = ET.SubElement(way_point, "time")
+                time.text = gpx_way_point.time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if gpx_way_point.mag_var is not None:
+                mag_var = ET.SubElement(way_point, "magvar")
+                mag_var.text = "{:.{}f}".format(gpx_way_point.mag_var, self.precisions["default"])
+            if gpx_way_point.geo_id_height is not None:
+                geo_id_height = ET.SubElement(way_point, "geoidheight")
+                geo_id_height.text = "{:.{}f}".format(gpx_way_point.geo_id_height, self.precisions["default"])
+            if gpx_way_point.name is not None:
+                name = ET.SubElement(way_point, "name")
+                name.text = gpx_way_point.name
+            if gpx_way_point.cmt is not None:
+                cmt = ET.SubElement(way_point, "cmt")
+                cmt.text = gpx_way_point.cmt
+            if gpx_way_point.desc is not None:
+                desc = ET.SubElement(way_point, "desc")
+                desc.text = gpx_way_point.desc
+            if gpx_way_point.src is not None:
+                src = ET.SubElement(way_point, "src")
+                src.text = gpx_way_point.src
+            if gpx_way_point.link is not None:
+                way_point = self.add_link(way_point, gpx_way_point.link)
+            if gpx_way_point.sym is not None:
+                sym = ET.SubElement(way_point, "sym")
+                sym.text = gpx_way_point.sym
+            if gpx_way_point.type is not None:
+                type = ET.SubElement(way_point, "type")
+                type.text = gpx_way_point.type
+            if gpx_way_point.fix is not None:
+                fix = ET.SubElement(way_point, "fix")
+                fix.text = gpx_way_point.fix
+            if gpx_way_point.sat is not None:
+                sat = ET.SubElement(way_point, "sat")
+                sat.text = str(gpx_way_point.sat)
+            if gpx_way_point.hdop is not None:
+                hdop = ET.SubElement(way_point, "hdop")
+                hdop.text = "{:.{}f}".format(gpx_way_point.hdop, self.precisions["default"])
+            if gpx_way_point.vdop is not None:
+                vdop = ET.SubElement(way_point, "vdop")
+                vdop.text = "{:.{}f}".format(gpx_way_point.vdop, self.precisions["default"])
+            if gpx_way_point.pdop is not None:
+                pdop = ET.SubElement(way_point, "pdop")
+                pdop.text = "{:.{}f}".format(gpx_way_point.pdop, self.precisions["default"])
+            if gpx_way_point.age_of_gps_data is not None:
+                age_of_gps_data = ET.SubElement(way_point, "age_of_gps_data")
+                age_of_gps_data.text = "{:.{}f}".format(gpx_way_point.age_of_gps_data, self.precisions["default"])
+            if gpx_way_point.dgpsid is not None:
+                dgpsid = ET.SubElement(way_point, "dgpsid")
+                dgpsid.text = str(gpx_way_point.dgpsid)
+            if gpx_way_point.extensions is not None:
+                way_point = self.add_extensions(way_point, gpx_way_point.extensions)
+
+        return gpx_root
+    
     def tracks_to_string(self, gpx_root: ET.Element) -> ET.Element:
 
         logging.info("Preparing tracks...")
@@ -273,10 +354,10 @@ class Writer():
                     point = ET.SubElement(segment, "trkpt")
                     point.set("lat", "{:.{}f}".format(gpx_point.latitude, self.precisions["lat_lon"]))
                     point.set("lon", "{:.{}f}".format(gpx_point.longitude, self.precisions["lat_lon"]))
-                    if self.ele:
+                    if self.ele and gpx_point.elevation is not None:
                         ele = ET.SubElement(point, "ele")
                         ele.text = "{:.{}f}".format(gpx_point.elevation, self.precisions["elevation"])
-                    if self.time:
+                    if self.time and gpx_point.time is not None:
                         time = ET.SubElement(point, "time")
                         time.text = gpx_point.time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -299,6 +380,10 @@ class Writer():
             # Metadata
             if self.metadata:
                 gpx_root = self.metadata_to_string(gpx_root)
+
+            # Way points
+            if self.waypoints:
+                gpx_root = self.waypoints_to_string(gpx_root)
 
             # Tracks
             gpx_root = self.tracks_to_string(gpx_root)

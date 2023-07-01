@@ -11,6 +11,14 @@ class Person():
             name: str = None,
             email: Email = None,
             link: Link = None) -> None:
+        """
+        Initialize Person instance.
+
+        Args:
+            name (str, optional): Name. Defaults to None.
+            email (Email, optional): Email. Defaults to None.
+            link (Link, optional): Link. Defaults to None.
+        """
         self.name: str = name
         self.email: Email = email
         self.link: Link = link

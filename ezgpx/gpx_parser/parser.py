@@ -4,7 +4,7 @@ from datetime import datetime
 
 import xml.etree.ElementTree as ET
 
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, TrackPoint, TrackSegment, Track
+from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, TrackPoint, TrackSegment, Track, WayPoint
 
 DEFAULT_PRECISION = 2
 
@@ -13,7 +13,13 @@ class Parser():
     GPX file parser.
     """
 
-    def __init__(self, file_path: str = ""):
+    def __init__(self, file_path: str = "") -> None:
+        """
+        initialize Parser instance.
+
+        Args:
+            file_path (str, optional): Path to the file to parse. Defaults to "".
+        """
         self.file_path: str = file_path
         self.gpx_tree: ET.ElementTree = None
         self.gpx_root: ET.Element = None
@@ -23,7 +29,8 @@ class Parser():
                                 "distance": DEFAULT_PRECISION,
                                 "duration": DEFAULT_PRECISION,
                                 "speed": DEFAULT_PRECISION,
-                                "rate": DEFAULT_PRECISION}
+                                "rate": DEFAULT_PRECISION,
+                                "default": DEFAULT_PRECISION}
         self.gpx: Gpx = Gpx()
 
         if self.file_path != "":
@@ -121,7 +128,7 @@ class Parser():
             bounds (???): Parsed bounds element.
 
         Returns:
-            Bounds: Bounds object.
+            Bounds: Bounds instance.
         """
         if bounds is None:
             return None
@@ -140,7 +147,7 @@ class Parser():
             copyright (???): Parsed copyright element.
 
         Returns:
-            Copyright: Copyright object.
+            Copyright: Copyright instance.
         """
         if copyright is None:
             return None
@@ -158,7 +165,7 @@ class Parser():
             email (???): Parsed email element.
 
         Returns:
-            Email: Email object.
+            Email: Email instance.
         """
         if email is None:
             return None
@@ -175,7 +182,7 @@ class Parser():
             extensions (???): Parsed extensions element.
 
         Returns:
-            Extensions: Extensions object.
+            Extensions: Extensions instance.
         """
         if extensions is None:
             return None
@@ -205,7 +212,7 @@ class Parser():
             link (???): Parsed link element.
 
         Returns:
-            Link: Link object.
+            Link: Link instance.
         """
         if link is None:
             return None
@@ -223,7 +230,7 @@ class Parser():
             person (???): Parsed person element.
 
         Returns:
-            Person: Person object.
+            Person: Person instance.
         """
         if person is None:
             return None
@@ -235,9 +242,8 @@ class Parser():
     
     def parse_metadata(self):
         """
-        Parse metadata element in GPX File.
+        Parse metadata element in GPX file.
         """
-        
         metadata = self.gpx_root.find("topo:metadata", self.name_space)
 
         name = self.find_text(metadata, "topo:name")
@@ -252,6 +258,144 @@ class Parser():
 
         self.gpx.metadata = Metadata(name, desc, author, copyright, link, time, keywords, bounds, extensions)
 
+    def parse_waypoint(self, waypoint) -> WayPoint:
+        """
+        Parse waypoint element in GPX file.
+
+        Args:
+            waypoint (???): Parsed WayPoint element.
+
+        Returns:
+            WayPoint: WayPoint instance.
+        """
+        try:
+            lat = float(waypoint.get("lat"))
+        except:
+            logging.error(f"{waypoint} contains invalid latitude: {waypoint.get('lat')}")
+            lat = None
+
+        try:
+            lon = float(float(waypoint.get("lon")))
+        except:
+            logging.error(f"{waypoint} contains invalid longitude: {float(waypoint.get('lon'))}")
+            lon = None
+        
+        try:
+            ele = float(self.find_text(waypoint, "topo:ele"))
+        except:
+            logging.error(f"{waypoint} contains invalid elevation: {self.find_text(waypoint, 'topo:ele')}")
+            ele = None
+
+        try:
+            time = datetime.strptime(self.find_text(waypoint, "topo:time"), "%Y-%m-%dT%H:%M:%SZ")
+        except:
+            logging.error(f"{waypoint} contains invalid time: {self.find_text(waypoint, 'topo:time')}")
+            time = None
+
+        try:
+            mag_var = float(self.find_text(waypoint, "topo:magvar"))
+        except:
+            logging.error(f"{waypoint} contains invalid magnitude variation: {self.find_text(waypoint, 'topo:magvar')}")
+            mag_var = None
+
+        try:
+            geo_id_height = float(self.find_text(waypoint, "topo:geoidheight"))
+        except:
+            logging.error(f"{waypoint} contains invalid geographic identifier height: {self.find_text(waypoint, 'topo:geoidheight')}")
+            geo_id_height = None
+
+        try:
+            name = self.find_text(waypoint, "topo:name")
+        except:
+            logging.error(f"{waypoint} contains invalid name: {self.find_text(waypoint, 'topo:name')}")
+            name = None
+
+        try:
+            cmt = self.find_text(waypoint, "topo:cmt")
+        except:
+            logging.error(f"{waypoint} contains invalid comment: {self.find_text(waypoint, 'topo:cmt')}")
+            cmt = None
+
+        try:
+            desc = self.find_text(waypoint, "topo:desc")
+        except:
+            logging.error(f"{waypoint} contains invalid description: {self.find_text(waypoint, 'topo:desc')}")
+            desc = None
+
+        try:
+            src = self.find_text(waypoint, "topo:src")
+        except:
+            logging.error(f"{waypoint} contains invalid source: {self.find_text(waypoint, 'topo:src')}")
+            src = None
+
+        link = self.parse_link(waypoint.find("topo:link", self.name_space))
+
+        try:
+            sym = self.find_text(waypoint, "topo:sym")
+        except:
+            logging.error(f"{waypoint} contains invalid sym: {self.find_text(waypoint, 'topo:sym')}")
+            sym = None
+
+        try:
+            type = self.find_text(waypoint, "topo:type")
+        except:
+            logging.error(f"{waypoint} contains invalid type: {self.find_text(waypoint, 'topo:type')}")
+            type = None
+
+        try:
+            fix = self.find_text(waypoint, "topo:fix")
+        except:
+            logging.error(f"{waypoint} contains invalid fix: {self.find_text(waypoint, 'topo:fix')}")
+            fix = None
+
+        try:
+            sat = int(self.find_text(waypoint, "topo:sat"))
+        except:
+            logging.error(f"{waypoint} contains invalid sat: {self.find_text(waypoint, 'topo:sat')}")
+            sat = None
+
+        try:
+            hdop = float(self.find_text(waypoint, "topo:hdop"))
+        except:
+            logging.error(f"{waypoint} contains invalid hdop: {self.find_text(waypoint, 'topo:hdop')}")
+            hdop = None
+
+        try:
+            vdop = float(self.find_text(waypoint, "topo:vdop"))
+        except:
+            logging.error(f"{waypoint} contains invalid vdop: {self.find_text(waypoint, 'topo:vdop')}")
+            vdop = None
+
+        try:
+            pdop = float(self.find_text(waypoint, "topo:pdop"))
+        except:
+            logging.error(f"{waypoint} contains invalid pdop: {self.find_text(waypoint, 'topo:pdop')}")
+            pdop = None
+
+        try:
+            age_of_gps_data = float(self.find_text(waypoint, "topo:ageofgpsdata"))
+        except:
+            logging.error(f"{waypoint} contains invalid age_of_gps_data: {self.find_text(waypoint, 'topo:ageofgpsdata')}")
+            age_of_gps_data = None
+
+        try:
+            dgpsid = float(self.find_text(waypoint, "topo:dgpsid"))
+        except:
+            logging.error(f"{waypoint} contains invalid dgpsid: {self.find_text(waypoint, 'topo:dgpsid')}")
+            dgpsid = None
+
+        extensions = self.parse_extensions(waypoint.find("topo:extensions", self.name_space))
+
+        return WayPoint(lat, lon, ele, time, mag_var, geo_id_height, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, age_of_gps_data, dgpsid, extensions)
+
+    def parse_waypoints(self):
+        """
+        Parse waypoint elements in GPX file
+        """
+        way_points = self.gpx_root.findall("topo:wpt", self.name_space)
+        for way_point in way_points:
+            self.gpx.wpt.append(self.parse_waypoint(way_point))
+
     def parse_point(self, point) -> TrackPoint:
         """
         Parse trkpt element from GPX file.
@@ -260,7 +404,7 @@ class Parser():
             point (???): Parsed trkpt element.
 
         Returns:
-            TrackPoint: TrackPoint object.
+            TrackPoint: TrackPoint instance.
         """
         try:
             lat = float(point.get("lat"))
@@ -295,7 +439,7 @@ class Parser():
             segment (???): Parsed trkseg element.
 
         Returns:
-            TrackSegment: TrackSegment object.
+            TrackSegment: TrackSegment instance.
         """
         # Points
         trkpt = []
@@ -316,7 +460,7 @@ class Parser():
             track (???): Parsed trk element.
 
         Returns:
-            Track: Track object.
+            Track: Track instance.
         """
         name = self.find_text(track, "topo:name")
         cmt = self.find_text(track, "topo:cmt")
@@ -355,7 +499,7 @@ class Parser():
             file_path (str, optional): Path to the file to parse. Defaults to "".
 
         Returns:
-            Gpx: Gpx object., self.name_space).text
+            Gpx: Gpx instance., self.name_space).text
         """
         # File
         if file_path != "":
@@ -384,6 +528,13 @@ class Parser():
             self.parse_metadata()
         except:
             logging.exception("Unable to parse metadata in GPX file")
+            raise
+
+        # Parse way points
+        try:
+            self.parse_waypoints()
+        except:
+            logging.exception("Unable to parse waypoints in GPX file")
             raise
 
         # Parse tracks

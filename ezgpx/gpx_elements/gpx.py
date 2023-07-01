@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from .metadata import *
+from .way_point import *
 from .track import *
 
 from ..utils import haversine_distance, ramer_douglas_peucker
@@ -24,7 +25,25 @@ class Gpx():
             xmlns_gpxtrk: str = None,
             xmlns_wptx1: str = None,
             metadata: Metadata = None,
-            tracks: list[Track] = []):
+            wpt: list[WayPoint] = [],
+            tracks: list[Track] = []) -> None:
+        """
+        Initialize Gpx instance.
+
+        Args:
+            creator (str, optional): Creator. Defaults to None.
+            xmlns (str, optional): XML xmlns. Defaults to None.
+            version (str, optional): Version. Defaults to None.
+            xmlns_xsi (str, optional): XML xmlns_xsi. Defaults to None.
+            xsi_schema_location (list[str], optional): XML schema location. Defaults to None.
+            xmlns_gpxtpx (str, optional): _description_. Defaults to None.
+            xmlns_gpxx (str, optional): _description_. Defaults to None.
+            xmlns_gpxtrk (str, optional): _description_. Defaults to None.
+            xmlns_wptx1 (str, optional): _description_. Defaults to None.
+            metadata (Metadata, optional): Metadata. Defaults to None.
+            wpt (list[WayPoint], optional): Way points. Defaults to [].
+            tracks (list[Track], optional): List of tracks. Defaults to [].
+        """
         self.creator: str = creator
         self.xmlns: str = xmlns
         self.version: str = version
@@ -37,6 +56,7 @@ class Gpx():
         self.xmlns_wptx1: str = xmlns_wptx1
 
         self.metadata: Metadata = metadata
+        self.wpt:list[WayPoint] = wpt
         self.tracks: list[Track] = tracks
 
     def distance(self) -> float:
