@@ -2,10 +2,11 @@ import logging
 import pandas as pd
 from datetime import datetime, timezone
 
-from .metadata import *
-from .way_point import *
-from .track import *
-
+from .metadata import Metadata
+from .way_point import WayPoint
+from .route import Route
+from .track import Track
+from .extensions import Extensions
 from ..utils import haversine_distance, ramer_douglas_peucker
 
 class Gpx():
@@ -26,7 +27,9 @@ class Gpx():
             xmlns_wptx1: str = None,
             metadata: Metadata = None,
             wpt: list[WayPoint] = [],
-            tracks: list[Track] = []) -> None:
+            rte: list[Route] = [],
+            tracks: list[Track] = [],
+            extensions: Extensions = None) -> None:
         """
         Initialize Gpx instance.
 
@@ -42,7 +45,9 @@ class Gpx():
             xmlns_wptx1 (str, optional): _description_. Defaults to None.
             metadata (Metadata, optional): Metadata. Defaults to None.
             wpt (list[WayPoint], optional): Way points. Defaults to [].
+            rte (list[Route], optional): Routes. Defaults to [].
             tracks (list[Track], optional): List of tracks. Defaults to [].
+            extensions (Extensions, optional): Extensions. Defaults to [].
         """
         self.creator: str = creator
         self.xmlns: str = xmlns
@@ -57,7 +62,9 @@ class Gpx():
 
         self.metadata: Metadata = metadata
         self.wpt:list[WayPoint] = wpt
+        self.rte: list[Route] = rte
         self.tracks: list[Track] = tracks
+        self.extensions: Extensions = extensions
 
     def distance(self) -> float:
         """

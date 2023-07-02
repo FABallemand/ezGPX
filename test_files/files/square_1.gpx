@@ -34,6 +34,22 @@
         <ageofdgpsdata>66.6</ageofdgpsdata>
         <dgpsid>0</dgpsid>
     </wpt>
+    <rte>
+        <name>ROUTE TEST</name>
+        <cmt>This is a test route</cmt>
+        <src>with a proper source</src>
+        <number>0</number>
+        <type>TEST ROUTE</type>
+        <rtept lat="0.0" lon="0.0">
+            <name>First route point</name>
+        </rtept>
+        <rtept lat="0.1" lon="0.1">
+            <name>Second route point</name>
+        </rtept>
+        <rtept lat="0.2" lon="0.2">
+            <name>Third route point</name>
+        </rtept>
+    </rte>
     <trk>
         <name>29_04_2023</name>
         <trkseg>

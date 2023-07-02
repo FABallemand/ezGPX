@@ -1,10 +1,8 @@
+import logging
 from datetime import datetime
-
 import pandas as pd
 from math import degrees
 import matplotlib.pyplot as plt
-
-import logging
 
 from ..gpx_elements import Gpx
 from ..gpx_parser import Parser
@@ -20,7 +18,7 @@ class GPX():
         self.file_path: str = file_path
         self.parser: Parser = Parser(file_path)
         self.gpx: Gpx = self.parser.gpx
-        self.writer: Writer = Writer(self.gpx, precisions=self.parser.precisions)
+        self.writer: Writer = Writer(self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
 
     def nb_points(self) -> int:
         """

@@ -6,6 +6,7 @@ from .gpx import *
 from .link import *
 from .metadata import *
 from .person import *
+from .route import *
 from .track import *
 from .track_segment import *
 from .track_point import *

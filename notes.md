@@ -5,7 +5,7 @@
 #### 💾 Python XML Parsing:
 - Real Python: [A roadmap to XML Parsers in Python](https://realpython.com/python-xml-parser/#learn-about-xml-parsers-in-pythons-standard-library)
 - [xml.etree.ElementTree — The ElementTree XML API](https://docs.python.org/3/library/xml.etree.elementtree.html)
-<!-- - https://python.doctor/page-xml-python-xpath -->
+- GeeksForGeeks: [Reading and Writing XML Files in Python](https://www.geeksforgeeks.org/reading-and-writing-xml-files-in-python/)
 
 #### 🌏 Map Projection
 - Wikipedia: [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection)
@@ -32,4 +32,4 @@ creator="xsd:string [1] ?">
 ```
 - Garmin extensions
 - Compute length properly
-- Add support for different time format (milisecond)
+- Unify topo types (ex: trkpt is a subclass of wpt) ie: add tags in class, parser, writer
