@@ -1,11 +1,12 @@
 
 class Extensions():
     """
-    Track extensions.
+    extensionsType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "extensions",
             display_color: str = "Cyan",
             distance: float = None,
             total_elapsed_time: float = None,
@@ -25,6 +26,7 @@ class Extensions():
         Initialize Extensions instance.
 
         Args:
+            tag (str, optional): XML tag. Defaults to "extensions".
             display_color (str, optional): Display color. Defaults to "Cyan".
             distance (float, optional): Distance. Defaults to None.
             total_elapsed_time (float, optional): Total elapsed time. Defaults to None.
@@ -41,6 +43,7 @@ class Extensions():
             avg_descent_rate (float, optional): Average descent rate. Defaults to None.
             max_descent_rate (float, optional): Maximum descent rate. Defaults to None.
         """
+        self.tag: str = tag
         self.display_color: str = display_color
         self.distance: float = distance
         self.total_elapsed_time: float = total_elapsed_time # int?

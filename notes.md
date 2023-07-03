@@ -18,18 +18,6 @@
 - [gpxpy](https://github.com/tkrajina/gpxpy)
 
 ## 📝 TO DO LIST !!
-- Complete gpx
-```xml
-<gpx
-version="1.1 [1] ?"
-creator="xsd:string [1] ?">
-<metadata> metadataType </metadata> [0..1] ?
-<wpt> wptType </wpt> [0..*] ?
-<rte> rteType </rte> [0..*] ?
-<trk> trkType </trk> [0..*] ?
-<extensions> extensionsType </extensions> [0..1] ?
-</gpx>
-```
 - Garmin extensions
 - Compute length properly
-- Unify topo types (ex: trkpt is a subclass of wpt) ie: add tags in class, parser, writer
+- Unify parsing and writing methods

@@ -3,9 +3,10 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Route, TrackPoint, TrackSegment, Track, WayPoint
+from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
 DEFAULT_PRECISION = 2
+DEFAULT_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 class Parser():
     """
@@ -34,7 +35,7 @@ class Parser():
             "rate": DEFAULT_PRECISION,
             "default": DEFAULT_PRECISION
             }
-        self.time_format = "%Y-%m-%dT%H:%M:%SZ"
+        self.time_format = DEFAULT_TIME_FORMAT
 
         self.gpx: Gpx = Gpx()
 
@@ -249,28 +250,19 @@ class Parser():
             Union[datetime, None]: Floating point value from sub-element.
         """
         try:
-            time_ = datetime.strptime(self.find_text(element, sub_element), self.time_format)
+            time_ = datetime.strptime(element.find(sub_element, self.name_space).text, self.time_format)
         except:
             time_ = None
             logging.debug(f"{element} has no attribute {sub_element}")
         return time_
-    
-    def parse_properties(self):
-        """
-        Parse XML properties of GPX file.
-        """
-        self.gpx.creator = self.gpx_root.attrib["creator"]
-        self.gpx.version = self.gpx_root.attrib["version"]
-        self.gpx.xmlns = self.gpx_root.tag[1:-4]
-        name_spaces = self.gpx_root.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
-        self.gpx.xsi_schema_location = [x for x in name_spaces if x != ""]
 
-    def parse_bounds(self, bounds) -> Bounds:
+    def parse_bounds(self, bounds, tag: str ="bounds") -> Bounds:
         """
-        Parse bounds typed element from GPX file.
+        Parse boundsType element from GPX file.
 
         Args:
             bounds (xml.etree.ElementTree.Element): Parsed bounds element.
+            tag (str, Optional): XML tag. Defaults to "bounds".
 
         Returns:
             Bounds: Bounds instance.
@@ -282,14 +274,16 @@ class Parser():
         minlon = self.get_text(bounds, "minlon")
         maxlat = self.get_text(bounds, "maxlat")
         maxlon = self.get_text(bounds, "maxlon")
-        return Bounds(minlat, minlon, maxlat, maxlon)
+
+        return Bounds(tag, minlat, minlon, maxlat, maxlon)
     
-    def parse_copyright(self, copyright) -> Copyright:
+    def parse_copyright(self, copyright, tag: str ="copyright") -> Copyright:
         """
-        Parse copyright typed element from GPX file.
+        Parse copyrightType element from GPX file.
 
         Args:
             copyright (xml.etree.ElementTree.Element): Parsed copyright element.
+            tag (str, Optional): XML tag. Defaults to "copyright".
 
         Returns:
             Copyright: Copyright instance.
@@ -300,14 +294,16 @@ class Parser():
         author = self.get_text(copyright, "author")
         year = self.find_text(copyright, "topo:year")
         licence = self.find_text(copyright, "topo:licence")
-        return Copyright(author, year, licence)
+
+        return Copyright(tag, author, year, licence)
     
-    def parse_email(self, email) -> Email:
+    def parse_email(self, email, tag: str ="email") -> Email:
         """
-        Parse email typed element from GPX file.
+        Parse emailType element from GPX file.
 
         Args:
             email (xml.etree.ElementTree.Element): Parsed email element.
+            tag (str, Optional): XML tag. Defaults to "email".
 
         Returns:
             Email: Email instance.
@@ -317,14 +313,16 @@ class Parser():
         
         id = self.get_text(email, "id")
         domain = self.get_text(email, "domain")
-        return Email(id, domain)
+
+        return Email(tag, id, domain)
     
-    def parse_extensions(self, extensions) -> Extensions:
+    def parse_extensions(self, extensions, tag: str ="extensions") -> Extensions:
         """
-        Parse extensions typed element from GPX file.
+        Parse extensionsType element from GPX file.
 
         Args:
             extensions (xml.etree.ElementTree.Element): Parsed extensions element.
+            tag (str, Optional): XML tag. Defaults to "extensions".
 
         Returns:
             Extensions: Extensions instance.
@@ -347,14 +345,16 @@ class Parser():
         max_ascent_rate = self.find_text(extensions, "topo:MaxAscentRate")
         avg_descent_rate = self.find_text(extensions, "topo:AvgDescentRate")
         max_descent_rate = self.find_text(extensions, "topo:MaxDescentRate")
-        return Extensions(display_color, distance, total_elapsed_time, moving_time, stopped_time, moving_speed, max_speed, max_elevation, min_elevation, ascent, descent, avg_ascent_rate, max_ascent_rate, avg_descent_rate, max_descent_rate)
 
-    def parse_link(self, link) -> Link:
+        return Extensions(tag, display_color, distance, total_elapsed_time, moving_time, stopped_time, moving_speed, max_speed, max_elevation, min_elevation, ascent, descent, avg_ascent_rate, max_ascent_rate, avg_descent_rate, max_descent_rate)
+
+    def parse_link(self, link, tag: str ="link") -> Link:
         """
-        Parse link typed element from GPX file.
+        Parse linkType element from GPX file.
 
         Args:
             link (xml.etree.ElementTree.Element): Parsed link element.
+            tag (str, Optional): XML tag. Defaults to "link".
 
         Returns:
             Link: Link instance.
@@ -365,14 +365,42 @@ class Parser():
         href = self.get_text(link, "href")
         text = self.find_text(link, "topo:text")
         type = self.find_text(link, "topo:type")
-        return Link(href, text, type)
+
+        return Link(tag, href, text, type)
     
-    def parse_person(self, person) -> Person:
+    def parse_metadata(self, metadata, tag: str = "metadata") -> Metadata:
         """
-        Parse person typed element from GPX file.
+        Parse metadataType element from GPX file.
+
+        Args:
+            metadata (xml.etree.ElementTree.Element): Parsed metadata element.
+            tag (str, Optional): XML tag. Defaults to "metadata".
+
+        Returns:
+            Metadata: Metadata instance.
+        """
+        if metadata is None:
+            return None
+
+        name = self.find_text(metadata, "topo:name")
+        desc = self.find_text(metadata, "topo:desc")
+        author = self.parse_person(metadata.find("topo:author", self.name_space))
+        copyright = self.parse_copyright(metadata.find("topo:copyright", self.name_space))
+        link = self.parse_link(metadata.find("topo:link", self.name_space))
+        time = self.find_time(metadata, "topo:time")
+        keywords = self.find_text(metadata, "topo:keywords")
+        bounds = self.parse_bounds(metadata.find("topo:bounds", self.name_space))
+        extensions = self.parse_extensions(metadata.find("topo:extensions", self.name_space))
+
+        return Metadata(tag, name, desc, author, copyright, link, time, keywords, bounds, extensions)
+
+    def parse_person(self, person, tag: str ="person") -> Person:
+        """
+        Parse personType element from GPX file.
 
         Args:
             person (xml.etree.ElementTree.Element): Parsed person element.
+            tag (str, Optional): XML tag. Defaults to "person".
 
         Returns:
             Person: Person instance.
@@ -383,36 +411,132 @@ class Parser():
         name = self.find_text(person, "topo:name")
         email = self.parse_email(person.find("topo:email", self.name_space))
         link = self.parse_link(person.find("topo:link", self.name_space))
-        return Person(name, email, link)
+
+        return Person(tag, name, email, link)
     
-    def parse_metadata(self):
-        """
-        Parse metadata typed element from GPX file.
-        """
-        metadata = self.gpx_root.find("topo:metadata", self.name_space)
+    def parse_point_segment(self, point_segment, tag: str = "ptseg") -> PointSegment:
+        pass
 
-        name = self.find_text(metadata, "topo:name")
-        desc = self.find_text(metadata, "topo:desc")
-        author = self.parse_person(metadata.find("topo:author", self.name_space))
-        copyright = self.parse_copyright(metadata.find("topo:copyright", self.name_space))
-        link = self.parse_link(metadata.find("topo:link", self.name_space))
-        time = datetime.strptime(metadata.find("topo:time", self.name_space).text, self.time_format)
-        keywords = self.find_text(metadata, "topo:keywords")
-        bounds = self.parse_bounds(metadata.find("topo:bounds", self.name_space))
-        extensions = self.parse_extensions(metadata.find("topo:extensions", self.name_space))
-
-        self.gpx.metadata = Metadata(name, desc, author, copyright, link, time, keywords, bounds, extensions)
-
-    def parse_way_point(self, way_point) -> WayPoint:
+    def parse_point(self, point, tag: str = "pt") -> Point:
         """
-        Parse wpt typed element from GPX file.
+        Parse ptType element from GPX file.
+
+        Args:
+            point (xml.etree.ElementTree.Element): Parsed pt element.
+            tag (str, Optional): XML tag. Defaults to "pt".
+
+        Returns:
+            Point: Point instance.
+        """
+        if point is None:
+            return None
+        
+        lat = self.get_float(point, "lat")
+        lon = self.get_float(point, "lon")
+        ele = self.find_float(point, "topo:ele")
+        time = self.find_time(point, "topo:time")
+
+        return Point(tag, lat, lon, ele, time)
+    
+    def parse_route(self, route, tag: str = "rte") -> Route:
+        """
+        Parse rteType element from GPX file.
+
+        Args:
+            route (xml.etree.ElementTree.Element): Parsed rte element.
+            tag (str, Optional): XML tag. Defaults to "rte".
+
+        Returns:
+            Route: Route instance.
+        """
+        if route is None:
+            return None
+        
+        name = self.find_text(route, "topo:name")
+        cmt = self.find_text(route, "topo:cmt")
+        desc = self.find_text(route, "topo:desc")
+        src = self.find_text(route, "topo:src")
+        link = self.parse_link(route.find("topo:link", self.name_space))
+        number = self.find_int(route, "topo:number")
+        type = self.find_text(route, "topo:type")
+        extensions = self.parse_extensions(route.find("topo:extensions", self.name_space))
+
+        rtept = []
+        way_points = route.findall("topo:rtept", self.name_space)
+        for way_point in way_points:
+            rtept.append(self.parse_way_point(way_point))
+
+        return Route(tag, name, cmt, desc, src, link, number, type, extensions, rtept)
+
+    def parse_track_segment(self, track_segment, tag: str = "trkseg") -> TrackSegment:
+        """
+        Parse trksegType element from GPX file.
+
+        Args:
+            track_segment (xml.etree.ElementTree.Element): Parsed trkseg element.
+            tag (str, Optional): XML tag. Defaults to "trkseg".
+
+        Returns:
+            TrackSegment: TrackSegment instance.
+        """
+        if track_segment is None:
+            return None
+        
+        # Points
+        trkpt = []
+        track_points = track_segment.findall("topo:trkpt", self.name_space)
+        for track_point in track_points:
+            trkpt.append(self.parse_way_point(track_point, "trkpt"))
+
+        # Extensions
+        extensions = self.parse_extensions(track_segment.find("topo:extensions", self.name_space))
+
+        return TrackSegment(tag, trkpt, extensions)
+
+    def parse_track(self, track, tag: str = "trk") -> Track:
+        """
+        Parse trkType element from GPX file.
+
+        Args:
+            track (xml.etree.ElementTree.Element): Parsed trk element.
+            tag (str, Optional): XML tag. Defaults to "trk".
+
+        Returns:
+            Track: Track instance.
+        """
+        if track is None:
+            return None
+        
+        name = self.find_text(track, "topo:name")
+        cmt = self.find_text(track, "topo:cmt")
+        desc = self.find_text(track, "topo:desc")
+        src = self.find_text(track, "topo:src")
+        link = self.parse_link(track.find("topo:link", self.name_space))
+        number = self.find_int(track, "topo:number")
+        type = self.find_text(track, "topo:type")
+        extensions = self.parse_extensions(track.find("topo:extensions", self.name_space))
+
+        trkseg = []
+        segments = track.findall("topo:trkseg", self.name_space)
+        for segment in segments:
+            trkseg.append(self.parse_track_segment(segment))
+
+        return Track(tag, name, cmt, desc, src, link, number, type, extensions, trkseg)
+    
+    def parse_way_point(self, way_point, tag: str = "wpt") -> WayPoint:
+        """
+        Parse wptType element from GPX file.
 
         Args:
             way_point (xml.etree.ElementTree.Element): Parsed wpt element.
+            tag (str, Optional): XML tag. Defaults to "person".
 
         Returns:
             WayPoint: WayPoint instance.
         """
+        if way_point is None:
+            return None
+        
         lat = self.get_float(way_point, "lat")
         lon = self.get_float(way_point, "lon")
         ele = self.find_float(way_point, "topo:ele")
@@ -436,126 +560,54 @@ class Parser():
         dgpsid = self.find_float(way_point, "topo:dgpsid")
         extensions = self.parse_extensions(way_point.find("topo:extensions", self.name_space))
 
-        return WayPoint(lat, lon, ele, time, mag_var, geo_id_height, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, age_of_gps_data, dgpsid, extensions)
+        return WayPoint(tag, lat, lon, ele, time, mag_var, geo_id_height, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, age_of_gps_data, dgpsid, extensions)
 
-    def parse_way_points(self):
+    def parse_root_properties(self):
         """
-        Parse wpt typed elements from GPX file.
+        Parse XML properties from GPX file.
+        """
+        self.gpx.creator = self.gpx_root.attrib["creator"]
+        self.gpx.version = self.gpx_root.attrib["version"]
+        self.gpx.xmlns = self.gpx_root.tag[1:-4]
+        name_spaces = self.gpx_root.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
+        self.gpx.xsi_schema_location = [x for x in name_spaces if x != ""]
+
+    def parse_root_metadata(self):
+        """
+        Parse metadataType elements from GPX file.
+        """
+        self.gpx.metadata = self.parse_metadata(self.gpx_root.find("topo:metadata", self.name_space))
+
+    def parse_root_way_points(self):
+        """
+        Parse wptType elements from GPX file.
         """
         way_points = self.gpx_root.findall("topo:wpt", self.name_space)
         for way_point in way_points:
             self.gpx.wpt.append(self.parse_way_point(way_point))
 
-    def parse_route(self, route) -> Route:
+    def parse_root_routes(self):
         """
-        Parse rte typed element from GPX file.
-
-        Args:
-            route (xml.etree.ElementTree.Element): Parsed rte element.
-
-        Returns:
-            Route: Route instance.
-        """
-        name = self.find_text(route, "topo:name")
-        cmt = self.find_text(route, "topo:cmt")
-        desc = self.find_text(route, "topo:desc")
-        src = self.find_text(route, "topo:src")
-        link = self.parse_link(route.find("topo:link", self.name_space))
-        number = self.find_int(route, "topo:number")
-        type = self.find_text(route, "topo:type")
-        extensions = self.parse_extensions(route.find("topo:extensions", self.name_space))
-
-        rtept = []
-        way_points = route.findall("topo:rtept", self.name_space)
-        for way_point in way_points:
-            rtept.append(self.parse_way_point(way_point))
-
-        return Route(name, cmt, desc, src, link, number, type, extensions, rtept)
-
-    def parse_routes(self):
-        """
-        Parse rte typed elements from GPX file
+        Parse rteType elements from GPX file
         """
         routes = self.gpx_root.findall("topo:rte", self.name_space)
         for route in routes:
             self.gpx.rte.append(self.parse_route(route))  
 
-    def parse_point(self, point) -> TrackPoint:
+    def parse_root_tracks(self):
         """
-        Parse trkpt typed element from GPX file.
-
-        Args:
-            point (xml.etree.ElementTree.Element): Parsed trkpt element.
-
-        Returns:
-            TrackPoint: TrackPoint instance.
+        Parse trkType elements from GPX file.
         """
-        lat = self.get_float(point, "lat")
-        lon = self.get_float(point, "lon")
-        ele = self.find_float(point, "topo:ele")
-        time = self.find_time(point, "topo:time")
-
-        return TrackPoint(lat, lon, ele, time)
-
-    def parse_segment(self, segment) -> TrackSegment:
-        """
-        Parse trkseg typed element from GPX file.
-
-        Args:
-            segment (xml.etree.ElementTree.Element): Parsed trkseg element.
-
-        Returns:
-            TrackSegment: TrackSegment instance.
-        """
-        # Points
-        trkpt = []
-        points = segment.findall("topo:trkpt", self.name_space)
-        for point in points:
-            trkpt.append(self.parse_point(point))
-
-        # Extensions
-        extensions = self.parse_extensions(segment.find("topo:extensions", self.name_space))
-
-        return TrackSegment(trkpt, extensions)
-
-    def parse_track(self, track) -> Track:
-        """
-        Parse trk typed element from GPX file.
-
-        Args:
-            track (xml.etree.ElementTree.Element): Parsed trk element.
-
-        Returns:
-            Track: Track instance.
-        """
-        name = self.find_text(track, "topo:name")
-        cmt = self.find_text(track, "topo:cmt")
-        desc = self.find_text(track, "topo:desc")
-        src = self.find_text(track, "topo:src")
-        link = self.parse_link(track.find("topo:link", self.name_space))
-        try:
-            number = int(self.find_text(track, "topo:number"))
-        except:
-            logging.error(f"{track} contains invalid number: {self.find_text(track, 'topo:number')}")
-            number = None
-        type = self.find_text(track, "topo:type")
-        extensions = self.parse_extensions(track.find("topo:extensions", self.name_space))
-
-        trkseg = []
-        segments = track.findall("topo:trkseg", self.name_space)
-        for segment in segments:
-            trkseg.append(self.parse_segment(segment))
-
-        return Track(name, cmt, desc, src, link, number, type, extensions, trkseg)
-
-    def parse_tracks(self):
-        """
-        Parse trk typed elements from GPX file.
-        """
-        # Tracks
         tracks = self.gpx_root.findall("topo:trk", self.name_space)
         for track in tracks:
             self.gpx.tracks.append(self.parse_track(track))
+
+    def parse_root_extensions(self):
+        """
+        Parse extensionsType elements from GPX file.
+        """
+        extensions = self.gpx_root.find("topo:extensions", self.name_space)
+        self.gpx.extensions = self.parse_extensions(extensions)
 
     def parse(self, file_path: str = "") -> Gpx:
         """
@@ -584,7 +636,7 @@ class Parser():
 
         # Parse properties
         try:
-            self.parse_properties()
+            self.parse_root_properties()
         except:
             logging.exception("Unable to parse properties in GPX file")
             raise
@@ -597,36 +649,35 @@ class Parser():
         
         # Parse metadata
         try:
-            self.parse_metadata()
+            self.parse_root_metadata()
         except:
             logging.exception("Unable to parse metadata in GPX file")
             raise
 
         # Parse way points
         try:
-            self.parse_way_points()
+            self.parse_root_way_points()
         except:
             logging.exception("Unable to parse way_points in GPX file")
             raise
 
         # Parse routes
         try:
-            self.parse_routes()
+            self.parse_root_routes()
         except:
             logging.exception("Unable to parse routes in GPX file")
             raise
 
         # Parse tracks
         try:
-            self.parse_tracks()
+            self.parse_root_tracks()
         except:
             logging.exception("Unable to parse tracks in GPX file")
             raise
 
         # Parse extensions
         try:
-            extensions = self.gpx_root.find("topo:extensions", self.name_space)
-            self.gpx.extensions = self.parse_extensions(extensions)
+            self.parse_root_extensions()
         except:
             logging.exception("Unable to parse extensions in GPX file")
             raise

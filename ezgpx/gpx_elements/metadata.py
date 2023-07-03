@@ -5,11 +5,12 @@ from .person import Person
 
 class Metadata():
     """
-    Metadata (metadata) element in GPX file.
+    metadataType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "metadata",
             name: str = None,
             desc: str = None,
             author: Person = None,
@@ -23,6 +24,7 @@ class Metadata():
         Initialize Metadata instance.
 
         Args:
+            tag (str, optional): XML tag. Defaults to "metadata".
             name (str, optional): Name. Defaults to None.
             desc (str, optional): Description. Defaults to None.
             author (Person, optional): Author. Defaults to None.
@@ -33,6 +35,7 @@ class Metadata():
             bounds (str, optional): Bounds. Defaults to None.
             extensions (str, optional): Extensions. Defaults to None.
         """
+        self.tag: str = tag
         self.name: str = name
         self.desc: str = desc
         self.author: Person = author

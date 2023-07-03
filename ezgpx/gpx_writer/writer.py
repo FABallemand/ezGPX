@@ -2,9 +2,10 @@ import os
 from typing import Optional, Union
 import logging
 import xml.etree.ElementTree as ET
+from datetime import datetime
 
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Route, TrackPoint, TrackSegment, Track, WayPoint
-from ..gpx_parser import DEFAULT_PRECISION
+from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
+from ..gpx_parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 
 class Writer():
     """
@@ -58,14 +59,14 @@ class Writer():
 
         self.gpx_root = None
 
-    def add_subelement(self, element: ET.Element, sub_element: str, text: str = None) -> tuple[ET.Element, Union[ET.Element, None]]:
+    def add_subelement(self, element: ET.Element, sub_element: str, text: str) -> tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
         Args:
             element (xml.etree.ElementTree.Element): GPX element.
             sub_element (str): GPX sub-element.
-            text (str): GPX sub-element text. Defaults to None.
+            text (str): GPX sub-element text.
 
         Returns:
             tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
@@ -76,14 +77,14 @@ class Writer():
             sub_element_.text = text
         return element, sub_element_
     
-    def add_subelement_number(self, element: ET.Element, sub_element: str, number: Union[int, float] = None, precision: int = DEFAULT_PRECISION) -> tuple[ET.Element, Union[ET.Element, None]]:
+    def add_subelement_number(self, element: ET.Element, sub_element: str, number: Union[int, float], precision: int = DEFAULT_PRECISION) -> tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
         Args:
             element (xml.etree.ElementTree.Element): GPX element.
             sub_element (str): GPX sub-element.
-            number (Union[int, float], optional): GPX sub-element value. Defaults to None.
+            number (Union[int, float], optional): GPX sub-element value.
             precision (int, optional): Precision. Defaults to DEFAULT_PRECISION.
 
         Returns:
@@ -100,6 +101,28 @@ class Writer():
                 logging.error("Invalid number type")
         return element, sub_element_
     
+    def add_subelement_time(self, element: ET.Element, sub_element: str, time: datetime, format: str = DEFAULT_TIME_FORMAT) -> ET.Element:
+        """
+        Add sub-element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            sub_element (str): GPX sub-element.
+            time (datetime, optional): GPX sub-element value.
+            format (str, optional): Format. Defaults to DEFAULT_TIME_FORMAT.
+
+        Returns:
+            tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+        """
+        sub_element_ = None
+        if time is not None:
+            sub_element_ = ET.SubElement(element, sub_element)
+            try:
+                sub_element_.text = time.strftime(format)
+            except:
+                logging.error("Invalid time format")
+        return element, sub_element_
+    
     def add_bounds(self, element: ET.Element, bounds: Bounds) -> ET.Element:
         """
         Add Bounds instance to GPX element.
@@ -112,7 +135,7 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if bounds is not None:
-            bounds_ = ET.SubElement(element, "bounds")
+            bounds_ = ET.SubElement(element, bounds.tag)
             bounds_, _ = self.add_subelement_number(bounds_, "minlat", bounds.minlat, self.precisions["lat_lon"])
             bounds_, _ = self.add_subelement_number(bounds_, "minlon", bounds.minlon, self.precisions["lat_lon"])
             bounds_, _ = self.add_subelement_number(bounds_, "maxlat", bounds.maxlat, self.precisions["lat_lon"])
@@ -131,7 +154,7 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if copyright is not None:
-            copyright_ = ET.SubElement(element, "copyright")
+            copyright_ = ET.SubElement(element, copyright.tag)
             if copyright.author is not None:
                 copyright_.set("author", copyright.author)
             copyright_, _ = self.add_subelement(copyright_, "year", str(copyright.year))
@@ -150,7 +173,7 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if email is not None:
-            email_ = ET.SubElement(element, "email")
+            email_ = ET.SubElement(element, email.tag)
             if email.id is not None:
                 email_.set("id", email.id)
             if email.domain is not None:
@@ -169,7 +192,7 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if extensions is not None:
-            extensions_ = ET.SubElement(element, "extensions")
+            extensions_ = ET.SubElement(element, extensions.tag)
             extensions_, _ = self.add_subelement(extensions_, "display_color", extensions.display_color)
             extensions_, _ = self.add_subelement_number(extensions_, "distance", extensions.distance, self.precisions["distance"])
             extensions_, _ = self.add_subelement_number(extensions_, "total_elapsed_time", extensions.total_elapsed_time, self.precisions["duration"])
@@ -199,11 +222,35 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if link is not None:
-            link_ = ET.SubElement(element, "link")
+            link_ = ET.SubElement(element, link.tag)
             if link.href is not None:
                 link_.set("href", link.href)
             link_, _ = self.add_subelement(link_, "text", link.text)
             link_, _ = self.add_subelement(link_, "type", link.type)
+        return element
+
+    def add_metadata(self, element: ET.Element, metadata: Metadata) -> ET.Element:
+        """
+        Add Metadata instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            metadata (Metadata): Metadata instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if metadata is not None:
+            metadata_ = ET.SubElement(self.gpx_root, metadata.tag)
+            metadata_, _ = self.add_subelement(metadata_, "name", metadata.name)
+            metadata_, _ = self.add_subelement(metadata_, "desc", metadata.desc)
+            metadata_ = self.add_person(metadata_, metadata.author)
+            metadata_ = self.add_copyright(metadata_, metadata.copyright)
+            metadata_ = self.add_link(metadata_, metadata.link)
+            metadata_, _ = self.add_subelement_time(metadata_, "time", metadata.time, self.time_format)
+            metadata_, _ = self.add_subelement(metadata_, "keywords", metadata.keywords)
+            metadata_ = self.add_bounds(metadata_, metadata.bounds)
+            metadata_ = self.add_extensions(metadata_, metadata.extensions)
         return element
     
     def add_person(self, element: ET.Element, person: Person) -> ET.Element:
@@ -218,10 +265,106 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if person is not None:
-            person_ = ET.SubElement(element, "person")
+            person_ = ET.SubElement(element, person.tag)
             person_, _ = self.add_subelement(person_, "name", person.name)
             person_ = self.add_email(person_, person.email)
             person_ = self.add_link(person_, person.link)
+        return element
+    
+    def add_point_segment(self, element: ET.Element, point_segment: PointSegment) -> ET.Element:
+        """
+        Add PointSegment instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            point_segment (PointSegment): PointSegment instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if point_segment is not None:
+            pass
+        return element
+
+    def add_point(self, element: ET.Element, point: Point) -> ET.Element:
+        """
+        Add Point instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            point (Point): Point instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if point is not None:
+            point_ = ET.SubElement(element, point.tag)
+            if point.lat is not None:
+                point_.set("lat", "{:.{}f}".format(point.lat, self.precisions["lat_lon"]))
+            if point.lon is not None:
+                point_.set("lon", "{:.{}f}".format(point.lon, self.precisions["lat_lon"]))
+            point_ = self.add_subelement_number(point_, "ele", point.ele, self.precisions["elevation"])
+            point_, _ = self.add_subelement_time(point_, "time", point.time, self.time_format)
+        return element
+
+    def add_route(self, element: ET.Element, route: Route) -> ET.Element:
+        """
+        Add Route instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            route (Route): Route instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if route is not None:
+            route_ = ET.SubElement(element, route.tag)
+            route_, _ = self.add_subelement(route_, "name", route.name)
+            route_, _ = self.add_subelement(route_, "cmt", route.cmt)
+            route_, _ = self.add_subelement(route_, "desc", route.desc)
+            route_, _ = self.add_subelement(route_, "src", route.src)
+            route_ = self.add_link(route_, route.link)
+            route_, _ = self.add_subelement_number(route_, "number", route.src, 0)
+            route_, _ = self.add_subelement(route_, "type", route.type)
+            route_ = self.add_extensions(route_, route.extensions)
+            for way_point in route.rtept:
+                route_ = self.add_way_point(route_, way_point)
+        return element
+
+    def add_track_segment(self, element: ET.Element, track_segment: TrackSegment) -> ET.Element:
+        """
+        Add TrackSegment instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            track_segment (TrackSegment): TrackSegment instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if track_segment is not None:
+            track_segment_ = ET.SubElement(element, track_segment.tag)
+            for track_point in track_segment.trkpt:
+                track_segment_ = self.add_way_point(track_segment_, track_point)
+        return element
+
+    def add_track(self, element: ET.Element, track: Track) -> ET.Element:
+        """
+        Add Track instance element to GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            track (Track): Track instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        if track is not None:
+            track_ = ET.SubElement(element, track.tag)
+            track_, _ = self.add_subelement(track_, "name", track.name)
+            for track_segment in track.trkseg:
+                track_ = self.add_track_segment(track_, track_segment)
         return element
     
     def add_way_point(self, element: ET.Element, way_point: WayPoint) -> ET.Element:
@@ -235,92 +378,29 @@ class Writer():
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
-        return self.add_way_point_(element, way_point)
-    
-    def add_route_point(self, element: ET.Element, way_point: WayPoint) -> ET.Element:
-        """
-        Add WayPoint instance element to GPX element.
-
-        Args:
-            element (xml.etree.ElementTree.Element): GPX element.
-            route_point (WayPoint): WayPoint instance to add.
-
-        Returns:
-            xml.etree.ElementTree.Element: GPX element.
-        """
-        return self.add_way_point_(element, way_point, "rtept")
-    
-    def add_way_point_(self, element: ET.Element, way_point: WayPoint, tag: str = "wpt") -> ET.Element:
-        """
-        Add WayPoint instance element to GPX element.
-
-        Args:
-            element (xml.etree.ElementTree.Element): GPX element.
-            way_point (WayPoint): WayPoint instance to add.
-            tag (str, Optional): Tag to assign to the point (wpt or rtept). Defaults to "wpt".
-
-        Returns:
-            xml.etree.ElementTree.Element: GPX element.
-        """
-        way_point_ = ET.SubElement(element, tag)
-        way_point_.set("lat", "{:.{}f}".format(way_point.lat, self.precisions["lat_lon"]))
-        way_point_.set("lon", "{:.{}f}".format(way_point.lon, self.precisions["lat_lon"]))
-        if way_point.ele is not None:
-            ele = ET.SubElement(way_point_, "ele")
-            ele.text = "{:.{}f}".format(way_point.ele, self.precisions["elevation"])
-        if way_point.time is not None:
-            time = ET.SubElement(way_point_, "time")
-            time.text = way_point.time.strftime(self.time_format)
-        if way_point.mag_var is not None:
-            mag_var = ET.SubElement(way_point_, "magvar")
-            mag_var.text = "{:.{}f}".format(way_point.mag_var, self.precisions["default"])
-        if way_point.geo_id_height is not None:
-            geo_id_height = ET.SubElement(way_point_, "geoidheight")
-            geo_id_height.text = "{:.{}f}".format(way_point.geo_id_height, self.precisions["default"])
-        if way_point.name is not None:
-            name = ET.SubElement(way_point_, "name")
-            name.text = way_point.name
-        if way_point.cmt is not None:
-            cmt = ET.SubElement(way_point_, "cmt")
-            cmt.text = way_point.cmt
-        if way_point.desc is not None:
-            desc = ET.SubElement(way_point_, "desc")
-            desc.text = way_point.desc
-        if way_point.src is not None:
-            src = ET.SubElement(way_point_, "src")
-            src.text = way_point.src
-        if way_point.link is not None:
-            way_point = self.add_link(way_point_, way_point.link)
-        if way_point.sym is not None:
-            sym = ET.SubElement(way_point_, "sym")
-            sym.text = way_point.sym
-        if way_point.type is not None:
-            type = ET.SubElement(way_point_, "type")
-            type.text = way_point.type
-        if way_point.fix is not None:
-            fix = ET.SubElement(way_point_, "fix")
-            fix.text = way_point.fix
-        if way_point.sat is not None:
-            sat = ET.SubElement(way_point_, "sat")
-            sat.text = str(way_point.sat)
-        if way_point.hdop is not None:
-            hdop = ET.SubElement(way_point_, "hdop")
-            hdop.text = "{:.{}f}".format(way_point.hdop, self.precisions["default"])
-        if way_point.vdop is not None:
-            vdop = ET.SubElement(way_point_, "vdop")
-            vdop.text = "{:.{}f}".format(way_point.vdop, self.precisions["default"])
-        if way_point.pdop is not None:
-            pdop = ET.SubElement(way_point_, "pdop")
-            pdop.text = "{:.{}f}".format(way_point.pdop, self.precisions["default"])
-        if way_point.age_of_gps_data is not None:
-            age_of_gps_data = ET.SubElement(way_point_, "age_of_gps_data")
-            age_of_gps_data.text = "{:.{}f}".format(way_point.age_of_gps_data, self.precisions["default"])
-        if way_point.dgpsid is not None:
-            dgpsid = ET.SubElement(way_point_, "dgpsid")
-            dgpsid.text = str(way_point.dgpsid)
-        if way_point.extensions is not None:
-            way_point = self.add_extensions(way_point_, way_point.extensions)
-
+        if way_point is not None:
+            way_point_ = ET.SubElement(element, way_point.tag)
+            way_point_.set("lat", "{:.{}f}".format(way_point.lat, self.precisions["lat_lon"]))
+            way_point_.set("lon", "{:.{}f}".format(way_point.lon, self.precisions["lat_lon"]))
+            way_point_, _ = self.add_subelement_number(way_point_, "ele", way_point.ele, self.precisions["elevation"])
+            way_point_, _ = self.add_subelement_time(way_point_, "time", way_point.time, self.time_format)
+            way_point_, _ = self.add_subelement_number(way_point_, "magvar", way_point.mag_var, self.precisions["default"])
+            way_point_, _ = self.add_subelement_number(way_point_, "geoidheight", way_point.geo_id_height, self.precisions["default"])
+            way_point_, _ = self.add_subelement(way_point_, "name", way_point.name)
+            way_point_, _ = self.add_subelement(way_point_, "cmt", way_point.cmt)
+            way_point_, _ = self.add_subelement(way_point_, "desc", way_point.desc)
+            way_point_, _ = self.add_subelement(way_point_, "src", way_point.src)
+            way_point_ = self.add_link(way_point_, way_point.link)
+            way_point_, _ = self.add_subelement(way_point_, "src", way_point.src)
+            way_point_, _ = self.add_subelement(way_point_, "type", way_point.type)
+            way_point_, _ = self.add_subelement(way_point_, "fix", way_point.fix)
+            way_point_, _ = self.add_subelement_number(way_point_, "sat", way_point.sat, 0)
+            way_point_, _ = self.add_subelement_number(way_point_, "hdop", way_point.hdop, self.precisions["default"])
+            way_point_, _ = self.add_subelement_number(way_point_, "vdop", way_point.vdop, self.precisions["default"])
+            way_point_, _ = self.add_subelement_number(way_point_, "pdop", way_point.pdop, self.precisions["default"])
+            way_point_, _ = self.add_subelement_number(way_point_, "ageofgpsdata", way_point.age_of_gps_data, self.precisions["default"])
+            way_point_, _ = self.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)
+            way_point_ = self.add_extensions(way_point_, way_point.extensions)
         return element
          
     def add_properties_garmin(self) -> None:
@@ -370,17 +450,7 @@ class Writer():
         """
         logging.info("Preparing metadata...")
 
-        metadata = ET.SubElement(self.gpx_root, "metadata")
-
-        metadata, _ = self.add_subelement(metadata, "name", self.gpx.metadata.name)
-        metadata, _ = self.add_subelement(metadata, "desc", self.gpx.metadata.desc)
-        metadata = self.add_person(metadata, self.gpx.metadata.author)
-        metadata = self.add_copyright(metadata, self.gpx.metadata.copyright)
-        metadata = self.add_link(metadata, self.gpx.metadata.link)
-        metadata, _ = self.add_subelement(metadata, "time", self.gpx.metadata.time.strftime(self.time_format))
-        metadata, _ = self.add_subelement(metadata, "keywords", self.gpx.metadata.keywords)
-        metadata = self.add_bounds(metadata, self.gpx.metadata.bounds)
-        metadata = self.add_extensions(metadata, self.gpx.metadata.extensions)
+        self.gpx_root = self.add_metadata(self.gpx_root, self.gpx.metadata)
     
     def add_root_way_points(self) -> None:
         """
@@ -388,8 +458,8 @@ class Writer():
         """
         logging.info("Preparing way points...")
 
-        for gpx_way_point in self.gpx.wpt:
-            self.gpx_root = self.add_way_point(self.gpx_root, gpx_way_point)
+        for way_point in self.gpx.wpt:
+            self.gpx_root = self.add_way_point(self.gpx_root, way_point)
     
     def add_root_routes(self) -> None:
         """
@@ -397,59 +467,17 @@ class Writer():
         """
         logging.info("Preparing routes...")
 
-        for gpx_route in self.gpx.rte:
-            route = ET.SubElement(self.gpx_root, "rte")
-            if gpx_route.name is not None:
-                name = ET.SubElement(route, "name")
-                name.text = gpx_route.name
-            if gpx_route.cmt is not None:
-                cmt = ET.SubElement(route, "cmt")
-                cmt.text = gpx_route.cmt
-            if gpx_route.desc is not None:
-                desc = ET.SubElement(route, "desc")
-                desc.text = gpx_route.desc
-            if gpx_route.src is not None:
-                src = ET.SubElement(route, "src")
-                src.text = gpx_route.src
-            if gpx_route.link is not None:
-                route = self.add_link(route, gpx_route.link)
-            if gpx_route.number is not None:
-                number = ET.SubElement(route, "number")
-                number.text = str(gpx_route.number)
-            if gpx_route.type is not None:
-                type = ET.SubElement(route, "type")
-                type.text = gpx_route.type
-            if gpx_route.extensions is not None:
-                route = self.add_extensions(route, gpx_route.extensions)
-            if gpx_route.rtept is not []:
-                for way_point in gpx_route.rtept:
-                    route = self.add_route_point(route, way_point)
+        for route in self.gpx.rte:
+            self.gpx_root = self.add_route(self.gpx_root, route)
     
-    def add_root_tracks(self,) -> None:
+    def add_root_tracks(self) -> None:
         """
         Add trck elements to the GPX root element.
         """
         logging.info("Preparing tracks...")
 
-        for gpx_track in self.gpx.tracks:
-            track = ET.SubElement(self.gpx_root, "trk")
-            track, _ = self.add_subelement(track, "name", gpx_track.name)
-
-            # Track segments
-            for gpx_segment in gpx_track.trkseg:
-                segment = ET.SubElement(track, "trkseg")
-
-                # Track points
-                for gpx_point in gpx_segment.trkpt:
-                    point = ET.SubElement(segment, "trkpt")
-                    point.set("lat", "{:.{}f}".format(gpx_point.latitude, self.precisions["lat_lon"]))
-                    point.set("lon", "{:.{}f}".format(gpx_point.longitude, self.precisions["lat_lon"]))
-                    if self.ele and gpx_point.elevation is not None:
-                        ele = ET.SubElement(point, "ele")
-                        ele.text = "{:.{}f}".format(gpx_point.elevation, self.precisions["elevation"])
-                    if self.time and gpx_point.time is not None:
-                        time = ET.SubElement(point, "time")
-                        time.text = gpx_point.time.strftime(self.time_format)
+        for track in self.gpx.tracks:
+            self.gpx_root = self.add_track(self.gpx_root, track)
     
     def add_root_extensions(self) -> None:
         """

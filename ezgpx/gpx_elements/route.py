@@ -6,11 +6,12 @@ from .way_point import WayPoint
 
 class Route():
     """
-    Route (rte) element in GPX file.
+    rteType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "rte",
             name: str = None,
             cmt: str = None,
             desc: str = None,
@@ -24,6 +25,7 @@ class Route():
         Initialize Route instance.
 
         Args:
+            tag (str, optional): XML tag. Defaults to "rte".
             name (str, optional): Name. Defaults to None.
             cmt (str, optional): Comment. Defaults to None.
             desc (str, optional): Description. Defaults to None.
@@ -33,6 +35,7 @@ class Route():
             extensions (Extensions, optional): Extensions. Defaults to None.
             rtept (list[WayPoint], optional): Route points. Defaults to [].
         """
+        self.tag: str = tag
         self.name: str = name
         self.cmt: str = cmt
         self.desc: str = desc

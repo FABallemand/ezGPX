@@ -4,11 +4,12 @@ from .track_segment import *
 
 class Track():
     """
-    Track (trk) element in GPX file.
+    trkType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "trk",
             name: str = None,
             cmt: str = None,
             desc: str = None,
@@ -22,6 +23,7 @@ class Track():
         Initialize Track instance.
 
         Args:
+        tag (str, optional): XML tag. Defaults to "trk".
             name (str, optional): Name. Defaults to None.
             cmt (str, optional): Comment. Defaults to None.
             desc (str, optional): Description. Defaults to None.
@@ -32,6 +34,7 @@ class Track():
             extensions (Extensions, optional): Extensions. Defaults to None.
             trkseg (list[TrackSegment], optional): List of track segments. Defaults to [].
         """
+        self.tag: str = tag
         self.name: str = name
         self.cmt: str = cmt
         self.desc: str = desc

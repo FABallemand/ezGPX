@@ -7,11 +7,12 @@ from ..utils import web_mercator_projection
 
 class WayPoint():
     """
-    Way point (wpt) element in GPX file.
+    wptType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "wpt",
             lat: float = None,
             lon: float = None,
             ele: float = None,
@@ -37,6 +38,7 @@ class WayPoint():
         Initialize WayPoint instance.
 
         Args:
+            tag (str, optional): XML tag. Defaults to "wpt".
             lat (float, optional): Latitude. Defaults to None.
             lon (float, optional): Longitude. Defaults to None.
             ele (float, optional): Elevation. Defaults to None.
@@ -57,6 +59,7 @@ class WayPoint():
             age_of_gps_data (float, optional): Age of GPS data. Defaults to None.
             dgpsid (int, optional): _description_. Defaults to None.
         """
+        self.tag: str = tag
         self.lat: float = lat
         self.lon: float = lon
         self.ele: float = ele

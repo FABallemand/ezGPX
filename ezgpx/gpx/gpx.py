@@ -291,7 +291,7 @@ class GPX():
         if ascent:
             plt.text(1, 0, f"Ascent:\n{self.ascent():.2f} m", **text_kwargs)
         elif pace:
-            plt.text(1, 0, f"Pace:\n{self.avg_pace():.2f}", **text_kwargs)
+            plt.text(1, 0, f"Pace:\n{self.avg_pace():.2f} min/km", **text_kwargs)
         elif speed:
             plt.text(1, 0, f"Speed:\n{self.avg_speed():.2f} km/h", **text_kwargs)
 

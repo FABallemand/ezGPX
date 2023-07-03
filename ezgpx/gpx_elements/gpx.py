@@ -11,11 +11,12 @@ from ..utils import haversine_distance, ramer_douglas_peucker
 
 class Gpx():
     """
-    Gpx (gpx) element in GPX file.
+    gpxType element in GPX file.
     """
 
     def __init__(
             self,
+            tag: str = "gpx",
             creator: str = None,
             xmlns: str = None,
             version: str = None,
@@ -34,6 +35,7 @@ class Gpx():
         Initialize Gpx instance.
 
         Args:
+            tag (str, optional): XML tag. Defaults to "gpx".
             creator (str, optional): Creator. Defaults to None.
             xmlns (str, optional): XML xmlns. Defaults to None.
             version (str, optional): Version. Defaults to None.
@@ -49,6 +51,7 @@ class Gpx():
             tracks (list[Track], optional): List of tracks. Defaults to [].
             extensions (Extensions, optional): Extensions. Defaults to [].
         """
+        self.tag: str = tag
         self.creator: str = creator
         self.xmlns: str = xmlns
         self.version: str = version
@@ -90,13 +93,13 @@ class Gpx():
             float: Ascent (meters)
         """
         ascent = 0
-        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
+        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    if track_point.elevation > previous_elevation:
-                        ascent += track_point.elevation - previous_elevation
-                    previous_elevation = track_point.elevation
+                    if track_point.ele > previous_elevation:
+                        ascent += track_point.ele - previous_elevation
+                    previous_elevation = track_point.ele
         return ascent
     
     def descent(self) -> float:
@@ -107,13 +110,13 @@ class Gpx():
             float: Descent (meters)
         """
         descent = 0
-        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
+        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    if track_point.elevation < previous_elevation:
-                        descent += previous_elevation - track_point.elevation
-                    previous_elevation = track_point.elevation
+                    if track_point.ele < previous_elevation:
+                        descent += previous_elevation - track_point.ele
+                    previous_elevation = track_point.ele
         return descent
     
     def min_elevation(self) -> float:
@@ -123,12 +126,12 @@ class Gpx():
         Returns:
             float: Minimum elevation (meters).
         """
-        min_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
+        min_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    if track_point.elevation < min_elevation:
-                        min_elevation = track_point.elevation
+                    if track_point.ele < min_elevation:
+                        min_elevation = track_point.ele
         return min_elevation
     
     def max_elevation(self) -> float:
@@ -138,12 +141,12 @@ class Gpx():
         Returns:
             float: Maximum elevation (meters).
         """
-        max_elevation = self.tracks[0].trkseg[0].trkpt[0].elevation
+        max_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    if track_point.elevation > max_elevation:
-                        max_elevation = track_point.elevation
+                    if track_point.ele > max_elevation:
+                        max_elevation = track_point.ele
         return max_elevation
     
     def utc_start_time(self) -> datetime:
@@ -171,16 +174,26 @@ class Gpx():
         Returns:
             datetime: Start time.
         """
-        return self.tracks[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+        start_time = None
+        try:
+            start_time = self.tracks[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+        except:
+            logging.error("Unable to find activity start time")
+        return start_time
     
-    def stop_time(self):
+    def stop_time(self) -> datetime:
         """
         Return the activity stopping time.
 
         Returns:
             datetime: Stop time.
         """
-        return self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        stop_time = None
+        try:
+            stop_time = self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        except:
+            logging.error("Unable to find activity stop time")
+        return stop_time
     
     def total_elapsed_time(self) -> datetime:
         """
@@ -189,7 +202,12 @@ class Gpx():
         Returns:
             datetime: Total elapsed time.
         """
-        return self.stop_time() - self.start_time()
+        total_elapsed_time = None
+        try:
+            total_elapsed_time = self.stop_time() - self.start_time()
+        except:
+            logging.error("Unable to compute activity total elapsed time")
+        return total_elapsed_time
     
     def stopped_time(self, tolerance: float = 2.45) -> datetime:
         """
@@ -285,9 +303,9 @@ class Gpx():
             for segment in track.trkseg:
                 for point in segment.trkpt:
                     route_info.append({
-                        "latitude": point.latitude,
-                        "longitude": point.longitude,
-                        "elevation": point.elevation,
+                        "latitude": point.lat,
+                        "longitude": point.lon,
+                        "elevation": point.ele,
                         "x": point._x,
                         "y": point._y
                     })
