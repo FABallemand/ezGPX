@@ -20,14 +20,6 @@ test_gpx.plot(start_stop=True, elevation_color=True)
 
 ## 📚 References:
 
-### 🖥️ Implementation
-
-#### 🏷️ XML
-- [GPX XML Schema](http://www.topografix.com/GPX/1/1/)
-
-#### 🌏 Map Projection
-- Wikipedia: [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection)
-
 ### 🧭 Other Python GPX Library
 - [gpxpy](https://github.com/tkrajina/gpxpy)
 

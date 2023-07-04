@@ -69,6 +69,66 @@ class Gpx():
         self.tracks: list[Track] = tracks
         self.extensions: Extensions = extensions
 
+    def name(self) -> str:
+        """
+        Return activity name.
+
+        Returns:
+            str: Activity name.
+        """
+        return self.tracks[0].name
+
+    def nb_points(self) -> int:
+        """
+        Compute the number of points in the GPX.
+
+        Returns:
+            int: Number of points in the GPX.
+        """
+        nb_pts = 0
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                nb_pts += len(track_segment.trkpt)
+        return nb_pts
+    
+    def bounds(self) -> tuple[float, float, float, float]:
+        """
+        Find minimum and maximum latitude and longitude.
+
+        Returns:
+            tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
+        """
+        min_lat = self.tracks[0].trkseg[0].trkpt[0].lat
+        min_lon = self.tracks[0].trkseg[0].trkpt[0].lon
+        max_lat = min_lat
+        max_lon = min_lon
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.lat < min_lat:
+                        min_lat = track_point.lat
+                    if track_point.lon < min_lon:
+                        min_lon = track_point.lon
+                    if track_point.lat > max_lat:
+                        max_lat = track_point.lat
+                    if track_point.lon > max_lon:
+                        max_lon = track_point.lon
+        return min_lat, min_lon, max_lat, max_lon
+
+
+    def center(self) -> tuple[float, float]:
+        """
+        Compute the center coordinates of the track.
+
+        Returns:
+            tuple[float, float]: Latitude and longitude of the center point.
+        """
+        min_lat, min_lon, max_lat, max_lon = self.bounds()
+        center_lat = min_lat + (max_lat - min_lat) / 2
+        center_lon = min_lon + (max_lon - min_lon) / 2
+        return center_lat, center_lon
+
     def distance(self) -> float:
         """
         Compute the total distance (meters) of the tracks contained in the Gpx element.

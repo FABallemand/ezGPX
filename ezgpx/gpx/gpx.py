@@ -2,7 +2,11 @@ import logging
 from datetime import datetime
 import pandas as pd
 from math import degrees
+
 import matplotlib.pyplot as plt
+
+import webbrowser
+import gmplot
 
 from ..gpx_elements import Gpx
 from ..gpx_parser import Parser
@@ -20,18 +24,41 @@ class GPX():
         self.gpx: Gpx = self.parser.gpx
         self.writer: Writer = Writer(self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
 
+    def name(self) -> str:
+        """
+        Return activity name.
+
+        Returns:
+            str: Activity name.
+        """
+        return self.gpx.name()
+
     def nb_points(self) -> int:
         """
-        Compute the number of points in the GPX.
+        Return the number of points in the GPX.
 
         Returns:
             int: Number of points in the GPX.
         """
-        nb_pts = 0
-        for track in self.gpx.tracks:
-            for track_segment in track.trkseg:
-                nb_pts += len(track_segment.trkpt)
-        return nb_pts
+        return self.gpx.nb_points()
+    
+    def bounds(self) -> tuple[float, float, float, float]:
+        """
+        Find minimum and maximum latitude and longitude.
+
+        Returns:
+            tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
+        """
+        return self.gpx.bounds()
+    
+    def center(self) -> tuple[float, float]:
+        """
+        Return the coordinates of the center point.
+
+        Returns:
+            tuple[float, float]: Latitude and longitude of the center point.
+        """
+        return self.gpx.center()
     
     def distance(self) -> float:
         """
@@ -236,18 +263,18 @@ class GPX():
         epsilon = degrees(tolerance/EARTH_RADIUS)
         self.gpx.simplify(epsilon)
 
-    def plot(
+    def matplotlib_plot(
             self,
             projection: str = None,
             title: str = "Track",
             base_color: str = "#101010",
             start_stop: bool = False,
             elevation_color: bool = False,
-            duration: bool = None,
-            distance: bool = None,
-            ascent: bool = None,
-            pace: bool = None,
-            speed: bool = None,
+            duration: bool = False,
+            distance: bool = False,
+            ascent: bool = False,
+            pace: bool = False,
+            speed: bool = False,
             file_path: str = None):
 
         # Handle projection
@@ -305,3 +332,37 @@ class GPX():
             plt.savefig(file_path)
         else:
             plt.show()
+
+    def gmap_plot(
+        self,
+        title: str = None,
+        base_color: str = "#110000",
+        start_stop: str = False,
+        zoom: float = 10.0,
+        file_path: str = None,
+        open: bool = True,
+        scatter: bool = False,
+        plot: bool = True):
+
+        # Convert to dataframe and compute center latitude and longitude
+        test_gpx_df = self.to_dataframe()
+        center_lat, center_lon = self.center()
+
+        # Create plotter
+        map = gmplot.GoogleMapPlotter(center_lat, center_lon, zoom)
+
+        # Plot and save
+        if title is not None:
+            map.text(center_lat, center_lon, self.name(), color="#FFFFFF")
+        if start_stop:
+            map.scatter([self.gpx.tracks[0].trkseg[0].trkpt[0].lat], [self.gpx.tracks[0].trkseg[0].trkpt[0].lon], "#00FF00", size=5, marker=True)
+            map.scatter([self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lat], [self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lat], "#FF0000", size=5, marker=True)
+        if scatter:
+            map.scatter(test_gpx_df["latitude"], test_gpx_df["longitude"], base_color, size=5, marker=False)
+        if plot:
+            map.plot(test_gpx_df["latitude"], test_gpx_df["longitude"], base_color, edge_width=2.5)
+        map.draw(file_path)
+
+        # Open
+        if open:
+            webbrowser.open(file_path)
