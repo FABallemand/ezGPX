@@ -23,6 +23,12 @@ class TrackSegment():
         self.trkpt: list[WayPoint] = trkpt
         self.extensions: Extensions = extensions
 
-    def project(self):
+    def project(self, projection: str):
+        """
+        Project points.
+
+        Args:
+            projection (str): Projection.
+        """
         for point in self.trkpt:
-            point.project()
+            point.project(projection)

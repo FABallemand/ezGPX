@@ -278,17 +278,15 @@ class GPX():
             file_path: str = None):
 
         # Handle projection
-        if projection in ["Web Mercator"]:
-            logging.info("-> Handling projection")
-            # Project points
-            self.gpx.project()
-
+        if projection is None:
+            column_x = "longitude"
+            column_y = "latitude"
+        else:
             # Select dataframe columns to use
             column_x = "x"
             column_y = "y"
-        else:
-            column_x = "longitude"
-            column_y = "latitude"
+            # Project
+            self.gpx.project(projection)
 
         # Create dataframe containing data from the GPX file
         gpx_df = self.to_dataframe()
@@ -325,7 +323,11 @@ class GPX():
         plt.title(title, size=20)
         plt.xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
         plt.yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
-
+        
+        if projection is not None:
+            ax = plt.gca()
+            ax.set_xlim(left=min(gpx_df[column_x]), right=max(gpx_df[column_x]))
+            ax.set_ylim(bottom=min(gpx_df[column_y]), top=max(gpx_df[column_y]))
 
         if file_path is not None:
             # Check path

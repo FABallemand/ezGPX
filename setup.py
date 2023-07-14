@@ -32,7 +32,7 @@ setup(
     ],
     packages=find_packages(include=['ezgpx']),
     include_package_data=True,
-    install_requires=[],
+    install_requires=["gmap", "folium"],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests'

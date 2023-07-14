@@ -3,7 +3,7 @@ import datetime
 
 from .extensions import Extensions
 from .link import Link
-from ..utils import web_mercator_projection
+from ..utils import web_mercator_projection, lambert_conformal_conic_projection
 
 class WayPoint():
     """
@@ -85,5 +85,16 @@ class WayPoint():
         self._x: int = None
         self._y: int = None
 
-    def project(self):
-        self._x, self._y = web_mercator_projection(self.lat, self.lon)
+    def project(self, projection: str):
+        """
+        Project point.
+
+        Args:
+            projection (str): Projection.
+        """
+        if projection in ["web_mercator_projection", "web_mercator", "wm"]:
+            self._x, self._y = web_mercator_projection(self.lat, self.lon)
+        elif projection in ["lambert_conformal_conic_projection", "lambert_conformal_conic", "lcc"]:
+            self._x, self._y = lambert_conformal_conic_projection(self.lat, self.lon, 90.0, 135.0, 45.0, 45.0)
+        else:
+            logging.error(f"Invalid projection: {projection}")

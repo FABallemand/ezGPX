@@ -45,6 +45,12 @@ class Track():
         self.extensions: Extensions = extensions
         self.trkseg: list[TrackSegment] = trkseg
 
-    def project(self):
+    def project(self, projection: str):
+        """
+        Project segments.
+
+        Args:
+            projection (str): Projection.
+        """
         for segment in self.trkseg:
-            segment.project()
+            segment.project(projection)

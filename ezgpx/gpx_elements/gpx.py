@@ -372,9 +372,15 @@ class Gpx():
         df = pd.DataFrame(route_info)
         return df
     
-    def project(self):
+    def project(self, projection: str):
+        """
+        Project tracks.
+
+        Args:
+            projection (str): Projection.
+        """
         for track in self.tracks:
-            track.project()
+            track.project(projection)
     
     def remove_gps_errors(self, error_distance=100):
         """

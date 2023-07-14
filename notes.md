@@ -9,9 +9,22 @@
 - GeeksForGeeks: [Reading and Writing XML Files in Python](https://www.geeksforgeeks.org/reading-and-writing-xml-files-in-python/)
 
 #### 🌏 Map Plotting
+
+##### 🖥️ APIs
+
+######
 - [gmplot](https://github.com/gmplot/gmplot)
+######
+- [Basemap Matplotlib Toolkit](https://matplotlib.org/basemap/index.html)
+- [Basemap tutorial](https://basemaptutorial.readthedocs.io/en/latest/index.html)
+######
+- Pypi: [folium](https://pypi.org/project/folium/)
+- [Folium Quickstart](https://python-visualization.github.io/folium/quickstart.html#Polylines)
+######
 - [OSMPythonTools](https://wiki.openstreetmap.org/wiki/OSMPythonTools)
-- - Towards Data Science: [Loading Data from OpenStreetMap with Python and the Overpass API](https://towardsdatascience.com/loading-data-from-openstreetmap-with-python-and-the-overpass-api-513882a27fd0)
+- Towards Data Science: [Loading Data from OpenStreetMap with Python and the Overpass API](https://towardsdatascience.com/loading-data-from-openstreetmap-with-python-and-the-overpass-api-513882a27fd0)
+
+##### 🗺️ Projections
 - Wikipedia: [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection)
 
 #### 🗃️ Creating a Python Library
@@ -24,4 +37,3 @@
 ## 📝 TO DO LIST !!
 - Garmin extensions
 - Compute length properly
-- Unify parsing and writing methods
