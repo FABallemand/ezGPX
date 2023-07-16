@@ -569,6 +569,7 @@ class Parser():
         self.gpx.creator = self.gpx_root.attrib["creator"]
         self.gpx.version = self.gpx_root.attrib["version"]
         self.gpx.xmlns = self.gpx_root.tag[1:-4]
+        self.name_space["topo"] = self.gpx.xmlns
         name_spaces = self.gpx_root.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
         self.gpx.xsi_schema_location = [x for x in name_spaces if x != ""]
 
