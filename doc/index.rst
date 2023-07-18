@@ -10,7 +10,10 @@ Welcome to ezGPX's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   description.rst
+   installation.rst
+   tutorials/index.rst
+   modules.rst
 
 
 Indices and tables

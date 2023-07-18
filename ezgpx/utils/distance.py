@@ -80,7 +80,7 @@ def perpendicular_distance(start_point, end_point, point) -> float:
             a = 1
             b = 0
             c = point_1.lon  
-            logging.warning("Vertical line")
+            logging.debug("Vertical line")
             
         return a, b, c
 

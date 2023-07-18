@@ -20,7 +20,7 @@ setup(
     download_url='https://github.com/FABallemand/ezGPX',
     project_urls={
             "Bug Tracker": "https://github.com/FABallemand/ezGPX/issues",
-            # "Documentation": "",
+            "Documentation": "https://ezgpx.readthedocs.io/en/latest/",
             "Source Code": "https://github.com/FABallemand/ezGPX",
         },
     author='Fabien ALLEMAND',
