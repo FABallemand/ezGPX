@@ -10,18 +10,24 @@ with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='ezGPX',
-    version='0.1.0',
+    name='ezgpx',
+    version='0.1.1',
     description='Easy to use Python GPX library',
     long_description=long_description,
     long_description_content_type='text/markdown',
+    keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-data'],
     # url='https://medium-multiply.readthedocs.io/',
+    download_url='https://github.com/FABallemand/ezGPX',
+    project_urls={
+            "Bug Tracker": "https://github.com/FABallemand/ezGPX/issues",
+            # "Documentation": "",
+            "Source Code": "https://github.com/FABallemand/ezGPX",
+        },
     author='Fabien ALLEMAND',
     author_email='allemand.fabien@orange.fr',
     license='GNU GPLv3',
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
@@ -30,24 +36,11 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent'
     ],
-    packages=find_packages(include=['ezgpx']),
+    # packages=find_packages(include=['ezgpx']),
+    packages=['ezgpx'],
     include_package_data=True,
-    install_requires=["gmap", "folium"],
+    install_requires=['gmap', 'folium'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests'
 )
-
-# setup(
-#     name='ezGPX',
-#     # packages=find_packages(include=['mypythonlib']),
-#     packages=find_packages(),
-#     version='0.1.0',
-#     description='Easy to use Python GPX library',
-#     author='Fabien ALLEMAND',
-#     license='GNU GPLv3',
-#     install_requires=[],
-#     setup_requires=['pytest-runner'],
-#     tests_require=['pytest'],
-#     test_suite='tests',
-# )

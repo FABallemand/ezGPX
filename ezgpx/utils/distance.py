@@ -12,8 +12,8 @@ def haversine_distance(point_1, point_2) -> float:
     https://en.wikipedia.org/wiki/Haversine_formula
 
     Args:
-        point_1 (TrackPoint): First point.
-        point_2 (TrackPoint): Second point.
+        point_1 (WayPoint): First point.
+        point_2 (WayPoint): Second point.
 
     Returns:
         float: Haversine distance between the points.
@@ -34,8 +34,8 @@ def distance(point_1, point_2) -> float:
     Euclidian distance between two points.
 
     Args:
-        point_1 (TrackPoint): First point.
-        point_2 (TrackPoint): Second point.
+        point_1 (WayPoint): First point.
+        point_2 (WayPoint): Second point.
 
     Returns:
         float: Distance between the points.
@@ -50,9 +50,9 @@ def perpendicular_distance(start_point, end_point, point) -> float:
     Distance between a point and a line.
 
     Args:
-        start_point (TrackPoint): A point on the line.
-        end_point (TrackPoint): A point on the line.
-        point (TrackPoint): A point to measure the distance from.
+        start_point (WayPoint): A point on the line.
+        end_point (WayPoint): A point on the line.
+        point (WayPoint): A point to measure the distance from.
 
     Returns:
         float: Perpendicular distance between the point *point* and the line defined by *start_point* and *end_point*.
@@ -63,8 +63,8 @@ def perpendicular_distance(start_point, end_point, point) -> float:
         Compute the coefficients of a line equation of the form: ax+by+c=0.
 
         Args:
-            point_1 (TrackPoint): A point on the line.
-            point_2 (TrackPoint): A point on the line.
+            point_1 (WayPoint): A point on the line.
+            point_2 (WayPoint): A point on the line.
 
         Returns:
             tuple: Coefficients of the line equation.

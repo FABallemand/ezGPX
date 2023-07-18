@@ -13,7 +13,7 @@ parent_folder = os.path.realpath(os.path.dirname(file_folder)) # ie: ezGPX
 os.chdir(file_folder)
 sys.path.append(parent_folder + "/ezgpx")
 
-from ezgpx import utils, TrackPoint
+from ezgpx import utils, WayPoint
 
 class TestUtils():
 
@@ -21,27 +21,27 @@ class TestUtils():
         pass
 
     def _test_perpendicular_distance_horizontal_line(self):
-        start = TrackPoint(0, 0)
-        end = TrackPoint(0, 2)
-        point = TrackPoint(1, 1)
+        start = WayPoint("wpt", 0, 0)
+        end = WayPoint("wpt", 0, 2)
+        point = WayPoint("wpt", 1, 1)
         return math.isclose(utils.perpendicular_distance(start, end, point), 1)
 
     def _test_perpendicular_distance_vertical_line(self):
-        start = TrackPoint(0, 0)
-        end = TrackPoint(2, 0)
-        point = TrackPoint(1, 1)
+        start = WayPoint("wpt", 0, 0)
+        end = WayPoint("wpt", 2, 0)
+        point = WayPoint("wpt", 1, 1)
         return math.isclose(utils.perpendicular_distance(start, end, point), 1)
     
     def _test_perpendicular_distance_random_line(self):
-        start = TrackPoint(0, 0)
-        end = TrackPoint(1, 1)
-        point = TrackPoint(1, 0)
+        start = WayPoint("wpt", 0, 0)
+        end = WayPoint("wpt", 1, 1)
+        point = WayPoint("wpt", 1, 0)
         return math.isclose(utils.perpendicular_distance(start, end, point), math.sqrt(2)/2)
     
     def _test_perpendicular_distance_point_on_line(self):
-        start = TrackPoint(0, 0)
-        end = TrackPoint(1, 1)
-        point = TrackPoint(2, 2)
+        start = WayPoint("wpt", 0, 0)
+        end = WayPoint("wpt", 1, 1)
+        point = WayPoint("wpt", 2, 2)
         return math.isclose(utils.perpendicular_distance(start, end, point), 0)
     
     def test_perpendicular_distance(self):

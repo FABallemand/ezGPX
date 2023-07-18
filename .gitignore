@@ -1,5 +1,8 @@
 tests/dev_tests/*
 *_test.gpx
+*.old
+*.private
+*.unused
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
