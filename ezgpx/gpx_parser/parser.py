@@ -66,8 +66,12 @@ class Parser():
                 return len(decimal)
             else:
                 return 0
-        except:
-            logging.error(f"Unable to find precision of number: {number}")
+        except OSError as err:
+            logging.exception(f"OS error: {err}")
+        except ValueError:
+            logging.exception("Could not convert data ({number}) to a floating point value.")
+        except Exception as err:
+            logging.exception(f"Unexpected {err=}, {type(err)=}.\nUnable to find precision of number: {number}")
             raise
 
     def find_precisions(self):
@@ -121,7 +125,7 @@ class Parser():
         """
         time = self.find_time_element()
         if time is None:
-            logging.warning("No time element in GPX file")
+            logging.warning("No time element in GPX file.")
             return
 
         try:
@@ -144,7 +148,7 @@ class Parser():
         try:
             text_ = element.get(sub_element)
         except:
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
             text_ = None
         return text_
     
@@ -162,7 +166,7 @@ class Parser():
         try:
             int_ = int(element.get(sub_element))
         except:
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
             int_ = None
         return int_
     
@@ -180,7 +184,7 @@ class Parser():
         try:
             float_ = float(element.get(sub_element))
         except:
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
             float_ = None
         return float_
     
@@ -199,7 +203,7 @@ class Parser():
             text_ = element.find(sub_element, self.name_space).text
         except:
             text_ = None
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
         return text_
     
     def find_int(self, element, sub_element: str) -> Union[int, None]:
@@ -217,7 +221,7 @@ class Parser():
             int_ = int(element.find(sub_element, self.name_space).text)
         except:
             int_ = None
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
         return int_
     
     def find_float(self, element, sub_element: str) -> Union[float, None]:
@@ -235,7 +239,7 @@ class Parser():
             float_ = float(element.find(sub_element, self.name_space).text)
         except:
             float_ = None
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
         return float_
     
     def find_time(self, element, sub_element: str) -> Union[datetime, None]:
@@ -253,7 +257,7 @@ class Parser():
             time_ = datetime.strptime(element.find(sub_element, self.name_space).text, self.time_format)
         except:
             time_ = None
-            logging.debug(f"{element} has no attribute {sub_element}")
+            logging.debug(f"{element} has no attribute {sub_element}.")
         return time_
 
     def parse_bounds(self, bounds, tag: str ="bounds") -> Bounds:
@@ -624,22 +628,22 @@ class Parser():
         if file_path != "":
             self.file_path = file_path
         elif self.file_path == "":
-            logging.error("No GPX file to parse")
+            logging.error("No GPX file to parse.")
             return
 
         # Parse GPX file
         try:
             self.gpx_tree = ET.parse(self.file_path)
             self.gpx_root = self.gpx_tree.getroot()
-        except:
-            logging.exception("Unable to parse GPX file")
+        except Exception as err:
+            logging.exception(f"Unexpected {err=}, {type(err)=}.\nUnable to parse GPX file.")
             raise
 
         # Parse properties
         try:
             self.parse_root_properties()
         except:
-            logging.exception("Unable to parse properties in GPX file")
+            logging.error("Unable to parse properties in GPX file.")
             raise
 
         # Find precisions
@@ -652,36 +656,36 @@ class Parser():
         try:
             self.parse_root_metadata()
         except:
-            logging.exception("Unable to parse metadata in GPX file")
+            logging.error("Unable to parse metadata in GPX file.")
             raise
 
         # Parse way points
         try:
             self.parse_root_way_points()
         except:
-            logging.exception("Unable to parse way_points in GPX file")
+            logging.error("Unable to parse way_points in GPX file.")
             raise
 
         # Parse routes
         try:
             self.parse_root_routes()
         except:
-            logging.exception("Unable to parse routes in GPX file")
+            logging.error("Unable to parse routes in GPX file.")
             raise
 
         # Parse tracks
         try:
             self.parse_root_tracks()
         except:
-            logging.exception("Unable to parse tracks in GPX file")
+            logging.error("Unable to parse tracks in GPX file.")
             raise
 
         # Parse extensions
         try:
             self.parse_root_extensions()
         except:
-            logging.exception("Unable to parse extensions in GPX file")
+            logging.error("Unable to parse extensions in GPX file.")
             raise
 
-        logging.debug("Parsing complete")
+        logging.debug("Parsing complete!!")
         return self.gpx

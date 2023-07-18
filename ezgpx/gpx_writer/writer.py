@@ -98,7 +98,7 @@ class Writer():
             elif type(number) is float:
                 sub_element_.text = "{:.{}f}".format(number, precision)
             else:
-                logging.error("Invalid number type")
+                logging.error("Invalid number type.")
         return element, sub_element_
     
     def add_subelement_time(self, element: ET.Element, sub_element: str, time: datetime, format: str = DEFAULT_TIME_FORMAT) -> ET.Element:
@@ -120,7 +120,7 @@ class Writer():
             try:
                 sub_element_.text = time.strftime(format)
             except:
-                logging.error("Invalid time format")
+                logging.error("Invalid time format.")
         return element, sub_element_
     
     def add_bounds(self, element: ET.Element, bounds: Bounds) -> ET.Element:
@@ -531,7 +531,7 @@ class Writer():
             self.gpx_string = ET.tostring(self.gpx_root, encoding="unicode")
             # self.gpx_string = ET.tostring(gpx_root, encoding="utf-8")
 
-            logging.info(f"GPX successfully converted to string\n{self.gpx_string}")
+            logging.info(f"GPX successfully converted to string:\n{self.gpx_string}")
 
             return self.gpx_string
 
@@ -539,8 +539,14 @@ class Writer():
         """
         Convert Gpx instance to string and write to file.
         """
+        # Open/create GPX file
+        try:
+            f = open(self.path, "w")
+        except OSError:
+            logging.exception(f"Could not open/read file: {self.path}")
+            raise
         # Write GPX file
-        with open(self.path, "w") as f:
+        with f:
             f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             f.write(self.gpx_string)
 
@@ -552,7 +558,6 @@ class Writer():
             path (str): Path to write the GPX file.
         """
         directory_path = os.path.dirname(os.path.realpath(path))
-        logging.debug(directory_path)
         if not os.path.exists(directory_path):
             logging.error("Provided path does not exist")
             return
