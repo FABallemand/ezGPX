@@ -4,6 +4,9 @@ tests/dev_tests/*
 *.private
 *.unused
 
+# Documentation
+doc/_*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

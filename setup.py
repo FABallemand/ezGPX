@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-data'],
-    # url='https://medium-multiply.readthedocs.io/',
+    url='https://pypi.org/project/ezgpx/',
     download_url='https://github.com/FABallemand/ezGPX',
     project_urls={
             "Bug Tracker": "https://github.com/FABallemand/ezGPX/issues",
