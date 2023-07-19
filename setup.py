@@ -11,7 +11,7 @@ with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ezgpx',
-    version='0.1.1',
+    version='0.1.3',
     description='Easy to use Python GPX library',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -36,7 +36,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent'
     ],
-    packages=find_packages(include=['ezgpx']),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=['gmap', 'folium'],
     setup_requires=['pytest-runner'],
