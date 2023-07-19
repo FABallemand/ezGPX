@@ -3,6 +3,7 @@
 ## 🔎 Description
 Easy to use Python GPX library.
 
+- PyPi: https://pypi.org/project/ezgpx/
 - Documentation: https://ezgpx.readthedocs.io/en/latest/
 - Source code: https://github.com/FABallemand/ezGPX
 - Bug reports: https://github.com/FABallemand/ezGPX/issues
