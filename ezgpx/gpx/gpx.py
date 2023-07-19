@@ -544,7 +544,7 @@ class GPX():
         else:
             plt.show()
 
-    def gmap_plot(
+    def gmplot_plot(
             self,
             base_color: str = "#110000",
             start_stop_colors: Optional[tuple[str, str]] = None,
@@ -556,7 +556,7 @@ class GPX():
             scatter: bool = False,
             plot: bool = True):
         """
-        Plot GPX using gmap.
+        Plot GPX using gmplot.
 
         Args:
             base_color (str, optional): Track_color. Defaults to "#110000".

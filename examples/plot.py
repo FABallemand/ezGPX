@@ -27,8 +27,8 @@ gpx.matplotlib_basemap_plot(base_color="darkorange",
                             speed=(1,0),
                             file_path="img_2")
 
-# Plot with gmap (Google Maps)
-gpx.gmap_plot(base_color="yellow",
+# Plot with gmplot (Google Maps)
+gpx.gmplot_plot(base_color="yellow",
               start_stop_colors=("green", "red"),
               way_points_color="blue",
               zoom=14,

@@ -1,7 +1,7 @@
 Installation
 ============
 
-.. warning:: In order to use advanced plotting features, ezgpx uses gmap and folium.
+.. warning:: In order to use advanced plotting features, ezgpx uses gmplot and folium.
 
 Install ezGPX with :command:`pip`::
 

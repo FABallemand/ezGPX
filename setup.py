@@ -38,7 +38,14 @@ setup(
     ],
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['gmap', 'folium'],
+    install_requires=[
+        'pandas',
+        'matplotlib',
+        'basemap',
+        'gmplot',
+        'folium',
+        'pytest'
+    ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     test_suite='tests'

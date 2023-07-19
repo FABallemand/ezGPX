@@ -55,10 +55,10 @@ Matplotlib Basemap Toolkit
   :width: 500
   :alt: Matplotlib Basemap Toolkit plot
 
-gmap
+gmplot
 ^^^^
 
-.. warning:: Requires :py:mod:`~gmap`.
+.. warning:: Requires :py:mod:`~gmplot`.
 
 ::
 
@@ -67,8 +67,8 @@ gmap
     # Parse GPX file
     gpx = ezgpx.GPX("file.gpx")
 
-    # Plot with gmap (Google Maps)
-    gpx.gmap_plot(base_color="yellow",
+    # Plot with gmplot (Google Maps)
+    gpx.gmplot_plot(base_color="yellow",
                 start_stop_colors=("green", "red"),
                 way_points_color="blue",
                 zoom=13,
@@ -76,9 +76,9 @@ gmap
                 file_path="map_1.html",
                 open=False)
 
-.. image:: ../../img/gmap_plot_1.png
+.. image:: ../../img/gmplot_plot_1.png
   :width: 500
-  :alt: gmap plot
+  :alt: gmplot plot
 
 Folium
 ^^^^^^
