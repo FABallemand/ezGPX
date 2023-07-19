@@ -643,11 +643,11 @@ class GPX():
                        tiles=tiles)
         
         # Plot track points
-        test_gpx_df = self.to_dataframe()
-        test_gpx_df["coordinates"] = list(
-            zip(test_gpx_df.latitude, test_gpx_df.longitude))
-        folium.PolyLine(test_gpx_df["coordinates"],
-                        tooltip=title, color=base_color).add_to(m)
+        gpx_df = self.to_dataframe()
+        gpx_df["coordinates"] = list(
+            zip(gpx_df.latitude, gpx_df.longitude))
+        folium.PolyLine(gpx_df["coordinates"],
+                        tooltip=self.name(), color=base_color).add_to(m)
 
         # Scatter start and stop points with different color
         if start_stop_colors:
