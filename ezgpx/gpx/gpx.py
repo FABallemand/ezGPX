@@ -339,8 +339,9 @@ class GPX():
             plt.text(speed[0], speed[1],
                      f"Speed:\n{self.avg_speed():.2f} km/h", **text_parameters)
 
-    def matplotlib_plot(
+    def matplotlib_axes_plot(
             self,
+            axes,
             projection: Optional[str] = None,
             base_color: str = "#101010",
             elevation_color: bool = False,
@@ -353,23 +354,6 @@ class GPX():
             pace: Optional[tuple[float, float]] = None,
             speed: Optional[tuple[float, float]] = None,
             file_path: Optional[str] = None):
-        """
-        Plot GPX using Matplotlib.
-
-        Args:
-            projection (Optional[str], optional): Projection to use. Defaults to None.
-            base_color (str, optional): Track color. Defaults to "#101010".
-            elevation_color (bool, optional): Plot track with color according to elevation. Defaults to False.
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            title (Optional[str], optional): Title. Defaults to None.
-            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
-            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
-            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
-            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            file_path (Optional[str], optional): Path to save plot. Defaults to None.
-        """
         # Handle projection (select dataframe columns to use and project if needed)
         if projection is None:
             column_x = "longitude"
@@ -382,21 +366,18 @@ class GPX():
         # Create dataframe containing data from the GPX file
         gpx_df = self.to_dataframe()
 
-        # Create figure
-        fig = plt.figure(figsize=(14, 8))
-
         # Scatter all track points
         if elevation_color:
-            plt.scatter(gpx_df[column_x], gpx_df[column_y],
+            axes.scatter(gpx_df[column_x], gpx_df[column_y],
                         c=gpx_df["elevation"])
         else:
-            plt.scatter(gpx_df[column_x], gpx_df[column_y], color=base_color)
+            axes.scatter(gpx_df[column_x], gpx_df[column_y], color=base_color)
 
         # Scatter start and stop points with different color
         if start_stop_colors is not None:
-            plt.scatter(gpx_df[column_x][0],
+            axes.scatter(gpx_df[column_x][0],
                         gpx_df[column_y][0], color=start_stop_colors[0])
-            plt.scatter(gpx_df[column_x][len(gpx_df[column_x])-1],
+            axes.scatter(gpx_df[column_x][len(gpx_df[column_x])-1],
                         gpx_df[column_y][len(gpx_df[column_x])-1], color=start_stop_colors[1])
 
         # Scatter way points with different color
@@ -404,27 +385,26 @@ class GPX():
             for way_point in self.gpx.wpt:
                 if projection:
                     way_point.project(projection)
-                    plt.scatter(way_point._x, way_point._y, color=way_points_color)
+                    axes.scatter(way_point._x, way_point._y, color=way_points_color)
                 else:
-                    plt.scatter(way_point.lon, way_point.lat, color=way_points_color)
+                    axes.scatter(way_point.lon, way_point.lat, color=way_points_color)
 
         # Add title
         if title is not None:
             plt.title(title, size=20)
 
         # Add text elements
-        self._matplotlib_plot_text(fig, duration, distance, ascent, pace, speed)
+        self._matplotlib_plot_text(axes.get_figure(), duration, distance, ascent, pace, speed)
 
         # Add ticks
-        plt.xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
-        plt.yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
+        axes.set_xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
+        axes.set_yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
 
         # Add axis limits (useless??)
         if projection is not None:
-            ax = plt.gca()
-            ax.set_xlim(left=min(gpx_df[column_x]),
+            axes.set_xlim(left=min(gpx_df[column_x]),
                         right=max(gpx_df[column_x]))
-            ax.set_ylim(bottom=min(gpx_df[column_y]),
+            axes.set_ylim(bottom=min(gpx_df[column_y]),
                         top=max(gpx_df[column_y]))
 
         # Save or display plot
@@ -436,6 +416,40 @@ class GPX():
             plt.savefig(file_path)
         else:
             plt.show()
+
+    def matplotlib_plot(
+        self,
+        projection: Optional[str] = None,
+        base_color: str = "#101010",
+        elevation_color: bool = False,
+        start_stop_colors: Optional[tuple[str, str]] = None,
+        way_points_color: Optional[str] = None,
+        title: Optional[str] = None,
+        duration: Optional[tuple[float, float]] = None,
+        distance: Optional[tuple[float, float]] = None,
+        ascent: Optional[tuple[float, float]] = None,
+        pace: Optional[tuple[float, float]] = None,
+        speed: Optional[tuple[float, float]] = None,
+        file_path: Optional[str] = None):
+
+        # Create figure with axes
+        fig = plt.figure(figsize=(14, 8))
+        fig.add_subplot(111)
+
+        # Plot on axes
+        self.matplotlib_axes_plot(fig.axes[0],
+                                  projection,
+                                  base_color, 
+                                  elevation_color,
+                                  start_stop_colors,
+                                  way_points_color,
+                                  title,
+                                  duration,
+                                  distance,
+                                  ascent,
+                                  pace,
+                                  speed,
+                                  file_path)
 
     def matplotlib_basemap_plot(
             self,
