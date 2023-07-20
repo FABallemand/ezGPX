@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 from math import degrees
 
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
@@ -341,7 +342,7 @@ class GPX():
 
     def matplotlib_axes_plot(
             self,
-            axes,
+            axes: Axes,
             projection: Optional[str] = None,
             base_color: str = "#101010",
             elevation_color: bool = False,
@@ -352,8 +353,27 @@ class GPX():
             distance: Optional[tuple[float, float]] = None,
             ascent: Optional[tuple[float, float]] = None,
             pace: Optional[tuple[float, float]] = None,
-            speed: Optional[tuple[float, float]] = None,
-            file_path: Optional[str] = None):
+            speed: Optional[tuple[float, float]] = None):
+        """
+        Plot GPX on Matplotlib axes.
+
+        Args:
+            axes (matplotlib.axes.Axes): Axes to plot on.
+            projection (Optional[str], optional): Projection. Defaults to None.
+            base_color (str, optional): Track color.. Defaults to "#101010".
+            elevation_color (bool, optional): Color track according to elevation. Defaults to False.
+            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
+            way_points_color (str, optional): Way point color. Defaults to False.
+            title (Optional[str], optional): Title. Defaults to None.
+            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
+            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
+            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
+            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
+            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
+        """
+        # Clear axes
+        axes.clear()
+
         # Handle projection (select dataframe columns to use and project if needed)
         if projection is None:
             column_x = "longitude"
@@ -391,7 +411,7 @@ class GPX():
 
         # Add title
         if title is not None:
-            plt.title(title, size=20)
+            axes.set_title(title, size=20)
 
         # Add text elements
         self._matplotlib_plot_text(axes.get_figure(), duration, distance, ascent, pace, speed)
@@ -407,16 +427,6 @@ class GPX():
             axes.set_ylim(bottom=min(gpx_df[column_y]),
                         top=max(gpx_df[column_y]))
 
-        # Save or display plot
-        if file_path is not None:
-            directory_path = os.path.dirname(os.path.realpath(file_path))
-            if not os.path.exists(directory_path):
-                logging.error("Provided path does not exist")
-                return
-            plt.savefig(file_path)
-        else:
-            plt.show()
-
     def matplotlib_plot(
         self,
         projection: Optional[str] = None,
@@ -431,7 +441,23 @@ class GPX():
         pace: Optional[tuple[float, float]] = None,
         speed: Optional[tuple[float, float]] = None,
         file_path: Optional[str] = None):
+        """
+        plot GPX using Matplotlib.
 
+        Args:
+            projection (Optional[str], optional): Projection. Defaults to None.
+            base_color (str, optional): Track color.. Defaults to "#101010".
+            elevation_color (bool, optional): Color track according to elevation. Defaults to False.
+            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
+            way_points_color (str, optional): Way point color. Defaults to False.
+            title (Optional[str], optional): Title. Defaults to None.
+            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
+            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
+            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
+            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
+            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
+            file_path (Optional[str], optional): Path to save plot. Defaults to None.
+        """
         # Create figure with axes
         fig = plt.figure(figsize=(14, 8))
         fig.add_subplot(111)
@@ -448,8 +474,17 @@ class GPX():
                                   distance,
                                   ascent,
                                   pace,
-                                  speed,
-                                  file_path)
+                                  speed)
+        
+        # Save or display plot
+        if file_path is not None:
+            directory_path = os.path.dirname(os.path.realpath(file_path))
+            if not os.path.exists(directory_path):
+                logging.error("Provided path does not exist")
+                return
+            plt.savefig(file_path)
+        else:
+            plt.show()
 
     def matplotlib_basemap_plot(
             self,
