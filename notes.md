@@ -37,3 +37,4 @@
 ## 📝 TO DO LIST !!
 - Garmin extensions
 - Compute length properly
+- Add features, deploy and update GPX_Tool

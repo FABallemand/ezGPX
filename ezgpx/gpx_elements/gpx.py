@@ -351,24 +351,35 @@ class Gpx():
         """
         return 60 / self.avg_moving_speed()
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self, projection: bool = False) -> pd.DataFrame:
         """
         Convert Gpx element to Pandas Dataframe.
 
         Returns:
-            pd.DataFrame: Dataframe containing position data from GPX.
+            Pandas.DataFrame: Dataframe containing position data from GPX.
         """
         route_info = []
-        for track in self.tracks:
-            for segment in track.trkseg:
-                for point in segment.trkpt:
-                    route_info.append({
-                        "latitude": point.lat,
-                        "longitude": point.lon,
-                        "elevation": point.ele,
-                        "x": point._x,
-                        "y": point._y
-                    })
+
+        if projection:
+            for track in self.tracks:
+                for segment in track.trkseg:
+                    for point in segment.trkpt:
+                        route_info.append({
+                            "latitude": point.lat,
+                            "longitude": point.lon,
+                            "elevation": point.ele,
+                            "x": point._x,
+                            "y": point._y
+                        })
+        else:
+            for track in self.tracks:
+                for segment in track.trkseg:
+                    for point in segment.trkpt:
+                        route_info.append({
+                            "latitude": point.lat,
+                            "longitude": point.lon,
+                            "elevation": point.ele
+                        })
         df = pd.DataFrame(route_info)
         return df
     

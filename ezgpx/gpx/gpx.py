@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union
+from typing import Optional, Union, NewType
 import logging
 import webbrowser
 from datetime import datetime
@@ -22,18 +22,31 @@ from ..gpx_parser import Parser
 from ..gpx_writer import Writer
 from ..utils import EARTH_RADIUS
 
+GPX = NewType("GPX", object) # GPX forward declaration for type hint
 
 class GPX():
     """
     High level GPX object.
     """
 
-    def __init__(self, file_path: str):
-        self.file_path: str = file_path
-        self.parser: Parser = Parser(file_path)
-        self.gpx: Gpx = self.parser.gpx
-        self.writer: Writer = Writer(
-            self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
+    def __init__(self, file_path: Optional[str] = None) -> None:
+        if file_path is not None:
+            self.file_path: str = file_path
+            self.parser: Parser = Parser(file_path)
+            self.gpx: Gpx = self.parser.gpx
+            self.writer: Writer = Writer(
+                self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
+        else:
+            pass
+        
+    def file_name(self) -> Union[str, None]:
+        """
+        Return .gpx file name.
+
+        Returns:
+            str: File name.
+        """
+        return os.path.basename(self.file_path)
 
     def name(self) -> str:
         """
@@ -219,33 +232,6 @@ class GPX():
         """
         return self.gpx.avg_moving_pace()
 
-    def to_string(self) -> str:
-        """
-        Convert the GPX object to a string.
-
-        Returns:
-            str: String representingth GPX object.
-        """
-        return self.writer.gpx_to_string(self.gpx)
-
-    def to_gpx(self, path: str):
-        """
-        Write the GPX object to a .gpx file.
-
-        Args:
-            path (str): Path to the .gpx file.
-        """
-        self.writer.write(path)
-
-    def to_dataframe(self) -> pd.DataFrame:
-        """
-        Convert GPX object to Pandas Dataframe.
-
-        Returns:
-            pd.DataFrame: Dataframe containing position data from GPX.
-        """
-        return self.gpx.to_dataframe()
-
     def remove_metadata(self):
         """
         Remove metadata (ie: metadata will not be written when saving the GPX object as a .gpx file).
@@ -291,6 +277,80 @@ class GPX():
         """
         epsilon = degrees(tolerance/EARTH_RADIUS)
         self.gpx.simplify(epsilon)
+
+    def merge(self, gpx: GPX):
+        
+        if self.gpx.tag is None:
+            self.gpx.tag = gpx.gpx.tag
+        if self.gpx.creator is None:
+            self.gpx.creator = gpx.gpx.creator
+        if self.gpx.xmlns is None:
+            self.gpx.xmlns = gpx.gpx.xmlns
+        if self.gpx.version is None:
+            self.gpx.version = gpx.gpx.version
+        if self.gpx.xmlns_xsi is None:
+            self.gpx.xmlns_xsi = gpx.gpx.xmlns_xsi
+        if self.gpx.xsi_schema_location is None:
+            self.gpx.xsi_schema_location = gpx.gpx.xsi_schema_location
+        if self.gpx.xmlns_gpxtpx is None:
+            self.gpx.xmlns_gpxtpx = gpx.gpx.xmlns_gpxtpx
+        if self.gpx.xmlns_gpxx is None:
+            self.gpx.xmlns_gpxx = gpx.gpx.xmlns_gpxx
+        if self.gpx.xmlns_gpxtrk is None:
+            self.gpx.xmlns_gpxtrk = gpx.gpx.xmlns_gpxtrk
+        if self.gpx.xmlns_wptx1 is None:
+            self.gpx.xmlns_wptx1 = gpx.gpx.xmlns_wptx1
+        if self.gpx.metadata is None:
+            self.gpx.metadata = gpx.gpx.metadata
+        if self.gpx.wpt is None:
+            self.gpx.wpt = gpx.gpx.wpt
+        if self.gpx.rte is None:
+            self.gpx.rte = gpx.gpx.rte
+        if self.gpx.tracks is None:
+            self.gpx.tracks = gpx.gpx.tracks
+        if self.gpx.extensions is None:
+            self.gpx.extensions = gpx.gpx.extensions
+
+    def to_string(self) -> str:
+        """
+        Convert the GPX object to a string.
+
+        Returns:
+            str: String representingth GPX object.
+        """
+        return self.writer.gpx_to_string(self.gpx)
+    
+    def to_dataframe(self, projection: bool = False) -> pd.DataFrame:
+        """
+        Convert GPX object to Pandas Dataframe.
+
+        Returns:
+            pd.DataFrame: Dataframe containing position data from GPX.
+        """
+        return self.gpx.to_dataframe(projection)
+
+    def to_gpx(self, path: str):
+        """
+        Write the GPX object to a .gpx file.
+
+        Args:
+            path (str): Path to the .gpx file.
+        """
+        self.writer.write(path)
+
+    def to_csv(
+            self,
+            path: str,
+            sep: str = ",",
+            header: bool = True,
+            index: bool = False):
+        """
+        Write the GPX object track coordinates to a .csv file.
+
+        Args:
+            path (str): Path to the .csv file.
+        """
+        self.to_dataframe().to_csv(path, sep=sep, header=header, index=index)
 
     def _matplotlib_plot_text(
             self,
@@ -384,7 +444,7 @@ class GPX():
             self.gpx.project(projection)  # Project all track points
 
         # Create dataframe containing data from the GPX file
-        gpx_df = self.to_dataframe()
+        gpx_df = self.to_dataframe(projection=True)
 
         # Scatter all track points
         if elevation_color:

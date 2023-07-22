@@ -416,12 +416,14 @@ class Writer():
             schema_location_string += " "
         schema_location_string = schema_location_string[:len(schema_location_string)-1]
         self.gpx_root.set("xsi:schemaLocation", schema_location_string)
+        self.gpx_root.set("xmlns:xsi", self.gpx.xmlns_xsi)
     
     def add_properties_strava(self) -> None:
         """
         Add Strava style properties to the GPX root element.
         """
         self.gpx_root.set("creator", self.gpx.creator)
+        self.gpx_root.set("xmlns:xsi", self.gpx.xmlns_xsi)
         schema_location_string = ""
         for loc in self.gpx.xsi_schema_location:
             schema_location_string += loc

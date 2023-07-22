@@ -260,7 +260,7 @@ class Parser():
             logging.debug(f"{element} has no attribute {sub_element}.")
         return time_
 
-    def parse_bounds(self, bounds, tag: str ="bounds") -> Bounds:
+    def parse_bounds(self, bounds, tag: str ="bounds") -> Union[Bounds, None]:
         """
         Parse boundsType element from GPX file.
 
@@ -281,7 +281,7 @@ class Parser():
 
         return Bounds(tag, minlat, minlon, maxlat, maxlon)
     
-    def parse_copyright(self, copyright, tag: str ="copyright") -> Copyright:
+    def parse_copyright(self, copyright, tag: str ="copyright") -> Union[Copyright, None]:
         """
         Parse copyrightType element from GPX file.
 
@@ -301,7 +301,7 @@ class Parser():
 
         return Copyright(tag, author, year, licence)
     
-    def parse_email(self, email, tag: str ="email") -> Email:
+    def parse_email(self, email, tag: str ="email") -> Union[Email, None]:
         """
         Parse emailType element from GPX file.
 
@@ -320,7 +320,7 @@ class Parser():
 
         return Email(tag, id, domain)
     
-    def parse_extensions(self, extensions, tag: str ="extensions") -> Extensions:
+    def parse_extensions(self, extensions, tag: str ="extensions") -> Union[Extensions, None]:
         """
         Parse extensionsType element from GPX file.
 
@@ -334,25 +334,26 @@ class Parser():
         if extensions is None:
             return None
         
-        display_color = self.find_text(extensions, "topo:DisplayColor")
-        distance = self.find_text(extensions, "topo:Distance")
-        total_elapsed_time = self.find_text(extensions, "topo:TotalElapsedTime")
-        moving_time = self.find_text(extensions, "topo:MovingTime")
-        stopped_time = self.find_text(extensions, "topo:StoppedTime")
-        moving_speed = self.find_text(extensions, "topo:MovingSpeed")
-        max_speed = self.find_text(extensions, "topo:MaxSpeed")
-        max_elevation = self.find_text(extensions, "topo:MaxElevation")
-        min_elevation = self.find_text(extensions, "topo:MinElevation")
-        ascent = self.find_text(extensions, "topo:Ascent")
-        descent = self.find_text(extensions, "topo:Descent")
-        avg_ascent_rate = self.find_text(extensions, "topo:AvgAscentRate")
-        max_ascent_rate = self.find_text(extensions, "topo:MaxAscentRate")
-        avg_descent_rate = self.find_text(extensions, "topo:AvgDescentRate")
-        max_descent_rate = self.find_text(extensions, "topo:MaxDescentRate")
+        # display_color = self.find_text(extensions, "topo:DisplayColor")
+        # distance = self.find_text(extensions, "topo:Distance")
+        # total_elapsed_time = self.find_text(extensions, "topo:TotalElapsedTime")
+        # moving_time = self.find_text(extensions, "topo:MovingTime")
+        # stopped_time = self.find_text(extensions, "topo:StoppedTime")
+        # moving_speed = self.find_text(extensions, "topo:MovingSpeed")
+        # max_speed = self.find_text(extensions, "topo:MaxSpeed")
+        # max_elevation = self.find_text(extensions, "topo:MaxElevation")
+        # min_elevation = self.find_text(extensions, "topo:MinElevation")
+        # ascent = self.find_text(extensions, "topo:Ascent")
+        # descent = self.find_text(extensions, "topo:Descent")
+        # avg_ascent_rate = self.find_text(extensions, "topo:AvgAscentRate")
+        # max_ascent_rate = self.find_text(extensions, "topo:MaxAscentRate")
+        # avg_descent_rate = self.find_text(extensions, "topo:AvgDescentRate")
+        # max_descent_rate = self.find_text(extensions, "topo:MaxDescentRate")
 
-        return Extensions(tag, display_color, distance, total_elapsed_time, moving_time, stopped_time, moving_speed, max_speed, max_elevation, min_elevation, ascent, descent, avg_ascent_rate, max_ascent_rate, avg_descent_rate, max_descent_rate)
-
-    def parse_link(self, link, tag: str ="link") -> Link:
+        # return Extensions(tag, display_color, distance, total_elapsed_time, moving_time, stopped_time, moving_speed, max_speed, max_elevation, min_elevation, ascent, descent, avg_ascent_rate, max_ascent_rate, avg_descent_rate, max_descent_rate)
+        return None
+    
+    def parse_link(self, link, tag: str ="link") -> Union[Link, None]:
         """
         Parse linkType element from GPX file.
 
@@ -372,7 +373,7 @@ class Parser():
 
         return Link(tag, href, text, type)
     
-    def parse_metadata(self, metadata, tag: str = "metadata") -> Metadata:
+    def parse_metadata(self, metadata, tag: str = "metadata") -> Union[Metadata, None]:
         """
         Parse metadataType element from GPX file.
 
@@ -398,7 +399,7 @@ class Parser():
 
         return Metadata(tag, name, desc, author, copyright, link, time, keywords, bounds, extensions)
 
-    def parse_person(self, person, tag: str ="person") -> Person:
+    def parse_person(self, person, tag: str ="person") -> Union[Person, None]:
         """
         Parse personType element from GPX file.
 
@@ -421,7 +422,7 @@ class Parser():
     def parse_point_segment(self, point_segment, tag: str = "ptseg") -> PointSegment:
         pass
 
-    def parse_point(self, point, tag: str = "pt") -> Point:
+    def parse_point(self, point, tag: str = "pt") -> Union[Point, None]:
         """
         Parse ptType element from GPX file.
 
@@ -442,7 +443,7 @@ class Parser():
 
         return Point(tag, lat, lon, ele, time)
     
-    def parse_route(self, route, tag: str = "rte") -> Route:
+    def parse_route(self, route, tag: str = "rte") -> Union[Route, None]:
         """
         Parse rteType element from GPX file.
 
@@ -472,7 +473,7 @@ class Parser():
 
         return Route(tag, name, cmt, desc, src, link, number, type, extensions, rtept)
 
-    def parse_track_segment(self, track_segment, tag: str = "trkseg") -> TrackSegment:
+    def parse_track_segment(self, track_segment, tag: str = "trkseg") -> Union[TrackSegment, None]:
         """
         Parse trksegType element from GPX file.
 
@@ -497,7 +498,7 @@ class Parser():
 
         return TrackSegment(tag, trkpt, extensions)
 
-    def parse_track(self, track, tag: str = "trk") -> Track:
+    def parse_track(self, track, tag: str = "trk") -> Union[Track, None]:
         """
         Parse trkType element from GPX file.
 
@@ -527,7 +528,7 @@ class Parser():
 
         return Track(tag, name, cmt, desc, src, link, number, type, extensions, trkseg)
     
-    def parse_way_point(self, way_point, tag: str = "wpt") -> WayPoint:
+    def parse_way_point(self, way_point, tag: str = "wpt") -> Union[WayPoint, None]:
         """
         Parse wptType element from GPX file.
 
@@ -566,6 +567,13 @@ class Parser():
 
         return WayPoint(tag, lat, lon, ele, time, mag_var, geo_id_height, name, cmt, desc, src, link, sym, type, fix, sat, hdop, vdop, pdop, age_of_gps_data, dgpsid, extensions)
 
+    def find_xmlns_xsi(self) -> Union[str, None]:
+        schema_location = None
+        for elmt in list(self.gpx_root.attrib.keys()):
+            if elmt.endswith("schemaLocation"):
+                schema_location = elmt[1:-15]
+        return schema_location
+
     def parse_root_properties(self):
         """
         Parse XML properties from GPX file.
@@ -573,6 +581,7 @@ class Parser():
         self.gpx.creator = self.gpx_root.attrib["creator"]
         self.gpx.version = self.gpx_root.attrib["version"]
         self.gpx.xmlns = self.gpx_root.tag[1:-4]
+        self.gpx.xmlns_xsi = self.find_xmlns_xsi()
         self.name_space["topo"] = self.gpx.xmlns
         name_spaces = self.gpx_root.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
         self.gpx.xsi_schema_location = [x for x in name_spaces if x != ""]
