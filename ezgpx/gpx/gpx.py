@@ -38,6 +38,9 @@ class GPX():
                 self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
         else:
             pass
+
+    def __str__(self) -> str:
+        return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.writer}"
         
     def file_name(self) -> Union[str, None]:
         """
@@ -290,8 +293,7 @@ class GPX():
             self.gpx.version = gpx.gpx.version
         if self.gpx.xmlns_xsi is None:
             self.gpx.xmlns_xsi = gpx.gpx.xmlns_xsi
-        if self.gpx.xsi_schema_location is None:
-            self.gpx.xsi_schema_location = gpx.gpx.xsi_schema_location
+        self.gpx.xsi_schema_location.extend(gpx.gpx.xsi_schema_location)
         if self.gpx.xmlns_gpxtpx is None:
             self.gpx.xmlns_gpxtpx = gpx.gpx.xmlns_gpxtpx
         if self.gpx.xmlns_gpxx is None:
@@ -302,12 +304,9 @@ class GPX():
             self.gpx.xmlns_wptx1 = gpx.gpx.xmlns_wptx1
         if self.gpx.metadata is None:
             self.gpx.metadata = gpx.gpx.metadata
-        if self.gpx.wpt is None:
-            self.gpx.wpt = gpx.gpx.wpt
-        if self.gpx.rte is None:
-            self.gpx.rte = gpx.gpx.rte
-        if self.gpx.tracks is None:
-            self.gpx.tracks = gpx.gpx.tracks
+        self.gpx.wpt.extend(gpx.gpx.wpt)
+        self.gpx.rte.extend(gpx.gpx.rte)
+        self.gpx.tracks.extend(gpx.gpx.tracks)
         if self.gpx.extensions is None:
             self.gpx.extensions = gpx.gpx.extensions
 

@@ -27,9 +27,9 @@ class Gpx():
             xmlns_gpxtrk: str = None,
             xmlns_wptx1: str = None,
             metadata: Metadata = None,
-            wpt: list[WayPoint] = [],
-            rte: list[Route] = [],
-            tracks: list[Track] = [],
+            wpt: list[WayPoint] = None,
+            rte: list[Route] = None,
+            tracks: list[Track] = None,
             extensions: Extensions = None) -> None:
         """
         Initialize Gpx instance.
@@ -46,10 +46,10 @@ class Gpx():
             xmlns_gpxtrk (str, optional): _description_. Defaults to None.
             xmlns_wptx1 (str, optional): _description_. Defaults to None.
             metadata (Metadata, optional): Metadata. Defaults to None.
-            wpt (list[WayPoint], optional): Way points. Defaults to [].
-            rte (list[Route], optional): Routes. Defaults to [].
-            tracks (list[Track], optional): List of tracks. Defaults to [].
-            extensions (Extensions, optional): Extensions. Defaults to [].
+            wpt (list[WayPoint], optional): Way points. Defaults to None.
+            rte (list[Route], optional): Routes. Defaults to None.
+            tracks (list[Track], optional): List of tracks. Defaults to None.
+            extensions (Extensions, optional): Extensions. Defaults to None.
         """
         self.tag: str = tag
         self.creator: str = creator
@@ -57,16 +57,28 @@ class Gpx():
         self.version: str = version
 
         self.xmlns_xsi: str = xmlns_xsi
-        self.xsi_schema_location: str = xsi_schema_location
+        if xsi_schema_location is None:
+            self.xsi_schema_location: str = []
+        else:
+            self.xsi_schema_location: str = xsi_schema_location
         self.xmlns_gpxtpx: str = xmlns_gpxtpx
         self.xmlns_gpxx: str = xmlns_gpxx
         self.xmlns_gpxtrk: str = xmlns_gpxtrk
         self.xmlns_wptx1: str = xmlns_wptx1
 
         self.metadata: Metadata = metadata
-        self.wpt:list[WayPoint] = wpt
-        self.rte: list[Route] = rte
-        self.tracks: list[Track] = tracks
+        if wpt is None:
+            self.wpt:list[WayPoint] = []
+        else:
+            self.wpt:list[WayPoint] = wpt
+        if rte is None:
+            self.rte: list[Route] = []
+        else:
+            self.rte: list[Route] = rte
+        if tracks is None:
+            self.tracks: list[Track] = []
+        else:
+            self.tracks: list[Track] = tracks
         self.extensions: Extensions = extensions
 
     def name(self) -> str:

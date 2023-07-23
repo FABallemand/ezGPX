@@ -645,7 +645,7 @@ class Parser():
             self.gpx_tree = ET.parse(self.file_path)
             self.gpx_root = self.gpx_tree.getroot()
         except Exception as err:
-            logging.exception(f"Unexpected {err=}, {type(err)=}.\nUnable to parse GPX file.")
+            logging.exception(f"Unexpected {err}, {type(err)}.\nUnable to parse GPX file.")
             raise
 
         # Parse properties

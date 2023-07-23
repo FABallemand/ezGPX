@@ -8,13 +8,16 @@ class PointSegment():
     def __init__(
             self,
             tag: str = "ptseg",
-            points: list[Point] = []) -> None:
+            points: list[Point] = None) -> None:
         """
         Initialize PointSegment instance.
 
         Args:
             tag (str, optional): XML tag. Defaults to "ptseg".
-            points (list[Point], optional): List of points. Defaults to [].
+            points (list[Point], optional): List of points. Defaults to None.
         """
         self.tag: str = tag
-        self.points: list[Point] = points
+        if points is None:
+            self.points: list[Point] = []
+        else:
+            self.points: list[Point] = points
