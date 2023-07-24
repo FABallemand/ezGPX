@@ -8,6 +8,7 @@ from math import degrees
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+import matplotlib.colors
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
@@ -59,6 +60,15 @@ class GPX():
             str: Activity name.
         """
         return self.gpx.name()
+    
+    def set_name(self, new_name: str) -> None:
+        """
+        Set name.
+
+        Args:
+            new_name (str): New name.
+        """
+        self.gpx.set_name(new_name)
 
     def nb_points(self) -> int:
         """
@@ -76,7 +86,7 @@ class GPX():
         Returns:
             WayPoint: First point.
         """
-        return self.gpx.tracks[0].trkseg[0].trkpt[0]
+        return self.gpx.first_point()
 
     def last_point(self) -> WayPoint:
         """
@@ -85,7 +95,7 @@ class GPX():
         Returns:
             WayPoint: Last point.
         """
-        return self.gpx.tracks[-1].trkseg[-1].trkpt[-1]
+        return self.gpx.last_point()
 
     def bounds(self) -> tuple[float, float, float, float]:
         """
@@ -131,6 +141,30 @@ class GPX():
             float: Descent (meters).
         """
         return self.gpx.descent()
+    
+    def compute_points_ascent_rate(self) -> None:
+        """
+        Compute ascent rate at each point.
+        """
+        self.gpx.compute_points_ascent_rate()
+
+    def min_ascent_rate(self) -> float:
+        """
+        Return activity minimum ascent rate.
+
+        Returns:
+            float: Minimum ascent rate.
+        """
+        return self.gpx.min_ascent_rate()
+    
+    def max_ascent_rate(self) -> float:
+        """
+        Return activity maximum ascent rate.
+
+        Returns:
+            float: Maximum ascent rate.
+        """
+        return self.gpx.max_ascent_rate()
 
     def min_elevation(self) -> float:
         """
@@ -212,11 +246,31 @@ class GPX():
             float: Average moving speed (kilometers per hour).
         """
         return self.gpx.avg_moving_speed()
+    
+    def compute_points_speed(self) -> None:
+        """
+        Compute speed (kilometers per hour) at each track point.
+        """
+        self.gpx.compute_points_speed()
+
+    def min_speed(self) -> float:
+        """
+        Return the minimum speed during the activity.
+
+        Returns:
+            float: Minimum speed.
+        """
+        return self.gpx.min_speed()
 
     def max_speed(self) -> float:
-        # TODO
-        pass
+        """
+        Return the maximum speed during the activity.
 
+        Returns:
+            float: Maximum speed.
+        """
+        return self.gpx.max_speed()
+    
     def avg_pace(self) -> float:
         """
         Return average pace (minutes per kilometer) during the activity.
@@ -234,6 +288,36 @@ class GPX():
             float: Average moving pace (minutes per kilometer).
         """
         return self.gpx.avg_moving_pace()
+    
+    def compute_points_pace(self) -> None:
+        """
+        Compute pace at each track point.
+        """
+        self.gpx.compute_points_pace()
+
+    def min_pace(self) -> float:
+        """
+        Return the minimum pace during the activity.
+
+        Returns:
+            float: Minimum pace.
+        """
+        return self.gpx.min_pace()
+
+    def max_pace(self) -> float:
+        """
+        Return the maximum pace during the activity.
+
+        Returns:
+            float: Maximum pace.
+        """
+        return self.gpx.max_pace()
+    
+    def compute_points_ascent_speed(self) -> None:
+        """
+        Compute ascent speed (kilometers per hour) at each track point.
+        """
+        self.gpx.compute_points_ascent_speed()
 
     def remove_metadata(self):
         """
@@ -319,14 +403,29 @@ class GPX():
         """
         return self.writer.gpx_to_string(self.gpx)
     
-    def to_dataframe(self, projection: bool = False) -> pd.DataFrame:
+    def to_dataframe(
+            self,
+            projection: bool = False,
+            elevation: bool = True,
+            speed: bool = False,
+            pace: bool = False,
+            ascent_rate: bool = False,
+            ascent_speed: bool = False) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
 
+        Args:
+            projection (bool, optional): Toggle projection. Defaults to False.
+            elevation (bool, optional): Toggle elevation. Defaults to True.
+            speed (bool, optional): Toggle speed. Defaults to False.
+            pace (bool, optional): Toggle pace. Defaults to False.
+            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
+            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
+
         Returns:
-            pd.DataFrame: Dataframe containing position data from GPX.
+            pd.DataFrame: Dataframe containing data from GPX.
         """
-        return self.gpx.to_dataframe(projection)
+        return self.gpx.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed)
 
     def to_gpx(self, path: str):
         """
@@ -339,7 +438,13 @@ class GPX():
 
     def to_csv(
             self,
-            path: str,
+            projection: bool = False,
+            elevation: bool = True,
+            speed: bool = False,
+            pace: bool = False,
+            ascent_rate: bool = False,
+            ascent_speed: bool = False,
+            path: str = "unnamed.csv",
             sep: str = ",",
             header: bool = True,
             index: bool = False):
@@ -347,9 +452,18 @@ class GPX():
         Write the GPX object track coordinates to a .csv file.
 
         Args:
-            path (str): Path to the .csv file.
+            projection (bool, optional): Toogle projected coordinates. Defaults to False.
+            elevation (bool, optional): Toggle elevation. Defaults to True.
+            speed (bool, optional): Toggle speed. Defaults to False.
+            pace (bool, optional): Toggle pace. Defaults to False.
+            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
+            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
+            path (str, optional): Path. Defaults to "unnamed.csv".
+            sep (str, optional): Separator. Defaults to ",".
+            header (bool, optional): Toggle header. Defaults to True.
+            index (bool, optional): Toggle index. Defaults to False.
         """
-        self.to_dataframe().to_csv(path, sep=sep, header=header, index=index)
+        self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, header=header, index=index)
 
     def _matplotlib_plot_text(
             self,
@@ -403,8 +517,8 @@ class GPX():
             self,
             axes: Axes,
             projection: Optional[str] = None,
-            base_color: str = "#101010",
-            elevation_color: bool = False,
+            color: str = "#101010",
+            colorbar: bool = False,
             start_stop_colors: Optional[tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             title: Optional[str] = None,
@@ -419,7 +533,8 @@ class GPX():
         Args:
             axes (matplotlib.axes.Axes): Axes to plot on.
             projection (Optional[str], optional): Projection. Defaults to None.
-            base_color (str, optional): Track color.. Defaults to "#101010".
+            color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
+            colorbar (bool, optional): Colorbar toggle. Defaults to False.
             elevation_color (bool, optional): Color track according to elevation. Defaults to False.
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
@@ -435,22 +550,48 @@ class GPX():
 
         # Handle projection (select dataframe columns to use and project if needed)
         if projection is None:
-            column_x = "longitude"
-            column_y = "latitude"
+            column_x = "lon"
+            column_y = "lat"
         else:
             column_x = "x"
             column_y = "y"
             self.gpx.project(projection)  # Project all track points
 
         # Create dataframe containing data from the GPX file
-        gpx_df = self.to_dataframe(projection=True)
+        gpx_df = self.to_dataframe(projection=True, elevation=True, speed=True, pace=True, ascent_rate=True, ascent_speed=True)
 
         # Scatter all track points
-        if elevation_color:
-            axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["elevation"])
+        if color == "elevation":
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","blue"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=gpx_df["ele"], cmap=cmap)
+        elif color == "speed":
+            # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "deepskyblue", "blue", "mediumblue", "midnightblue"])
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "mediumblue", "midnightblue"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=gpx_df["speed"], cmap=cmap)
+        elif color == "pace":
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "midnightblue"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=gpx_df["pace"], cmap=cmap)
+        elif color == "vertical_drop":
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["yellow", "orange", "red", "purple", "black"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=abs(gpx_df["ascent_rate"]), cmap=cmap)
+        elif color == "ascent_rate":
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["darkgreen", "green", "yellow", "red", "black"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=gpx_df["ascent_rate"], cmap=cmap)
+        elif color == "ascent_speed":
+            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["deeppink", "lightpink", "lightcoral", "red", "darkred"])
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
+                        c=gpx_df["ascent_speed"], cmap=cmap)
         else:
-            axes.scatter(gpx_df[column_x], gpx_df[column_y], color=base_color)
+            im = axes.scatter(gpx_df[column_x], gpx_df[column_y], color=color)
+        
+        # Colorbar
+        if colorbar:
+            plt.colorbar(im)
 
         # Scatter start and stop points with different color
         if start_stop_colors is not None:
@@ -489,8 +630,8 @@ class GPX():
     def matplotlib_plot(
         self,
         projection: Optional[str] = None,
-        base_color: str = "#101010",
-        elevation_color: bool = False,
+        color: str = "#101010",
+        colorbar: bool = False,
         start_stop_colors: Optional[tuple[str, str]] = None,
         way_points_color: Optional[str] = None,
         title: Optional[str] = None,
@@ -505,8 +646,8 @@ class GPX():
 
         Args:
             projection (Optional[str], optional): Projection. Defaults to None.
-            base_color (str, optional): Track color.. Defaults to "#101010".
-            elevation_color (bool, optional): Color track according to elevation. Defaults to False.
+            color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
+            colorbar (bool, optional): Colorbar toggle. Defaults to False.
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
             title (Optional[str], optional): Title. Defaults to None.
@@ -524,8 +665,8 @@ class GPX():
         # Plot on axes
         self.matplotlib_axes_plot(fig.axes[0],
                                   projection,
-                                  base_color, 
-                                  elevation_color,
+                                  color,
+                                  colorbar,
                                   start_stop_colors,
                                   way_points_color,
                                   title,
@@ -549,7 +690,7 @@ class GPX():
             self,
             projection: str = "cyl",
             service: str = "World_Shaded_Relief",
-            base_color: str = "#101010",
+            color: str = "#101010",
             start_stop_colors: Optional[tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             title: Optional[str] = None,
@@ -565,7 +706,7 @@ class GPX():
         Args:
             projection (str, optional): Projection. Currently supported projections: cyl. Defaults to "cyl".
             service (str, optional): Service used to fetch map background. Currently supported services: "World_Shaded_Relief". Defaults to "World_Shaded_Relief".
-            base_color (str, optional): Track color. Defaults to "#101010".
+            color (str, optional): Track color. Defaults to "#101010".
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
             title (Optional[str], optional): Title. Defaults to None.
@@ -616,12 +757,12 @@ class GPX():
         gpx_df = self.to_dataframe()
 
         # Project track points
-        x, y = map(gpx_df["longitude"], gpx_df["latitude"])
+        x, y = map(gpx_df["lon"], gpx_df["lat"])
         
         # Plot track points on the map
         x = x.tolist()
         y = y.tolist()
-        map.plot(x, y, marker=None, color=base_color)
+        map.plot(x, y, marker=None, color=color)
 
         # Scatter start and stop points with different color
         if start_stop_colors:
@@ -654,7 +795,7 @@ class GPX():
 
     def gmplot_plot(
             self,
-            base_color: str = "#110000",
+            color: str = "#110000",
             start_stop_colors: Optional[tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             zoom: float = 10.0,
@@ -667,7 +808,7 @@ class GPX():
         Plot GPX using gmplot.
 
         Args:
-            base_color (str, optional): Track_color. Defaults to "#110000".
+            color (str, optional): Track_color. Defaults to "#110000".
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
             zoom (float, optional): Zoom. Defaults to 10.0.
@@ -686,11 +827,11 @@ class GPX():
 
         # Scatter track points
         if scatter:
-            map.scatter(gpx_df["latitude"], gpx_df["longitude"],
-                        base_color, size=5, marker=False)
+            map.scatter(gpx_df["lat"], gpx_df["lon"],
+                        color, size=5, marker=False)
         if plot:
-            map.plot(gpx_df["latitude"], gpx_df["longitude"],
-                     base_color, edge_width=2.5)
+            map.plot(gpx_df["lat"], gpx_df["lon"],
+                     color, edge_width=2.5)
         
         # Scatter start and stop points with different color
         if start_stop_colors:
@@ -721,7 +862,7 @@ class GPX():
     def folium_plot(
             self,
             tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"
-            base_color: str = "#110000",
+            color: str = "#110000",
             start_stop_colors: Optional[tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             minimap: bool = False,
@@ -755,7 +896,7 @@ class GPX():
         gpx_df["coordinates"] = list(
             zip(gpx_df.latitude, gpx_df.longitude))
         folium.PolyLine(gpx_df["coordinates"],
-                        tooltip=self.name(), color=base_color).add_to(m)
+                        tooltip=self.name(), color=color).add_to(m)
 
         # Scatter start and stop points with different color
         if start_stop_colors:

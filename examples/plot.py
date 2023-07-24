@@ -4,7 +4,7 @@ import ezgpx
 gpx = ezgpx.GPX("file.gpx")
 
 # Plot with Matplotlib
-gpx.matplotlib_plot(elevation_color=True,
+gpx.matplotlib_plot(color="elevation",
                     start_stop_colors=("green", "red"),
                     way_points_color="blue",
                     title=gpx.name(),
@@ -16,7 +16,7 @@ gpx.matplotlib_plot(elevation_color=True,
                     file_path="img_1")
 
 # Plot with Matplotlib Basemap Toolkit
-gpx.matplotlib_basemap_plot(base_color="darkorange",
+gpx.matplotlib_basemap_plot(color="darkorange",
                             start_stop_colors=("darkgreen", "darkred"),
                             way_points_color="darkblue",
                             title=gpx.name(),
@@ -28,17 +28,17 @@ gpx.matplotlib_basemap_plot(base_color="darkorange",
                             file_path="img_2")
 
 # Plot with gmplot (Google Maps)
-gpx.gmplot_plot(base_color="yellow",
-              start_stop_colors=("green", "red"),
-              way_points_color="blue",
-              zoom=14,
-              title=gpx.name(),
-              file_path="map_1.html",
-              open=False)
+gpx.gmplot_plot(color="yellow",
+                start_stop_colors=("green", "red"),
+                way_points_color="blue",
+                zoom=14,
+                title=gpx.name(),
+                file_path="map_1.html",
+                open=False)
 
 # Plot with Folium
 gpx.folium_plot(tiles="OpenStreetMap",
-                base_color="orange",
+                color="orange",
                 start_stop_colors=("green", "red"),
                 way_points_color="blue",
                 minimap=True,

@@ -36,5 +36,5 @@
 
 ## 📝 TO DO LIST !!
 - Garmin extensions
-- Compute length properly
+- Compute length properly (improve haversine distance precision, 2D, 3D)
 - Add features, deploy and update GPX_Tool

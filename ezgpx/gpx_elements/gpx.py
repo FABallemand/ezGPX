@@ -89,6 +89,15 @@ class Gpx():
             str: Activity name.
         """
         return self.tracks[0].name
+    
+    def set_name(self, new_name: str) -> None:
+        """
+        Set name.
+
+        Args:
+            new_name (str): New name.
+        """
+        self.tracks[0].name = new_name
 
     def nb_points(self) -> int:
         """
@@ -102,6 +111,24 @@ class Gpx():
             for track_segment in track.trkseg:
                 nb_pts += len(track_segment.trkpt)
         return nb_pts
+    
+    def first_point(self) -> WayPoint:
+        """
+        Return GPX first point.
+
+        Returns:
+            WayPoint: First point.
+        """
+        return self.tracks[0].trkseg[0].trkpt[0]
+
+    def last_point(self) -> WayPoint:
+        """
+        Return GPX last point.
+
+        Returns:
+            WayPoint: Last point.
+        """
+        return self.tracks[-1].trkseg[-1].trkpt[-1]
     
     def bounds(self) -> tuple[float, float, float, float]:
         """
@@ -190,6 +217,60 @@ class Gpx():
                         descent += previous_elevation - track_point.ele
                     previous_elevation = track_point.ele
         return descent
+    
+    def compute_points_ascent_rate(self) -> None:
+        """
+        Compute ascent rate at each point.
+        """
+        previous_point = self.first_point()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    distance = haversine_distance(previous_point, track_point)
+                    ascent = track_point.ele - previous_point.ele
+                    try:
+                        track_point.ascent_rate = (ascent * 100) / distance
+                        logging.info(f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
+                    except:
+                        track_point.ascent_rate = 0.0
+                    previous_point = track_point
+
+    def min_ascent_rate(self) -> float:
+        """
+        Return activity minimum ascent rate.
+
+        Returns:
+            float: Minimum ascent rate.
+        """
+        min_ascent_rate = 100.0
+        self.compute_points_ascent_rate()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.ascent_rate < min_ascent_rate:
+                        min_ascent_rate = track_point.ascent_rate
+
+        return min_ascent_rate 
+
+    def max_ascent_rate(self) -> float:
+        """
+        Return activity maximum ascent rate.
+
+        Returns:
+            float: Maximum ascent rate.
+        """
+        max_ascent_rate = -1.0
+        self.compute_points_ascent_rate()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.ascent_rate > max_ascent_rate:
+                        max_ascent_rate = track_point.ascent_rate
+
+        return max_ascent_rate                
     
     def min_elevation(self) -> float:
         """
@@ -345,6 +426,59 @@ class Gpx():
 
         return distance / moving_time
     
+    def compute_points_speed(self) -> None:
+        """
+        Compute speed (kilometers per hour) at each track point.
+        """
+        previous_point = self.first_point()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    distance = haversine_distance(previous_point, track_point) / 1000 # Convert to kilometers
+                    time = (track_point.time - previous_point.time).total_seconds() / 3600 # Convert to hours
+                    try:
+                        track_point.speed = distance / time
+                    except:
+                        track_point.speed = 0.0
+                    previous_point = track_point
+
+    def min_speed(self) -> float:
+        """
+        Return the minimum speed during the activity.
+
+        Returns:
+            float: Minimum speed.
+        """
+        min_speed = 1000.0
+        self.compute_points_speed()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.speed < min_speed:
+                        min_speed = track_point.speed
+
+        return min_speed
+
+    def max_speed(self) -> float:
+        """
+        Return the maximum speed during the activity.
+
+        Returns:
+            float: Maximum speed.
+        """
+        max_speed = -1.0
+        self.compute_points_speed()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.speed > max_speed:
+                        max_speed = track_point.speed
+
+        return max_speed
+    
     def avg_pace(self) -> float:
         """
         Compute the average pace (minute per kilometer) during the activity.
@@ -352,7 +486,7 @@ class Gpx():
         Returns:
             float: Average pace (minute per kilometer).
         """
-        return 60 / self.avg_speed()
+        return 60.0 / self.avg_speed()
     
     def avg_moving_pace(self) -> float:
         """
@@ -361,37 +495,131 @@ class Gpx():
         Returns:
             float: Average moving pace (minute per kilometer).
         """
-        return 60 / self.avg_moving_speed()
-
-    def to_dataframe(self, projection: bool = False) -> pd.DataFrame:
+        return 60.0 / self.avg_moving_speed()
+    
+    def compute_points_pace(self) -> None:
         """
-        Convert Gpx element to Pandas Dataframe.
+        Compute pace at each track point.
+        """
+        self.compute_points_speed()
+
+        for track in self.tracks:
+            for segment in track.trkseg:
+                for point in segment.trkpt:
+                    try:
+                        point.pace = 60.0 / point.speed
+                    except:
+                        point.pace = self.avg_moving_pace() # Fill with average moving space (first point)
+
+    def min_pace(self) -> float:
+        """
+        Return the minimum pace during the activity.
 
         Returns:
-            Pandas.DataFrame: Dataframe containing position data from GPX.
+            float: Minimum pace.
         """
-        route_info = []
+        min_pace = 1000.0
+        self.compute_points_pace()
 
-        if projection:
-            for track in self.tracks:
-                for segment in track.trkseg:
-                    for point in segment.trkpt:
-                        route_info.append({
-                            "latitude": point.lat,
-                            "longitude": point.lon,
-                            "elevation": point.ele,
-                            "x": point._x,
-                            "y": point._y
-                        })
-        else:
-            for track in self.tracks:
-                for segment in track.trkseg:
-                    for point in segment.trkpt:
-                        route_info.append({
-                            "latitude": point.lat,
-                            "longitude": point.lon,
-                            "elevation": point.ele
-                        })
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.pace < min_pace:
+                        min_pace = track_point.pace
+
+        return min_pace
+
+    def max_pace(self) -> float:
+        """
+        Return the maximum pace during the activity.
+
+        Returns:
+            float: Maximum pace.
+        """
+        max_pace = -1.0
+        self.compute_points_pace()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.pace > max_pace:
+                        max_pace = track_point.pace
+
+        return max_pace
+    
+    def compute_points_ascent_speed(self) -> None:
+        """
+        Compute ascent speed (kilometers per hour) at each track point.
+        """
+        previous_point = self.first_point()
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    ascent = (track_point.ele - previous_point.ele) / 1000 # Convert to kilometers
+                    time = (track_point.time - previous_point.time).total_seconds() / 3600 # Convert to hours
+                    try:
+                        track_point.ascent_speed = ascent / time
+                    except:
+                        track_point.ascent_speed = 0.0
+                    previous_point = track_point
+
+    def to_dataframe(
+            self,
+            projection: bool = False,
+            elevation: bool = True,
+            speed: bool = False,
+            pace: bool = False,
+            ascent_rate: bool = False,
+            ascent_speed: bool = False) -> pd.DataFrame:
+        """
+        Convert GPX object to Pandas Dataframe.
+
+        Args:
+            projection (bool, optional): Toggle projection. Defaults to False.
+            elevation (bool, optional): Toggle elevation. Defaults to True.
+            speed (bool, optional): Toggle speed. Defaults to False.
+            pace (bool, optional): Toggle pace. Defaults to False.
+            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
+            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
+
+        Returns:
+            pd.DataFrame: Dataframe containing data from GPX.
+        """
+        test_point = self.first_point()
+        if projection and test_point._x is None:
+            logging.warning(f"Converting GPX to dataframe with missing projection data.")
+        if speed and test_point.speed is None:
+            self.compute_points_speed()
+        if pace and test_point.pace is None:
+            self.compute_points_pace()
+        if ascent_rate and test_point.ascent_rate is None:
+            self.compute_points_ascent_rate()
+        if ascent_speed and test_point.ascent_speed is None:
+            self.compute_points_ascent_speed()
+
+        route_info = []
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    track_point_dict = {
+                        "lat": track_point.lat,
+                        "lon": track_point.lon
+                    }
+                    if elevation:
+                        track_point_dict["ele"] = track_point.ele
+                    if projection:
+                        track_point_dict["x"] = track_point._x
+                        track_point_dict["y"] = track_point._y
+                    if speed:
+                        track_point_dict["speed"] = track_point.speed
+                    if pace:
+                        track_point_dict["pace"] = track_point.pace
+                    if ascent_rate:
+                        track_point_dict["ascent_rate"] = track_point.ascent_rate
+                    if ascent_speed:
+                        track_point_dict["ascent_speed"] = track_point.ascent_speed
+                    route_info.append(track_point_dict)
         df = pd.DataFrame(route_info)
         return df
     

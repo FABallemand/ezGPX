@@ -82,6 +82,13 @@ class WayPoint():
         self.dgpsid: int = dgpsid
         self.extensions: Extensions = extensions
 
+        # Statistics (for map plotting: https://support.strava.com/hc/en-us/articles/360049869011-Personalized-Stat-Maps)
+        self.speed: float = None
+        self.pace: float = None
+        self.ascent_rate: float = None
+        self.ascent_speed: float = None
+
+        # Projection
         self._x: int = None
         self._y: int = None
 
