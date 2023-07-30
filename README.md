@@ -26,7 +26,7 @@ gpx = ezgpx.GPX("file.gpx")
 gpx.simplify()
 
 # Plot with Matplotlib
-gpx.matplotlib_plot(elevation_color=True,
+gpx.matplotlib_plot(color="elevation",
                     start_stop_colors=("green", "red"),
                     way_points_color="blue",
                     title=gpx.name(),

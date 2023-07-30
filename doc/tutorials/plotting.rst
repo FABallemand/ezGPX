@@ -56,7 +56,7 @@ Matplotlib Basemap Toolkit
   :alt: Matplotlib Basemap Toolkit plot
 
 gmplot
-^^^^
+^^^^^^
 
 .. warning:: Requires :py:mod:`~gmplot`.
 
@@ -76,7 +76,7 @@ gmplot
                 file_path="map_1.html",
                 open=False)
 
-.. image:: ../../img/gmplot_plot_1.png
+.. image:: ../../img/gmap_plot_1.png
   :width: 500
   :alt: gmplot plot
 
