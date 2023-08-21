@@ -3,7 +3,6 @@ from typing import Optional, Union
 import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
-import xmlschema
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
@@ -45,37 +44,6 @@ class Parser():
 
         if self.file_path is not None:
             self.parse()
-
-    def check_schema(self, extensions_schema: bool = False) -> bool:
-        """
-        Check XML schema.
-
-        Args:
-            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
-
-        Returns:
-            bool: True if the file follows XML schemas.
-        """
-        if extensions_schema:
-            gpx_schemas = [s for s in self.gpx.xsi_schema_location if s.endswith(".xsd")]
-            for gpx_schema in gpx_schemas:
-                print(f"schema = {gpx_schema}")
-                schema = xmlschema.XMLSchema(gpx_schema)
-                if not schema.is_valid(self.file_path):
-                    logging.error(f"File does not follow {gpx_schema}")
-                    return False
-        else:
-            schema = None
-            if self.gpx.version == "1.1":
-                schema = xmlschema.XMLSchema("schemas/gpx_1_1/gpx.xsd")
-            elif self.gpx.version == "1.0":
-                schema = xmlschema.XMLSchema("schemas/gpx_1_0/gpx.xsd")
-
-            if schema is not None:
-                return schema.is_valid(self.file_path)
-            else:
-                logging.error("Unable to check XML schema")
-                return True
 
     def find_precision(self, number: str) -> int:
         """
@@ -691,7 +659,7 @@ class Parser():
 
         # Check XML schema
         if check_schema:
-            if not self.check_schema(extensions_schema):
+            if not self.gpx.check_schema(self.file_path, extensions_schema):
                 logging.error("Invalid GPX file (does not follow XML schema).")
                 raise
 

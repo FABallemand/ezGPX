@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
-from ..gpx_parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+from ..gpx_parser import Parser, DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 
 class Writer():
     """
@@ -552,12 +552,13 @@ class Writer():
             f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             f.write(self.gpx_string)
 
-    def write(self, path: str):
+    def write(self, path: str, check_schema: bool = False):
         """
         Handle writing.
 
         Args:
             path (str): Path to write the GPX file.
+            check_schema (bool, optional): Toggle schema verification after writting. Defaults to False.
         """
         directory_path = os.path.dirname(os.path.realpath(path))
         if not os.path.exists(directory_path):
@@ -567,4 +568,10 @@ class Writer():
         self.path = path
         self.gpx_to_string()
         self.write_gpx()
+
+        if check_schema:
+            verification_gpx = Parser(path)
+            if not verification_gpx.check_schema(extensions_schema=False):
+                logging.error("Invalid written file (does not follow schema)")
+                return
 

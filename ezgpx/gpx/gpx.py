@@ -42,6 +42,18 @@ class GPX():
 
     def __str__(self) -> str:
         return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.writer}"
+    
+    def check_schema(self, extensions_schema: bool = False) -> bool:
+        """
+        Check XML schema.
+
+        Args:
+            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+
+        Returns:
+            bool: True if the file follows XML schemas.
+        """
+        return self.gpx.check_schema(self.file_path, extensions_schema)
         
     def file_name(self) -> Union[str, None]:
         """

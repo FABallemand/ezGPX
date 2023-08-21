@@ -1,4 +1,5 @@
 import logging
+import xmlschema
 import pandas as pd
 from datetime import datetime, timezone
 
@@ -80,6 +81,38 @@ class Gpx():
         else:
             self.tracks: list[Track] = tracks
         self.extensions: Extensions = extensions
+
+    def check_schema(self, file_path: str, extensions_schema: bool = False) -> bool:
+        """
+        Check XML schema.
+
+        Args:
+            file_path (str): File path.
+            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+
+        Returns:
+            bool: True if the file follows XML schemas.
+        """
+        if extensions_schema:
+            gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
+            for gpx_schema in gpx_schemas:
+                print(f"schema = {gpx_schema}")
+                schema = xmlschema.XMLSchema(gpx_schema)
+                if not schema.is_valid(file_path):
+                    logging.error(f"File does not follow {gpx_schema}")
+                    return False
+        else:
+            schema = None
+            if self.version == "1.1":
+                schema = xmlschema.XMLSchema("schemas/gpx_1_1/gpx.xsd")
+            elif self.version == "1.0":
+                schema = xmlschema.XMLSchema("schemas/gpx_1_0/gpx.xsd")
+
+            if schema is not None:
+                return schema.is_valid(file_path)
+            else:
+                logging.error("Unable to check XML schema")
+                return True
 
     def name(self) -> str:
         """
