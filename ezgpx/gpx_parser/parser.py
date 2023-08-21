@@ -1,7 +1,9 @@
+import os
 from typing import Optional, Union
 import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
+import xmlschema
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
@@ -13,14 +15,16 @@ class Parser():
     GPX file parser.
     """
 
-    def __init__(self, file_path: str = "") -> None:
+    def __init__(self, file_path: Optional[str] = None) -> None:
         """
         initialize Parser instance.
 
         Args:
-            file_path (str, optional): Path to the file to parse. Defaults to "".
+            file_path (str, optional): Path to the file to parse. Defaults to None.
         """
         self.file_path: str = file_path
+        if not os.path.exists(self.file_path):
+            logging.warning("File path does not exist")
 
         self.gpx_tree: ET.ElementTree = None
         self.gpx_root: ET.Element = None
@@ -39,11 +43,39 @@ class Parser():
 
         self.gpx: Gpx = Gpx()
 
-        if self.file_path != "":
+        if self.file_path is not None:
             self.parse()
 
-    def check_schema(self):
-        pass
+    def check_schema(self, extensions_schema: bool = False) -> bool:
+        """
+        Check XML schema.
+
+        Args:
+            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+
+        Returns:
+            bool: True if the file follows XML schemas.
+        """
+        if extensions_schema:
+            gpx_schemas = [s for s in self.gpx.xsi_schema_location if s.endswith(".xsd")]
+            for gpx_schema in gpx_schemas:
+                print(f"schema = {gpx_schema}")
+                schema = xmlschema.XMLSchema(gpx_schema)
+                if not schema.is_valid(self.file_path):
+                    logging.error(f"File does not follow {gpx_schema}")
+                    return False
+        else:
+            schema = None
+            if self.gpx.version == "1.1":
+                schema = xmlschema.XMLSchema("schemas/gpx_1_1/gpx.xsd")
+            elif self.gpx.version == "1.0":
+                schema = xmlschema.XMLSchema("schemas/gpx_1_0/gpx.xsd")
+
+            if schema is not None:
+                return schema.is_valid(self.file_path)
+            else:
+                logging.error("Unable to check XML schema")
+                return True
 
     def find_precision(self, number: str) -> int:
         """
@@ -623,18 +655,20 @@ class Parser():
         extensions = self.gpx_root.find("topo:extensions", self.name_space)
         self.gpx.extensions = self.parse_extensions(extensions)
 
-    def parse(self, file_path: str = "") -> Gpx:
+    def parse(self, file_path: Optional[str] = None, check_schema: bool = True, extensions_schema: bool = False) -> Gpx:
         """
         Parse GPX file.
 
         Args:
-            file_path (str, optional): Path to the file to parse. Defaults to "".
+            file_path (str, optional): Path to the file to parse. Defaults to None.
+            check_schema (bool, optional): Toogle schema verificaton. Defaults to True.
+            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
 
         Returns:
             Gpx: Gpx instance., self.name_space).text
         """
         # File
-        if file_path != "":
+        if file_path is not None and os.path.exists(file_path):
             self.file_path = file_path
         elif self.file_path == "":
             logging.error("No GPX file to parse.")
@@ -654,6 +688,12 @@ class Parser():
         except:
             logging.error("Unable to parse properties in GPX file.")
             raise
+
+        # Check XML schema
+        if check_schema:
+            if not self.check_schema(extensions_schema):
+                logging.error("Invalid GPX file (does not follow XML schema).")
+                raise
 
         # Find precisions
         self.find_precisions()

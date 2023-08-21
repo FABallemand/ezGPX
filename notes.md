@@ -7,6 +7,8 @@
 - Real Python: [A roadmap to XML Parsers in Python](https://realpython.com/python-xml-parser/#learn-about-xml-parsers-in-pythons-standard-library)
 - [xml.etree.ElementTree — The ElementTree XML API](https://docs.python.org/3/library/xml.etree.elementtree.html)
 - GeeksForGeeks: [Reading and Writing XML Files in Python](https://www.geeksforgeeks.org/reading-and-writing-xml-files-in-python/)
+- [Validating XML with Python: A Step-by-Step Guide](https://medium.com/@murungaephantus/validating-xml-with-python-a-step-by-step-guide-53d4a4b9716b) (Does not work...)
+- [xmlschema](https://xmlschema.readthedocs.io/en/latest/usage.html)
 
 #### 🌏 Map Plotting
 
@@ -37,4 +39,3 @@
 ## 📝 TO DO LIST !!
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)
-- Add features, deploy and update GPX_Tool
