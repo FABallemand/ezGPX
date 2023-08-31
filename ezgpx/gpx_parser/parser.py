@@ -14,16 +14,18 @@ class Parser():
     GPX file parser.
     """
 
-    def __init__(self, file_path: Optional[str] = None) -> None:
+    def __init__(self, file_path: Optional[str] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> None:
         """
-        initialize Parser instance.
+        Initialize Parser instance.
 
         Args:
             file_path (str, optional): Path to the file to parse. Defaults to None.
+            check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
         """
         self.file_path: str = file_path
-        if not os.path.exists(self.file_path):
-            logging.warning("File path does not exist")
+        self.check_schemas: bool = check_schemas
+        self.extensions_schemass: bool = extensions_schemas
 
         self.gpx_tree: ET.ElementTree = None
         self.gpx_root: ET.Element = None
@@ -42,8 +44,10 @@ class Parser():
 
         self.gpx: Gpx = Gpx()
 
-        if self.file_path is not None:
+        if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
+        else:
+            logging.warning("File path does not exist")
 
     def find_precision(self, number: str) -> int:
         """
@@ -623,25 +627,13 @@ class Parser():
         extensions = self.gpx_root.find("topo:extensions", self.name_space)
         self.gpx.extensions = self.parse_extensions(extensions)
 
-    def parse(self, file_path: Optional[str] = None, check_schema: bool = True, extensions_schema: bool = False) -> Gpx:
+    def parse(self) -> Gpx:
         """
         Parse GPX file.
-
-        Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
-            check_schema (bool, optional): Toogle schema verificaton. Defaults to True.
-            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
 
         Returns:
             Gpx: Gpx instance., self.name_space).text
         """
-        # File
-        if file_path is not None and os.path.exists(file_path):
-            self.file_path = file_path
-        elif self.file_path == "":
-            logging.error("No GPX file to parse.")
-            return
-
         # Parse GPX file
         try:
             self.gpx_tree = ET.parse(self.file_path)
@@ -658,8 +650,8 @@ class Parser():
             raise
 
         # Check XML schema
-        if check_schema:
-            if not self.gpx.check_schema(self.file_path, extensions_schema):
+        if self.check_schemas:
+            if not self.gpx.check_schemas(self.file_path, self.extensions_schemas):
                 logging.error("Invalid GPX file (does not follow XML schema).")
                 raise
 

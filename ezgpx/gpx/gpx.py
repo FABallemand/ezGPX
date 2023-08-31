@@ -30,30 +30,39 @@ class GPX():
     High level GPX object.
     """
 
-    def __init__(self, file_path: Optional[str] = None) -> None:
-        if file_path is not None:
+    def __init__(self, file_path: Optional[str] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> None:
+        """
+        Initialise GPX instance.
+
+        Args:
+            file_path (str, optional): Path to the file to parse. Defaults to None.
+            check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton during parsing. Requires internet connection and is not guaranted to work. Defaults to False.
+        """
+        if file_path is not None and os.path.exists(file_path):
             self.file_path: str = file_path
-            self.parser: Parser = Parser(file_path)
+            self.parser: Parser = Parser(file_path, check_schemas, extensions_schemas)
             self.gpx: Gpx = self.parser.gpx
             self.writer: Writer = Writer(
                 self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
         else:
+            logging.warning("File path does not exist")
             pass
 
     def __str__(self) -> str:
         return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.writer}"
     
-    def check_schema(self, extensions_schema: bool = False) -> bool:
+    def check_schemas(self, extensions_schemas: bool = False) -> bool:
         """
         Check XML schema.
 
         Args:
-            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work. Defaults to False.
 
         Returns:
             bool: True if the file follows XML schemas.
         """
-        return self.gpx.check_schema(self.file_path, extensions_schema)
+        return self.gpx.check_schemas(self.file_path, extensions_schemas)
         
     def file_name(self) -> Union[str, None]:
         """
@@ -439,14 +448,19 @@ class GPX():
         """
         return self.gpx.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed)
 
-    def to_gpx(self, path: str):
+    def to_gpx(self, path: str, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
         """
         Write the GPX object to a .gpx file.
 
         Args:
             path (str): Path to the .gpx file.
+            check_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
+
+        Returns:
+            bool: Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        self.writer.write(path)
+        return self.writer.write(path, check_schemas, extensions_schemas)
 
     def to_csv(
             self,
@@ -464,7 +478,7 @@ class GPX():
         Write the GPX object track coordinates to a .csv file.
 
         Args:
-            projection (bool, optional): Toogle projected coordinates. Defaults to False.
+            projection (bool, optional): Toggle projected coordinates. Defaults to False.
             elevation (bool, optional): Toggle elevation. Defaults to True.
             speed (bool, optional): Toggle speed. Defaults to False.
             pace (bool, optional): Toggle pace. Defaults to False.
@@ -546,7 +560,7 @@ class GPX():
             axes (matplotlib.axes.Axes): Axes to plot on.
             projection (Optional[str], optional): Projection. Defaults to None.
             color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
-            colorbar (bool, optional): Colorbar toggle. Defaults to False.
+            colorbar (bool, optional): Colorbar Toggle. Defaults to False.
             elevation_color (bool, optional): Color track according to elevation. Defaults to False.
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
@@ -659,7 +673,7 @@ class GPX():
         Args:
             projection (Optional[str], optional): Projection. Defaults to None.
             color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
-            colorbar (bool, optional): Colorbar toggle. Defaults to False.
+            colorbar (bool, optional): Colorbar Toggle. Defaults to False.
             start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
             way_points_color (str, optional): Way point color. Defaults to False.
             title (Optional[str], optional): Title. Defaults to None.

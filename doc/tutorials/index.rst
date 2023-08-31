@@ -9,3 +9,4 @@ Tutorials
   plotting.rst
   modifying.rst
   writing.rst
+  schemas.rst

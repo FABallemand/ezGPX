@@ -82,21 +82,21 @@ class Gpx():
             self.tracks: list[Track] = tracks
         self.extensions: Extensions = extensions
 
-    def check_schema(self, file_path: str, extensions_schema: bool = False) -> bool:
+    def check_schemas(self, file_path: str, extensions_schemas: bool = False) -> bool:
         """
         Check XML schema.
 
         Args:
             file_path (str): File path.
-            extensions_schema (bool, optional): Toogle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
 
         Returns:
             bool: True if the file follows XML schemas.
         """
-        if extensions_schema:
+        if extensions_schemas:
             gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
             for gpx_schema in gpx_schemas:
-                print(f"schema = {gpx_schema}")
+                logging.debug(f"schema = {gpx_schema}")
                 schema = xmlschema.XMLSchema(gpx_schema)
                 if not schema.is_valid(file_path):
                     logging.error(f"File does not follow {gpx_schema}")

@@ -15,7 +15,7 @@ class Writer():
     def __init__(
             self,
             gpx: Gpx = None,
-            path: str = "",
+            path: str = None,
             properties: bool = True,
             metadata: bool = True,
             way_points: bool = True,
@@ -30,7 +30,7 @@ class Writer():
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
-            path (str, optional): Path to the file to write. Defaults to "".
+            path (str, optional): Path to the file to write. Defaults to None.
             properties (bool, optional): Toggle properties writting. Defaults to True.
             metadata (bool, optional): Toggle metadata writting. Defaults to True.
             way_point (bool, optional): Toggle way points writting. Defaults to True.
@@ -552,13 +552,17 @@ class Writer():
             f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             f.write(self.gpx_string)
 
-    def write(self, path: str, check_schema: bool = False):
+    def write(self, path: str, check_schemas: bool = False, extensions_schemas: bool = False) -> bool:
         """
         Handle writing.
 
         Args:
             path (str): Path to write the GPX file.
-            check_schema (bool, optional): Toggle schema verification after writting. Defaults to False.
+            check_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
+            extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
+
+        Returns:
+            bool: Return False if written file does not follow checked schemas. Return True otherwise.
         """
         directory_path = os.path.dirname(os.path.realpath(path))
         if not os.path.exists(directory_path):
@@ -569,9 +573,10 @@ class Writer():
         self.gpx_to_string()
         self.write_gpx()
 
-        if check_schema:
-            verification_gpx = Parser(path)
-            if not verification_gpx.check_schema(extensions_schema=False):
+        if check_schemas:
+            verification_gpx = Parser(path, check_schemas=False, extensions_schemas=False).gpx
+            if not verification_gpx.check_schemas(self.path, extensions_schemas=extensions_schemas):
                 logging.error("Invalid written file (does not follow schema)")
-                return
+                return False
+        return True
 
