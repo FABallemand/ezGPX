@@ -67,7 +67,7 @@ def perpendicular_distance(start_point, end_point, point) -> float:
             point_2 (WayPoint): A point on the line.
 
         Returns:
-            tuple: Coefficients of the line equation.
+            Tuple: Coefficients of the line equation.
         """
         delta_x = point_1.lon - point_2.lon
         delta_y = point_1.lat - point_2.lat

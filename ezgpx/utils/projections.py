@@ -1,8 +1,9 @@
+from typing import Tuple
 from math import pi, radians, floor, log, cos, sin, tan
 from ..utils import EARTH_RADIUS
 
 
-def web_mercator_projection(latitude: float, longitude: float, zoom_level: int = 1) -> tuple[int, int]:
+def web_mercator_projection(latitude: float, longitude: float, zoom_level: int = 1) -> Tuple[int, int]:
     """
     https://en.wikipedia.org/wiki/Web_Mercator_projection
 
@@ -12,7 +13,7 @@ def web_mercator_projection(latitude: float, longitude: float, zoom_level: int =
         zoom_level (int, optional): Zoom level. Defaults to 1.
 
     Returns:
-        tuple[int, int]: Point coordinates in the web-mercator projection.
+        Tuple[int, int]: Point coordinates in the web-mercator projection.
     """
 
     # WARNING -> Poles: see link above
@@ -29,7 +30,7 @@ def web_mercator_projection(latitude: float, longitude: float, zoom_level: int =
     return x, y  # ???
 
 
-def lambert_conformal_conic_projection(latitude: float, longitude: float, ref_latitude: float, ref_longitude: float, standard_parallel_1: float, standard_parallel_2: float) -> tuple[float, float]:
+def lambert_conformal_conic_projection(latitude: float, longitude: float, ref_latitude: float, ref_longitude: float, standard_parallel_1: float, standard_parallel_2: float) -> Tuple[float, float]:
     """
     https://en.wikipedia.org/wiki/Lambert_conformal_conic_projection
 
@@ -42,7 +43,7 @@ def lambert_conformal_conic_projection(latitude: float, longitude: float, ref_la
         standard_parallel_2 (float): Second standard parallel.
 
     Returns:
-        tuple[float, float]: Point coordinates in the Lambert conformal conic projection.
+        Tuple[float, float]: Point coordinates in the Lambert conformal conic projection.
     """
     latitude = radians(latitude)
     longitude = radians(longitude)

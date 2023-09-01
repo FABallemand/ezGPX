@@ -1,3 +1,4 @@
+from typing import Tuple
 import logging
 import xmlschema
 import pandas as pd
@@ -163,12 +164,12 @@ class Gpx():
         """
         return self.tracks[-1].trkseg[-1].trkpt[-1]
     
-    def bounds(self) -> tuple[float, float, float, float]:
+    def bounds(self) -> Tuple[float, float, float, float]:
         """
         Find minimum and maximum latitude and longitude.
 
         Returns:
-            tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
+            Tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
         """
         min_lat = self.tracks[0].trkseg[0].trkpt[0].lat
         min_lon = self.tracks[0].trkseg[0].trkpt[0].lon
@@ -189,12 +190,12 @@ class Gpx():
         return min_lat, min_lon, max_lat, max_lon
 
 
-    def center(self) -> tuple[float, float]:
+    def center(self) -> Tuple[float, float]:
         """
         Compute the center coordinates of the track.
 
         Returns:
-            tuple[float, float]: Latitude and longitude of the center point.
+            Tuple[float, float]: Latitude and longitude of the center point.
         """
         min_lat, min_lon, max_lat, max_lon = self.bounds()
         center_lat = min_lat + (max_lat - min_lat) / 2

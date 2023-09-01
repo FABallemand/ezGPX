@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -59,7 +59,7 @@ class Writer():
 
         self.gpx_root = None
 
-    def add_subelement(self, element: ET.Element, sub_element: str, text: str) -> tuple[ET.Element, Union[ET.Element, None]]:
+    def add_subelement(self, element: ET.Element, sub_element: str, text: str) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -69,7 +69,7 @@ class Writer():
             text (str): GPX sub-element text.
 
         Returns:
-            tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
         """
         sub_element_ = None
         if text is not None:
@@ -77,7 +77,7 @@ class Writer():
             sub_element_.text = text
         return element, sub_element_
     
-    def add_subelement_number(self, element: ET.Element, sub_element: str, number: Union[int, float], precision: int = DEFAULT_PRECISION) -> tuple[ET.Element, Union[ET.Element, None]]:
+    def add_subelement_number(self, element: ET.Element, sub_element: str, number: Union[int, float], precision: int = DEFAULT_PRECISION) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -88,7 +88,7 @@ class Writer():
             precision (int, optional): Precision. Defaults to DEFAULT_PRECISION.
 
         Returns:
-            tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
         """
         sub_element_ = None
         if number is not None:
@@ -112,7 +112,7 @@ class Writer():
             format (str, optional): Format. Defaults to DEFAULT_TIME_FORMAT.
 
         Returns:
-            tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
         """
         sub_element_ = None
         if time is not None:

@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union, NewType
+from typing import Optional, Union, Tuple, NewType
 import logging
 import webbrowser
 from datetime import datetime
@@ -138,24 +138,24 @@ class GPX():
         """
         return self.gpx.last_point()
 
-    def bounds(self) -> tuple[float, float, float, float]:
+    def bounds(self) -> Tuple[float, float, float, float]:
         """
         Find minimum and maximum latitude and longitude.
 
         Returns
         -------
-        tuple[float, float, float, float]
+        Tuple[float, float, float, float]
             Min latitude, min longitude, max latitude, max longitude.
         """
         return self.gpx.bounds()
 
-    def center(self) -> tuple[float, float]:
+    def center(self) -> Tuple[float, float]:
         """
         Return the coordinates of the center point.
 
         Returns
         -------
-        tuple[float, float]
+        Tuple[float, float]
             Latitude and longitude of the center point.
         """
         return self.gpx.center()
@@ -598,11 +598,11 @@ class GPX():
     def _matplotlib_plot_text(
             self,
             fig: Figure,
-            duration: Optional[tuple[float, float]] = (0, 0),
-            distance: Optional[tuple[float, float]] = (0.5, 0),
-            ascent: Optional[tuple[float, float]] = (1, 0),
-            pace: Optional[tuple[float, float]] = (1, 0),
-            speed: Optional[tuple[float, float]] = (1, 0),
+            duration: Optional[Tuple[float, float]] = (0, 0),
+            distance: Optional[Tuple[float, float]] = (0.5, 0),
+            ascent: Optional[Tuple[float, float]] = (1, 0),
+            pace: Optional[Tuple[float, float]] = (1, 0),
+            speed: Optional[Tuple[float, float]] = (1, 0),
             text_parameters: Optional[dict] = None):
         """
         Plot text on Matplotlib plot.
@@ -611,15 +611,15 @@ class GPX():
         ----------
         fig : Figure
             Matplotlib figure.
-        duration : Optional[tuple[float, float]], optional
+        duration : Optional[Tuple[float, float]], optional
             Duration text plot coordinates, by default (0, 0)
-        distance : Optional[tuple[float, float]], optional
+        distance : Optional[Tuple[float, float]], optional
             Distance text plot coordinates, by default (0.5, 0)
-        ascent : Optional[tuple[float, float]], optional
+        ascent : Optional[Tuple[float, float]], optional
             Ascent text plot coordinates, by default (1, 0)
-        pace : Optional[tuple[float, float]], optional
+        pace : Optional[Tuple[float, float]], optional
             Pace text plot coordinates, by default (1, 0)
-        speed : Optional[tuple[float, float]], optional
+        speed : Optional[Tuple[float, float]], optional
             Speed text plot coordinates, by default (1, 0)
         text_parameters : Optional[dict], optional
             Text parameters, by default None
@@ -657,14 +657,14 @@ class GPX():
             projection: Optional[str] = None,
             color: str = "#101010",
             colorbar: bool = False,
-            start_stop_colors: Optional[tuple[str, str]] = None,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             title: Optional[str] = None,
-            duration: Optional[tuple[float, float]] = None,
-            distance: Optional[tuple[float, float]] = None,
-            ascent: Optional[tuple[float, float]] = None,
-            pace: Optional[tuple[float, float]] = None,
-            speed: Optional[tuple[float, float]] = None):
+            duration: Optional[Tuple[float, float]] = None,
+            distance: Optional[Tuple[float, float]] = None,
+            ascent: Optional[Tuple[float, float]] = None,
+            pace: Optional[Tuple[float, float]] = None,
+            speed: Optional[Tuple[float, float]] = None):
         """
         Plot GPX on Matplotlib axes.
 
@@ -680,21 +680,21 @@ class GPX():
             "ascent_speed"), by default "#101010"
         colorbar : bool, optional
             Colorbar Toggle, by default False
-        start_stop_colors : Optional[tuple[str, str]], optional
+        start_stop_colors : Optional[Tuple[str, str]], optional
             Start and stop points colors, by default None
         way_points_color : Optional[str], optional
             Way point color, by default None
         title : Optional[str], optional
             Title, by default None
-        duration : Optional[tuple[float, float]], optional
+        duration : Optional[Tuple[float, float]], optional
             Display duration, by default None
-        distance : Optional[tuple[float, float]], optional
+        distance : Optional[Tuple[float, float]], optional
             Display distance, by default None
-        ascent : Optional[tuple[float, float]], optional
+        ascent : Optional[Tuple[float, float]], optional
             Display ascent, by default None
-        pace : Optional[tuple[float, float]], optional
+        pace : Optional[Tuple[float, float]], optional
             Display pace, by default None
-        speed : Optional[tuple[float, float]], optional
+        speed : Optional[Tuple[float, float]], optional
             Display speed, by default None
         """
         # Clear axes
@@ -784,14 +784,14 @@ class GPX():
         projection: Optional[str] = None,
         color: str = "#101010",
         colorbar: bool = False,
-        start_stop_colors: Optional[tuple[str, str]] = None,
+        start_stop_colors: Optional[Tuple[str, str]] = None,
         way_points_color: Optional[str] = None,
         title: Optional[str] = None,
-        duration: Optional[tuple[float, float]] = None,
-        distance: Optional[tuple[float, float]] = None,
-        ascent: Optional[tuple[float, float]] = None,
-        pace: Optional[tuple[float, float]] = None,
-        speed: Optional[tuple[float, float]] = None,
+        duration: Optional[Tuple[float, float]] = None,
+        distance: Optional[Tuple[float, float]] = None,
+        ascent: Optional[Tuple[float, float]] = None,
+        pace: Optional[Tuple[float, float]] = None,
+        speed: Optional[Tuple[float, float]] = None,
         file_path: Optional[str] = None):
         """
         Plot GPX using Matplotlib.
@@ -806,21 +806,21 @@ class GPX():
             "ascent_speed"), by default "#101010"
         colorbar : bool, optional
             Colorbar Toggle, by default False
-        start_stop_colors : Optional[tuple[str, str]], optional
+        start_stop_colors : Optional[Tuple[str, str]], optional
             Start and stop points colors, by default None
         way_points_color : Optional[str], optional
             Way point color, by default None
         title : Optional[str], optional
             Title, by default None
-        duration : Optional[tuple[float, float]], optional
+        duration : Optional[Tuple[float, float]], optional
             Display duration, by default None
-        distance : Optional[tuple[float, float]], optional
+        distance : Optional[Tuple[float, float]], optional
             Display distance, by default None
-        ascent : Optional[tuple[float, float]], optional
+        ascent : Optional[Tuple[float, float]], optional
             Display ascent, by default None
-        pace : Optional[tuple[float, float]], optional
+        pace : Optional[Tuple[float, float]], optional
             Display pace, by default None
-        speed : Optional[tuple[float, float]], optional
+        speed : Optional[Tuple[float, float]], optional
             Display speed, by default None
         """
         # Create figure with axes
@@ -856,14 +856,14 @@ class GPX():
             projection: str = "cyl",
             service: str = "World_Shaded_Relief",
             color: str = "#101010",
-            start_stop_colors: Optional[tuple[str, str]] = None,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             title: Optional[str] = None,
-            duration: Optional[tuple[float, float]] = None,
-            distance: Optional[tuple[float, float]] = None,
-            ascent: Optional[tuple[float, float]] = None,
-            pace: Optional[tuple[float, float]] = None,
-            speed: Optional[tuple[float, float]] = None,
+            duration: Optional[Tuple[float, float]] = None,
+            distance: Optional[Tuple[float, float]] = None,
+            ascent: Optional[Tuple[float, float]] = None,
+            pace: Optional[Tuple[float, float]] = None,
+            speed: Optional[Tuple[float, float]] = None,
             file_path: str = None):
         """
         Plot GPX using Matplotlib Basemap Toolkit.
@@ -878,21 +878,21 @@ class GPX():
             by default "World_Shaded_Relief"
         color : str, optional
             Track color, by default "#101010"
-        start_stop_colors : Optional[tuple[str, str]], optional
+        start_stop_colors : Optional[Tuple[str, str]], optional
             Start and stop points colors, by default None
         way_points_color : Optional[str], optional
             Way point color, by default None
         title : Optional[str], optional
             Title, by default None
-        duration : Optional[tuple[float, float]], optional
+        duration : Optional[Tuple[float, float]], optional
             Display duration, by default None
-        distance : Optional[tuple[float, float]], optional
+        distance : Optional[Tuple[float, float]], optional
             Display distance, by default None
-        ascent : Optional[tuple[float, float]], optional
+        ascent : Optional[Tuple[float, float]], optional
             Display ascent, by default None
-        pace : Optional[tuple[float, float]], optional
+        pace : Optional[Tuple[float, float]], optional
             Display pace, by default None
-        speed : Optional[tuple[float, float]], optional
+        speed : Optional[Tuple[float, float]], optional
             Display speed, by default None
         file_path : str, optional
             Path to save plot, by default None
@@ -976,7 +976,7 @@ class GPX():
     def gmplot_plot(
             self,
             color: str = "#110000",
-            start_stop_colors: Optional[tuple[str, str]] = None,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             zoom: float = 10.0,
             title: Optional[str] = None,
@@ -991,7 +991,7 @@ class GPX():
         ----------
         color : str, optional
             Track color, by default "#110000"
-        start_stop_colors : Optional[tuple[str, str]], optional
+        start_stop_colors : Optional[Tuple[str, str]], optional
             Start and stop points colors, by default None
         way_points_color : Optional[str], optional
             Way points color, by default None
@@ -1053,7 +1053,7 @@ class GPX():
             self,
             tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"
             color: str = "#110000",
-            start_stop_colors: Optional[tuple[str, str]] = None,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             minimap: bool = False,
             coord_popup: bool = False,
@@ -1069,7 +1069,7 @@ class GPX():
         tiles : str, optional
             Map tiles. Supported tiles: "OpenStreetMap", "Stamen Terrain",
             "Stamen Toner", by default "OpenStreetMap"
-        start_stop_colors : Optional[tuple[str, str]], optional
+        start_stop_colors : Optional[Tuple[str, str]], optional
             Start and stop points colors, by default None
         way_points_color : Optional[str], optional
             Way points color, by default None
