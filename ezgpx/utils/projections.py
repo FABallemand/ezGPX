@@ -7,15 +7,20 @@ def web_mercator_projection(latitude: float, longitude: float, zoom_level: int =
     """
     https://en.wikipedia.org/wiki/Web_Mercator_projection
 
-    Args:
-        latitude (float): Point latitude.
-        longitude (float): Point longitude.
-        zoom_level (int, optional): Zoom level. Defaults to 1.
+    Parameters
+    ----------
+    latitude : float
+        Point latitude.
+    longitude : float
+        Point longitude.
+    zoom_level : int, optional
+        Zoom level, by default 1
 
-    Returns:
-        Tuple[int, int]: Point coordinates in the web-mercator projection.
+    Returns
+    -------
+    Tuple[int, int]
+        Point coordinates in the web-mercator projection.
     """
-
     # WARNING -> Poles: see link above
 
     # Convert latitude and longitude to radians
@@ -34,16 +39,25 @@ def lambert_conformal_conic_projection(latitude: float, longitude: float, ref_la
     """
     https://en.wikipedia.org/wiki/Lambert_conformal_conic_projection
 
-    Args:
-        latitude (float): Point latitude.
-        longitude (float): Point longitude.
-        ref_latitude (float): Reference point latitude.
-        ref_longitude (float): Reference point longitude.
-        standard_parallel_1 (float): First standard parallel.
-        standard_parallel_2 (float): Second standard parallel.
+    Parameters
+    ----------
+    latitude : float
+        Point latitude.
+    longitude : float
+        Point longitude.
+    ref_latitude : float
+        Reference point latitude.
+    ref_longitude : float
+        Reference point longitude.
+    standard_parallel_1 : float
+        First standard parallel.
+    standard_parallel_2 : float
+        Second standard parallel.
 
-    Returns:
-        Tuple[float, float]: Point coordinates in the Lambert conformal conic projection.
+    Returns
+    -------
+    Tuple[float, float]
+        Point coordinates in the Lambert conformal conic projection.
     """
     latitude = radians(latitude)
     longitude = radians(longitude)
