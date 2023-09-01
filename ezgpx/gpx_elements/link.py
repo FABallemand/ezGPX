@@ -1,5 +1,4 @@
 
-
 class Link():
     """
     linkType element in GPX file.

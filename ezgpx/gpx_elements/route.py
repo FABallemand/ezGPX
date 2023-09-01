@@ -1,5 +1,3 @@
-import logging
-
 from .extensions import Extensions
 from .link import Link
 from .way_point import WayPoint

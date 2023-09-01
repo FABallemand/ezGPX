@@ -4,4 +4,4 @@ ezgpx
 .. toctree::
    :maxdepth: 4
 
-   ezgpx
+   ezgpx.rst

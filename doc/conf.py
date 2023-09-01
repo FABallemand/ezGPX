@@ -34,10 +34,18 @@ extensions = [
 ]
 
 autodoc_mock_imports = [
+    'os',
+    'typing',
+    'logging',
+    'webbrowser',
+    'math',
+    'logging',
+    'xml',
     'xmlschema',
     'pandas',
+    'datetime',
     'matplotlib',
-    'basemap',
+    'mpl_toolkits',
     'gmplot',
     'folium',
     'pytest'
