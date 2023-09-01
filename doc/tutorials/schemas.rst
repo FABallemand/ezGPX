@@ -3,7 +3,7 @@ Checking Schemas
 
 There are tree ways to check if a GPX file follows the XML schemas.
 In all cases, the GPX file will be checked for the relevant Topographix GPX schema (either version 1.0 or 1.1).
-If the :py:arg:`~extensions_schemas` is set to :py:val:`~True`, then the GPX file will be tested for all schemas that are listed.
+If the :py:attribute:`~extensions_schemas` is set to :py:const:`~True`, then the GPX file will be tested for all schemas that are listed.
 
 During Parsing
 ^^^^^^^^^^^^^^
