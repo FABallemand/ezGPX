@@ -11,14 +11,14 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)
 
     Parameters
     ----------
-    points : List[TrackPoint]
+    points : List
         List of points defining the track to simplify.
     epsilon : float, optional
         Ramer-Douglas-Peucker threshold distance (higher value means more simplifications), by default degrees(2/EARTH_RADIUS) (ie: the angle corresponding to a distance of 2 meters at the surface of the earth).
 
     Returns
     -------
-    List[TrackPoint]
+    List
         List of points defining the simplified track.
     """
     # Find the point with the maximum distance
