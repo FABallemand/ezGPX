@@ -33,6 +33,16 @@ extensions = [
     'sphinx.ext.viewcode'
 ]
 
+autodoc_mock_imports = [
+    'xmlschema',
+    'pandas',
+    'matplotlib',
+    'basemap',
+    'gmplot',
+    'folium',
+    'pytest'
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
