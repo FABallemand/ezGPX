@@ -1,3 +1,5 @@
+from typing import List
+
 from .extensions import *
 from .link import Link
 from .track_segment import *
@@ -18,7 +20,7 @@ class Track():
             number: int = None,
             type: str = None,
             extensions: Extensions = None,
-            trkseg: list[TrackSegment] = None):
+            trkseg: List[TrackSegment] = None):
         """
         Initialize Track instance.
 
@@ -32,7 +34,7 @@ class Track():
             number (int, optional): Number. Defaults to None.
             type (str, optional): Type. Defaults to None.
             extensions (Extensions, optional): Extensions. Defaults to None.
-            trkseg (list[TrackSegment], optional): List of track segments. Defaults to None.
+            trkseg (List[TrackSegment], optional): List of track segments. Defaults to None.
         """
         self.tag: str = tag
         self.name: str = name
@@ -44,9 +46,9 @@ class Track():
         self.type: str = type
         self.extensions: Extensions = extensions
         if trkseg is None:
-            self.trkseg: list[TrackSegment] = trkseg
+            self.trkseg: List[TrackSegment] = trkseg
         else:
-            self.trkseg: list[TrackSegment] = trkseg
+            self.trkseg: List[TrackSegment] = trkseg
 
     def project(self, projection: str):
         """

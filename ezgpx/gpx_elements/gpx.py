@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 import logging
 import xmlschema
 import pandas as pd
@@ -23,15 +23,15 @@ class Gpx():
             xmlns: str = None,
             version: str = None,
             xmlns_xsi: str = None,
-            xsi_schema_location: list[str] = None,
+            xsi_schema_location: List[str] = None,
             xmlns_gpxtpx: str = None,
             xmlns_gpxx: str = None,
             xmlns_gpxtrk: str = None,
             xmlns_wptx1: str = None,
             metadata: Metadata = None,
-            wpt: list[WayPoint] = None,
-            rte: list[Route] = None,
-            tracks: list[Track] = None,
+            wpt: List[WayPoint] = None,
+            rte: List[Route] = None,
+            tracks: List[Track] = None,
             extensions: Extensions = None) -> None:
         """
         Initialize Gpx instance.
@@ -42,15 +42,15 @@ class Gpx():
             xmlns (str, optional): XML xmlns. Defaults to None.
             version (str, optional): Version. Defaults to None.
             xmlns_xsi (str, optional): XML xmlns_xsi. Defaults to None.
-            xsi_schema_location (list[str], optional): XML schema location. Defaults to None.
+            xsi_schema_location (List[str], optional): XML schema location. Defaults to None.
             xmlns_gpxtpx (str, optional): _description_. Defaults to None.
             xmlns_gpxx (str, optional): _description_. Defaults to None.
             xmlns_gpxtrk (str, optional): _description_. Defaults to None.
             xmlns_wptx1 (str, optional): _description_. Defaults to None.
             metadata (Metadata, optional): Metadata. Defaults to None.
-            wpt (list[WayPoint], optional): Way points. Defaults to None.
-            rte (list[Route], optional): Routes. Defaults to None.
-            tracks (list[Track], optional): List of tracks. Defaults to None.
+            wpt (List[WayPoint], optional): Way points. Defaults to None.
+            rte (List[Route], optional): Routes. Defaults to None.
+            tracks (List[Track], optional): List of tracks. Defaults to None.
             extensions (Extensions, optional): Extensions. Defaults to None.
         """
         self.tag: str = tag
@@ -70,17 +70,17 @@ class Gpx():
 
         self.metadata: Metadata = metadata
         if wpt is None:
-            self.wpt:list[WayPoint] = []
+            self.wpt:List[WayPoint] = []
         else:
-            self.wpt:list[WayPoint] = wpt
+            self.wpt:List[WayPoint] = wpt
         if rte is None:
-            self.rte: list[Route] = []
+            self.rte: List[Route] = []
         else:
-            self.rte: list[Route] = rte
+            self.rte: List[Route] = rte
         if tracks is None:
-            self.tracks: list[Track] = []
+            self.tracks: List[Track] = []
         else:
-            self.tracks: list[Track] = tracks
+            self.tracks: List[Track] = tracks
         self.extensions: Extensions = extensions
 
     def check_schemas(self, file_path: str, extensions_schemas: bool = False) -> bool:
@@ -675,7 +675,7 @@ class Gpx():
             error_distance (int, optional): Error threshold distance (meters) between two points. Defaults to 1000.
 
         Returns:
-            list: List of removed points (GPS errors).
+            List: List of removed points (GPS errors).
         """
         previous_point = None
         gps_errors = []

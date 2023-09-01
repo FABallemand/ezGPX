@@ -1,3 +1,5 @@
+from typing import List
+
 from .extensions import Extensions
 from .way_point import WayPoint
 
@@ -9,21 +11,21 @@ class TrackSegment():
     def __init__(
             self,
             tag: str = "trkseg",
-            trkpt: list[WayPoint] = None,
+            trkpt: List[WayPoint] = None,
             extensions: Extensions = None) -> None:
         """
         Initialize TrackSegment instance.
 
         Args:
         tag (str, optional): XML tag. Defaults to "trkseg".
-            trkpt (list[WayPoint], optional): List of track points. Defaults to None.
+            trkpt (List[WayPoint], optional): List of track points. Defaults to None.
             extensions (Extensions, optional): Extensions. Defaults to None.
         """
         self.tag: str = tag
         if trkpt is None:
-            self.trkpt: list[WayPoint] = []
+            self.trkpt: List[WayPoint] = []
         else:
-            self.trkpt: list[WayPoint] = trkpt
+            self.trkpt: List[WayPoint] = trkpt
         self.extensions: Extensions = extensions
 
     def project(self, projection: str):
