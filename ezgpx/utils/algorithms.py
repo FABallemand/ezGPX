@@ -1,5 +1,4 @@
 import logging
-
 from math import degrees
 
 from .distance import EARTH_RADIUS, perpendicular_distance
@@ -9,12 +8,17 @@ def ramer_douglas_peucker(points: list, epsilon: float = degrees(2/EARTH_RADIUS)
     Simplify a curve using the Ramer-Douglas-Peucker algorithm.
     Source: https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
 
-    :param points: _description_
-    :type points: list[TrackPoint]
-    :param epsilon: Ramer-Douglas-Peucker threshold distance (higher value means more simplifications), defaults to degrees(2/EARTH_RADIUS) (ie: the angle corresponding to a distance of 2 meters at the surface of the earth).
-    :type epsilon: float, optional
-    :return: List of points defining the simplified curve.
-    :rtype: list[TrackPoint]
+    Parameters
+    ----------
+    points : list[TrackPoint]
+        List of points defining the track to simplify.
+    epsilon : float, optional
+        Ramer-Douglas-Peucker threshold distance (higher value means more simplifications), by default degrees(2/EARTH_RADIUS) (ie: the angle corresponding to a distance of 2 meters at the surface of the earth).
+
+    Returns
+    -------
+    list[TrackPoint]
+        List of points defining the simplified track.
     """
     # Find the point with the maximum distance
     d_max = 0
