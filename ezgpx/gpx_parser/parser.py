@@ -75,7 +75,7 @@ class Parser():
         except ValueError:
             logging.exception("Could not convert data ({number}) to a floating point value.")
         except Exception as err:
-            logging.exception(f"Unexpected {err=}, {type(err)=}.\nUnable to find precision of number: {number}")
+            logging.exception(f"Unexpected {err}, {type(err)}.\nUnable to find precision of number: {number}")
             raise
 
     def find_precisions(self):
