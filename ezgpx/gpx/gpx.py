@@ -34,10 +34,14 @@ class GPX():
         """
         Initialise GPX instance.
 
-        Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
-            check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton during parsing. Requires internet connection and is not guaranted to work. Defaults to False.
+        Parameters
+        ----------
+        file_path : Optional[str], optional
+            Path to the file to parse, by default None
+        check_schemas : bool, optional
+            Toggle schema verification during parsing, by default True
+        extensions_schemas : bool, optional
+            Toggle extensions schema verificaton during parsing, by default False
         """
         if file_path is not None and os.path.exists(file_path):
             self.file_path: str = file_path
@@ -56,11 +60,15 @@ class GPX():
         """
         Check XML schema.
 
-        Args:
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work. Defaults to False.
+        Parameters
+        ----------
+        extensions_schemas : bool, optional
+            Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work, by default False
 
-        Returns:
-            bool: True if the file follows XML schemas.
+        Returns
+        -------
+        bool
+            True if the file follows XML schemas.
         """
         return self.gpx.check_schemas(self.file_path, extensions_schemas)
         
@@ -68,8 +76,10 @@ class GPX():
         """
         Return .gpx file name.
 
-        Returns:
-            str: File name.
+        Returns
+        -------
+        Union[str, None]
+            File name.
         """
         return os.path.basename(self.file_path)
 
@@ -77,8 +87,10 @@ class GPX():
         """
         Return activity name.
 
-        Returns:
-            str: Activity name.
+        Returns
+        -------
+        str
+            Activity name.
         """
         return self.gpx.name()
     
@@ -86,8 +98,10 @@ class GPX():
         """
         Set name.
 
-        Args:
-            new_name (str): New name.
+        Parameters
+        ----------
+        new_name : str
+            New name.
         """
         self.gpx.set_name(new_name)
 
@@ -95,8 +109,10 @@ class GPX():
         """
         Return the number of points in the GPX.
 
-        Returns:
-            int: Number of points in the GPX.
+        Returns
+        -------
+        int
+            Number of points in the GPX.
         """
         return self.gpx.nb_points()
 
@@ -104,8 +120,10 @@ class GPX():
         """
         Return GPX first point.
 
-        Returns:
-            WayPoint: First point.
+        Returns
+        -------
+        WayPoint
+            First point.
         """
         return self.gpx.first_point()
 
@@ -113,8 +131,10 @@ class GPX():
         """
         Return GPX last point.
 
-        Returns:
-            WayPoint: Last point.
+        Returns
+        -------
+        WayPoint
+            Last point.
         """
         return self.gpx.last_point()
 
@@ -122,8 +142,10 @@ class GPX():
         """
         Find minimum and maximum latitude and longitude.
 
-        Returns:
-            tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
+        Returns
+        -------
+        tuple[float, float, float, float]
+            Min latitude, min longitude, max latitude, max longitude.
         """
         return self.gpx.bounds()
 
@@ -131,8 +153,10 @@ class GPX():
         """
         Return the coordinates of the center point.
 
-        Returns:
-            tuple[float, float]: Latitude and longitude of the center point.
+        Returns
+        -------
+        tuple[float, float]
+            Latitude and longitude of the center point.
         """
         return self.gpx.center()
 
@@ -140,8 +164,10 @@ class GPX():
         """
         Returns the distance (meters) of the tracks contained in the GPX.
 
-        Returns:
-            float: Distance (meters).
+        Returns
+        -------
+        float
+            Distance (meters).
         """
         return self.gpx.distance()
 
@@ -149,8 +175,10 @@ class GPX():
         """
         Returns the ascent (meters) of the tracks contained in the GPX.
 
-        Returns:
-            float: Ascent (meters).
+        Returns
+        -------
+        float
+            Ascent (meters).
         """
         return self.gpx.ascent()
 
@@ -158,8 +186,10 @@ class GPX():
         """
         Returns the descent (meters) of the tracks contained in the GPX.
 
-        Returns:
-            float: Descent (meters).
+        Returns
+        -------
+        float
+            Descent (meters).
         """
         return self.gpx.descent()
     
@@ -173,8 +203,10 @@ class GPX():
         """
         Return activity minimum ascent rate.
 
-        Returns:
-            float: Minimum ascent rate.
+        Returns
+        -------
+        float
+            Minimum ascent rate.
         """
         return self.gpx.min_ascent_rate()
     
@@ -182,8 +214,10 @@ class GPX():
         """
         Return activity maximum ascent rate.
 
-        Returns:
-            float: Maximum ascent rate.
+        Returns
+        -------
+        float
+            Maximum ascent rate.
         """
         return self.gpx.max_ascent_rate()
 
@@ -191,8 +225,10 @@ class GPX():
         """
         Returns the minimum elevation (meters) in the tracks contained in the GPX.
 
-        Returns:
-            float: Minimum elevation (meters).
+        Returns
+        -------
+        float
+            Minimum elevation (meters).
         """
         return self.gpx.min_elevation()
 
@@ -200,8 +236,10 @@ class GPX():
         """
         Returns the maximum elevation (meters) in the tracks contained in the GPX.
 
-        Returns:
-            float: Maximum elevation (meters).
+        Returns
+        -------
+        float
+            Maximum elevation (meters).
         """
         return self.gpx.max_elevation()
 
@@ -209,8 +247,10 @@ class GPX():
         """
         Return the activity start time.
 
-        Returns:
-            datetime: Start time.
+        Returns
+        -------
+        datetime
+            Start time.
         """
         return self.gpx.start_time()
 
@@ -218,8 +258,10 @@ class GPX():
         """
         Return the activity stop time.
 
-        Returns:
-            datetime: Stop time.
+        Returns
+        -------
+        datetime
+            Stop time.
         """
         return self.gpx.stop_time()
 
@@ -227,8 +269,10 @@ class GPX():
         """
         Return the total elapsed time during the activity.
 
-        Returns:
-            datetime: Total elapsed time.
+        Returns
+        -------
+        datetime
+            Total elapsed time.
         """
         return self.gpx.total_elapsed_time()
 
@@ -236,8 +280,10 @@ class GPX():
         """
         Return the stopped time during the activity.
 
-        Returns:
-            datetime: Stopped time.
+        Returns
+        -------
+        datetime
+            Stopped time.
         """
         return self.gpx.stopped_time()
 
@@ -245,8 +291,10 @@ class GPX():
         """
         Return the moving time during the activity.
 
-        Returns:
-            datetime: Moving time.
+        Returns
+        -------
+        datetime
+            Moving time.
         """
         return self.gpx.moving_time()
 
@@ -254,8 +302,10 @@ class GPX():
         """
         Return average speed (kilometers per hour) during the activity.
 
-        Returns:
-            float: Average speed (kilometers per hour).
+        Returns
+        -------
+        float
+            Average speed (kilometers per hour).
         """
         return self.gpx.avg_speed()
 
@@ -263,8 +313,10 @@ class GPX():
         """
         Return average moving speed (kilometers per hour) during the activity.
 
-        Returns:
-            float: Average moving speed (kilometers per hour).
+        Returns
+        -------
+        float
+            Average moving speed (kilometers per hour).
         """
         return self.gpx.avg_moving_speed()
     
@@ -278,8 +330,10 @@ class GPX():
         """
         Return the minimum speed during the activity.
 
-        Returns:
-            float: Minimum speed.
+        Returns
+        -------
+        float
+            Minimum speed.
         """
         return self.gpx.min_speed()
 
@@ -287,8 +341,10 @@ class GPX():
         """
         Return the maximum speed during the activity.
 
-        Returns:
-            float: Maximum speed.
+        Returns
+        -------
+        float
+            Maximum speed.
         """
         return self.gpx.max_speed()
     
@@ -296,8 +352,10 @@ class GPX():
         """
         Return average pace (minutes per kilometer) during the activity.
 
-        Returns:
-            float: Average pace (minutes per kilometer).
+        Returns
+        -------
+        float
+            Average pace (minutes per kilometer).
         """
         return self.gpx.avg_pace()
 
@@ -305,8 +363,10 @@ class GPX():
         """
         Return average moving pace (minutes per kilometer) during the activity.
 
-        Returns:
-            float: Average moving pace (minutes per kilometer).
+        Returns
+        -------
+        float
+            Average moving pace (minutes per kilometer).
         """
         return self.gpx.avg_moving_pace()
     
@@ -320,8 +380,10 @@ class GPX():
         """
         Return the minimum pace during the activity.
 
-        Returns:
-            float: Minimum pace.
+        Returns
+        -------
+        float
+            Minimum pace.
         """
         return self.gpx.min_pace()
 
@@ -329,8 +391,10 @@ class GPX():
         """
         Return the maximum pace during the activity.
 
-        Returns:
-            float: Maximum pace.
+        Returns
+        -------
+        float
+            Maximum pace.
         """
         return self.gpx.max_pace()
     
@@ -368,9 +432,12 @@ class GPX():
         """
         Remove points that are to close together.
 
-        Args:
-            min_dist (float, optional): Minimal distance between two points. Defaults to 1.
-            max_dist (float, optional): Maximal distance between two points. Defaults to 10.
+        Parameters
+        ----------
+        min_dist : float, optional
+            Minimal distance between two points, by default 1
+        max_dist : float, optional
+            Maximal distance between two points, by default 10
         """
         self.gpx.remove_close_points(min_dist, max_dist)
 
@@ -378,16 +445,25 @@ class GPX():
         """
         Simplify the tracks using Ramer-Douglas-Peucker algorithm.
 
-        Args:
-            tolerance (float, optional): Tolerance (meters). Corresponds to the
-            minimum distance between the point and the track before the point
-            is removed. Defaults to 2.
+        Parameters
+        ----------
+        tolerance : float, optional
+            Tolerance (meters). Corresponds to the minimum distance between the
+            point and the track before the point is removed, by default 2
         """
         epsilon = degrees(tolerance/EARTH_RADIUS)
         self.gpx.simplify(epsilon)
 
     def merge(self, gpx: GPX):
-        
+        """
+        _summary_
+
+        Parameters
+        ----------
+        gpx : GPX
+            _description_
+        """
+        # TODO
         if self.gpx.tag is None:
             self.gpx.tag = gpx.gpx.tag
         if self.gpx.creator is None:
@@ -419,8 +495,10 @@ class GPX():
         """
         Convert the GPX object to a string.
 
-        Returns:
-            str: String representingth GPX object.
+        Returns
+        -------
+        str
+            String representingth GPX object.
         """
         return self.writer.gpx_to_string(self.gpx)
     
@@ -435,16 +513,25 @@ class GPX():
         """
         Convert GPX object to Pandas Dataframe.
 
-        Args:
-            projection (bool, optional): Toggle projection. Defaults to False.
-            elevation (bool, optional): Toggle elevation. Defaults to True.
-            speed (bool, optional): Toggle speed. Defaults to False.
-            pace (bool, optional): Toggle pace. Defaults to False.
-            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
-            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
+        Parameters
+        ----------
+        projection : bool, optional
+            Toggle projection, by default False
+        elevation : bool, optional
+            Toggle elevation, by default True
+        speed : bool, optional
+            Toggle speed, by default False
+        pace : bool, optional
+            Toggle pace, by default False
+        ascent_rate : bool, optional
+            Toggle ascent rate, by default False
+        ascent_speed : bool, optional
+            Toggle ascent speed, by default False
 
-        Returns:
-            pd.DataFrame: Dataframe containing data from GPX.
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe containing data from GPX.
         """
         return self.gpx.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed)
 
@@ -452,13 +539,19 @@ class GPX():
         """
         Write the GPX object to a .gpx file.
 
-        Args:
-            path (str): Path to the .gpx file.
-            check_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
+        Parameters
+        ----------
+        path : str
+            Path to the .gpx file.
+        check_schemas : bool, optional
+            Toggle schema verification after writting, by default True
+        extensions_schemas : bool, optional
+            Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work, by default False
 
-        Returns:
-            bool: Return False if written file does not follow checked schemas. Return True otherwise.
+        Returns
+        -------
+        bool
+            Return False if written file does not follow checked schemas. Return True otherwise.
         """
         return self.writer.write(path, check_schemas, extensions_schemas)
 
@@ -477,17 +570,28 @@ class GPX():
         """
         Write the GPX object track coordinates to a .csv file.
 
-        Args:
-            projection (bool, optional): Toggle projected coordinates. Defaults to False.
-            elevation (bool, optional): Toggle elevation. Defaults to True.
-            speed (bool, optional): Toggle speed. Defaults to False.
-            pace (bool, optional): Toggle pace. Defaults to False.
-            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
-            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
-            path (str, optional): Path. Defaults to "unnamed.csv".
-            sep (str, optional): Separator. Defaults to ",".
-            header (bool, optional): Toggle header. Defaults to True.
-            index (bool, optional): Toggle index. Defaults to False.
+        Parameters
+        ----------
+        projection : bool, optional
+            Toggle projected coordinates, by default False
+        elevation : bool, optional
+            Toggle elevation, by default True
+        speed : bool, optional
+            Toggle speed, by default False
+        pace : bool, optional
+            Toggle pace, by default False
+        ascent_rate : bool, optional
+            Toggle ascent rate, by default False
+        ascent_speed : bool, optional
+            Toggle ascent speed, by default False
+        path : str, optional
+            Path to the .csv file, by default "unnamed.csv"
+        sep : str, optional
+            Separator, by default ","
+        header : bool, optional
+            Toggle header, by default True
+        index : bool, optional
+            Toggle index, by default False
         """
         self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, header=header, index=index)
 
@@ -503,14 +607,22 @@ class GPX():
         """
         Plot text on Matplotlib plot.
 
-        Args:
-            fig (matplotlib.figure.Figure): Matplotlib figure.
-            duration (Optional[tuple[float, float]], optional): Duration text plot coordinates. Defaults to (0, 0).
-            distance (Optional[tuple[float, float]], optional): Distance text plot coordinates. Defaults to (0.5, 0).
-            ascent (Optional[tuple[float, float]], optional): Ascent text plot coordinates. Defaults to (1, 0).
-            pace (Optional[tuple[float, float]], optional): Pace text plot coordinates. Defaults to (1, 0).
-            speed (Optional[tuple[float, float]], optional): Speed text plot coordinates. Defaults to (1, 0).
-            text_parameters (Optional[dict], optional): Text parameters. Defaults to None.
+        Parameters
+        ----------
+        fig : Figure
+            Matplotlib figure.
+        duration : Optional[tuple[float, float]], optional
+            Duration text plot coordinates, by default (0, 0)
+        distance : Optional[tuple[float, float]], optional
+            Distance text plot coordinates, by default (0.5, 0)
+        ascent : Optional[tuple[float, float]], optional
+            Ascent text plot coordinates, by default (1, 0)
+        pace : Optional[tuple[float, float]], optional
+            Pace text plot coordinates, by default (1, 0)
+        speed : Optional[tuple[float, float]], optional
+            Speed text plot coordinates, by default (1, 0)
+        text_parameters : Optional[dict], optional
+            Text parameters, by default None
         """
         # Handle text parameters
         if text_parameters is None:
@@ -556,20 +668,34 @@ class GPX():
         """
         Plot GPX on Matplotlib axes.
 
-        Args:
-            axes (matplotlib.axes.Axes): Axes to plot on.
-            projection (Optional[str], optional): Projection. Defaults to None.
-            color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
-            colorbar (bool, optional): Colorbar Toggle. Defaults to False.
-            elevation_color (bool, optional): Color track according to elevation. Defaults to False.
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            title (Optional[str], optional): Title. Defaults to None.
-            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
-            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
-            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
-            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
+        Parameters
+        ----------
+        axes : Axes
+            Axes to plot on.
+        projection : Optional[str], optional
+            Projection, by default None
+        color : str, optional
+            A color string (ie: "#FF0000" or "red") or a track attribute
+            ("elevation", "speed", "pace", "vertical_drop", "ascent_rate",
+            "ascent_speed"), by default "#101010"
+        colorbar : bool, optional
+            Colorbar Toggle, by default False
+        start_stop_colors : Optional[tuple[str, str]], optional
+            Start and stop points colors, by default None
+        way_points_color : Optional[str], optional
+            Way point color, by default None
+        title : Optional[str], optional
+            Title, by default None
+        duration : Optional[tuple[float, float]], optional
+            Display duration, by default None
+        distance : Optional[tuple[float, float]], optional
+            Display distance, by default None
+        ascent : Optional[tuple[float, float]], optional
+            Display ascent, by default None
+        pace : Optional[tuple[float, float]], optional
+            Display pace, by default None
+        speed : Optional[tuple[float, float]], optional
+            Display speed, by default None
         """
         # Clear axes
         axes.clear()
@@ -668,21 +794,34 @@ class GPX():
         speed: Optional[tuple[float, float]] = None,
         file_path: Optional[str] = None):
         """
-        plot GPX using Matplotlib.
+        Plot GPX using Matplotlib.
 
-        Args:
-            projection (Optional[str], optional): Projection. Defaults to None.
-            color (str, optional): A color string (ie: "#FF0000" or "red") or a track attribute ("elevation", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed") Defaults to "#101010".
-            colorbar (bool, optional): Colorbar Toggle. Defaults to False.
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            title (Optional[str], optional): Title. Defaults to None.
-            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
-            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
-            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
-            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            file_path (Optional[str], optional): Path to save plot. Defaults to None.
+        Parameters
+        ----------
+        projection : Optional[str], optional
+            Projection, by default None
+        color : str, optional
+            A color string (ie: "#FF0000" or "red") or a track attribute
+            ("elevation", "speed", "pace", "vertical_drop", "ascent_rate",
+            "ascent_speed"), by default "#101010"
+        colorbar : bool, optional
+            Colorbar Toggle, by default False
+        start_stop_colors : Optional[tuple[str, str]], optional
+            Start and stop points colors, by default None
+        way_points_color : Optional[str], optional
+            Way point color, by default None
+        title : Optional[str], optional
+            Title, by default None
+        duration : Optional[tuple[float, float]], optional
+            Display duration, by default None
+        distance : Optional[tuple[float, float]], optional
+            Display distance, by default None
+        ascent : Optional[tuple[float, float]], optional
+            Display ascent, by default None
+        pace : Optional[tuple[float, float]], optional
+            Display pace, by default None
+        speed : Optional[tuple[float, float]], optional
+            Display speed, by default None
         """
         # Create figure with axes
         fig = plt.figure(figsize=(14, 8))
@@ -729,19 +868,34 @@ class GPX():
         """
         Plot GPX using Matplotlib Basemap Toolkit.
 
-        Args:
-            projection (str, optional): Projection. Currently supported projections: cyl. Defaults to "cyl".
-            service (str, optional): Service used to fetch map background. Currently supported services: "World_Shaded_Relief". Defaults to "World_Shaded_Relief".
-            color (str, optional): Track color. Defaults to "#101010".
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            title (Optional[str], optional): Title. Defaults to None.
-            duration (Optional[tuple[float, float]], optional): Display duration. Defaults to None.
-            distance (Optional[tuple[float, float]], optional): Display distance. Defaults to None.
-            ascent (Optional[tuple[float, float]], optional): Display ascent. Defaults to None.
-            pace (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            speed (Optional[tuple[float, float]], optional): Display pace. Defaults to None.
-            file_path (Optional[str], optional): Path to save plot. Defaults to None.
+        Parameters
+        ----------
+        projection : str, optional
+            Projection, by default "cyl"
+        service : str, optional
+            Service used to fetch map background. Currently supported services:
+            "World_Shaded_Relief". Defaults to "World_Shaded_Relief",
+            by default "World_Shaded_Relief"
+        color : str, optional
+            Track color, by default "#101010"
+        start_stop_colors : Optional[tuple[str, str]], optional
+            Start and stop points colors, by default None
+        way_points_color : Optional[str], optional
+            Way point color, by default None
+        title : Optional[str], optional
+            Title, by default None
+        duration : Optional[tuple[float, float]], optional
+            Display duration, by default None
+        distance : Optional[tuple[float, float]], optional
+            Display distance, by default None
+        ascent : Optional[tuple[float, float]], optional
+            Display ascent, by default None
+        pace : Optional[tuple[float, float]], optional
+            Display pace, by default None
+        speed : Optional[tuple[float, float]], optional
+            Display speed, by default None
+        file_path : str, optional
+            Path to save plot, by default None
         """
         # Create figure
         fig = plt.figure(figsize=(14, 8))
@@ -833,16 +987,26 @@ class GPX():
         """
         Plot GPX using gmplot.
 
-        Args:
-            color (str, optional): Track_color. Defaults to "#110000".
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            zoom (float, optional): Zoom. Defaults to 10.0.
-            title (str, optional): Title. Defaults to None.
-            file_path (str, optional): Path to save plot. Defaults to None.
-            open (bool, optional): Open the plot in the default web browser. Defaults to True.
-            scatter (bool, optional): Scatter track points. Defaults to False.
-            plot (bool, optional): Plot track points. Defaults to True.
+        Parameters
+        ----------
+        color : str, optional
+            Track color, by default "#110000"
+        start_stop_colors : Optional[tuple[str, str]], optional
+            Start and stop points colors, by default None
+        way_points_color : Optional[str], optional
+            Way points color, by default None
+        zoom : float, optional
+            Zoom, by default 10.0
+        title : Optional[str], optional
+            Title, by default None
+        file_path : str, optional
+            Path to save plot, by default None
+        open : bool, optional
+            Open the plot in the default web browser, by default True
+        scatter : bool, optional
+            Scatter track points, by default False
+        plot : bool, optional
+            Plot track points, by default True
         """
         # Create plotter
         center_lat, center_lon = self.center()
@@ -900,16 +1064,27 @@ class GPX():
         """
         Plot GPX using folium.
 
-        Args:
-            tiles (str, optional): Map tiles. Supported tiles: "OpenStreetMap", "Stamen Terrain", "Stamen Toner". Defaults to "OpenStreetMap".
-            start_stop_colors (tuple[str, str], optional): Start and stop points colors. Defaults to False.
-            way_points_color (str, optional): Way point color. Defaults to False.
-            minimap (bool, optional): Add minimap. Defaults to False.
-            coord_popup (bool, optional): Add coordinates pop-up when clicking on the map. Defaults to False.
-            title (Optional[str], optional): _description_. Defaults to None.
-            zoom (float, optional): Zoom. Defaults to 12.0.
-            file_path (str, optional): Path to save plot. Defaults to None.
-            open (bool, optional): Open the plot in the default web browser. Defaults to True.
+        Parameters
+        ----------
+        tiles : str, optional
+            Map tiles. Supported tiles: "OpenStreetMap", "Stamen Terrain",
+            "Stamen Toner", by default "OpenStreetMap"
+        start_stop_colors : Optional[tuple[str, str]], optional
+            Start and stop points colors, by default None
+        way_points_color : Optional[str], optional
+            Way points color, by default None
+        minimap : bool, optional
+            Add minimap, by default False
+        coord_popup : bool, optional
+            Add coordinates pop-up when clicking on the map, by default False
+        title : Optional[str], optional
+            Title, by default None
+        zoom : float, optional
+            Zoom, by default 12.0
+        file_path : str, optional
+            Path to save plot, by default None
+        open : bool, optional
+            Open the plot in the default web browser, by default True
         """
         # Create map
         center_lat, center_lon = self.center()

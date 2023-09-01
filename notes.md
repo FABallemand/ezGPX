@@ -37,5 +37,6 @@
 - [gpxpy](https://github.com/tkrajina/gpxpy)
 
 ## 📝 TO DO LIST !!
+- Merge method
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)
