@@ -7,10 +7,8 @@ Welcome to ezGPX's documentation!
 =================================
 
 .. image:: https://img.shields.io/github/license/FABallemand/ezGPX
-:   alt: GitHub
 
 .. image:: https://img.shields.io/pypi/v/ezgpx
-:   alt: PyPI - Version
 
 .. toctree::
    :maxdepth: 2
