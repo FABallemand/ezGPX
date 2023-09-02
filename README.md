@@ -1,10 +1,10 @@
 # 🗺️ ezGPX
 
-[![GitHub license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/FABallemand/ezGPX/blob/main/LICENSE)
-[![PyPI version](https://badge.fury.io/py/ezgpx.svg)](https://pypi.org/project/ezgpx/)
-[![GitHub latest commit](https://badgen.net/github/last-commit/Naereen/Strapdown.js)](https://github.com/FABallemand/ezGPX/commit/)
+![GitHub](https://img.shields.io/github/license/FABallemand/ezGPX)
+![PyPI - Version](https://img.shields.io/pypi/v/ezgpx)
+![GitHub last commit](https://img.shields.io/github/last-commit/FABallemand/ezGPX/main)
 [![Documentation Status](https://readthedocs.org/projects/ezgpx/badge/?version=latest)](https://ezgpx.readthedocs.io/en/latest/?badge=latest)
-[![PyPI download month](https://img.shields.io/pypi/dm/ansicolortags.svg)](https://pypi.org/project/ezgpx/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/ezgpx)
 
 ## 🔎 Description
 Easy to use Python GPX library.
