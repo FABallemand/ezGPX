@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Union, List, Tuple
 import logging
 import xmlschema
 import pandas as pd
@@ -609,16 +609,25 @@ class Gpx():
         """
         Convert GPX object to Pandas Dataframe.
 
-        Args:
-            projection (bool, optional): Toggle projection. Defaults to False.
-            elevation (bool, optional): Toggle elevation. Defaults to True.
-            speed (bool, optional): Toggle speed. Defaults to False.
-            pace (bool, optional): Toggle pace. Defaults to False.
-            ascent_rate (bool, optional): Toggle ascent rate. Defaults to False.
-            ascent_speed (bool, optional): Toggle ascent speed. Defaults to False.
+        Parameters
+        ----------
+        projection : bool, optional
+            Toggle projection, by default False
+        elevation : bool, optional
+            Toggle elevation, by default True
+        speed : bool, optional
+            Toggle speed, by default False
+        pace : bool, optional
+            Toggle pace, by default False
+        ascent_rate : bool, optional
+            Toggle ascent rate, by default False
+        ascent_speed : bool, optional
+            Toggle ascent speed, by default False
 
-        Returns:
-            pd.DataFrame: Dataframe containing data from GPX.
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe containing data from GPX.
         """
         test_point = self.first_point()
         if projection and test_point._x is None:
@@ -641,7 +650,10 @@ class Gpx():
                         "lon": track_point.lon
                     }
                     if elevation:
-                        track_point_dict["ele"] = track_point.ele
+                        if track_point.ele is not None:
+                            track_point_dict["ele"] = track_point.ele
+                        else:
+                            track_point_dict["ele"] = 0
                     if projection:
                         track_point_dict["x"] = track_point._x
                         track_point_dict["y"] = track_point._y
@@ -657,6 +669,59 @@ class Gpx():
         df = pd.DataFrame(route_info)
         return df
     
+    def to_csv(
+            self,
+            path: str = None,
+            sep: str = ",",
+            columns: List[str] = None,
+            header: bool = True,
+            index: bool = False) -> Union[str, None]:
+        """
+        Write the GPX object track coordinates to a .csv file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to the .csv file, by default None
+        sep : str, optional
+            Separator, by default ","
+        columns : List[str], optional
+            List of columns to write, by default None
+        header : bool, optional
+            Toggle header, by default True
+        index : bool, optional
+             Toggle index, by default False
+
+        Returns
+        -------
+        str
+            CSV like string if path is set to None.
+        """
+        if columns is None:
+            columns =  ["lat", "lon"]
+
+        elevation = False
+        projection = False
+        speed = False
+        pace = False
+        ascent_rate = False
+        ascent_speed = False
+        
+        if "ele" in columns:
+            elevation = True
+        if "x" in columns or "y" in columns:
+            projection = True
+        if "speed" in columns:
+            speed = True
+        if "pace" in columns:
+            pace = True
+        if "ascent_rate" in columns:
+            ascent_rate = True
+        if "ascent_speed" in columns:
+            ascent_speed = True
+
+        return self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=columns, header=header, index=index)
+
     def project(self, projection: str):
         """
         Project tracks.

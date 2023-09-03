@@ -7,7 +7,7 @@ from datetime import datetime
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
 from ..gpx_parser import Parser, DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 
-class Writer():
+class GPXWriter():
     """
     GPX file writer.
     """
@@ -26,7 +26,7 @@ class Writer():
             precisions: dict = None,
             time_format: str = None) -> None:
         """
-        Initialize Writer instance.
+        Initialize GPXWriter instance.
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
@@ -241,7 +241,7 @@ class Writer():
             xml.etree.ElementTree.Element: GPX element.
         """
         if metadata is not None:
-            metadata_ = ET.SubElement(self.gpx_root, metadata.tag)
+            metadata_ = ET.SubElement(element, metadata.tag)
             metadata_, _ = self.add_subelement(metadata_, "name", metadata.name)
             metadata_, _ = self.add_subelement(metadata_, "desc", metadata.desc)
             metadata_ = self.add_person(metadata_, metadata.author)
@@ -492,7 +492,7 @@ class Writer():
 
     def gpx_to_string(self) -> str:
         """
-        Convert Gpx instance to string.
+        Convert Gpx instance to a string (the content of a .gpx file).
 
         Returns:
             str: String corresponding to the Gpx instance.
@@ -579,4 +579,3 @@ class Writer():
                 logging.error("Invalid written file (does not follow schema)")
                 return False
         return True
-

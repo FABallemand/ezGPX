@@ -11,7 +11,7 @@ with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ezgpx',
-    version='0.1.6',
+    version='0.1.7',
     description='Easy to use Python GPX library',
     long_description=long_description,
     long_description_content_type='text/markdown',

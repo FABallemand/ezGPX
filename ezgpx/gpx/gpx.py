@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union, Tuple, NewType
+from typing import Optional, Union, List, Tuple, Dict, NewType
 import logging
 import webbrowser
 from datetime import datetime
@@ -20,7 +20,8 @@ from folium.features import DivIcon
 
 from ..gpx_elements import Gpx, WayPoint
 from ..gpx_parser import Parser
-from ..gpx_writer import Writer
+from ..gpx_writer import GPXWriter
+from ..kml_writer import KMLWriter
 from ..utils import EARTH_RADIUS
 
 GPX = NewType("GPX", object) # GPX forward declaration for type hint
@@ -47,14 +48,16 @@ class GPX():
             self.file_path: str = file_path
             self.parser: Parser = Parser(file_path, check_schemas, extensions_schemas)
             self.gpx: Gpx = self.parser.gpx
-            self.writer: Writer = Writer(
+            self.gpx_writer: GPXWriter = GPXWriter(
+                self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
+            self.kml_writer: KMLWriter = KMLWriter(
                 self.gpx, precisions=self.parser.precisions, time_format=self.parser.time_format)
         else:
             logging.warning("File path does not exist")
             pass
 
     def __str__(self) -> str:
-        return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.writer}"
+        return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.gpx_writer}"
     
     def check_schemas(self, extensions_schemas: bool = False) -> bool:
         """
@@ -408,19 +411,19 @@ class GPX():
         """
         Remove metadata (ie: metadata will not be written when saving the GPX object as a .gpx file).
         """
-        self.writer.metadata = False
+        self.gpx_writer.metadata = False
 
     def remove_elevation(self):
         """
         Remove elevation data (ie: elevation data will not be written when saving the GPX object as a .gpx file).
         """
-        self.writer.ele = False
+        self.gpx_writer.ele = False
 
     def remove_time(self):
         """
         Remove time data (ie: time data will not be written when saving the GPX object as a .gpx file).
         """
-        self.writer.time = False
+        self.gpx_writer.time = False
 
     def remove_gps_errors(self):
         """
@@ -500,7 +503,7 @@ class GPX():
         str
             String representingth GPX object.
         """
-        return self.writer.gpx_to_string(self.gpx)
+        return self.gpx_writer.gpx_to_string(self.gpx)
     
     def to_dataframe(
             self,
@@ -535,6 +538,36 @@ class GPX():
         """
         return self.gpx.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed)
 
+    def to_csv(
+            self,
+            path: str = None,
+            sep: str = ",",
+            columns: List[str] = None,
+            header: bool = True,
+            index: bool = False) -> Union[str, None]:
+        """
+        Write the GPX object track coordinates to a .csv file.
+
+        Parameters
+        ----------
+        path : str, optional
+            Path to the .csv file, by default None
+        sep : str, optional
+            Separator, by default ","
+        columns : List[str], optional
+            List of columns to write, by default None
+        header : bool, optional
+            Toggle header, by default True
+        index : bool, optional
+             Toggle index, by default False
+
+        Returns
+        -------
+        str
+            CSV like string if path is set to None.
+        """
+        return self.gpx.to_csv(columns, path, sep, header, index)
+    
     def to_gpx(self, path: str, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
         """
         Write the GPX object to a .gpx file.
@@ -553,47 +586,29 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.writer.write(path, check_schemas, extensions_schemas)
-
-    def to_csv(
-            self,
-            projection: bool = False,
-            elevation: bool = True,
-            speed: bool = False,
-            pace: bool = False,
-            ascent_rate: bool = False,
-            ascent_speed: bool = False,
-            path: str = "unnamed.csv",
-            sep: str = ",",
-            header: bool = True,
-            index: bool = False):
+        return self.gpx_writer.write(path, check_schemas, extensions_schemas)
+    
+    def to_kml(self, path: str, styles: Optional[List[Tuple[str, Dict]]] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
         """
-        Write the GPX object track coordinates to a .csv file.
+        Write the GPX object to a .kml file.
 
         Parameters
         ----------
-        projection : bool, optional
-            Toggle projected coordinates, by default False
-        elevation : bool, optional
-            Toggle elevation, by default True
-        speed : bool, optional
-            Toggle speed, by default False
-        pace : bool, optional
-            Toggle pace, by default False
-        ascent_rate : bool, optional
-            Toggle ascent rate, by default False
-        ascent_speed : bool, optional
-            Toggle ascent speed, by default False
-        path : str, optional
-            Path to the .csv file, by default "unnamed.csv"
-        sep : str, optional
-            Separator, by default ","
-        header : bool, optional
-            Toggle header, by default True
-        index : bool, optional
-            Toggle index, by default False
+        path : str
+            Path to the .gpx file.
+        styles : List[Tuple[str, Dict]], optional
+            List of (style_id, style) tuples, by default None
+        check_schemas : bool, optional
+            Toggle schema verification after writting, by default True
+        extensions_schemas : bool, optional
+            Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work, by default False
+
+        Returns
+        -------
+        bool
+            Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, header=header, index=index)
+        return self.kml_writer.write(path, styles, check_schemas, extensions_schemas)
 
     def _matplotlib_plot_text(
             self,

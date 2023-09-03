@@ -1,1 +1,1 @@
-from .writer import *
+from .gpx_writer import *
