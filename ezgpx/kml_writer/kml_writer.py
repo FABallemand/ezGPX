@@ -2,6 +2,7 @@ import os
 from typing import Optional, Union, List, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
+import xmlschema
 from datetime import datetime
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
@@ -386,8 +387,7 @@ class KMLWriter():
             self,
             path: str,
             styles: Optional[List[Tuple[str, Dict]]] = None,
-            check_schemas: bool = False,
-            extensions_schemas: bool = False) -> bool:
+            check_schemas: bool = False) -> bool:
         """
         Handle writing.
 
@@ -399,10 +399,6 @@ class KMLWriter():
             List of (style_id, style) tuples, by default None
         check_schemas : bool, optional
             Toggle schema verification after writting, by default False
-        extensions_schemas : bool, optional
-            Toggle extensions schema verificaton after writing.
-            Requires internet connection and is not guaranted to work,
-            by default False
 
         Returns
         -------
@@ -427,8 +423,14 @@ class KMLWriter():
 
         # Check schema
         if check_schemas:
-            verification_gpx = Parser(path, check_schemas=False, extensions_schemas=False).gpx
-            if not verification_gpx.check_schemas(self.path, extensions_schemas=extensions_schemas):
-                logging.error("Invalid written file (does not follow schema)")
-                return False
+            # Load schema
+            current_file_path = os.path.dirname(os.path.abspath(__file__))
+            schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/kml_2_2/ogckml22.xsd"))
+            
+            # Check schema
+            if schema is not None:
+                return schema.is_valid(self.path)
+            else:
+                logging.error("Unable to check XML schema")
+                return True
         return True

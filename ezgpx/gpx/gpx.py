@@ -588,7 +588,7 @@ class GPX():
         """
         return self.gpx_writer.write(path, check_schemas, extensions_schemas)
     
-    def to_kml(self, path: str, styles: Optional[List[Tuple[str, Dict]]] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
+    def to_kml(self, path: str, styles: Optional[List[Tuple[str, Dict]]] = None, check_schemas: bool = True) -> bool:
         """
         Write the GPX object to a .kml file.
 
@@ -600,15 +600,13 @@ class GPX():
             List of (style_id, style) tuples, by default None
         check_schemas : bool, optional
             Toggle schema verification after writting, by default True
-        extensions_schemas : bool, optional
-            Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work, by default False
 
         Returns
         -------
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.kml_writer.write(path, styles, check_schemas, extensions_schemas)
+        return self.kml_writer.write(path, styles, check_schemas)
 
     def _matplotlib_plot_text(
             self,

@@ -15,7 +15,7 @@ setup(
     description='Easy to use Python GPX library',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-data'],
+    keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-converter', 'gpx-data'],
     url='https://pypi.org/project/ezgpx/',
     download_url='https://github.com/FABallemand/ezGPX',
     project_urls={

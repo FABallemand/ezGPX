@@ -1,3 +1,4 @@
+import os
 from typing import Union, List, Tuple
 import logging
 import xmlschema
@@ -104,10 +105,11 @@ class Gpx():
                     return False
         else:
             schema = None
+            current_file_path = os.path.dirname(os.path.abspath(__file__))
             if self.version == "1.1":
-                schema = xmlschema.XMLSchema("schemas/gpx_1_1/gpx.xsd")
+                schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/gpx_1_1/gpx.xsd"))
             elif self.version == "1.0":
-                schema = xmlschema.XMLSchema("schemas/gpx_1_0/gpx.xsd")
+                schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/gpx_1_0/gpx.xsd"))
 
             if schema is not None:
                 return schema.is_valid(file_path)

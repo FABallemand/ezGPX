@@ -37,6 +37,7 @@
 - [gpxpy](https://github.com/tkrajina/gpxpy)
 
 ## 📝 TO DO LIST !!
+- Documentation for conversion + Medium
 - Sub classes for GPX & KML writers
 - Merge method
 - Garmin extensions
