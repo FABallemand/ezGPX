@@ -38,7 +38,6 @@
 
 ## 📝 TO DO LIST !!
 - Change to project.toml (https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
-- Documentation for conversion + Medium
 - Sub classes for GPX & KML writers
 - Merge method
 - Garmin extensions
