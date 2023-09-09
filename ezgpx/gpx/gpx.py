@@ -494,7 +494,7 @@ class GPX():
         if self.gpx.extensions is None:
             self.gpx.extensions = gpx.gpx.extensions
 
-    def to_string(self) -> str:
+    def to_gpx_string(self) -> str:
         """
         Convert the GPX object to a string.
 
