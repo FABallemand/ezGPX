@@ -38,7 +38,7 @@
 
 ## 📝 TO DO LIST !!
 - Change to project.toml (https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
-- Sub classes for GPX & KML writers
 - Merge method
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)
+- Tests

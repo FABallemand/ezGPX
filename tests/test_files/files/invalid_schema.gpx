@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx creator="StravaGPX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd
+                        http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd
+                        http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd"
+    version="1.1" xmlns="http://www.topografix.com/GPX/1/1"
+    xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+    xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3">
+    <metadata>
+        <time>2023-05-22T06:04:58Z</time>
+        <trk>
+            <name>Dérouillage habituel 💥</name>
+            <type>9</type>
+            <trkseg>
+                <trkpt lat="44.0433320" lon="4.4530890">
+                    <ele>110.7</ele>
+                    <time>2023-05-22T06:04:58Z</time>
+                </trkpt>
+                <trkpt lat="44.0433530" lon="4.4531130">
+                    <ele>111.0</ele>
+                    <time>2023-05-22T06:04:59Z</time>
+                </trkpt>
+            </trkseg>
+        </trk>
+    </metadata>
+    <trk>
+        <name>Dérouillage habituel 💥</name>
+        <type>9</type>
+        <trkseg>
+            <trkpt lat="44.0433320" lon="4.4530890">
+                <ele>110.7</ele>
+                <time>2023-05-22T06:04:58Z</time>
+            </trkpt>
+            <trkpt lat="44.0433530" lon="4.4531130">
+                <ele>111.0</ele>
+                <time>2023-05-22T06:04:59Z</time>
+            </trkpt>
+        </trkseg>
+    </trk>
+</gpx>

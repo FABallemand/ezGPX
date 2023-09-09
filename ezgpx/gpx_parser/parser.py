@@ -25,7 +25,7 @@ class Parser():
         """
         self.file_path: str = file_path
         self.check_schemas: bool = check_schemas
-        self.extensions_schemass: bool = extensions_schemas
+        self.extensions_schemas: bool = extensions_schemas
 
         self.gpx_tree: ET.ElementTree = None
         self.gpx_root: ET.Element = None

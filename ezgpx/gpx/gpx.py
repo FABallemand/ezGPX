@@ -57,7 +57,7 @@ class GPX():
             pass
 
     def __str__(self) -> str:
-        return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\nwriter = {self.gpx_writer}"
+        return f"file_path = {self.file_path}\nparser = {self.parser}\ngpx = {self.gpx}\ngpx_writer = {self.gpx_writer}\nkml_writer = {self.kml_writer}"
     
     def check_schemas(self, extensions_schemas: bool = False) -> bool:
         """
@@ -566,7 +566,7 @@ class GPX():
         str
             CSV like string if path is set to None.
         """
-        return self.gpx.to_csv(columns, path, sep, header, index)
+        return self.gpx.to_csv(path, sep, columns, header, index)
     
     def to_gpx(self, path: str, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
         """
