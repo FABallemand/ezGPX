@@ -37,22 +37,38 @@ class Gpx():
         """
         Initialize Gpx instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "gpx".
-            creator (str, optional): Creator. Defaults to None.
-            xmlns (str, optional): XML xmlns. Defaults to None.
-            version (str, optional): Version. Defaults to None.
-            xmlns_xsi (str, optional): XML xmlns_xsi. Defaults to None.
-            xsi_schema_location (List[str], optional): XML schema location. Defaults to None.
-            xmlns_gpxtpx (str, optional): _description_. Defaults to None.
-            xmlns_gpxx (str, optional): _description_. Defaults to None.
-            xmlns_gpxtrk (str, optional): _description_. Defaults to None.
-            xmlns_wptx1 (str, optional): _description_. Defaults to None.
-            metadata (Metadata, optional): Metadata. Defaults to None.
-            wpt (List[WayPoint], optional): Way points. Defaults to None.
-            rte (List[Route], optional): Routes. Defaults to None.
-            tracks (List[Track], optional): List of tracks. Defaults to None.
-            extensions (Extensions, optional): Extensions. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "gpx"
+        creator : str, optional
+            Creator, by default None
+        xmlns : str, optional
+            XML xmlns, by default None
+        version : str, optional
+            Version, by default None
+        xmlns_xsi : str, optional
+            XML xmlns_xsi, by default None
+        xsi_schema_location : List[str], optional
+            XML schema location, by default None
+        xmlns_gpxtpx : str, optional
+            ???, by default None
+        xmlns_gpxx : str, optional
+            ???, by default None
+        xmlns_gpxtrk : str, optional
+            ???, by default None
+        xmlns_wptx1 : str, optional
+            ???, by default None
+        metadata : Metadata, optional
+            Metadata, by default None
+        wpt : List[WayPoint], optional
+            Way points, by default None
+        rte : List[Route], optional
+            Routes, by default None
+        tracks : List[Track], optional
+            List of tracks, by default None
+        extensions : Extensions, optional
+            Extensions, by default None
         """
         self.tag: str = tag
         self.creator: str = creator
@@ -88,12 +104,17 @@ class Gpx():
         """
         Check XML schema.
 
-        Args:
-            file_path (str): File path.
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work.Defaults to False.
+        Parameters
+        ----------
+        file_path : str
+            File path
+        extensions_schemas : bool, optional
+            Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work, by default False
 
-        Returns:
-            bool: True if the file follows XML schemas.
+        Returns
+        -------
+        bool
+            True if the file follows XML schemas
         """
         if extensions_schemas:
             gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
@@ -121,8 +142,10 @@ class Gpx():
         """
         Return activity name.
 
-        Returns:
-            str: Activity name.
+        Returns
+        -------
+        str
+            Activity name.
         """
         return self.tracks[0].name
     
@@ -130,8 +153,10 @@ class Gpx():
         """
         Set name.
 
-        Args:
-            new_name (str): New name.
+        Parameters
+        ----------
+        new_name : str
+            New name.
         """
         self.tracks[0].name = new_name
 
@@ -139,8 +164,10 @@ class Gpx():
         """
         Compute the number of points in the GPX.
 
-        Returns:
-            int: Number of points in the GPX.
+        Returns
+        -------
+        int
+            Number of points in the GPX.
         """
         nb_pts = 0
         for track in self.tracks:
@@ -152,8 +179,10 @@ class Gpx():
         """
         Return GPX first point.
 
-        Returns:
-            WayPoint: First point.
+        Returns
+        -------
+        WayPoint
+            First point.
         """
         return self.tracks[0].trkseg[0].trkpt[0]
 
@@ -161,8 +190,10 @@ class Gpx():
         """
         Return GPX last point.
 
-        Returns:
-            WayPoint: Last point.
+        Returns
+        -------
+        WayPoint
+            Last point.
         """
         return self.tracks[-1].trkseg[-1].trkpt[-1]
     
@@ -170,8 +201,10 @@ class Gpx():
         """
         Find minimum and maximum latitude and longitude.
 
-        Returns:
-            Tuple[float, float, float, float]: Min latitude, min longitude, max latitude, max longitude
+        Returns
+        -------
+        Tuple[float, float, float, float]
+            Min latitude, min longitude, max latitude, max longitude.
         """
         min_lat = self.tracks[0].trkseg[0].trkpt[0].lat
         min_lon = self.tracks[0].trkseg[0].trkpt[0].lon
@@ -196,8 +229,10 @@ class Gpx():
         """
         Compute the center coordinates of the track.
 
-        Returns:
-            Tuple[float, float]: Latitude and longitude of the center point.
+        Returns
+        -------
+        Tuple[float, float]
+            Latitude and longitude of the center point.
         """
         min_lat, min_lon, max_lat, max_lon = self.bounds()
         center_lat = min_lat + (max_lat - min_lat) / 2
@@ -208,8 +243,10 @@ class Gpx():
         """
         Compute the total distance (meters) of the tracks contained in the Gpx element.
 
-        Returns:
-            float: Distance (meters)
+        Returns
+        -------
+        float
+            Distance (meters).
         """
         dst = 0
         previous_point = self.tracks[0].trkseg[0].trkpt[0]
@@ -224,8 +261,10 @@ class Gpx():
         """
         Compute the total ascent (meters) of the tracks contained in the Gpx element.
 
-        Returns:
-            float: Ascent (meters)
+        Returns
+        -------
+        float
+            Ascent (meters).
         """
         ascent = 0
         previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
@@ -241,8 +280,10 @@ class Gpx():
         """
         Compute the total descent (meters) of the tracks contained in the Gpx element.
 
-        Returns:
-            float: Descent (meters)
+        Returns
+        -------
+        float
+            Descent (meters).
         """
         descent = 0
         previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
@@ -276,8 +317,10 @@ class Gpx():
         """
         Return activity minimum ascent rate.
 
-        Returns:
-            float: Minimum ascent rate.
+        Returns
+        -------
+        float
+            Minimum ascent rate.
         """
         min_ascent_rate = 100.0
         self.compute_points_ascent_rate()
@@ -294,8 +337,10 @@ class Gpx():
         """
         Return activity maximum ascent rate.
 
-        Returns:
-            float: Maximum ascent rate.
+        Returns
+        -------
+        float
+            Maximum ascent rate.
         """
         max_ascent_rate = -1.0
         self.compute_points_ascent_rate()
@@ -312,8 +357,10 @@ class Gpx():
         """
         Compute minimum elevation (meters) in the tracks contained in the Gpx element.
 
-        Returns:
-            float: Minimum elevation (meters).
+        Returns
+        -------
+        float
+            Minimum elevation (meters).
         """
         min_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
@@ -327,8 +374,10 @@ class Gpx():
         """
         Compute maximum elevation (meters) in the tracks contained in the Gpx element.
 
-        Returns:
-            float: Maximum elevation (meters).
+        Returns
+        -------
+        float
+            Maximum elevation (meters).
         """
         max_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
         for track in self.tracks:
@@ -340,28 +389,34 @@ class Gpx():
     
     def utc_start_time(self) -> datetime:
         """
-        Return the activity UTC starting time.
+        Return the activity UTC start time.
 
-        Returns:
-            datetime: UTC start time.
+        Returns
+        -------
+        datetime
+            UTC start time.
         """
         return self.tracks[0].trkseg[0].trkpt[0].time
     
     def utc_stop_time(self):
         """
-        Return the activity UTC stopping time.
+        Return the activity UTC stop time.
 
-        Returns:
-            datetime: UTC stop time.
+        Returns
+        -------
+        datetime
+            UTC stop time.
         """
         return self.tracks[-1].trkseg[-1].trkpt[-1].time
     
     def start_time(self) -> datetime:
         """
-        Return the activity starting time.
+        Return the activity start time.
 
-        Returns:
-            datetime: Start time.
+        Returns
+        -------
+        datetime
+            Start time.
         """
         start_time = None
         try:
@@ -372,10 +427,12 @@ class Gpx():
     
     def stop_time(self) -> datetime:
         """
-        Return the activity stopping time.
+        Return the activity stop time.
 
-        Returns:
-            datetime: Stop time.
+        Returns
+        -------
+        datetime
+            Stop time.
         """
         stop_time = None
         try:
@@ -388,8 +445,10 @@ class Gpx():
         """
         Compute the total elapsed time.
 
-        Returns:
-            datetime: Total elapsed time.
+        Returns
+        -------
+        datetime
+            Total elapsed time.
         """
         total_elapsed_time = None
         try:
@@ -402,11 +461,16 @@ class Gpx():
         """
         Compute the stopped time during activity.
 
-        Args:
-            tolerance (float, optional): Maximal distance between two points for movement. Defaults to 2.45. (According to my tests with strava_run_1 and the data on Strava).
+        Parameters
+        ----------
+        tolerance : float, optional
+            Maximal distance between two points for movement, by default 2.45
+            (According to my tests with strava_run_1.gpx and the data on Strava)
 
-        Returns:
-            datetime: Stopped time.
+        Returns
+        -------
+        datetime
+            Stopped time.
         """
         stopped_time = self.start_time() - self.start_time() # Better way to do it?
 
@@ -425,8 +489,10 @@ class Gpx():
         """
         Compute the moving time during the activity.
 
-        Returns:
-            datetime: Moving time.
+        Returns
+        -------
+        datetime
+            Moving time.
         """
         return self.total_elapsed_time() - self.stopped_time()
     
@@ -434,8 +500,10 @@ class Gpx():
         """
         Compute the average speed (kilometers per hour) during the activity.
 
-        Returns:
-            float: Average speed (kilometers per hour).
+        Returns
+        -------
+        float
+            Average speed (kilometers per hour).
         """
         # Compute and convert total elapsed time
         total_elapsed_time = self.total_elapsed_time()
@@ -450,8 +518,10 @@ class Gpx():
         """
         Compute the average moving speed (kilometers per hour) during the activity.
 
-        Returns:
-            float: Average moving speed (kilometers per hour).
+        Returns
+        -------
+        float
+            Average moving speed (kilometers per hour).
         """
         # Compute and convert moving time
         moving_time = self.moving_time()
@@ -483,8 +553,10 @@ class Gpx():
         """
         Return the minimum speed during the activity.
 
-        Returns:
-            float: Minimum speed.
+        Returns
+        -------
+        float
+            Minimum speed.
         """
         min_speed = 1000.0
         self.compute_points_speed()
@@ -501,8 +573,10 @@ class Gpx():
         """
         Return the maximum speed during the activity.
 
-        Returns:
-            float: Maximum speed.
+        Returns
+        -------
+        float
+            Maximum speed.
         """
         max_speed = -1.0
         self.compute_points_speed()
@@ -519,8 +593,10 @@ class Gpx():
         """
         Compute the average pace (minute per kilometer) during the activity.
 
-        Returns:
-            float: Average pace (minute per kilometer).
+        Returns
+        -------
+        float
+            Average pace (minute per kilometer).
         """
         return 60.0 / self.avg_speed()
     
@@ -528,8 +604,10 @@ class Gpx():
         """
         Compute the average moving pace (minute per kilometer) during the activity.
 
-        Returns:
-            float: Average moving pace (minute per kilometer).
+        Returns
+        -------
+        float
+            Average moving pace (minute per kilometer).
         """
         return 60.0 / self.avg_moving_speed()
     
@@ -551,8 +629,10 @@ class Gpx():
         """
         Return the minimum pace during the activity.
 
-        Returns:
-            float: Minimum pace.
+        Returns
+        -------
+        float
+            Minimum pace.
         """
         min_pace = 1000.0
         self.compute_points_pace()
@@ -569,8 +649,10 @@ class Gpx():
         """
         Return the maximum pace during the activity.
 
-        Returns:
-            float: Maximum pace.
+        Returns
+        -------
+        float
+            Maximum pace.
         """
         max_pace = -1.0
         self.compute_points_pace()
@@ -728,8 +810,10 @@ class Gpx():
         """
         Project tracks.
 
-        Args:
-            projection (str): Projection.
+        Parameters
+        ----------
+        projection : str
+            Projection.
         """
         for track in self.tracks:
             track.project(projection)
@@ -738,11 +822,15 @@ class Gpx():
         """
         Remove GPS errors.
 
-        Args:
-            error_distance (int, optional): Error threshold distance (meters) between two points. Defaults to 1000.
+        Parameters
+        ----------
+        error_distance : int, optional
+            Error threshold distance (meters) between two points, by default 100
 
-        Returns:
-            List: List of removed points (GPS errors).
+        Returns
+        -------
+        _type_
+            List of removed points (GPS errors).
         """
         previous_point = None
         gps_errors = []
@@ -771,9 +859,12 @@ class Gpx():
         """
         Remove points that are to close together.
 
-        Args:
-            min_dist (float, optional): Minimal distance between two points. Defaults to 1.
-            max_dist (float, optional): Maximal distance between two points. Defaults to 10.
+        Parameters
+        ----------
+        min_dist : float, optional
+            Minimal distance between two points, by default 1
+        max_dist : float, optional
+            Maximal distance between two points, by default 10
         """
         point_1 = None
         point_2 = None
@@ -814,8 +905,10 @@ class Gpx():
         """
         Simplify GPX tracks using Ramer-Douglas-Peucker algorithm.
 
-        Args:
-            epsilon (float): Tolerance.
+        Parameters
+        ----------
+        epsilon : _type_
+            Tolerance.
         """
         for track in self.tracks:
             for segment in track.trkseg:

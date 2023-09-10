@@ -25,23 +25,40 @@ class Extensions():
         """
         Initialize Extensions instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "extensions".
-            display_color (str, optional): Display color. Defaults to "Cyan".
-            distance (float, optional): Distance. Defaults to None.
-            total_elapsed_time (float, optional): Total elapsed time. Defaults to None.
-            moving_time (float, optional): Moving time. Defaults to None.
-            stopped_time (float, optional): Stopped time. Defaults to None.
-            moving_speed (float, optional): Moving speed. Defaults to None.
-            max_speed (float, optional): Maximum speed. Defaults to None.
-            max_elevation (float, optional): Maximum elevation. Defaults to None.
-            min_elevation (float, optional): Minimum elevation. Defaults to None.
-            ascent (float, optional): Ascent. Defaults to None.
-            descent (float, optional): Descent. Defaults to None.
-            avg_ascent_rate (float, optional): Average ascent rate. Defaults to None.
-            max_ascent_rate (float, optional): Maximum ascent rate. Defaults to None.
-            avg_descent_rate (float, optional): Average descent rate. Defaults to None.
-            max_descent_rate (float, optional): Maximum descent rate. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "extensions"
+        display_color : str, optional
+            Display color, by default "Cyan"
+        distance : float, optional
+            Distance, by default None
+        total_elapsed_time : float, optional
+            Total elapsed time, by default None
+        moving_time : float, optional
+            Moving time, by default None
+        stopped_time : float, optional
+            Stopped time, by default None
+        moving_speed : float, optional
+            Moving speed, by default None
+        max_speed : float, optional
+            Maximum speed, by default None
+        max_elevation : float, optional
+            Maximum elevation, by default None
+        min_elevation : float, optional
+            Minimum elevation, by default None
+        ascent : float, optional
+            Ascent, by default None
+        descent : float, optional
+            Descent, by default None
+        avg_ascent_rate : float, optional
+            Average ascent rate, by default None
+        max_ascent_rate : float, optional
+            Maximum ascent rate, by default None
+        avg_descent_rate : float, optional
+            Average descent rate, by default None
+        max_descent_rate : float, optional
+            Maximum descent rate, by default None
         """
         self.tag: str = tag
         self.display_color: str = display_color

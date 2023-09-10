@@ -13,11 +13,16 @@ class Copyright():
         """
         Initialize Copyright instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "copyright".
-            author (str, optional): Author. Defaults to None.
-            year (int, optional): Year. Defaults to None.
-            licence (str, optional): Licence. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "copyright"
+        author : str, optional
+            Author, by default None
+        year : int, optional
+            Year, by default None
+        licence : str, optional
+            Licence, by default None
         """
         self.tag: str = tag
         self.author: str = author

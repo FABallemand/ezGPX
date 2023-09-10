@@ -13,11 +13,16 @@ class Link():
         """
         Initialize Link instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "link".
-            href (str, optional): Hyper reference. Defaults to None.
-            text (str, optional): Text. Defaults to None.
-            type (str, optional): Type. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "link"
+        href : str, optional
+            Hyper reference, by default None
+        text : str, optional
+            Text, by default None
+        type : str, optional
+            Type, by default None
         """
         self.tag: str = tag
         self.href: str = href

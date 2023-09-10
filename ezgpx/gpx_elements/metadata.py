@@ -23,17 +23,28 @@ class Metadata():
         """
         Initialize Metadata instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "metadata".
-            name (str, optional): Name. Defaults to None.
-            desc (str, optional): Description. Defaults to None.
-            author (Person, optional): Author. Defaults to None.
-            copyright (str, optional): Copyright. Defaults to None.
-            link (Link, optional): Link. Defaults to None.
-            time (datetime, optional): Time. Defaults to None.
-            keywords (str, optional): Keywords. Defaults to None.
-            bounds (str, optional): Bounds. Defaults to None.
-            extensions (str, optional): Extensions. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "metadata"
+        name : str, optional
+            Name, by default None
+        desc : str, optional
+            Description, by default None
+        author : Person, optional
+            Author, by default None
+        copyright : str, optional
+            Copyright, by default None
+        link : Link, optional
+            Link, by default None
+        time : datetime, optional
+            Time, by default None
+        keywords : str, optional
+            Keywords, by default None
+        bounds : str, optional
+            Bounds, by default None
+        extensions : str, optional
+            Extensions, by default None
         """
         self.tag: str = tag
         self.name: str = name

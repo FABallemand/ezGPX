@@ -14,12 +14,12 @@ class PointSegment():
         """
         Initialize PointSegment instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "ptseg".
-            points (List[Point], optional): List of points. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "ptseg"
+        points : List[Point], optional
+            List of points, by default None
         """
         self.tag: str = tag
-        if points is None:
-            self.points: List[Point] = []
-        else:
-            self.points: List[Point] = points
+        self.points: List[Point] = [] if points is None else points

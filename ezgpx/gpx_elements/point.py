@@ -17,12 +17,18 @@ class Point():
         """
         Initialize Point instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "pt".
-            lat (float, optional): Latitude. Defaults to None.
-            lon (float, optional): Longitude. Defaults to None.
-            ele (float, optional): Elevation. Defaults to None.
-            time (datetime, optional): Time. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "pt"
+        lat : float, optional
+            Latitude, by default None
+        lon : float, optional
+            Longitude, by default None
+        ele : float, optional
+            Elevation, by default None
+        time : datetime, optional
+            Time, by default None
         """
         self.tag: str = tag
         self.lat: float = lat

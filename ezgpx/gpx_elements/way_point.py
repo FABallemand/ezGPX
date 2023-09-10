@@ -37,27 +37,55 @@ class WayPoint():
         """
         Initialize WayPoint instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "wpt".
-            lat (float, optional): Latitude. Defaults to None.
-            lon (float, optional): Longitude. Defaults to None.
-            ele (float, optional): Elevation. Defaults to None.
-            time (datetime, optional): Time. Defaults to None.
-            mag_var (float, optional): _description_. Defaults to None.
-            geo_id_height (float, optional): _description_. Defaults to None.
-            name (str, optional): Name. Defaults to None.
-            cmt (str, optional): Comment. Defaults to None.
-            desc (str, optional): Description. Defaults to None.
-            src (str, optional): Source. Defaults to None.
-            link (Link, optional): link. Defaults to None.
-            sym (str, optional): _description_. Defaults to None.
-            type (str, optional): Type. Defaults to None.
-            fix (str, optional): _description_. Defaults to None.
-            ppssat (int, optional): _description_. Defaults to None.
-            vdop (float, optional): _description_. Defaults to None.
-            pdop (float, optional): _description_. Defaults to None.
-            age_of_gps_data (float, optional): Age of GPS data. Defaults to None.
-            dgpsid (int, optional): _description_. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "wpt"
+        lat : float, optional
+            Latitude (degrees), by default None
+        lon : float, optional
+            Longitude (degrees), by default None
+        ele : float, optional
+            Elevation (meters), by default None
+        time : datetime, optional
+            Time, by default None
+        mag_var : float, optional
+            Magnetic variation (degrees) at the point, by default None
+        geo_id_height : float, optional
+            Height (meters) of geoid (mean sea level) above WGS84 earth
+            ellipsoid. As defined in NMEA GGA message., by default None
+        name : str, optional
+            Name, by default None
+        cmt : str, optional
+            Comment, by default None
+        desc : str, optional
+            Description, by default None
+        src : str, optional
+            Source, by default None
+        link : Link, optional
+            Link, by default None
+        sym : str, optional
+            Text of GPS symbol name. For interchange with other programs,
+            use the exact spelling of the symbol as displayed on the GPS.
+            If the GPS abbreviates words, spell them out, by default None
+        type : str, optional
+            Type, by default None
+        fix : str, optional
+            Type of GPX fix, by default None
+        sat : int, optional
+            Number of satellites used to calculate the GPX fix, by default None
+        hdop : float, optional
+            Horizontal dilution of precision, by default None
+        vdop : float, optional
+            Vertical dilution of precision, by default None
+        pdop : float, optional
+            Position dilution of precision, by default None
+        age_of_gps_data : float, optional
+            Number of seconds since last DGPS update, by default None
+        dgpsid : int, optional
+            ID of DGPS station used in differential correction, by default None
+        extensions: Extensions, optional
+            Extensions, by default None
         """
         self.tag: str = tag
         self.lat: float = lat
@@ -96,8 +124,10 @@ class WayPoint():
         """
         Project point.
 
-        Args:
-            projection (str): Projection.
+        Parameters
+        ----------
+        projection : str
+            Projection.
         """
         if projection in ["web_mercator_projection", "web_mercator", "wm"]:
             self._x, self._y = web_mercator_projection(self.lat, self.lon)

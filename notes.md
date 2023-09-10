@@ -42,3 +42,4 @@
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)
 - Tests
+- Update docstring (style + content [description from xsd])

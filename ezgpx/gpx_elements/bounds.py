@@ -14,12 +14,18 @@ class Bounds():
         """
         Initialize Bounds instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "bounds".
-            minlat (float, optional): Minimal latitude. Defaults to None.
-            minlon (float, optional): Minimal longitude. Defaults to None.
-            maxlat (float, optional): Maximal latitude. Defaults to None.
-            maxlon (float, optional): Maximal longitude. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "bounds"
+        minlat : float, optional
+            Minimal latitude, by default None
+        minlon : float, optional
+            Minimal longitude, by default None
+        maxlat : float, optional
+            Maximal latitude, by default None
+        maxlon : float, optional
+            Maximal longitude, by default None
         """
         self.tag: str = tag
         self.minlat: float = minlat

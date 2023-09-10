@@ -16,24 +16,27 @@ class TrackSegment():
         """
         Initialize TrackSegment instance.
 
-        Args:
-        tag (str, optional): XML tag. Defaults to "trkseg".
-            trkpt (List[WayPoint], optional): List of track points. Defaults to None.
-            extensions (Extensions, optional): Extensions. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "trkseg"
+        trkpt : List[WayPoint], optional
+            List of track points, by default None
+        extensions : Extensions, optional
+            Extensions, by default None
         """
         self.tag: str = tag
-        if trkpt is None:
-            self.trkpt: List[WayPoint] = []
-        else:
-            self.trkpt: List[WayPoint] = trkpt
+        self.trkpt: List[WayPoint] = [] if trkpt is None else trkpt
         self.extensions: Extensions = extensions
 
     def project(self, projection: str):
         """
         Project points.
 
-        Args:
-            projection (str): Projection.
+        Parameters
+        ----------
+        projection : str
+            Projection.
         """
         for point in self.trkpt:
             point.project(projection)

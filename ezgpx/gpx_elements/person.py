@@ -15,11 +15,16 @@ class Person():
         """
         Initialize Person instance.
 
-        Args:
-            tag (str, optional): XML tag. Defaults to "person".
-            name (str, optional): Name. Defaults to None.
-            email (Email, optional): Email. Defaults to None.
-            link (Link, optional): Link. Defaults to None.
+        Parameters
+        ----------
+        tag : str, optional
+            XML tag, by default "person"
+        name : str, optional
+            Name, by default None
+        email : Email, optional
+            Email, by default None
+        link : Link, optional
+            Link, by default None
         """
         self.tag: str = tag
         self.name: str = name
