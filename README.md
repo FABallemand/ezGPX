@@ -5,6 +5,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/FABallemand/ezGPX/main)
 [![Documentation Status](https://readthedocs.org/projects/ezgpx/badge/?version=latest)](https://ezgpx.readthedocs.io/en/latest/?badge=latest)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/ezgpx)
+<!-- ![CI](https://github.com/FABallemand/ezGPX/actions/workflows/ci.yml/badge.svg?event=push) -->
 
 ## 🔎 Description
 Easy to use Python GPX library.

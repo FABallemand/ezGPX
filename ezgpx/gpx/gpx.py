@@ -407,6 +407,28 @@ class GPX():
         """
         self.gpx.compute_points_ascent_speed()
 
+    def min_ascent_speed(self) -> float:
+        """
+        Return the minimum ascent speed (kilometers per hour) during the activity.
+
+        Returns
+        -------
+        float
+            Minimum ascent speed.
+        """
+        return self.gpx.min_ascent_speed()
+
+    def max_ascent_speed(self) -> float:
+        """
+        Return the maximum ascent speed (kilometers per hour) during the activity.
+
+        Returns
+        -------
+        float
+            Maximum ascent speed.
+        """
+        return self.gpx.max_ascent_speed()
+
     def remove_metadata(self):
         """
         Remove metadata (ie: metadata will not be written when saving the GPX object as a .gpx file).

@@ -22,4 +22,4 @@ jobs:
       - name: tests
         run: |
           python3 -c"import sys; print(sys.path)"
-          python3 -m pytest -s
+          python3 -m pytest -v

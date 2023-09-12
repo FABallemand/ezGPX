@@ -5,6 +5,7 @@ import filecmp
 from shutil import rmtree
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 file_folder = os.path.dirname(__file__)
@@ -110,7 +111,137 @@ class TestGPX():
         # Test
         assert(gpx.descent() == 224.79999999999987)
 
+    @pytest.mark.skip(reason="nothing to test")
+    def test_compute_points_ascent_rate(self):
+        pass
+
+    def test_min_ascent_rate(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.min_ascent_rate() == -38.54138626353898)
+
+    def test_max_ascent_rate(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.max_ascent_rate() == 51.2919872933083)
+
+    def test_min_elevation(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.min_elevation() == 98.5)
+
+    def test_max_elevation(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.max_elevation() == 235.6)
+
+    @pytest.mark.skip(reason="time related test")
+    def test_start_time(self):
+        pass
+
+    @pytest.mark.skip(reason="time related test")
+    def test_stop_time(self):
+        pass
+
+    @pytest.mark.skip(reason="time related test")
+    def test_total_elapsed_time(self):
+        pass
+
+    @pytest.mark.skip(reason="time related test")
+    def test_stopped_time(self):
+        pass
+
+    @pytest.mark.skip(reason="time related test")
+    def test_moving_time(self):
+        pass
+
+    def test_avg_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.avg_speed() == 10.66505004775145)
+
+    def test_avg_moving_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.avg_moving_speed() == 10.974613320139435)
+
+    @pytest.mark.skip(reason="nothing to test")
+    def test_compute_points_speed(self):
+        pass
+
+    def test_min_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.min_speed() == 0.0)
+
+    def test_max_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.max_speed() == 19.69510525631602)
+
+    def test_avg_pace(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.avg_pace() == 5.625852643105975)
+
+    def test_avg_moving_pace(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.avg_moving_pace() == 5.467163010645161)
+
+    @pytest.mark.skip(reason="nothing to test")
+    def test_compute_points_pace(self):
+        pass
+    
+    def test_min_pace(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.min_pace() == 3.046442210851278)
+
+    def test_max_pace(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.max_pace() == 1041.2956304834424)
+
+    @pytest.mark.skip(reason="nothing to test")
+    def test_compute_points_ascent_speed(self):
+        pass
+
+    def test_min_ascent_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.min_ascent_speed() == -3.3599999999999794)
+
+    def test_max_ascent_speed(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Test
+        assert(gpx.max_ascent_speed() == 2.1599999999999797)
+
+    #==== Modifications ======================================================#
+
     #==== Conversion and Saving ==============================================#
+
+    def test_to_dataframe(self):
+        # Parse GPX Files
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        df = gpx.to_dataframe()
+        reference_df = pd.read_csv(os.path.join(FILES_DIRECTORY, "strava_run_1_test.csv"))
+        # Test
+        assert(reference_df.equals(df))
 
     def test_to_gpx(self):
         # Parse GPX Files
