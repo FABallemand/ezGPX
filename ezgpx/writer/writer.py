@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from ..gpx_elements import Gpx
-from ..gpx_parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+from ..parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 
 class Writer():
     """
@@ -28,6 +28,22 @@ class Writer():
         """
         self.gpx: Gpx = gpx
         self.path: str = path
+
+    def setIfNotNone(self, element: ET.Element, field: str, value):
+        """
+        _summary_
+
+        Parameters
+        ----------
+        element : ET.Element
+            _description_
+        field : str
+            _description_
+        value : _type_
+            _description_
+        """
+        if value is not None:
+            element.set(field, value)
 
     def add_subelement(self, element: ET.Element, sub_element: str, text: str) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """

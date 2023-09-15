@@ -1,1 +1,1 @@
-from .parser import *
+from .gpx_parser import *

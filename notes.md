@@ -4,6 +4,7 @@
 
 #### 🏷️ XML
 - [GPX XML Schema](http://www.topografix.com/GPX/1/1/)
+- [KML XML Schema](http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd)
 - Real Python: [A roadmap to XML Parsers in Python](https://realpython.com/python-xml-parser/#learn-about-xml-parsers-in-pythons-standard-library)
 - [xml.etree.ElementTree — The ElementTree XML API](https://docs.python.org/3/library/xml.etree.elementtree.html)
 - GeeksForGeeks: [Reading and Writing XML Files in Python](https://www.geeksforgeeks.org/reading-and-writing-xml-files-in-python/)
@@ -38,6 +39,7 @@
 
 ## 📝 TO DO LIST !!
 - Change to project.toml (https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
+- Add doc for KML parsing
 - Merge method
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)

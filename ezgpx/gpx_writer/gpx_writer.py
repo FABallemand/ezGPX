@@ -6,7 +6,7 @@ from datetime import datetime
 
 from ..writer import Writer
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
-from ..gpx_parser import Parser
+from ..gpx_parser import GPXParser
 
 class GPXWriter(Writer):
     """
@@ -92,7 +92,7 @@ class GPXWriter(Writer):
         if copyright is not None:
             copyright_ = ET.SubElement(element, copyright.tag)
             if copyright.author is not None:
-                copyright_.set("author", copyright.author)
+                self.setIfNotNone(copyright_, "author", copyright.author)
             copyright_, _ = self.add_subelement(copyright_, "year", str(copyright.year))
             copyright_, _ = self.add_subelement(copyright_, "licence", str(copyright.licence))
         return element
@@ -111,9 +111,9 @@ class GPXWriter(Writer):
         if email is not None:
             email_ = ET.SubElement(element, email.tag)
             if email.id is not None:
-                email_.set("id", email.id)
+                self.setIfNotNone(email_, "id", email.id)
             if email.domain is not None:
-                email_.set("domain", email.domain)
+                self.setIfNotNone(email_, "domain", email.domain)
         return element
 
     def add_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
@@ -160,7 +160,7 @@ class GPXWriter(Writer):
         if link is not None:
             link_ = ET.SubElement(element, link.tag)
             if link.href is not None:
-                link_.set("href", link.href)
+                self.setIfNotNone(link_, "href", link.href)
             link_, _ = self.add_subelement(link_, "text", link.text)
             link_, _ = self.add_subelement(link_, "type", link.type)
         return element
@@ -235,10 +235,8 @@ class GPXWriter(Writer):
         """
         if point is not None:
             point_ = ET.SubElement(element, point.tag)
-            if point.lat is not None:
-                point_.set("lat", "{:.{}f}".format(point.lat, self.precisions["lat_lon"]))
-            if point.lon is not None:
-                point_.set("lon", "{:.{}f}".format(point.lon, self.precisions["lat_lon"]))
+            self.setIfNotNone(point_, "lat", "{:.{}f}".format(point.lat, self.precisions["lat_lon"]))
+            self.setIfNotNone(point_, "lon", "{:.{}f}".format(point.lon, self.precisions["lat_lon"]))
             point_ = self.add_subelement_number(point_, "ele", point.ele, self.precisions["elevation"])
             point_, _ = self.add_subelement_time(point_, "time", point.time, self.time_format)
         return element
@@ -316,8 +314,8 @@ class GPXWriter(Writer):
         """
         if way_point is not None:
             way_point_ = ET.SubElement(element, way_point.tag)
-            way_point_.set("lat", "{:.{}f}".format(way_point.lat, self.precisions["lat_lon"]))
-            way_point_.set("lon", "{:.{}f}".format(way_point.lon, self.precisions["lat_lon"]))
+            self.setIfNotNone(way_point_, "lat", "{:.{}f}".format(way_point.lat, self.precisions["lat_lon"]))
+            self.setIfNotNone(way_point_, "lon", "{:.{}f}".format(way_point.lon, self.precisions["lat_lon"]))
             way_point_, _ = self.add_subelement_number(way_point_, "ele", way_point.ele, self.precisions["elevation"])
             way_point_, _ = self.add_subelement_time(way_point_, "time", way_point.time, self.time_format)
             way_point_, _ = self.add_subelement_number(way_point_, "magvar", way_point.mag_var, self.precisions["default"])
@@ -338,36 +336,49 @@ class GPXWriter(Writer):
             way_point_, _ = self.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)
             way_point_ = self.add_extensions(way_point_, way_point.extensions)
         return element
+
+    def createSchemaLocationString(self, xsi_schema_location: list[str]):
+        """
+        Create schema location string to write in GPX file.
+
+        Parameters
+        ----------
+        xsi_schema_location : list[str]
+            List of schema locations.
+
+        Returns
+        -------
+        str
+            Schema location string to write in GPX file.
+        """
+        schema_location_string = ""
+        for loc in xsi_schema_location:
+            schema_location_string += loc
+            schema_location_string += " "
+        schema_location_string = schema_location_string[:-1]
+        return schema_location_string
          
     def add_properties_garmin(self) -> None:
         """
         Add Garmin style properties to the GPX root element.
         """
-        self.gpx_root.set("xmlns", self.gpx.xmlns)
-        self.gpx_root.set("creator", self.gpx.creator)
-        self.gpx_root.set("version", self.gpx.version)
-        schema_location_string = ""
-        for loc in self.gpx.xsi_schema_location:
-            schema_location_string += loc
-            schema_location_string += " "
-        schema_location_string = schema_location_string[:len(schema_location_string)-1]
-        self.gpx_root.set("xsi:schemaLocation", schema_location_string)
-        self.gpx_root.set("xmlns:xsi", self.gpx.xmlns_xsi)
+        self.setIfNotNone(self.gpx_root, "xmlns", self.gpx.xmlns)
+        self.setIfNotNone(self.gpx_root, "creator", self.gpx.creator)
+        self.setIfNotNone(self.gpx_root, "version", self.gpx.version)
+        schema_location_string = self.createSchemaLocationString(self.gpx.xsi_schema_location)
+        self.setIfNotNone(self.gpx_root, "xsi:schemaLocation", schema_location_string)
+        self.setIfNotNone(self.gpx_root, "xmlns:xsi", self.gpx.xmlns_xsi)
     
     def add_properties_strava(self) -> None:
         """
         Add Strava style properties to the GPX root element.
         """
-        self.gpx_root.set("creator", self.gpx.creator)
-        self.gpx_root.set("xmlns:xsi", self.gpx.xmlns_xsi)
-        schema_location_string = ""
-        for loc in self.gpx.xsi_schema_location:
-            schema_location_string += loc
-            schema_location_string += " "
-        schema_location_string = schema_location_string[:len(schema_location_string)-1]
-        self.gpx_root.set("xsi:schemaLocation", schema_location_string)
-        self.gpx_root.set("version", self.gpx.version)
-        self.gpx_root.set("xmlns", self.gpx.xmlns)
+        self.setIfNotNone(self.gpx_root, "creator", self.gpx.creator)
+        self.setIfNotNone(self.gpx_root, "xmlns:xsi", self.gpx.xmlns_xsi)
+        schema_location_string = self.createSchemaLocationString(self.gpx.xsi_schema_location)
+        self.setIfNotNone(self.gpx_root, "xsi:schemaLocation", schema_location_string)
+        self.setIfNotNone(self.gpx_root, "version", self.gpx.version)
+        self.setIfNotNone(self.gpx_root, "xmlns", self.gpx.xmlns)
     
     def add_root_properties(self) -> None:
         """
@@ -510,7 +521,7 @@ class GPXWriter(Writer):
         self.write_gpx()
 
         if check_schemas:
-            verification_gpx = Parser(path, check_schemas=False, extensions_schemas=False).gpx
+            verification_gpx = GPXParser(path, check_schemas=False, extensions_schemas=False).gpx
             if not verification_gpx.check_schemas(self.path, extensions_schemas=extensions_schemas):
                 logging.error("Invalid written file (does not follow schema)")
                 return False

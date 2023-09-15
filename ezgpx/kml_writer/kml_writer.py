@@ -104,7 +104,7 @@ class KMLWriter(Writer):
             KML element.
         """
         stylemap_ = ET.SubElement(element, "StyleMap")
-        stylemap_.set("id", id)
+        self.setIfNotNone(stylemap_, "id", id)
         style_id = 1
         for style_key, style in self.styles:
             stylemap_ = self.add_pair(stylemap_, style_key, "#style" + str(style_id))
@@ -183,7 +183,7 @@ class KMLWriter(Writer):
             KML element.
         """
         style_ = ET.SubElement(element, "Style")
-        style_.set("id", id)
+        self.setIfNotNone(style_, "id", id)
         style_ = self.add_linestyle(style_, style)
         style_ = self.add_polystyle(style_, style)
         return element
