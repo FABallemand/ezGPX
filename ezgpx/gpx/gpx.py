@@ -1145,7 +1145,7 @@ class GPX():
         # Plot track points
         gpx_df = self.to_dataframe()
         gpx_df["coordinates"] = list(
-            zip(gpx_df.latitude, gpx_df.longitude))
+            zip(gpx_df.lat, gpx_df.lon))
         folium.PolyLine(gpx_df["coordinates"],
                         tooltip=self.name(), color=color).add_to(m)
 
@@ -1183,6 +1183,8 @@ class GPX():
             ).add_to(m)
 
         # Save map
+        if file_path is None:
+            file_path = "unnamed.html"
         m.save(file_path)
 
         # Open map in web browser

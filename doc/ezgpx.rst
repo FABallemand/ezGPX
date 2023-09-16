@@ -11,6 +11,10 @@ Subpackages
    ezgpx.gpx_elements
    ezgpx.gpx_parser
    ezgpx.gpx_writer
+   ezgpx.kml_parser
+   ezgpx.kml_writer
+   ezgpx.parser
+   ezgpx.writer
    ezgpx.utils
 
 Module contents

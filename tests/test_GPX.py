@@ -304,13 +304,7 @@ class TestGPX():
         return np.array_equal(test_img, ref_img)
 
     @pytest.mark.skip(reason="not ready")
-    def test_matplotlib_plot(self, remove_tmp: bool = True):
-        """
-        Test matplotlib_plot method.
-
-        Args:
-            remove_tmp (bool, optional): Remove temporary folder. Defaults to True.
-        """
+    def test_matplotlib_plot(self):
         # Parse GPX file
         self.gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
         # Tests
@@ -322,6 +316,36 @@ class TestGPX():
         # self._test_matplotlib_plot_2()
         # self._test_matplotlib_plot_3()
         # self._test_matplotlib_plot_4()
+
+    def _test_folium_plot_1(self):
+        # Plot
+        self.gpx.folium_plot(tiles="openStreetMap",
+                             color="#110000",
+                             start_stop_colors=None,
+                             way_points_color=None,
+                             minimap=False,
+                             coord_popup=False,
+                             title=None,
+                             zoom=12,
+                             file_path="tmp/folium_strava_run_1.html",
+                             open=False)
+        # Compare files
+        return filecmp.cmp("tmp/folium_strava_run_1.html", os.path.join(REFERENCE_FILES_DIRECTORY, "folium_strava_run_1.html"), False)
+
+    @pytest.mark.skip(reason="not ready")
+    def test_folium_plot(self):
+        self.test_init() # For developping purpose only (using: pytest test_GPX.py::TestGPX::test_folium_plot)
+        # Parse GPX file
+        self.gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
+        # Tests
+        assert(self._test_folium_plot_1())
+        # assert(self._test_folium_plot_2())
+        # assert(self._test_folium_plot_3())
+        # assert(self._test_folium_plot_4())
+        # self._test_folium_plot_1()
+        # self._test_folium_plot_2()à
+        # self._test_folium_plot_3()
+        # self._test_folium_plot_4()
 
     #==== Destroy ============================================================#
 
