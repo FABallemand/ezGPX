@@ -1,6 +1,7 @@
 import os
 from typing import Optional, Union, List, Tuple, Dict, NewType
 import logging
+from zipfile import ZipFile
 import webbrowser
 from datetime import datetime
 import pandas as pd
@@ -61,6 +62,18 @@ class GPX():
                 self.gpx: Gpx = self.kml_parser.gpx
                 self.precisions = self.kml_parser.precisions
                 self.time_format = self.kml_parser.time_format
+            elif file_path.endswith(".kmz"):
+                kmz = ZipFile(file_path, 'r')
+                kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
+                if "doc.kml" not in kmls:
+                    logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
+                kml = kmz.open("doc.kml", 'r').read()
+                self.write_tmp_kml("tmp.kml", kml)
+                self.kml_parser: KMLParser = KMLParser("tmp.kml", check_schemas, extensions_schemas)
+                self.gpx: Gpx = self.kml_parser.gpx
+                self.precisions = self.kml_parser.precisions
+                self.time_format = self.kml_parser.time_format
+                os.remove("tmp.kml")
             else:
                 logging.error("Unable to parse this type of file...\nYou may consider renaming your file with the proper file extension.")
             self.gpx_writer: GPXWriter = GPXWriter(
@@ -1190,3 +1203,18 @@ class GPX():
         # Open map in web browser
         if open:
             webbrowser.open(file_path)
+
+    def write_tmp_kml(self, path: str ="tmp.kml", kml_string: Optional[bytes] = None):
+        """
+        Write temproray .KML file in order to parse KMZ file.
+        """
+        # Open/create KML file
+        try:
+            f = open(path, "wb")
+        except OSError:
+            logging.exception(f"Could not open/read file: {path}")
+            raise
+        # Write KML file
+        with f:
+            if kml_string is not None:
+                f.write(kml_string)

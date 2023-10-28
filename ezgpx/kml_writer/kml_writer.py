@@ -305,15 +305,15 @@ class KMLWriter(Writer):
 
     def write_gpx(self):
         """
-        Convert Gpx instance to string and write to file.
+        Convert Gpx instance to string and write to .kml file.
         """
-        # Open/create GPX file
+        # Open/create KML file
         try:
             f = open(self.path, "w")
         except OSError:
             logging.exception(f"Could not open/read file: {self.path}")
             raise
-        # Write GPX file
+        # Write KML file
         with f:
             f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             f.write(self.gpx_string)
