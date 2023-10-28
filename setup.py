@@ -47,8 +47,7 @@ setup(
         'basemap',
         'gmplot',
         'folium',
-        'pytest',
-        'sphinx_rtd_theme'
+        'pytest'
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
