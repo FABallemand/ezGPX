@@ -11,11 +11,11 @@ with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='ezgpx',
-    version='0.1.8',
+    version='0.1.9',
     description='Easy to use Python GPX library',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-converter', 'gpx-data'],
+    keywords=['gpx', 'gpx-files', 'gpx-parser', 'gpx-reader', 'gpx-writer', 'gpx-converter', 'gpx-data', 'kml', 'kmz', 'fit'],
     url='https://pypi.org/project/ezgpx/',
     download_url='https://github.com/FABallemand/ezGPX',
     project_urls={
@@ -36,6 +36,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Operating System :: OS Independent'
     ],
     packages=find_packages(),
@@ -48,7 +49,7 @@ setup(
         'gmplot',
         'folium',
         'fitparse',
-        'pytest'
+        'pytest',
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],

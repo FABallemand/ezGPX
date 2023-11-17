@@ -52,10 +52,5 @@ gpx.to_gpx("new_file.gpx")
 ```
 ![](img/matplotlib_plot_1.png)
 
-## 📚 References:
-
-### 🧭 Other Python GPX Library
-- [gpxpy](https://github.com/tkrajina/gpxpy)
-
 ## 👤 Author
 - Fabien ALLEMAND
