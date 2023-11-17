@@ -7,6 +7,8 @@ from datetime import datetime
 import pandas as pd
 from math import degrees
 
+from fitparse import FitFile
+
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 import matplotlib.colors
@@ -22,6 +24,7 @@ from folium.features import DivIcon
 from ..gpx_elements import Gpx, WayPoint
 from ..gpx_parser import GPXParser
 from ..kml_parser import KMLParser
+from ..fit_parser import FitParser
 from ..gpx_writer import GPXWriter
 from ..kml_writer import KMLWriter
 from ..utils import EARTH_RADIUS
@@ -48,20 +51,28 @@ class GPX():
         """
         if file_path is not None and os.path.exists(file_path):
             self.file_path: str = file_path
+            self.gpx: Gpx = None
             self.gpx_parser: GPXParser = None
             self.kml_parser: KMLParser = None
+            self.fit_parser: FitParser = None
             self.precisions: Dict = None
             self.time_format: str = None
+
+            # GPX
             if file_path.endswith(".gpx"):
-                self.gpx_parser: GPXParser = GPXParser(file_path, check_schemas, extensions_schemas)
-                self.gpx: Gpx = self.gpx_parser.gpx
+                self.gpx_parser = GPXParser(file_path, check_schemas, extensions_schemas)
+                self.gpx = self.gpx_parser.gpx
                 self.precisions = self.gpx_parser.precisions
                 self.time_format = self.gpx_parser.time_format
+
+            # KML
             elif file_path.endswith(".kml"):
-                self.kml_parser: KMLParser = KMLParser(file_path, check_schemas, extensions_schemas)
-                self.gpx: Gpx = self.kml_parser.gpx
+                self.kml_parser = KMLParser(file_path, check_schemas, extensions_schemas)
+                self.gpx = self.kml_parser.gpx
                 self.precisions = self.kml_parser.precisions
                 self.time_format = self.kml_parser.time_format
+
+            # KMZ
             elif file_path.endswith(".kmz"):
                 kmz = ZipFile(file_path, 'r')
                 kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
@@ -69,11 +80,20 @@ class GPX():
                     logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
                 kml = kmz.open("doc.kml", 'r').read()
                 self.write_tmp_kml("tmp.kml", kml)
-                self.kml_parser: KMLParser = KMLParser("tmp.kml", check_schemas, extensions_schemas)
-                self.gpx: Gpx = self.kml_parser.gpx
+                self.kml_parser = KMLParser("tmp.kml", check_schemas, extensions_schemas)
+                self.gpx = self.kml_parser.gpx
                 self.precisions = self.kml_parser.precisions
                 self.time_format = self.kml_parser.time_format
                 os.remove("tmp.kml")
+            
+            # FIT
+            elif file_path.endswith(".fit"):
+                self.fit_parser = FitParser(file_path)
+                self.gpx = self.fit_parser.gpx
+                self.precisions = self.fit_parser.precisions
+                self.time_format = self.fit_parser.time_format
+
+            # NOT SUPPORTED
             else:
                 logging.error("Unable to parse this type of file...\nYou may consider renaming your file with the proper file extension.")
             self.gpx_writer: GPXWriter = GPXWriter(

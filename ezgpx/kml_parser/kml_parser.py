@@ -4,10 +4,10 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
-from ..parser import Parser
+from ..xml_parser import XMLParser
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
-class KMLParser(Parser):
+class KMLParser(XMLParser):
     """
     KML file parser.
     """
@@ -21,14 +21,12 @@ class KMLParser(Parser):
             check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
             extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
         """
-        if file_path.endswith(".gpx"):
+        if not file_path.endswith(".kml"):
             return
-        super().__init__(file_path, check_schemas, extensions_schemas)
-
-        self.xml_tree: ET.ElementTree = None
-        self.kml_tree: ET.Element = None
-
-        self.name_space: dict = {"opengis": "http://www.opengis.net/kml/2.2"}
+        super().__init__(file_path,
+                         {"opengis": "http://www.opengis.net/kml/2.2"},
+                         check_schemas,
+                         extensions_schemas)
         
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()

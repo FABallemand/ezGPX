@@ -4,10 +4,10 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
-from ..parser import Parser
+from ..xml_parser import XMLParser
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
-class GPXParser(Parser):
+class GPXParser(XMLParser):
     """
     GPX file parser.
     """
@@ -21,12 +21,17 @@ class GPXParser(Parser):
             check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
             extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
         """
-        if file_path.endswith(".kml"):
+        if not file_path.endswith(".gpx"):
             return
-        super().__init__(file_path, check_schemas, extensions_schemas)
-
-        self.name_space: dict = {"topo": "http://www.topografix.com/GPX/1/1"}
-
+        super().__init__(file_path,
+                         {"topo": "http://www.topografix.com/GPX/1/1"},
+                         check_schemas, 
+                         extensions_schemas)
+        
+        print(f"GPX FILE PATH = {self.file_path}")
+        print(f"GPX NAME SPACE = {self.name_space}")
+        print(f"GPX TIME FORMAT = {self.time_format}")
+ 
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
         else:

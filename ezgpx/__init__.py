@@ -4,5 +4,6 @@ from .gpx_parser import *
 from .gpx_writer import *
 from .kml_parser import *
 from .kml_writer import *
-from .parser import *
+from .fit_parser import *
+from .xml_parser import *
 from .writer import *

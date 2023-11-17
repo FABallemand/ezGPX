@@ -55,3 +55,16 @@ In order to parse a KMZ file, simply create a new :py:class:`~ezgpx.gpx.GPX` obj
 
     # Parse KML file
     gpx = GPX("file.kmz")
+
+
+FIT Files
+^^^^^^^^^
+
+In order to parse a FIT file, simply create a new :py:class:`~ezgpx.gpx.GPX` object with the path to the file.
+
+::
+
+    from ezGPX import GPX
+
+    # Parse FIT file
+    gpx = GPX("file.fit")

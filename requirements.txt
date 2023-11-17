@@ -5,3 +5,4 @@ basemap
 gmplot
 folium
 pytest
+fitparse

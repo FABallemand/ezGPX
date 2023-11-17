@@ -47,6 +47,7 @@ setup(
         'basemap',
         'gmplot',
         'folium',
+        'fitparse',
         'pytest'
     ],
     setup_requires=['pytest-runner'],
