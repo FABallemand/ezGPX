@@ -27,7 +27,6 @@ class XMLParser(Parser):
             self.name_space = {}
         else:
             self.name_space = name_space
-        print(f"XML NAME SPACE = {self.name_space}")
 
         self.check_schemas: bool = check_schemas
         self.extensions_schemas: bool = extensions_schemas

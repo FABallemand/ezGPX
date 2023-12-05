@@ -53,7 +53,7 @@ In order to parse a KMZ file, simply create a new :py:class:`~ezgpx.gpx.GPX` obj
 
     from ezGPX import GPX
 
-    # Parse KML file
+    # Parse KMZ file
     gpx = GPX("file.kmz")
 
 

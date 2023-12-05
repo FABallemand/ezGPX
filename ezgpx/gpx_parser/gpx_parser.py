@@ -27,10 +27,6 @@ class GPXParser(XMLParser):
                          {"topo": "http://www.topografix.com/GPX/1/1"},
                          check_schemas, 
                          extensions_schemas)
-        
-        print(f"GPX FILE PATH = {self.file_path}")
-        print(f"GPX NAME SPACE = {self.name_space}")
-        print(f"GPX TIME FORMAT = {self.time_format}")
  
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()

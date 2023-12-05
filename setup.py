@@ -40,6 +40,7 @@ setup(
         'Operating System :: OS Independent'
     ],
     packages=find_packages(),
+    package_data={"": ["*.xsd"]},
     include_package_data=True,
     install_requires=[
         'xmlschema',

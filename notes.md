@@ -48,6 +48,8 @@
 
 ## 🧭 Other Python GPX Library
 - [gpxpy](https://github.com/tkrajina/gpxpy)
+- [PyGPX](https://github.com/sgraaf/gpx)
+- [gpxcsv](https://github.com/astrowonk/gpxcsv)
 
 # 📝 TO DO LIST !!
 - Change to project.toml (https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
