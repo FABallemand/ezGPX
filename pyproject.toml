@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["ezgpx"]
+
+[tool.setuptools.package-data]
+"schemas.gpx_1_0" = ["*.xsd"]
+"schemas.gpx_1_1" = ["*.xsd"]
+"schemas.kml_2_2" = ["*.xsd"]
+
+[project]
+name = "ezgpx"
+version = "0.1.9"
+authors = [
+    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
+]
+maintainers = [
+    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
+]
+description = "Easy to use Python GPX library"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = [
+    "gpx",
+    "gpx-files",
+    "gpx-parser",
+    "gpx-reader",
+    "gpx-writer",
+    "gpx-converter",
+    "gpx-data",
+    "kml",
+    "kmz",
+    "fit"
+]
+license = {text = "GNU GPLv3"}
+classifiers=[
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "xmlschema",
+    "fitparse",
+    "pandas",
+    "matplotlib",
+    "basemap",
+    "gmplot",
+    "folium",
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://pypi.org/project/ezgpx/"
+Documentation = "https://ezgpx.readthedocs.io/en/latest/"
+Repository = "https://github.com/FABallemand/ezGPX"
+Issues = "https://github.com/FABallemand/ezGPX/issues"
