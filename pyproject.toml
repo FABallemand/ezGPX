@@ -58,7 +58,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://pypi.org/project/ezgpx/"
 Documentation = "https://ezgpx.readthedocs.io/en/latest/"
 Repository = "https://github.com/FABallemand/ezGPX"
 Issues = "https://github.com/FABallemand/ezGPX/issues"
+PyPi = "https://pypi.org/project/ezgpx/"
