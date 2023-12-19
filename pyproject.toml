@@ -3,17 +3,19 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
+where = ["."]
+include = ["ezgpx*"]
+exclude = ["docs*", "tests*"]
 namespaces = true
-where = ["ezgpx"]
 
 [tool.setuptools.package-data]
-"schemas.gpx_1_0" = ["*.xsd"]
-"schemas.gpx_1_1" = ["*.xsd"]
-"schemas.kml_2_2" = ["*.xsd"]
+"ezgpx.schemas.gpx_1_0" = ["*.xsd"]
+"ezgpx.schemas.gpx_1_1" = ["*.xsd"]
+"ezgpx.schemas.kml_2_2" = ["*.xsd"]
 
 [project]
 name = "ezgpx"
-version = "0.1.9"
+version = "0.1.12"
 authors = [
     {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
 ]
