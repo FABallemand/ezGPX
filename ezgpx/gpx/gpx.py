@@ -36,7 +36,11 @@ class GPX():
     High level GPX object.
     """
 
-    def __init__(self, file_path: Optional[str] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> None:
+    def __init__(
+            self,
+            file_path: Optional[str] = None,
+            xml_schema: bool = True,
+            xml_extensions_schemas: bool = False) -> None:
         """
         Initialise GPX instance.
 
@@ -44,7 +48,7 @@ class GPX():
         ----------
         file_path : Optional[str], optional
             Path to the file to parse, by default None
-        check_schemas : bool, optional
+        xml_schema : bool, optional
             Toggle schema verification during parsing, by default True
         extensions_schemas : bool, optional
             Toggle extensions schema verificaton during parsing, by default False
@@ -60,14 +64,14 @@ class GPX():
 
             # GPX
             if file_path.endswith(".gpx"):
-                self.gpx_parser = GPXParser(file_path, check_schemas, extensions_schemas)
+                self.gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self.gpx_parser.gpx
                 self.precisions = self.gpx_parser.precisions
                 self.time_format = self.gpx_parser.time_format
 
             # KML
             elif file_path.endswith(".kml"):
-                self.kml_parser = KMLParser(file_path, check_schemas, extensions_schemas)
+                self.kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self.kml_parser.gpx
                 self.precisions = self.kml_parser.precisions
                 self.time_format = self.kml_parser.time_format
@@ -80,7 +84,7 @@ class GPX():
                     logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
                 kml = kmz.open("doc.kml", 'r').read()
                 self.write_tmp_kml("tmp.kml", kml)
-                self.kml_parser = KMLParser("tmp.kml", check_schemas, extensions_schemas)
+                self.kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
                 self.gpx = self.kml_parser.gpx
                 self.precisions = self.kml_parser.precisions
                 self.time_format = self.kml_parser.time_format
@@ -105,23 +109,29 @@ class GPX():
             pass
 
     def __str__(self) -> str:
-        return f"file_path = {self.file_path}\nparser = {self.gpx_parser}\ngpx = {self.gpx}\ngpx_writer = {self.gpx_writer}\nkml_writer = {self.kml_writer}"
+        return f"file_path = {self.file_path}\ngpx = {self.gpx}"
     
-    def check_schemas(self, extensions_schemas: bool = False) -> bool:
+    def check_xml_schema(self) -> bool:
         """
         Check XML schema.
-
-        Parameters
-        ----------
-        extensions_schemas : bool, optional
-            Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work, by default False
 
         Returns
         -------
         bool
             True if the file follows XML schemas.
         """
-        return self.gpx.check_schemas(self.file_path, extensions_schemas)
+        return self.gpx.check_xml_schema(self.file_path)
+    
+    def check_xml_extensions_schemas(self) -> bool:
+        """
+        Check XML extension schemas.
+
+        Returns
+        -------
+        bool
+            True if the file follows XML schemas.
+        """
+        return self.gpx.check_xml_extensions_schemas(self.file_path)
         
     def file_name(self) -> Union[str, None]:
         """
@@ -638,7 +648,11 @@ class GPX():
         """
         return self.gpx.to_csv(path, sep, columns, header, index)
     
-    def to_gpx(self, path: str, check_schemas: bool = True, extensions_schemas: bool = False) -> bool:
+    def to_gpx(
+            self,
+            path: str,
+            xml_schema: bool = True,
+            xml_extensions_schemas: bool = False) -> bool:
         """
         Write the GPX object to a .gpx file.
 
@@ -646,9 +660,9 @@ class GPX():
         ----------
         path : str
             Path to the .gpx file.
-        check_schemas : bool, optional
+        xml_schema : bool, optional
             Toggle schema verification after writting, by default True
-        extensions_schemas : bool, optional
+        xml_extensions_schemas : bool, optional
             Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work, by default False
 
         Returns
@@ -656,9 +670,13 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.gpx_writer.write(path, check_schemas, extensions_schemas)
+        return self.gpx_writer.write(path, xml_schema, xml_extensions_schemas)
     
-    def to_kml(self, path: str, styles: Optional[List[Tuple[str, Dict]]] = None, check_schemas: bool = True) -> bool:
+    def to_kml(
+            self,
+            path: str,
+            styles: Optional[List[Tuple[str, Dict]]] = None,
+            xml_schema: bool = True) -> bool:
         """
         Write the GPX object to a .kml file.
 
@@ -668,7 +686,7 @@ class GPX():
             Path to the .gpx file.
         styles : List[Tuple[str, Dict]], optional
             List of (style_id, style) tuples, by default None
-        check_schemas : bool, optional
+        xml_schema : bool, optional
             Toggle schema verification after writting, by default True
 
         Returns
@@ -676,7 +694,7 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.kml_writer.write(path, styles, check_schemas)
+        return self.kml_writer.write(path, styles, xml_schema)
 
     def _matplotlib_plot_text(
             self,
@@ -1224,7 +1242,10 @@ class GPX():
         if open:
             webbrowser.open(file_path)
 
-    def write_tmp_kml(self, path: str ="tmp.kml", kml_string: Optional[bytes] = None):
+    def write_tmp_kml(
+            self,
+            path: str ="tmp.kml",
+            kml_string: Optional[bytes] = None):
         """
         Write temproray .KML file in order to parse KMZ file.
         """

@@ -32,18 +32,18 @@ class TestGPX():
 
     def test_parse(self):
         # Parse GPX files
-        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"), check_schemas=True, extensions_schemas=False)
-        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"), check_schemas=False, extensions_schemas=False)
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"), xml_schema=True, xml_extensions_schemas=False)
+        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"), xml_schema=False, xml_extensions_schemas=False)
 
-    #==== Check Schemas ======================================================#
+    #==== Check Schemas ======================================================#check_xml_schemas
 
     def test_check_schemas(self):
         # Parse GPX Files
-        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"), check_schemas=True, extensions_schemas=False)
-        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"), check_schemas=False, extensions_schemas=False)
+        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"), xml_schema=False, xml_extensions_schemas=False)
+        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"), xml_schema=False, xml_extensions_schemas=False)
         # Tests
-        assert(gpx.check_schemas(extensions_schemas=False) == True)
-        assert(invalid_gpx.check_schemas(extensions_schemas=False) == False)
+        assert(gpx.check_xml_schema() == True)
+        assert(invalid_gpx.check_xml_schema() == False)
 
     #==== Properties =========================================================#
 
@@ -246,14 +246,14 @@ class TestGPX():
     def test_to_gpx(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        gpx.to_gpx("tmp/strava_run_1.gpx", check_schemas=False)
+        gpx.to_gpx("tmp/strava_run_1.gpx", xml_schema=False)
         # Test
         assert(filecmp.cmp("tmp/strava_run_1.gpx", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.gpx"), False))
         
     def test_to_kml(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        gpx.to_kml("tmp/strava_run_1_test.kml", styles=None, check_schemas=False)
+        gpx.to_kml("tmp/strava_run_1_test.kml", styles=None, xml_schema=False)
         # Test
         assert(filecmp.cmp("tmp/strava_run_1_test.kml", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.kml"), False))
 

@@ -15,7 +15,7 @@ class Writer():
     def __init__(
             self,
             gpx: Gpx = None,
-            path: str = None) -> None:
+            file_path: str = None) -> None:
         """
         Initialize Writer instance.
 
@@ -23,11 +23,11 @@ class Writer():
         ----------
         gpx : Gpx, optional
             Gpx instance to write, by default None
-        path : str, optional
+        file_path : str, optional
             Path to the file to write, by default None
         """
         self.gpx: Gpx = gpx
-        self.path: str = path
+        self.file_path: str = file_path
 
     def setIfNotNone(self, element: ET.Element, field: str, value):
         """
@@ -108,3 +108,36 @@ class Writer():
             except:
                 logging.error("Invalid time format.")
         return element, sub_element_
+    
+    def check_xml_schemas(
+            self,
+            xml_schema: bool = False,
+            xml_extensions_schemas: bool = False) -> bool:
+        """
+        Check XML schemas after writting.
+
+        Parameters
+        ----------
+        xml_schema : bool, optional
+            Toggle XML schema verification, by default False.
+        xml_extensions_schemas : bool, optional
+            Toggle XML extensions schemas verification, by default False.
+
+        Returns
+        -------
+        bool
+            True if the written file follows all verified schemas.
+        """
+        # Check XML schema
+        if xml_schema:
+            if not self.gpx.check_xml_schema(self.file_path):
+                logging.error("Invalid GPX file (does not follow XML schema).")
+                return False
+
+        # Check XML extension schemas
+        if xml_extensions_schemas:
+            if not self.gpx.check_xml_extensions_schemas(self.file_path):
+                logging.error("Invalid GPX file (does not follow XML extensions schemas).")
+                return False
+            
+        return True

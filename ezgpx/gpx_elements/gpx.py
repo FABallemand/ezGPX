@@ -1,4 +1,5 @@
 import os
+from importlib_resources import files
 from typing import Union, List, Tuple
 import logging
 import xmlschema
@@ -100,7 +101,7 @@ class Gpx():
             self.tracks: List[Track] = tracks
         self.extensions: Extensions = extensions
 
-    def check_schemas(self, file_path: str, extensions_schemas: bool = False) -> bool:
+    def check_xml_schema(self, file_path: str) -> bool:
         """
         Check XML schema.
 
@@ -108,35 +109,56 @@ class Gpx():
         ----------
         file_path : str
             File path
-        extensions_schemas : bool, optional
-            Toggle extensions schema verificaton. Requires internet connection and is not guaranted to work, by default False
 
         Returns
         -------
         bool
             True if the file follows XML schemas
         """
-        if extensions_schemas:
-            gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
-            for gpx_schema in gpx_schemas:
-                logging.debug(f"schema = {gpx_schema}")
-                schema = xmlschema.XMLSchema(gpx_schema)
-                if not schema.is_valid(file_path):
-                    logging.error(f"File does not follow {gpx_schema}")
-                    return False
-        else:
-            schema = None
-            current_file_path = os.path.dirname(os.path.abspath(__file__))
-            if self.version == "1.1":
-                schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/gpx_1_1/gpx.xsd"))
-            elif self.version == "1.0":
-                schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/gpx_1_0/gpx.xsd"))
+        schema = None
 
-            if schema is not None:
-                return schema.is_valid(file_path)
+        # GPX
+        if file_path.endswith(".gpx"):
+            if self.version == "1.1":
+                schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd"))
+            elif self.version == "1.0":
+                schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd"))
             else:
-                logging.error("Unable to check XML schema")
-                return True
+                logging.error("Unable to check XML schema (unsupported GPX version)")
+                return False
+
+        # KML
+        elif file_path.endswith(".kml"):
+            schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd"))
+
+        # KMZ
+        elif file_path.endswith(".kmz"):
+            return False
+
+        # FIT
+        elif file_path.endswith(".fit"):
+            logging.error("Unable to check XML schema (fit files are not XML files)")
+            return False
+        
+        # NOT SUPPORTED
+        else:
+            logging.error("Unable to check XML schema (unable to identify file type)")
+            return False
+
+        if schema is not None:
+            return schema.is_valid(file_path)
+        else:
+            logging.error("Unable to check XML schema (unable to load XML schema)")
+            return False
+            
+    def check_xml_extensions_schemas(self, file_path: str) -> bool:
+        gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
+        for gpx_schema in gpx_schemas:
+            logging.debug(f"schema = {gpx_schema}")
+            schema = xmlschema.XMLSchema(gpx_schema)
+            if not schema.is_valid(file_path):
+                logging.error(f"File does not follow {gpx_schema}")
+                return False
 
     def name(self) -> str:
         """
@@ -308,7 +330,7 @@ class Gpx():
                     ascent = track_point.ele - previous_point.ele
                     try:
                         track_point.ascent_rate = (ascent * 100) / distance
-                        logging.info(f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
+                        logging.debug(f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
                     except:
                         track_point.ascent_rate = 0.0
                     previous_point = track_point

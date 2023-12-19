@@ -8,19 +8,22 @@ from datetime import datetime
 from ..writer import Writer
 from ..gpx_elements import Gpx
 
-DEFAULT_NORMAL_STYLE = {"color": "ff0000ff",
-                "width": 2,
-                "fill": 0
-                }
+DEFAULT_NORMAL_STYLE = {
+    "color": "ff0000ff",
+    "width": 2,
+    "fill": 0
+    }
 
-DEFAULT_HIGHLIGHT_STYLE = {"color": "ff0000ff",
-                   "width": 2,
-                   "fill": 0
-                   }
+DEFAULT_HIGHLIGHT_STYLE = {
+    "color": "ff0000ff",
+    "width": 2,
+    "fill": 0
+    }
 
-DEFAULT_STYLES = [("normal", DEFAULT_NORMAL_STYLE),
-                  ("highlight", DEFAULT_HIGHLIGHT_STYLE)
-                  ]
+DEFAULT_STYLES = [
+    ("normal", DEFAULT_NORMAL_STYLE),
+    ("highlight", DEFAULT_HIGHLIGHT_STYLE)
+    ]
 
 class KMLWriter(Writer):
     """
@@ -30,7 +33,7 @@ class KMLWriter(Writer):
     def __init__(
             self,
             gpx: Gpx = None,
-            path: str = None,
+            file_path: str = None,
             properties: bool = True,
             metadata: bool = True, # unused
             way_points: bool = True,
@@ -44,7 +47,7 @@ class KMLWriter(Writer):
         """
         Initialize GPXWriter instance.
         """
-        super().__init__(gpx, path)
+        super().__init__(gpx, file_path)
         self.file_name: str = ""
         self.kml_string: str = ""
 
@@ -309,9 +312,9 @@ class KMLWriter(Writer):
         """
         # Open/create KML file
         try:
-            f = open(self.path, "w")
+            f = open(self.file_path, "w")
         except OSError:
-            logging.exception(f"Could not open/read file: {self.path}")
+            logging.exception(f"Could not open/read file: {self.file_path}")
             raise
         # Write KML file
         with f:
@@ -320,19 +323,20 @@ class KMLWriter(Writer):
 
     def write(
             self,
-            path: str,
+            file_path: str,
             styles: Optional[List[Tuple[str, Dict]]] = None,
-            check_schemas: bool = False) -> bool:
+            xml_schema: bool = False,
+            xml_extensions_schemas: bool = False) -> bool:
         """
         Handle writing.
 
         Parameters
         ----------
-        path : str
+        file_path : str
             Path to write the KML file.
         styles : Optional[List[Tuple[str, Dict]]], optional
             List of (style_id, style) tuples, by default None
-        check_schemas : bool, optional
+        check_xml_schemas : bool, optional
             Toggle schema verification after writting, by default False
 
         Returns
@@ -341,12 +345,12 @@ class KMLWriter(Writer):
             bool: Return False if written file does not follow checked schemas. Return True otherwise.
         """
         # Handle path
-        directory_path = os.path.dirname(os.path.realpath(path))
+        directory_path = os.path.dirname(os.path.realpath(file_path))
         if not os.path.exists(directory_path):
             logging.error("Provided path does not exist")
-            return
-        self.path = path
-        self.file_name = os.path.basename(self.path)
+            return False
+        self.file_path = file_path
+        self.file_name = os.path.basename(self.file_path)
         
         # Update style
         if styles is not None:
@@ -356,16 +360,9 @@ class KMLWriter(Writer):
         self.gpx_to_string()
         self.write_gpx()
 
-        # Check schema
-        if check_schemas:
-            # Load schema
-            current_file_path = os.path.dirname(os.path.abspath(__file__))
-            schema = xmlschema.XMLSchema(os.path.join(current_file_path, "../schemas/kml_2_2/ogckml22.xsd"))
-            
-            # Check schema
-            if schema is not None:
-                return schema.is_valid(self.path)
-            else:
-                logging.error("Unable to check XML schema")
-                return True
-        return True
+        # Check XML schemas
+        res = True
+        if xml_schema or xml_extensions_schemas:
+            res = self.check_xml_schemas(xml_schema, xml_extensions_schemas)
+
+        return res

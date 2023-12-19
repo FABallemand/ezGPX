@@ -12,21 +12,25 @@ class GPXParser(XMLParser):
     GPX file parser.
     """
 
-    def __init__(self, file_path: Optional[str] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> None:
+    def __init__(
+            self,
+            file_path: Optional[str] = None,
+            check_xml_schemas: bool = True,
+            xml_extensions_schemas: bool = False) -> None:
         """
         Initialize GPXParser instance.
 
         Args:
             file_path (str, optional): Path to the file to parse. Defaults to None.
-            check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
+            check_xml_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
             extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
         """
         if not file_path.endswith(".gpx"):
             return
         super().__init__(file_path,
                          {"topo": "http://www.topografix.com/GPX/1/1"},
-                         check_schemas, 
-                         extensions_schemas)
+                         check_xml_schemas, 
+                         xml_extensions_schemas)
  
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
@@ -478,11 +482,8 @@ class GPXParser(XMLParser):
             logging.error("Unable to parse properties in GPX file.")
             raise
 
-        # Check XML schema
-        if self.check_schemas:
-            if not self.gpx.check_schemas(self.file_path, self.extensions_schemas):
-                logging.error("Invalid GPX file (does not follow XML schema).")
-                raise
+        # Check XML schemas
+        self.check_xml_schemas()
 
         # Find precisions
         self.find_precisions()

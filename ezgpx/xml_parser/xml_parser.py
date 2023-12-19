@@ -10,15 +10,20 @@ class XMLParser(Parser):
     XML File parser.
     """
 
-    def __init__(self, file_path: Optional[str] = None, name_space: Optional[dict] = None, check_schemas: bool = True, extensions_schemas: bool = False) -> None:
+    def __init__(
+            self,
+            file_path: Optional[str] = None,
+            name_space: Optional[dict] = None,
+            xml_schema: bool = True,
+            xml_extensions_schemas: bool = False) -> None:
         """
-        Initialize Parser instance.
+        Initialize XML Parser instance.
 
         Args:
             file_path (str, optional): Path to the file to parse. Defaults to None.
             name_space (dict, optional): File XML name spaces.
-            check_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
+            check_xml_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
         """
         super().__init__(file_path)
         
@@ -28,8 +33,8 @@ class XMLParser(Parser):
         else:
             self.name_space = name_space
 
-        self.check_schemas: bool = check_schemas
-        self.extensions_schemas: bool = extensions_schemas
+        self.xml_schema: bool = xml_schema
+        self.xml_extensions_schemas: bool = xml_extensions_schemas
 
         self.xml_tree: ET.ElementTree = None
         self.xml_root: ET.Element = None
@@ -159,3 +164,19 @@ class XMLParser(Parser):
             time_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
         return time_
+    
+    def check_xml_schemas(self):
+        """
+        Check XML schemas during parsing.
+        """
+        # Check XML schema
+        if self.xml_schema:
+            if not self.gpx.check_xml_schema(self.file_path):
+                logging.error("Invalid GPX file (does not follow XML schema).")
+                raise
+
+        # Check XML extension schemas
+        if self.xml_extensions_schemas:
+            if not self.gpx.check_xml_extensions_schemas(self.file_path):
+                logging.error("Invalid GPX file (does not follow XML extensions schemas).")
+                raise

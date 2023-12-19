@@ -16,7 +16,7 @@ class GPXWriter(Writer):
     def __init__(
             self,
             gpx: Gpx = None,
-            path: str = None,
+            file_path: str = None,
             properties: bool = True,
             metadata: bool = True,
             way_points: bool = True,
@@ -31,7 +31,7 @@ class GPXWriter(Writer):
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
-            path (str, optional): Path to the file to write. Defaults to None.
+            file_path (str, optional): Path to the file to write. Defaults to None.
             properties (bool, optional): Toggle properties writting. Defaults to True.
             metadata (bool, optional): Toggle metadata writting. Defaults to True.
             way_point (bool, optional): Toggle way points writting. Defaults to True.
@@ -42,7 +42,7 @@ class GPXWriter(Writer):
             precisions (dict, optional): Decimal precision for each type of value. Defaults to None.
             time_format (dict, optional): Time format. Defaults to None.
         """
-        super().__init__(gpx, path)
+        super().__init__(gpx, file_path)
         self.gpx_string: str = ""
 
         # Parameters
@@ -490,39 +490,45 @@ class GPXWriter(Writer):
         """
         # Open/create GPX file
         try:
-            f = open(self.path, "w")
+            f = open(self.file_path, "w")
         except OSError:
-            logging.exception(f"Could not open/read file: {self.path}")
+            logging.exception(f"Could not open/read file: {self.file_path}")
             raise
         # Write GPX file
         with f:
             f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
             f.write(self.gpx_string)
 
-    def write(self, path: str, check_schemas: bool = False, extensions_schemas: bool = False) -> bool:
+    def write(
+            self,
+            file_path: str,
+            xml_schema: bool = False,
+            xml_extensions_schemas: bool = False) -> bool:
         """
         Handle writing.
 
         Args:
             path (str): Path to write the GPX file.
-            check_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
+            check_xml_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
             extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
 
         Returns:
             bool: Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        directory_path = os.path.dirname(os.path.realpath(path))
+        directory_path = os.path.dirname(os.path.realpath(file_path))
         if not os.path.exists(directory_path):
             logging.error("Provided path does not exist")
-            return
-        
-        self.path = path
+            return False
+        self.file_path = file_path
+        self.file_name = os.path.basename(self.file_path)
+
+        # Write .gpx file
         self.gpx_to_string()
         self.write_gpx()
 
-        if check_schemas:
-            verification_gpx = GPXParser(path, check_schemas=False, extensions_schemas=False).gpx
-            if not verification_gpx.check_schemas(self.path, extensions_schemas=extensions_schemas):
-                logging.error("Invalid written file (does not follow schema)")
-                return False
-        return True
+        # Check XML schemas
+        res = True
+        if xml_schema or xml_extensions_schemas:
+            res = self.check_xml_schemas(xml_schema, xml_extensions_schemas)
+            
+        return res
