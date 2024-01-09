@@ -115,6 +115,7 @@ class WayPoint():
         self.pace: float = None
         self.ascent_rate: float = None
         self.ascent_speed: float = None
+        self.distance_from_start: float = None
 
         # Projection
         self._x: int = None

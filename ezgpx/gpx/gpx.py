@@ -65,6 +65,7 @@ class GPX():
             self.precisions: Dict = None
             self.time_data: bool = False
             self.time_format: str = None
+            self.dataframe: pd.DataFrame = None
 
             # GPX
             if file_path.endswith(".gpx"):
@@ -615,7 +616,8 @@ class GPX():
             speed: bool = False,
             pace: bool = False,
             ascent_rate: bool = False,
-            ascent_speed: bool = False) -> pd.DataFrame:
+            ascent_speed: bool = False,
+            distance_from_start: bool = False) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
 
@@ -633,13 +635,25 @@ class GPX():
             Toggle ascent rate, by default False
         ascent_speed : bool, optional
             Toggle ascent speed, by default False
+        distance_from_start : bool, optional
+            Toggle distance from start, by default False
 
         Returns
         -------
         pd.DataFrame
             Dataframe containing data from GPX.
         """
-        return self.gpx.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed)
+        if not self.time_data:
+            speed = False
+            pace = False
+            ascent_speed = False
+        return self.gpx.to_dataframe(projection,
+                                     elevation,
+                                     speed,
+                                     pace,
+                                     ascent_rate,
+                                     ascent_speed,
+                                     distance_from_start)
 
     def to_csv(
             self,
@@ -775,7 +789,7 @@ class GPX():
             plt.text(speed[0], speed[1],
                      f"Speed:\n{self.avg_speed():.2f} km/h", **text_parameters)
 
-    def matplotlib_axes_plot(
+    def matplotlib_map_plot(
             self,
             axes: Axes,
             projection: Optional[str] = None,
@@ -833,49 +847,34 @@ class GPX():
             column_y = "y"
             self.gpx.project(projection)  # Project all track points
 
-        # Create dataframe containing data from the GPX file
-        gpx_df = None
-        if color == "elevation":
-            gpx_df = self.to_dataframe(projection=True, elevation=True, speed=False, pace=False, ascent_rate=False, ascent_speed=False)
-        elif color == "speed":
-            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=True, pace=False, ascent_rate=False, ascent_speed=False)
-        elif color == "pace":
-            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=True, ascent_rate=False, ascent_speed=False)
-        elif color == "ascent_rate":
-            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=True, ascent_speed=False)
-        elif color == "ascent_speed":
-            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=False, ascent_speed=True)
-        else:
-            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=False, ascent_speed=False)
-
         # Scatter all track points
         if color == "elevation":
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","blue"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["ele"], cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=self.dataframe["ele"], cmap=cmap)
         elif color == "speed":
             # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "deepskyblue", "blue", "mediumblue", "midnightblue"])
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "mediumblue", "midnightblue"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["speed"], cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=self.dataframe["speed"], cmap=cmap)
         elif color == "pace":
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "midnightblue"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["pace"], cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=self.dataframe["pace"], cmap=cmap)
         elif color == "vertical_drop":
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["yellow", "orange", "red", "purple", "black"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=abs(gpx_df["ascent_rate"]), cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=abs(self.dataframe["ascent_rate"]), cmap=cmap)
         elif color == "ascent_rate":
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["darkgreen", "green", "yellow", "red", "black"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["ascent_rate"], cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=self.dataframe["ascent_rate"], cmap=cmap)
         elif color == "ascent_speed":
             cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["deeppink", "lightpink", "lightcoral", "red", "darkred"])
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y],
-                        c=gpx_df["ascent_speed"], cmap=cmap)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
+                        c=self.dataframe["ascent_speed"], cmap=cmap)
         else:
-            im = axes.scatter(gpx_df[column_x], gpx_df[column_y], color=color)
+            im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y], color=color)
         
         # Colorbar
         if colorbar:
@@ -883,10 +882,10 @@ class GPX():
 
         # Scatter start and stop points with different color
         if start_stop_colors is not None:
-            axes.scatter(gpx_df[column_x][0],
-                        gpx_df[column_y][0], color=start_stop_colors[0])
-            axes.scatter(gpx_df[column_x][len(gpx_df[column_x])-1],
-                        gpx_df[column_y][len(gpx_df[column_x])-1], color=start_stop_colors[1])
+            axes.scatter(self.dataframe[column_x][0],
+                        self.dataframe[column_y][0], color=start_stop_colors[0])
+            axes.scatter(self.dataframe[column_x][len(self.dataframe[column_x])-1],
+                        self.dataframe[column_y][len(self.dataframe[column_x])-1], color=start_stop_colors[1])
 
         # Scatter way points with different color
         if way_points_color:
@@ -905,18 +904,28 @@ class GPX():
         self._matplotlib_plot_text(axes.get_figure(), duration, distance, ascent, pace, speed)
 
         # Add ticks
-        axes.set_xticks([min(gpx_df[column_x]), max(gpx_df[column_x])])
-        axes.set_yticks([min(gpx_df[column_y]), max(gpx_df[column_y])])
+        axes.set_xticks([min(self.dataframe[column_x]), max(self.dataframe[column_x])])
+        axes.set_yticks([min(self.dataframe[column_y]), max(self.dataframe[column_y])])
 
         # Add axis limits (useless??)
         if projection is not None:
-            axes.set_xlim(left=min(gpx_df[column_x]),
-                        right=max(gpx_df[column_x]))
-            axes.set_ylim(bottom=min(gpx_df[column_y]),
-                        top=max(gpx_df[column_y]))
+            axes.set_xlim(left=min(self.dataframe[column_x]),
+                        right=max(self.dataframe[column_x]))
+            axes.set_ylim(bottom=min(self.dataframe[column_y]),
+                        top=max(self.dataframe[column_y]))
+            
+    def matplotlib_elevation_profile_plot(
+            self,
+            axes: Axes):
+        # Clear axes
+        axes.clear()
+
+        # Plot
+        im = axes.plot(self.dataframe["distance_from_start"].values, self.dataframe["ele"].values) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
 
     def matplotlib_plot(
         self,
+        map: bool = True,
         projection: Optional[str] = None,
         color: str = "#101010",
         colorbar: bool = False,
@@ -928,6 +937,7 @@ class GPX():
         ascent: Optional[Tuple[float, float]] = None,
         pace: Optional[Tuple[float, float]] = None,
         speed: Optional[Tuple[float, float]] = None,
+        elevation_profile: bool = False,
         file_path: Optional[str] = None):
         """
         Plot GPX using Matplotlib.
@@ -959,23 +969,49 @@ class GPX():
         speed : Optional[Tuple[float, float]], optional
             Display speed, by default None
         """
+        # Create dataframe containing data from the GPX file
+        self.dataframe = self.to_dataframe(projection=True,
+                                           elevation=True,
+                                           speed=True,
+                                           pace=True,
+                                           ascent_rate=True,
+                                           ascent_speed=True,
+                                           distance_from_start=True)
+
         # Create figure with axes
         fig = plt.figure(figsize=(14, 8))
-        fig.add_subplot(111)
+        
+        # Plot map
+        if map:
+            if elevation_profile:
+                fig.add_subplot(2, 1, 1)
+            else:
+                fig.add_subplot(1, 1, 1)
+            self.matplotlib_map_plot(fig.axes[0],
+                                     projection,
+                                     color,
+                                     colorbar,
+                                     start_stop_colors,
+                                     way_points_color,
+                                     title,
+                                     duration,
+                                     distance,
+                                     ascent,
+                                     pace,
+                                     speed)
+        
+        # Plot elevation profile
+        if elevation_profile:
+            if map:
+                fig.add_subplot(2, 1, 2)
+                axes_idx = 1
+                if colorbar:
+                    axes_idx = 2
+            else:
+                fig.add_subplot(1, 1, 1)
+                axes_idx = 0
+            self.matplotlib_elevation_profile_plot(fig.axes[axes_idx])
 
-        # Plot on axes
-        self.matplotlib_axes_plot(fig.axes[0],
-                                  projection,
-                                  color,
-                                  colorbar,
-                                  start_stop_colors,
-                                  way_points_color,
-                                  title,
-                                  duration,
-                                  distance,
-                                  ascent,
-                                  pace,
-                                  speed)
         
         # Save or display plot
         if file_path is not None:

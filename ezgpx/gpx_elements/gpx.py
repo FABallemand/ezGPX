@@ -270,7 +270,7 @@ class Gpx():
         float
             Distance (meters).
         """
-        dst = 0
+        dst = 0.0
         previous_point = self.tracks[0].trkseg[0].trkpt[0]
         for track in self.tracks:
             for track_segment in track.trkseg:
@@ -278,6 +278,20 @@ class Gpx():
                     dst += haversine_distance(previous_point, track_point)
                     previous_point = track_point
         return dst
+    
+    def compute_points_distance_from_start(self):
+        """
+        Compute distance from start at each point.
+        """
+        dst = 0.0
+        previous_point = self.tracks[0].trkseg[0].trkpt[0]
+        previous_point.distance_from_start = dst
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    dst += haversine_distance(previous_point, track_point)
+                    track_point.distance_from_start = dst
+                    previous_point = track_point
     
     def ascent(self) -> float:
         """
@@ -847,7 +861,8 @@ class Gpx():
             speed: bool = False,
             pace: bool = False,
             ascent_rate: bool = False,
-            ascent_speed: bool = False) -> pd.DataFrame:
+            ascent_speed: bool = False,
+            distance_from_start: bool = False) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
 
@@ -865,6 +880,8 @@ class Gpx():
             Toggle ascent rate, by default False
         ascent_speed : bool, optional
             Toggle ascent speed, by default False
+        distance_from_start : bool, optional
+            Toggle distance from start, by default False
 
         Returns
         -------
@@ -882,6 +899,8 @@ class Gpx():
             self.compute_points_ascent_rate()
         if ascent_speed and test_point.ascent_speed is None:
             self.compute_points_ascent_speed()
+        if distance_from_start and test_point.distance_from_start is None:
+            self.compute_points_distance_from_start()
 
         route_info = []
         for track in self.tracks:
@@ -907,6 +926,8 @@ class Gpx():
                         track_point_dict["ascent_rate"] = track_point.ascent_rate
                     if ascent_speed:
                         track_point_dict["ascent_speed"] = track_point.ascent_speed
+                    if distance_from_start:
+                        track_point_dict["distance_from_start"] = track_point.distance_from_start
                     route_info.append(track_point_dict)
         df = pd.DataFrame(route_info)
         return df
