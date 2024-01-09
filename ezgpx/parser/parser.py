@@ -29,7 +29,8 @@ class Parser():
             "rate": DEFAULT_PRECISION,
             "default": DEFAULT_PRECISION
             }
-        self.time_format = DEFAULT_TIME_FORMAT
+        self.time_data: bool = False
+        self.time_format: str = DEFAULT_TIME_FORMAT
 
         self.gpx: Gpx = Gpx()
 

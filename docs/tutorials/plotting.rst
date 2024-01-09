@@ -23,7 +23,7 @@ Matplotlib
                         ascent=(1, 0),
                         pace=None,
                         speed=None,
-                        file_path="img_1")
+                        file_path="img")
 
 .. image:: ../../img/matplotlib_plot_1.png
   :width: 500
@@ -49,7 +49,7 @@ Matplotlib Basemap Toolkit
                                 ascent=None,
                                 pace=None,
                                 speed=(1,0),
-                                file_path="img_2")
+                                file_path="img")
 
 .. image:: ../../img/matplotlib_basemap_plot_1.png
   :width: 500
@@ -73,7 +73,7 @@ gmplot
                 way_points_color="blue",
                 zoom=13,
                 title=gpx.name(),
-                file_path="map_1.html",
+                file_path="map.html",
                 open=False)
 
 .. image:: ../../img/gmap_plot_1.png
@@ -101,9 +101,35 @@ Folium
                     coord_popup=False,
                     title="Very nice track!",
                     zoom=8,
-                    file_path="map_2.html",
+                    file_path="map.html",
                     open=True)
 
 .. image:: ../../img/folium_plot_1.png
   :width: 500
   :alt: Folium plot
+
+PaperMap
+^^^^^^
+
+.. warning:: Requires :py:mod:`~papermap`.
+
+::
+
+    import ezgpx
+
+    # Parse GPX file
+    gpx = ezgpx.GPX("file.gpx")
+
+    # Plot with Folium
+    gpx.papermap_plot(tile_server="OpenStreetMap",
+                      size = "a4",
+                      use_landscape = True,
+                      scale = 25000,
+                      dpi = 300,
+                      add_grid = True,
+                      grid_size = 1000,
+                      file_path = "map.pdf"):
+
+.. image:: ../../img/papermap_plot_1.png
+  :width: 500
+  :alt: PaperMap plot

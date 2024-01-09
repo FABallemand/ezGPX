@@ -91,6 +91,7 @@ class GPXParser(XMLParser):
             logging.warning("No time element in GPX file.")
             return
 
+        self.time_data = True
         try:
             d = datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
             self.time_format = "%Y-%m-%dT%H:%M:%SZ"

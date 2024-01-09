@@ -21,6 +21,8 @@ import folium
 from folium.plugins import MiniMap
 from folium.features import DivIcon
 
+from papermap import PaperMap
+
 from ..gpx_elements import Gpx, WayPoint
 from ..gpx_parser import GPXParser
 from ..kml_parser import KMLParser
@@ -55,11 +57,13 @@ class GPX():
         """
         if file_path is not None and os.path.exists(file_path):
             self.file_path: str = file_path
+            self.file_name: str = os.path.basename(file_path)
             self.gpx: Gpx = None
             self.gpx_parser: GPXParser = None
             self.kml_parser: KMLParser = None
             self.fit_parser: FitParser = None
             self.precisions: Dict = None
+            self.time_data: bool = False
             self.time_format: str = None
 
             # GPX
@@ -67,6 +71,7 @@ class GPX():
                 self.gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self.gpx_parser.gpx
                 self.precisions = self.gpx_parser.precisions
+                self.time_data = self.gpx_parser.time_data
                 self.time_format = self.gpx_parser.time_format
 
             # KML
@@ -107,6 +112,24 @@ class GPX():
         else:
             logging.warning("File path does not exist")
             pass
+
+    def write_tmp_kml(
+            self,
+            path: str ="tmp.kml",
+            kml_string: Optional[bytes] = None):
+        """
+        Write temproray .KML file in order to parse KMZ file.
+        """
+        # Open/create KML file
+        try:
+            f = open(path, "wb")
+        except OSError:
+            logging.exception(f"Could not open/read file: {path}")
+            raise
+        # Write KML file
+        with f:
+            if kml_string is not None:
+                f.write(kml_string)
 
     def __str__(self) -> str:
         return f"file_path = {self.file_path}\ngpx = {self.gpx}"
@@ -811,7 +834,19 @@ class GPX():
             self.gpx.project(projection)  # Project all track points
 
         # Create dataframe containing data from the GPX file
-        gpx_df = self.to_dataframe(projection=True, elevation=True, speed=True, pace=True, ascent_rate=True, ascent_speed=True)
+        gpx_df = None
+        if color == "elevation":
+            gpx_df = self.to_dataframe(projection=True, elevation=True, speed=False, pace=False, ascent_rate=False, ascent_speed=False)
+        elif color == "speed":
+            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=True, pace=False, ascent_rate=False, ascent_speed=False)
+        elif color == "pace":
+            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=True, ascent_rate=False, ascent_speed=False)
+        elif color == "ascent_rate":
+            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=True, ascent_speed=False)
+        elif color == "ascent_speed":
+            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=False, ascent_speed=True)
+        else:
+            gpx_df = self.to_dataframe(projection=True, elevation=False, speed=False, pace=False, ascent_rate=False, ascent_speed=False)
 
         # Scatter all track points
         if color == "elevation":
@@ -1160,7 +1195,7 @@ class GPX():
             coord_popup: bool = False,
             title: Optional[str] = None,
             zoom: float = 12.0,
-            file_path: str = None,
+            file_path: Optional[str] = None,
             open: bool = True):
         """
         Plot GPX using folium.
@@ -1235,27 +1270,96 @@ class GPX():
 
         # Save map
         if file_path is None:
-            file_path = "unnamed.html"
+            file_path = self.file_path[:-4] + ".html"
         m.save(file_path)
 
         # Open map in web browser
         if open:
             webbrowser.open(file_path)
 
-    def write_tmp_kml(
+    def papermap_plot(
             self,
-            path: str ="tmp.kml",
-            kml_string: Optional[bytes] = None):
+            lat: Optional[float] = None,
+            lon: Optional[float] = None,
+            tile_server: str = "OpenStreetMap",
+            api_key: Optional[str] = None,
+            size: str = "a4",
+            use_landscape: bool = True,
+            margin_top: int = 10,
+            margin_right: int = 10,
+            margin_bottom: int = 10,
+            margin_left: int = 10,
+            scale: int = 25000,
+            dpi: int = 300,
+            background_color: str = "#FFF",
+            add_grid: bool = False,
+            grid_size: int = 1000,
+            file_path: Optional[str] = None):
         """
-        Write temproray .KML file in order to parse KMZ file.
+        Create background map of the GPX using PaperMap.
+
+        Parameters
+        ----------
+        lat : Optional[float], optional
+            Latitude of the center of the map, by default None
+        lon : Optional[float], optional
+            Longitude of the center of the map, by default None
+        tile_server : str, optional
+            Tile server to serve as the base of the paper map, by default "OpenStreetMap"
+        api_key : Optional[str], optional
+            API key for the chosen tile server (if applicable), by default None
+        size : str, optional
+            Size of the paper map, by default "a4"
+        use_landscape : bool, optional
+            Use landscape orientation, by default True
+        margin_top : int, optional
+            Top margin (in mm), by default 10
+        margin_right : int, optional
+            Right margin (in mm), by default 10
+        margin_bottom : int, optional
+            Bottom margin (in mm), by default 10
+        margin_left : int, optional
+            Left margin (in mm), by default 10
+        scale : int, optional
+            Scale of the paper map, by default 25000
+        dpi : int, optional
+            Dots per inch, by default 300
+        background_color : str, optional
+            Background color of the paper map, by default "#FFF"
+        add_grid : bool, optional
+            Add a coordinate grid overlay to the paper map, by default False
+        grid_size : int, optional
+            Size of the grid squares (if applicable, in meters), by default 1000
+        file_path : Optional[str], optional
+            Path to save plot, by default None
         """
-        # Open/create KML file
-        try:
-            f = open(path, "wb")
-        except OSError:
-            logging.exception(f"Could not open/read file: {path}")
-            raise
-        # Write KML file
-        with f:
-            if kml_string is not None:
-                f.write(kml_string)
+        # Create map
+        center_lat, center_lon = self.center()
+        if lat is None:
+            lat = center_lat
+        if lon is None:
+            lon = center_lon
+        
+        pm = PaperMap(lat=lat,
+                      lon=lon,
+                      tile_server=tile_server,
+                      api_key=api_key,
+                      size=size,
+                      use_landscape=use_landscape,
+                      margin_top=margin_top,
+                      margin_right=margin_right,
+                      margin_bottom=margin_bottom,
+                      margin_left=margin_left,
+                      scale=scale,
+                      dpi=dpi,
+                      background_color=background_color,
+                      add_grid=add_grid,
+                      grid_size=grid_size)
+        
+        # Render map
+        pm.render()
+
+        # Save map
+        if file_path is None:
+            file_path = self.file_path[:-4] + ".pdf"
+        pm.save(file_path)
