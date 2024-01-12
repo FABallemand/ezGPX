@@ -9,10 +9,10 @@ from math import degrees
 
 from fitparse import FitFile
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-import matplotlib.colors
-import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
 import gmplot
@@ -29,7 +29,7 @@ from ..kml_parser import KMLParser
 from ..fit_parser import FitParser
 from ..gpx_writer import GPXWriter
 from ..kml_writer import KMLWriter
-from ..utils import EARTH_RADIUS
+from ..utils import haversine_distance, EARTH_RADIUS
 
 GPX = NewType("GPX", object) # GPX forward declaration for type hint
 
@@ -244,6 +244,17 @@ class GPX():
             Latitude and longitude of the center point.
         """
         return self.gpx.center()
+    
+    def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
+        """
+        Find extreme points in track, i.e.: points with lowest and highest latitude and longitude.
+
+        Returns
+        -------
+        Tuple[WayPoint, WayPoint, WayPoint, WayPoint]
+            Min latitude point, min longitude point, max latitude point, max longitude point
+        """
+        return self.gpx.extreme_points()
 
     def distance(self) -> float:
         """
@@ -732,6 +743,10 @@ class GPX():
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
         return self.kml_writer.write(path, styles, xml_schema)
+    
+###############################################################################
+#### Matplotlib Plot ##########################################################
+###############################################################################
 
     def _matplotlib_plot_text(
             self,
@@ -847,30 +862,30 @@ class GPX():
             column_y = "y"
             self.gpx.project(projection)  # Project all track points
 
-        # Scatter all track points
+        # Scatter track points
         if color == "elevation":
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","blue"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["green","blue"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=self.dataframe["ele"], cmap=cmap)
         elif color == "speed":
-            # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "deepskyblue", "blue", "mediumblue", "midnightblue"])
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "mediumblue", "midnightblue"])
+            # cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "deepskyblue", "blue", "mediumblue", "midnightblue"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "mediumblue", "midnightblue"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=self.dataframe["speed"], cmap=cmap)
         elif color == "pace":
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "midnightblue"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["lightskyblue", "midnightblue"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=self.dataframe["pace"], cmap=cmap)
         elif color == "vertical_drop":
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["yellow", "orange", "red", "purple", "black"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["yellow", "orange", "red", "purple", "black"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=abs(self.dataframe["ascent_rate"]), cmap=cmap)
         elif color == "ascent_rate":
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["darkgreen", "green", "yellow", "red", "black"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["darkgreen", "green", "yellow", "red", "black"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=self.dataframe["ascent_rate"], cmap=cmap)
         elif color == "ascent_speed":
-            cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["deeppink", "lightpink", "lightcoral", "red", "darkred"])
+            cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["deeppink", "lightpink", "lightcoral", "red", "darkred"])
             im = axes.scatter(self.dataframe[column_x], self.dataframe[column_y],
                         c=self.dataframe["ascent_speed"], cmap=cmap)
         else:
@@ -913,19 +928,10 @@ class GPX():
                         right=max(self.dataframe[column_x]))
             axes.set_ylim(bottom=min(self.dataframe[column_y]),
                         top=max(self.dataframe[column_y]))
-            
-    def matplotlib_elevation_profile_plot(
-            self,
-            axes: Axes):
-        # Clear axes
-        axes.clear()
-
-        # Plot
-        im = axes.plot(self.dataframe["distance_from_start"].values, self.dataframe["ele"].values) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
 
     def matplotlib_plot(
         self,
-        map: bool = True,
+        figsize: Tuple[int, int] = (14, 8),
         projection: Optional[str] = None,
         color: str = "#101010",
         colorbar: bool = False,
@@ -937,13 +943,14 @@ class GPX():
         ascent: Optional[Tuple[float, float]] = None,
         pace: Optional[Tuple[float, float]] = None,
         speed: Optional[Tuple[float, float]] = None,
-        elevation_profile: bool = False,
         file_path: Optional[str] = None):
         """
         Plot GPX using Matplotlib.
 
         Parameters
         ----------
+        figsize : Tuple[float, float], optional
+            Plot size, by default (14, 8)
         projection : Optional[str], optional
             Projection, by default None
         color : str, optional
@@ -979,39 +986,22 @@ class GPX():
                                            distance_from_start=True)
 
         # Create figure with axes
-        fig = plt.figure(figsize=(14, 8))
+        fig = plt.figure(figsize=figsize)
+        fig.add_subplot(1, 1 ,1)
         
         # Plot map
-        if map:
-            if elevation_profile:
-                fig.add_subplot(2, 1, 1)
-            else:
-                fig.add_subplot(1, 1, 1)
-            self.matplotlib_map_plot(fig.axes[0],
-                                     projection,
-                                     color,
-                                     colorbar,
-                                     start_stop_colors,
-                                     way_points_color,
-                                     title,
-                                     duration,
-                                     distance,
-                                     ascent,
-                                     pace,
-                                     speed)
-        
-        # Plot elevation profile
-        if elevation_profile:
-            if map:
-                fig.add_subplot(2, 1, 2)
-                axes_idx = 1
-                if colorbar:
-                    axes_idx = 2
-            else:
-                fig.add_subplot(1, 1, 1)
-                axes_idx = 0
-            self.matplotlib_elevation_profile_plot(fig.axes[axes_idx])
-
+        self.matplotlib_map_plot(fig.axes[0],
+                                 projection,
+                                 color,
+                                 colorbar,
+                                 start_stop_colors,
+                                 way_points_color,
+                                 title,
+                                 duration,
+                                 distance,
+                                 ascent,
+                                 pace,
+                                 speed)
         
         # Save or display plot
         if file_path is not None:
@@ -1026,16 +1016,14 @@ class GPX():
     def matplotlib_basemap_plot(
             self,
             projection: str = "cyl",
-            service: str = "World_Shaded_Relief",
+            service: str = "World_Imagery",
+            xpixels: int =400,
+            ypixels: Optional[int] = None,
+            dpi: int = 96,
             color: str = "#101010",
             start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             title: Optional[str] = None,
-            duration: Optional[Tuple[float, float]] = None,
-            distance: Optional[Tuple[float, float]] = None,
-            ascent: Optional[Tuple[float, float]] = None,
-            pace: Optional[Tuple[float, float]] = None,
-            speed: Optional[Tuple[float, float]] = None,
             file_path: str = None):
         """
         Plot GPX using Matplotlib Basemap Toolkit.
@@ -1046,8 +1034,15 @@ class GPX():
             Projection, by default "cyl"
         service : str, optional
             Service used to fetch map background. Currently supported services:
-            "World_Shaded_Relief". Defaults to "World_Shaded_Relief",
-            by default "World_Shaded_Relief"
+            "bluemarble", "shadedrelief", "etopo" or a service listed on
+            https://server.arcgisonline.com/arcgis/rest/services, by default
+            "World_Imagery"
+        xpixels : int, optional
+            Number of pixels along the horizontal axis, by default 400
+        ypixels : Optional[int], optional
+            Number of pixels along the vertical axis, by default None
+        dpi : int, optional
+            Background map dot per inch, by default 96
         color : str, optional
             Track color, by default "#101010"
         start_stop_colors : Optional[Tuple[str, str]], optional
@@ -1056,16 +1051,6 @@ class GPX():
             Way point color, by default None
         title : Optional[str], optional
             Title, by default None
-        duration : Optional[Tuple[float, float]], optional
-            Display duration, by default None
-        distance : Optional[Tuple[float, float]], optional
-            Display distance, by default None
-        ascent : Optional[Tuple[float, float]], optional
-            Display ascent, by default None
-        pace : Optional[Tuple[float, float]], optional
-            Display pace, by default None
-        speed : Optional[Tuple[float, float]], optional
-            Display speed, by default None
         file_path : str, optional
             Path to save plot, by default None
         """
@@ -1099,11 +1084,24 @@ class GPX():
         # map.fillcontinents(color='coral',lake_color='aqua')
         # map.drawcoastlines()
 
-        # map.bluemarble()
-        # map.shadedrelief()
-        # map.etopo()
-        map.arcgisimage(service=service,
-                        xpixels=2000, dpi=200, verbose=True)
+        if service == "bluemarble":
+            map.bluemarble()
+        elif service == "shadedrelief":
+            map.shadedrelief()
+        elif service == "etopo":
+            map.etopo()
+        elif service == "wms":
+            wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
+            wms_server = "http://wms.geosignal.fr/metropole?"
+            map.wmsimage(wms_server,
+                         layers=["Communes", "Nationales", "Regions"],
+                         verbose=True)
+        else:
+            map.arcgisimage(service=service,
+                            xpixels=xpixels,
+                            ypixels=ypixels,
+                            dpi=dpi,
+                            verbose=True)
 
         # Create dataframe containing data from the GPX file
         gpx_df = self.to_dataframe()
@@ -1131,9 +1129,6 @@ class GPX():
         if title is not None:
             plt.title(title, size=20)
 
-        # Add text elements
-        self._matplotlib_plot_text(fig, duration, distance, ascent, pace, speed)
-
         # Save or display plot
         if file_path is not None:
             # Check if provided path exists
@@ -1144,6 +1139,298 @@ class GPX():
             plt.savefig(file_path)
         else:
             plt.show()
+
+###############################################################################
+#### Expert Plot ##############################################################
+###############################################################################
+            
+    def expert_map_plot(
+            self,
+            axes: Axes,
+            size: float = 10,
+            color: str = "#101010",
+            cmap: Optional[mpl.colors.Colormap] = None,
+            colorbar: bool = False,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
+            way_points_color: Optional[str] = None,
+            background: Optional[str] = None,
+            lat_offset: float = 0.001,
+            lon_offset: float = 0.001,
+            xpixels: int =400,
+            ypixels: Optional[int] = None,
+            dpi: int = 96,):
+        
+        # Create empty map
+        min_lat, min_lon, max_lat, max_lon = self.bounds()
+        min_lat, min_lon = max(0, min_lat - lat_offset), max(0, min_lon - lon_offset)
+        max_lat, max_lon = min(max_lat + lat_offset, 90), min(max_lon + lon_offset, 180)
+
+        map = Basemap(projection="cyl",
+                      llcrnrlon=min_lon,
+                      llcrnrlat=min_lat,
+                      urcrnrlon=max_lon,
+                      urcrnrlat=max_lat,
+                      ax=axes)
+
+        # Create empty map
+        # center_lat, center_lon = self.center()
+        # min_lat_point, min_lon_point, max_lat_point, max_lon_point = self.extreme_points()
+        # width = haversine_distance(min_lon_point, max_lon_point)
+        # height = haversine_distance(min_lat_point, max_lat_point)
+        # print(f"width={width} | height={height}")
+        # map = Basemap(projection="lcc",
+        #               lon_0=center_lon,
+        #               lat_0=center_lat,
+        #               width=width,
+        #               height=height,
+        #               ax=axes)
+        
+        # Add background
+        if background is None:
+            pass
+        elif background == "bluemarble":
+            map.bluemarble()
+        elif background == "shadedrelief":
+            map.shadedrelief()
+        elif background == "etopo":
+            map.etopo()
+        elif background == "wms":
+            wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
+            wms_server = "http://wms.geosignal.fr/metropole?"
+            map.wmsimage(wms_server,
+                         layers=["Communes", "Nationales", "Regions"],
+                         verbose=True)
+        else:
+            map.arcgisimage(service=background,
+                            xpixels=xpixels,
+                            ypixels=ypixels,
+                            dpi=dpi,
+                            verbose=True)
+            
+        # Scatter track points
+        x, y = map(self.dataframe["lon"], self.dataframe["lat"]) # Project track points
+        x, y = x.tolist(), y.tolist()                            # Convert to list
+        if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
+            im = map.scatter(self.dataframe["lon"],
+                              self.dataframe["lat"],
+                              s=size,
+                              c=self.dataframe[color],
+                              cmap=cmap)
+        else:
+            im = map.scatter(self.dataframe["lon"],
+                              self.dataframe["lat"],
+                              s=size,
+                              color=color)
+            
+        # HANDLE COLORBAR AS A SUBPLOT??
+        # Colorbar
+        if colorbar:
+            plt.colorbar(im,
+                         ax=axes)
+            
+        # Scatter start and stop points with different color
+        if start_stop_colors:
+            map.scatter(x[0], y[0], marker="^", color=start_stop_colors[0])
+            map.scatter(x[-1], y[-1], marker="h", color=start_stop_colors[1])
+
+        # Scatter way points with different color
+        if way_points_color:
+            for way_point in self.gpx.wpt:
+                x, y = map(way_point.lon, way_point.lat)              # Project way point
+                map.scatter(x, y, marker="D", color="waypoint_color") # Scatter way point
+
+        return im # Useless?
+
+    def expert_elevation_profile_plot(
+            self,
+            axes: Axes,
+            grid: bool = False,
+            size: float = 10,
+            color: str = "#101010",
+            cmap: Optional[mpl.colors.Colormap] = None,
+            colorbar: bool = False):
+        # Clear axes
+        axes.clear()
+
+        # Plot
+        if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
+            axes.scatter(self.dataframe["distance_from_start"].values,
+                         self.dataframe["ele"].values,
+                         s=size,
+                         c=self.dataframe[color],
+                         cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
+        else:
+            axes.scatter(self.dataframe["distance_from_start"].values,
+                         self.dataframe["ele"].values,
+                         s=size,
+                         color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
+
+        # Grid
+        if grid:
+            axes.grid()
+
+    def expert_data_table(
+            self,
+            axes: Axes,
+            bbox: List):
+        # Row labels
+        row_labels = [
+            "Distance",
+            "Total ascent",
+            "Total descent",
+            "Total time",
+            "Avg. speed",
+            "Avg. moving speed",
+            "Maximum speed",
+            "Moving time"
+        ]
+
+        # Cell text
+        cell_text = [
+            [f"{self.distance()/1000:.2f} km"],
+            [f"{self.ascent():.2f} m"],
+            [""],
+            [""],
+            [""],
+            [""],
+            [""],
+            [""]
+        ]
+
+        axes.table(cellText=cell_text,
+                   rowLabels=row_labels,
+                   edges="open",
+                   loc="center",
+                   bbox=bbox)
+        axes.axis("off")
+
+    def expert_plot(
+            self,
+            figsize: Tuple[int, int] = (14,8),
+            subplot: Tuple[int, int] = (1,1),
+            map_position: Optional[Tuple[int, int]] = (0,0),
+            map_size: float = 10,
+            map_color: str = "#101010",
+            map_cmap: Optional[mpl.colors.Colormap] = None,
+            map_colorbar: bool = False,
+            start_stop_colors: Optional[Tuple[str, str]] = None,
+            way_points_color: Optional[str] = None,
+            background: Optional[str] = "World_Imagery",
+            lat_offset: float = 0.001,
+            lon_offset: float = 0.001,
+            xpixels: int = 400,
+            ypixels: Optional[int] = None,
+            dpi: int = 96,
+            elevation_profile_position: Optional[Tuple[int, int]] = (1,0), # None
+            elevation_profile_grid: bool = False,
+            elevation_profile_size: float = 10,
+            elevation_profile_color: str = "#101010",
+            elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
+            elevation_profile_colorbar: bool = False,
+            shared_color: str = "#101010",
+            shared_cmap: Optional[mpl.colors.Colormap] = None,
+            shared_colorbar: bool = False,
+            data_table_position: Optional[Tuple[int, int]] = (1,1), # None
+            title: Optional[str] = None,
+            title_fontsize: int = 20,
+            file_path: Optional[str] = None):
+        # Create dataframe containing data from the GPX file
+        self.dataframe = self.to_dataframe(projection=True,
+                                           elevation=True,
+                                           speed=True,
+                                           pace=True,
+                                           ascent_rate=True,
+                                           ascent_speed=True,
+                                           distance_from_start=True)
+
+        # Create figure with axes
+        fig, axs = plt.subplots(nrows=subplot[0],
+                                ncols=subplot[1],
+                                figsize=figsize,
+                                gridspec_kw={'width_ratios': [3, 1]})
+        # fig.tight_layout()
+
+        # Initialize im
+        im = None
+
+        # Handle map plot
+        if map_position is not None:
+            if (True): # Check if map_position is correct
+                # Plot map on subplot
+                im = self.expert_map_plot(axs[map_position[0], map_position[1]],
+                                          size=map_size,
+                                          color=map_color,
+                                          cmap=map_cmap,
+                                          colorbar=map_colorbar if not shared_colorbar else False,
+                                          start_stop_colors=start_stop_colors,
+                                          way_points_color=way_points_color,
+                                          background=background,
+                                          lat_offset=lat_offset,
+                                          lon_offset=lon_offset,
+                                          xpixels=xpixels,
+                                          ypixels=ypixels,
+                                          dpi=dpi)
+            else:
+                logging.error(f"Invalid map position: no subplot {map_position} in a {subplot} array of plots")
+                return
+            
+        # if map_colorbar and im:
+        #     fig.colorbar(im,
+        #                  cax=axs[0, 1]) # aspect arg to change width?
+            
+        if shared_color and im:
+            if shared_cmap is None:
+                shared_cmap = mpl.cm.get_cmap('viridis', 12)
+            fig.colorbar(im,
+                         ax=axs.ravel().tolist())
+
+            
+        # Handle elevation profile plot
+        if elevation_profile_position is not None:
+            if (True): # Check if elevation_profile_position is correct
+                # Plot elevation profile on subplot
+                self.expert_elevation_profile_plot(axs[elevation_profile_position[0], elevation_profile_position[1]],
+                                                   grid=elevation_profile_grid,
+                                                   size=elevation_profile_size,
+                                                   color=elevation_profile_color,
+                                                   cmap=elevation_profile_cmap,
+                                                   colorbar=elevation_profile_colorbar)
+            else:
+                logging.error(f"Invalid map position: no subplot {elevation_profile_position} in a {subplot} array of plots")
+                return
+            
+        # Handle data table plot
+        if data_table_position is not None:
+            if (True): # Check if data_table_position is correct
+                # Compute table bounding box
+                pos = axs[data_table_position[0], data_table_position[1]].get_position()
+                bbox = [pos.x0, pos.y0, pos.width * 3, 0.8] # 3 is the width ratio set before
+                # Plot data table on subplot
+                self.expert_data_table(axs[data_table_position[0], data_table_position[1]],
+                                       bbox=bbox)
+            else:
+                logging.error(f"Invalid map position: no subplot {elevation_profile_position} in a {subplot} array of plots")
+                return
+            
+        # Add title
+        if title is not None:
+            fig.suptitle(title, fontsize=title_fontsize)
+            
+        # MAKE FUNCTION ??
+        # Save or display plot
+        if file_path is not None:
+            # Check if provided path exists
+            directory_path = os.path.dirname(os.path.realpath(file_path))
+            if not os.path.exists(directory_path):
+                logging.error("Provided path does not exist")
+                return
+            plt.savefig(file_path)
+        else:
+            plt.show()
+
+###############################################################################
+#### Google Maps Plot #########################################################
+###############################################################################
 
     def gmplot_plot(
             self,
@@ -1220,6 +1507,10 @@ class GPX():
         # Open map in web browser
         if open:
             webbrowser.open(file_path)
+
+###############################################################################
+#### Folium Plot ##############################################################
+###############################################################################
 
     def folium_plot(
             self,
@@ -1313,6 +1604,10 @@ class GPX():
         if open:
             webbrowser.open(file_path)
 
+###############################################################################
+#### PaperMap Plot ############################################################
+###############################################################################
+            
     def papermap_plot(
             self,
             lat: Optional[float] = None,

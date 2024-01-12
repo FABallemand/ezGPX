@@ -260,6 +260,33 @@ class Gpx():
         center_lat = min_lat + (max_lat - min_lat) / 2
         center_lon = min_lon + (max_lon - min_lon) / 2
         return center_lat, center_lon
+    
+    def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
+        """
+        Find extreme points in track, i.e.: points with lowest and highest latitude and longitude.
+
+        Returns
+        -------
+        Tuple[WayPoint, WayPoint, WayPoint, WayPoint]
+            Min latitude point, min longitude point, max latitude point, max longitude point
+        """
+        min_lat_point = self.tracks[0].trkseg[0].trkpt[0]
+        min_lon_point = self.tracks[0].trkseg[0].trkpt[0]
+        max_lat_point = self.tracks[0].trkseg[0].trkpt[0]
+        max_lon_point = self.tracks[0].trkseg[0].trkpt[0]
+
+        for track in self.tracks:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.lat < min_lat_point.lat:
+                        min_lat_point = track_point
+                    if track_point.lon < min_lon_point.lon:
+                        min_lon_point = track_point
+                    if track_point.lat > max_lat_point.lat:
+                        max_lat_point = track_point
+                    if track_point.lon > max_lon_point.lon:
+                        max_lon_point = track_point
+        return min_lat_point, min_lon_point, max_lat_point, max_lon_point
 
     def distance(self) -> float:
         """
