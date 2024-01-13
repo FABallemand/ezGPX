@@ -1254,13 +1254,13 @@ class GPX():
 
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
-            axes.scatter(self.dataframe["distance_from_start"].values,
+            axes.scatter(self.dataframe["distance_from_start"].values / 1000,
                          self.dataframe["ele"].values,
                          s=size,
                          c=self.dataframe[color],
                          cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
-            axes.scatter(self.dataframe["distance_from_start"].values,
+            axes.scatter(self.dataframe["distance_from_start"].values / 1000,
                          self.dataframe["ele"].values,
                          s=size,
                          color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
@@ -1268,6 +1268,10 @@ class GPX():
         # Grid
         if grid:
             axes.grid()
+
+        # Axis labels
+            axes.set_xlabel("Distance [km]")
+            axes.set_ylabel("Elevation [m]")
 
     def expert_data_table(
             self,
@@ -1289,12 +1293,12 @@ class GPX():
         cell_text = [
             [f"{self.distance()/1000:.2f} km"],
             [f"{self.ascent():.2f} m"],
-            [""],
-            [""],
-            [""],
-            [""],
-            [""],
-            [""]
+            [f"{self.descent():.2f} m"],
+            [f"{self.total_elapsed_time()}"],
+            [f"{self.avg_speed():.2f} km/h"],
+            [f"{self.avg_moving_speed():.2f} km/h"],
+            [f"{self.max_speed():.2f} km/h"],
+            [f"{self.moving_time()}"]
         ]
 
         axes.table(cellText=cell_text,
@@ -1303,6 +1307,39 @@ class GPX():
                    loc="center",
                    bbox=bbox)
         axes.axis("off")
+
+    def expert_ascent_rate_graph(
+            self,
+            axes: Axes):
+        ascent_rates = [None, 1, 5, 10, 20]
+        nb_ascent_rates = [0 for i in ascent_rates]
+        nb_points = 0
+
+        # Move to a Gpx method?
+        for track in self.gpx.tracks:
+            for track_segment in track.trkseg:
+                nb_points += len(track_segment.trkpt)
+                for track_point in track_segment.trkpt:
+                    i = len(ascent_rates)-1
+                    while i > 0 and track_point.ascent_rate < ascent_rates[i]:
+                        i -= 1
+                    nb_ascent_rates[i] += 1
+
+        percent_ascent_rate = [(nb * 100) / nb_points for nb in nb_ascent_rates]
+
+        y_pos = range(1, len(ascent_rates)+1)
+        y_labels = [f"{x} %" if x is not None else "" for x in ascent_rates]
+        rects = axes.barh(y=y_pos,
+                          width=percent_ascent_rate,
+                          color=["green", "yellow", "orange", "red", "black"])
+        large_percentiles = [f"{p:.1f} %" if p > 40 else '' for p in percent_ascent_rate]
+        small_percentiles = [f"{p:.1f} %" if p <= 40 else '' for p in percent_ascent_rate]
+        axes.bar_label(rects, small_percentiles,
+                       padding=5, color='black', fontweight='bold')
+        axes.bar_label(rects, large_percentiles,
+                       padding=-40, color='white', fontweight='bold')
+        axes.set_yticks(y_pos, labels=y_labels)
+        axes.set_title("Ascent rate")
 
     def expert_plot(
             self,
@@ -1327,12 +1364,14 @@ class GPX():
             elevation_profile_color: str = "#101010",
             elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
             elevation_profile_colorbar: bool = False,
+            ascent_rate_graph_position: Optional[Tuple[int, int]] = (0,1), # None
             shared_color: str = "#101010",
             shared_cmap: Optional[mpl.colors.Colormap] = None,
             shared_colorbar: bool = False,
             data_table_position: Optional[Tuple[int, int]] = (1,1), # None
             title: Optional[str] = None,
             title_fontsize: int = 20,
+            watermark: bool = False,
             file_path: Optional[str] = None):
         # Create dataframe containing data from the GPX file
         self.dataframe = self.to_dataframe(projection=True,
@@ -1396,7 +1435,7 @@ class GPX():
                                                    cmap=elevation_profile_cmap,
                                                    colorbar=elevation_profile_colorbar)
             else:
-                logging.error(f"Invalid map position: no subplot {elevation_profile_position} in a {subplot} array of plots")
+                logging.error(f"Invalid elevation profile position: no subplot {elevation_profile_position} in a {subplot} array of plots")
                 return
             
         # Handle data table plot
@@ -1409,12 +1448,24 @@ class GPX():
                 self.expert_data_table(axs[data_table_position[0], data_table_position[1]],
                                        bbox=bbox)
             else:
-                logging.error(f"Invalid map position: no subplot {elevation_profile_position} in a {subplot} array of plots")
+                logging.error(f"Invalid data table position: no subplot {data_table_position} in a {subplot} array of plots")
+                return
+            
+        # Handle ascent rate bar graph
+        if ascent_rate_graph_position is not None:
+            if (True): # Check if ascent_rate_graph_position is correct
+                # Plot bar graph on subplot
+                self.expert_ascent_rate_graph(axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
+            else:
+                logging.error(f"Invalid ascent rate graph position: no subplot {ascent_rate_graph_position} in a {subplot} array of plots")
                 return
             
         # Add title
         if title is not None:
-            fig.suptitle(title, fontsize=title_fontsize)
+            if watermark:
+                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+            else:
+                fig.suptitle(title, fontsize=title_fontsize)
             
         # MAKE FUNCTION ??
         # Save or display plot
