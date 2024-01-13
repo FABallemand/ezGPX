@@ -1144,7 +1144,7 @@ class GPX():
 #### Expert Plot ##############################################################
 ###############################################################################
             
-    def expert_map_plot(
+    def expert_map(
             self,
             axes: Axes,
             size: float = 10,
@@ -1241,7 +1241,7 @@ class GPX():
 
         return im # Useless?
 
-    def expert_elevation_profile_plot(
+    def expert_elevation_profile(
             self,
             axes: Axes,
             grid: bool = False,
@@ -1254,24 +1254,83 @@ class GPX():
 
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
-            axes.scatter(self.dataframe["distance_from_start"].values / 1000,
-                         self.dataframe["ele"].values,
-                         s=size,
-                         c=self.dataframe[color],
-                         cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
+            im = axes.scatter(self.dataframe["distance_from_start"].values / 1000, # Convert to km
+                              self.dataframe["ele"].values,
+                              s=size,
+                              c=self.dataframe[color],
+                              cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
-            axes.scatter(self.dataframe["distance_from_start"].values / 1000,
-                         self.dataframe["ele"].values,
-                         s=size,
-                         color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
+            im = axes.scatter(self.dataframe["distance_from_start"].values / 1000, # Convert to km
+                              self.dataframe["ele"].values,
+                              s=size,
+                              color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
 
         # Grid
         if grid:
             axes.grid()
 
+        # Colorbar
+        if colorbar:
+            plt.colorbar(im,
+                         ax=axes)
+
         # Axis labels
-            axes.set_xlabel("Distance [km]")
-            axes.set_ylabel("Elevation [m]")
+        axes.set_xlabel("Distance [km]")
+        axes.set_ylabel("Elevation [m]")
+
+    # x axis time instead of distance
+    def expert_pace_graph(
+            self,
+            axes: Axes,
+            grid: bool = False,
+            size: float = 10,
+            color: str = "#101010",
+            cmap: Optional[mpl.colors.Colormap] = None,
+            colorbar: bool = False,
+            threshold: float = 60.0):
+        # Clear axes
+        axes.clear()
+
+        # Plot
+        if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
+            # Remove lowest values
+            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+            pace = self.dataframe["pace"].values
+            color = self.dataframe[color]
+            tmp = [(x, p, c) for (x, p, c) in list(zip(x, pace, color)) if p < threshold]
+            x = [x for (x, p, c) in tmp]
+            pace = [p for (x, p, c) in tmp]
+            color = [c for (x, p, c) in tmp]
+            im = axes.scatter(x,
+                              pace,
+                              s=size,
+                              c=color,
+                              cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
+        else:
+            # Remove lowest values
+            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+            pace = self.dataframe["pace"].values
+            tmp = [(x, p) for (x,p) in list(zip(x, pace)) if p < threshold]
+            x = [x for (x,p) in tmp]
+            pace = [p for (x,p) in tmp]
+            im = axes.scatter(x,
+                              pace,
+                              s=size,
+                              color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
+        axes.invert_yaxis()
+
+        # Grid
+        if grid:
+            axes.grid()
+
+        # Colorbar
+        if colorbar:
+            plt.colorbar(im,
+                         ax=axes)
+
+        # Axis labels
+        axes.set_xlabel("Distance [km]")
+        axes.set_ylabel("Pace [min/km]")
 
     def expert_data_table(
             self,
@@ -1341,6 +1400,7 @@ class GPX():
         axes.set_yticks(y_pos, labels=y_labels)
         axes.set_title("Ascent rate")
 
+    # Use dict to pass parameters    
     def expert_plot(
             self,
             figsize: Tuple[int, int] = (14,8),
@@ -1364,6 +1424,13 @@ class GPX():
             elevation_profile_color: str = "#101010",
             elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
             elevation_profile_colorbar: bool = False,
+            pace_graph_position: Optional[Tuple[int, int]] = (2,0), # None
+            pace_graph_grid: bool = False,
+            pace_graph_size: float = 10,
+            pace_graph_color: str = "#101010",
+            pace_graph_cmap: Optional[mpl.colors.Colormap] = None,
+            pace_graph_colorbar: bool = False,
+            pace_graph_threshold: float = 60.0,
             ascent_rate_graph_position: Optional[Tuple[int, int]] = (0,1), # None
             shared_color: str = "#101010",
             shared_cmap: Optional[mpl.colors.Colormap] = None,
@@ -1396,7 +1463,7 @@ class GPX():
         if map_position is not None:
             if (True): # Check if map_position is correct
                 # Plot map on subplot
-                im = self.expert_map_plot(axs[map_position[0], map_position[1]],
+                im = self.expert_map(axs[map_position[0], map_position[1]],
                                           size=map_size,
                                           color=map_color,
                                           cmap=map_cmap,
@@ -1428,12 +1495,27 @@ class GPX():
         if elevation_profile_position is not None:
             if (True): # Check if elevation_profile_position is correct
                 # Plot elevation profile on subplot
-                self.expert_elevation_profile_plot(axs[elevation_profile_position[0], elevation_profile_position[1]],
+                self.expert_elevation_profile(axs[elevation_profile_position[0], elevation_profile_position[1]],
                                                    grid=elevation_profile_grid,
                                                    size=elevation_profile_size,
                                                    color=elevation_profile_color,
                                                    cmap=elevation_profile_cmap,
                                                    colorbar=elevation_profile_colorbar)
+            else:
+                logging.error(f"Invalid elevation profile position: no subplot {elevation_profile_position} in a {subplot} array of plots")
+                return
+            
+        # Handle pace graph plot
+        if pace_graph_position is not None:
+            if (True): # Check if pace_graph_position is correct
+                # Plot pace on subplot
+                self.expert_pace_graph(axs[pace_graph_position[0], pace_graph_position[1]],
+                                       grid=pace_graph_grid,
+                                       size=pace_graph_size,
+                                       color=pace_graph_color,
+                                       cmap=pace_graph_cmap,
+                                       colorbar=pace_graph_colorbar,
+                                       threshold=pace_graph_threshold)
             else:
                 logging.error(f"Invalid elevation profile position: no subplot {elevation_profile_position} in a {subplot} array of plots")
                 return

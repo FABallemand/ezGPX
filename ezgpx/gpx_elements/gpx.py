@@ -101,6 +101,10 @@ class Gpx():
             self.tracks: List[Track] = tracks
         self.extensions: Extensions = extensions
 
+###############################################################################
+#### Schemas ##################################################################
+###############################################################################
+
     def check_xml_schema(self, file_path: str) -> bool:
         """
         Check XML schema.
@@ -159,6 +163,10 @@ class Gpx():
             if not schema.is_valid(file_path):
                 logging.error(f"File does not follow {gpx_schema}")
                 return False
+            
+###############################################################################
+#### Name #####################################################################
+###############################################################################
 
     def name(self) -> str:
         """
@@ -181,6 +189,10 @@ class Gpx():
             New name.
         """
         self.tracks[0].name = new_name
+
+###############################################################################
+#### Points ###################################################################
+###############################################################################
 
     def nb_points(self) -> int:
         """
@@ -287,6 +299,10 @@ class Gpx():
                     if track_point.lon > max_lon_point.lon:
                         max_lon_point = track_point
         return min_lat_point, min_lon_point, max_lat_point, max_lon_point
+    
+###############################################################################
+#### Distance and Elevation ###################################################
+###############################################################################
 
     def distance(self) -> float:
         """
@@ -406,7 +422,7 @@ class Gpx():
             Maximum ascent rate.
         """
         max_ascent_rate = -1.0
-        self.compute_points_ascent_rate()
+        self.compute_points_ascent_rate() # Check if it needs to be done
 
         for track in self.tracks:
             for track_segment in track.trkseg:
@@ -449,6 +465,10 @@ class Gpx():
                     if track_point.ele > max_elevation:
                         max_elevation = track_point.ele
         return max_elevation
+    
+###############################################################################
+#### Time #####################################################################
+###############################################################################
     
     def utc_start_time(self) -> datetime:
         """
@@ -558,6 +578,10 @@ class Gpx():
             Moving time.
         """
         return self.total_elapsed_time() - self.stopped_time()
+    
+###############################################################################
+#### Speed and Pace ###########################################################
+###############################################################################
     
     def avg_speed(self) -> float:
         """
@@ -785,6 +809,10 @@ class Gpx():
 
         return max_ascent_speed
     
+###############################################################################
+#### Error Correction #########################################################
+###############################################################################
+    
     def remove_points(self, remove_factor: int = 2):
         count = 0
         for track in self.tracks:
@@ -868,6 +896,10 @@ class Gpx():
 
                 segment.trkpt = new_trkpt
 
+###############################################################################
+#### Simplification ###########################################################
+###############################################################################
+
     def simplify(self, epsilon):
         """
         Simplify GPX tracks using Ramer-Douglas-Peucker algorithm.
@@ -880,6 +912,10 @@ class Gpx():
         for track in self.tracks:
             for segment in track.trkseg:
                 segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)
+
+###############################################################################
+#### Exports ##################################################################
+###############################################################################
 
     def to_dataframe(
             self,
@@ -1011,6 +1047,10 @@ class Gpx():
             ascent_speed = True
 
         return self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=columns, header=header, index=index)
+
+###############################################################################
+#### Projection ###############################################################
+###############################################################################
 
     def project(self, projection: str):
         """
