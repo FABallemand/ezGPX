@@ -1160,11 +1160,10 @@ class GPX():
             ypixels: Optional[int] = None,
             dpi: int = 96,):
         
-        # Create empty map
+        # Create map
         min_lat, min_lon, max_lat, max_lon = self.bounds()
         min_lat, min_lon = max(0, min_lat - lat_offset), max(0, min_lon - lon_offset)
         max_lat, max_lon = min(max_lat + lat_offset, 90), min(max_lon + lon_offset, 180)
-
         map = Basemap(projection="cyl",
                       llcrnrlon=min_lon,
                       llcrnrlat=min_lat,
@@ -1334,8 +1333,13 @@ class GPX():
 
     def expert_data_table(
             self,
-            axes: Axes,
-            bbox: List):
+            parameters: Dict):
+        # Retrieve axes
+        axes = parameters.get("axes")
+        if axes is None:
+            logging.error("No axes provided for data table")
+            return
+
         # Row labels
         row_labels = [
             "Distance",
@@ -1348,8 +1352,8 @@ class GPX():
             "Moving time"
         ]
 
-        # Cell text
-        cell_text = [
+        # Data
+        data = [
             [f"{self.distance()/1000:.2f} km"],
             [f"{self.ascent():.2f} m"],
             [f"{self.descent():.2f} m"],
@@ -1360,11 +1364,29 @@ class GPX():
             [f"{self.moving_time()}"]
         ]
 
-        axes.table(cellText=cell_text,
-                   rowLabels=row_labels,
-                   edges="open",
-                   loc="center",
-                   bbox=bbox)
+        # Create table
+        table = axes.table(cellText=data,
+                           rowLabels=row_labels,
+                           edges="open",
+                           bbox=parameters.get("bbox"))
+        
+        # Font size
+        table.auto_set_font_size(False)
+        table.set_fontsize(13)
+        
+        # Adjust row height
+        nb_rows = len(row_labels)
+        # row_height = parameters.get("bbox")[3] / nb_rows
+        # column_width = parameters.get("bbox")[2] / 2
+        for i in range(nb_rows):
+            # table[(i, 0)].set_height(row_height)
+            # table[(i, 0)].set_width(column_width)
+            table[(i, 0)].set_text_props(ha="left")
+            # table[(i, 1)].set_height(row_height)
+            # table[(i, 1)].set_width(column_width)
+            # table[(i, 1)].set_text_props(ha="left")
+
+        # Remove axis
         axes.axis("off")
 
     def expert_ascent_rate_graph(
@@ -1453,8 +1475,18 @@ class GPX():
         fig, axs = plt.subplots(nrows=subplot[0],
                                 ncols=subplot[1],
                                 figsize=figsize,
-                                gridspec_kw={'width_ratios': [3, 1]})
-        # fig.tight_layout()
+                                gridspec_kw={"width_ratios": [3, 1],
+                                             "height_ratios": [1 for i in range(subplot[0])]})
+        
+        # Add title
+        if title is not None:
+            if watermark:
+                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+            else:
+                fig.suptitle(title, fontsize=title_fontsize)
+        
+        # Where to put it???
+        fig.tight_layout()
 
         # Initialize im
         im = None
@@ -1464,18 +1496,18 @@ class GPX():
             if (True): # Check if map_position is correct
                 # Plot map on subplot
                 im = self.expert_map(axs[map_position[0], map_position[1]],
-                                          size=map_size,
-                                          color=map_color,
-                                          cmap=map_cmap,
-                                          colorbar=map_colorbar if not shared_colorbar else False,
-                                          start_stop_colors=start_stop_colors,
-                                          way_points_color=way_points_color,
-                                          background=background,
-                                          lat_offset=lat_offset,
-                                          lon_offset=lon_offset,
-                                          xpixels=xpixels,
-                                          ypixels=ypixels,
-                                          dpi=dpi)
+                                     size=map_size,
+                                     color=map_color,
+                                     cmap=map_cmap,
+                                     colorbar=map_colorbar if not shared_colorbar else False,
+                                     start_stop_colors=start_stop_colors,
+                                     way_points_color=way_points_color,
+                                     background=background,
+                                     lat_offset=lat_offset,
+                                     lon_offset=lon_offset,
+                                     xpixels=xpixels,
+                                     ypixels=ypixels,
+                                     dpi=dpi)
             else:
                 logging.error(f"Invalid map position: no subplot {map_position} in a {subplot} array of plots")
                 return
@@ -1486,7 +1518,7 @@ class GPX():
             
         if shared_color and im:
             if shared_cmap is None:
-                shared_cmap = mpl.cm.get_cmap('viridis', 12)
+                shared_cmap = mpl.cm.get_cmap("viridis", 12)
             fig.colorbar(im,
                          ax=axs.ravel().tolist())
 
@@ -1525,10 +1557,15 @@ class GPX():
             if (True): # Check if data_table_position is correct
                 # Compute table bounding box
                 pos = axs[data_table_position[0], data_table_position[1]].get_position()
-                bbox = [pos.x0, pos.y0, pos.width * 3, 0.8] # 3 is the width ratio set before
+                bbox = [pos.x0, pos.y0, pos.width / 2, pos.height]
+                print(bbox)
+                bbox = [pos.x0, 0, pos.width, 1]
+                print(bbox)
+                # Create parameters
+                data_table_parameters = {"axes": axs[data_table_position[0], data_table_position[1]],
+                                         "bbox": bbox}
                 # Plot data table on subplot
-                self.expert_data_table(axs[data_table_position[0], data_table_position[1]],
-                                       bbox=bbox)
+                self.expert_data_table(data_table_parameters)
             else:
                 logging.error(f"Invalid data table position: no subplot {data_table_position} in a {subplot} array of plots")
                 return
@@ -1541,13 +1578,6 @@ class GPX():
             else:
                 logging.error(f"Invalid ascent rate graph position: no subplot {ascent_rate_graph_position} in a {subplot} array of plots")
                 return
-            
-        # Add title
-        if title is not None:
-            if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
-            else:
-                fig.suptitle(title, fontsize=title_fontsize)
             
         # MAKE FUNCTION ??
         # Save or display plot
