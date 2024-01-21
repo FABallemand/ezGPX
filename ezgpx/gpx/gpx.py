@@ -1143,7 +1143,41 @@ class GPX():
 ###############################################################################
 #### Expert Plot ##############################################################
 ###############################################################################
-            
+    
+    def check_axes(
+            self,
+            subplots: Tuple[int, int],
+            position: Tuple[int, int]):
+        """
+        Check position existence in the array of subplots.
+
+        Parameters
+        ----------
+        subplots : Tuple[int, int]
+            Number of rows and columns of subplots in the figure
+        position : Tuple[int, int]
+            Potential position of a subplot in the figure 
+
+        Returns
+        -------
+        bool
+            True if the subplot position exists in the figure
+        """
+        # Retrieve data
+        nb_rows, nb_columns = subplots
+        row, column = position
+
+        # Check row index
+        if row < 0 or row >= nb_rows:
+            return False
+        
+        # Check column index
+        if column < 0 or column >= nb_columns:
+            return False
+        
+        # Valid position
+        return True
+
     def expert_map(
             self,
             axes: Axes,
@@ -1151,38 +1185,59 @@ class GPX():
             color: str = "#101010",
             cmap: Optional[mpl.colors.Colormap] = None,
             colorbar: bool = False,
-            start_stop_colors: Optional[Tuple[str, str]] = None,
+            start_point_color: Optional[str] = None,
+            stop_point_color: Optional[str] = None,
             way_points_color: Optional[str] = None,
             background: Optional[str] = None,
             lat_offset: float = 0.001,
             lon_offset: float = 0.001,
-            xpixels: int =400,
+            xpixels: int = 400,
             ypixels: Optional[int] = None,
-            dpi: int = 96,):
+            dpi: int = 96):
+        # Clear axes
+        axes.clear()
         
-        # Create map
+        # Compute track boundaries
         min_lat, min_lon, max_lat, max_lon = self.bounds()
-        min_lat, min_lon = max(0, min_lat - lat_offset), max(0, min_lon - lon_offset)
-        max_lat, max_lon = min(max_lat + lat_offset, 90), min(max_lon + lon_offset, 180)
+
+        # Add default offset
+        delta_max = max(max_lat - min_lat, max_lon - min_lon)
+        offset_percentage = 0.04
+        offset = delta_max * offset_percentage
+        min_lat, min_lon = max(0, min_lat - offset), max(0, min_lon - offset)
+        max_lat, max_lon = min(max_lat + offset, 90), min(max_lon + offset, 180)
+
+        # Some sort of magic to achieve the correct map aspect ratio
+        lat_offset = 0.00001
+        lon_offset = 0.00001
+        delta_lat = max_lat - min_lat
+        delta_lon = max_lon - min_lon
+        r = delta_lon / delta_lat # Current map aspect ratio
+        pos = axes.get_position() # Axes bounding box
+        print(f"pos = {pos.width}")
+        print(f"pos = {pos.height}")
+        r_ref = pos.width / pos.height # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        tolerance = 0.001
+        while abs(r - r_ref) > tolerance:
+            if r > r_ref:
+                min_lat = max(0, min_lat - lat_offset)
+                max_lat = min(max_lat + lat_offset, 90)
+            if r < r_ref:
+                min_lon = max(0, min_lon - lon_offset)
+                max_lon = min(max_lon + lon_offset, 180)
+            delta_lat = max_lat - min_lat
+            delta_lon = max_lon - min_lon
+            r = delta_lon / delta_lat
+        print(f"r_ref = {r_ref}")
+        print(f"r = {r}")
+
+        # Create map
         map = Basemap(projection="cyl",
                       llcrnrlon=min_lon,
                       llcrnrlat=min_lat,
                       urcrnrlon=max_lon,
                       urcrnrlat=max_lat,
                       ax=axes)
-
-        # Create empty map
-        # center_lat, center_lon = self.center()
-        # min_lat_point, min_lon_point, max_lat_point, max_lon_point = self.extreme_points()
-        # width = haversine_distance(min_lon_point, max_lon_point)
-        # height = haversine_distance(min_lat_point, max_lat_point)
-        # print(f"width={width} | height={height}")
-        # map = Basemap(projection="lcc",
-        #               lon_0=center_lon,
-        #               lat_0=center_lat,
-        #               width=width,
-        #               height=height,
-        #               ax=axes)
         
         # Add background
         if background is None:
@@ -1201,8 +1256,8 @@ class GPX():
                          verbose=True)
         else:
             map.arcgisimage(service=background,
-                            xpixels=xpixels,
-                            ypixels=ypixels,
+                            # xpixels=xpixels,
+                            # ypixels=ypixels,
                             dpi=dpi,
                             verbose=True)
             
@@ -1211,55 +1266,65 @@ class GPX():
         x, y = x.tolist(), y.tolist()                            # Convert to list
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
             im = map.scatter(self.dataframe["lon"],
-                              self.dataframe["lat"],
-                              s=size,
-                              c=self.dataframe[color],
-                              cmap=cmap)
+                             self.dataframe["lat"],
+                             s=size,
+                             c=self.dataframe[color],
+                             cmap=cmap)
         else:
             im = map.scatter(self.dataframe["lon"],
-                              self.dataframe["lat"],
-                              s=size,
-                              color=color)
+                             self.dataframe["lat"],
+                             s=size,
+                             color=color)
             
-        # HANDLE COLORBAR AS A SUBPLOT??
-        # Colorbar
-        if colorbar:
-            plt.colorbar(im,
-                         ax=axes)
-            
-        # Scatter start and stop points with different color
-        if start_stop_colors:
-            map.scatter(x[0], y[0], marker="^", color=start_stop_colors[0])
-            map.scatter(x[-1], y[-1], marker="h", color=start_stop_colors[1])
+        # Scatter start point with different color
+        if start_point_color:
+            map.scatter(x[0], y[0], marker="^",
+                        color=start_point_color)
+
+        # Scatter stop point with different color
+        if stop_point_color:
+            map.scatter(x[-1], y[-1], marker="h",
+                        color=stop_point_color)
 
         # Scatter way points with different color
         if way_points_color:
             for way_point in self.gpx.wpt:
-                x, y = map(way_point.lon, way_point.lat)              # Project way point
-                map.scatter(x, y, marker="D", color="waypoint_color") # Scatter way point
+                x, y = map(way_point.lon, way_point.lat) # Project way point
+                map.scatter(x, y, marker="D",
+                            color=way_points_color)      # Scatter way point
+            
+        # Colorbar
+        if colorbar:
+            plt.colorbar(im,
+                         ax=axes)
 
-        return im # Useless?
+        return im
 
     def expert_elevation_profile(
             self,
             axes: Axes,
-            grid: bool = False,
             size: float = 10,
             color: str = "#101010",
             cmap: Optional[mpl.colors.Colormap] = None,
-            colorbar: bool = False):
+            colorbar: bool = False,
+            grid: bool = False,
+            fill_color: Optional[str] = None,
+            fill_alpha: float = 0.5):
         # Clear axes
         axes.clear()
 
+        # Compute x values
+        x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
-            im = axes.scatter(self.dataframe["distance_from_start"].values / 1000, # Convert to km
+            im = axes.scatter(x,
                               self.dataframe["ele"].values,
                               s=size,
                               c=self.dataframe[color],
                               cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
-            im = axes.scatter(self.dataframe["distance_from_start"].values / 1000, # Convert to km
+            im = axes.scatter(x,
                               self.dataframe["ele"].values,
                               s=size,
                               color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
@@ -1268,6 +1333,14 @@ class GPX():
         if grid:
             axes.grid()
 
+        # Fill
+        if fill_color:
+            axes.fill_between(x,
+                              [0 for i in range(len(x))],
+                              self.dataframe["ele"].values,
+                              color=fill_color,
+                              alpha=0.5)
+              
         # Colorbar
         if colorbar:
             plt.colorbar(im,
@@ -1281,19 +1354,23 @@ class GPX():
     def expert_pace_graph(
             self,
             axes: Axes,
-            grid: bool = False,
             size: float = 10,
             color: str = "#101010",
             cmap: Optional[mpl.colors.Colormap] = None,
             colorbar: bool = False,
+            grid: bool = False,
+            fill_color: Optional[str] = None,
+            fill_alpha: float = 0.5,
             threshold: float = 60.0):
         # Clear axes
         axes.clear()
 
+        # Compute x values
+        x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
             # Remove lowest values
-            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
             pace = self.dataframe["pace"].values
             color = self.dataframe[color]
             tmp = [(x, p, c) for (x, p, c) in list(zip(x, pace, color)) if p < threshold]
@@ -1307,7 +1384,6 @@ class GPX():
                               cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
             # Remove lowest values
-            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
             pace = self.dataframe["pace"].values
             tmp = [(x, p) for (x,p) in list(zip(x, pace)) if p < threshold]
             x = [x for (x,p) in tmp]
@@ -1322,6 +1398,15 @@ class GPX():
         if grid:
             axes.grid()
 
+        # Fill
+        if fill_color:
+            max_pace = max(pace)
+            axes.fill_between(x,
+                              [max_pace for i in range(len(x))],
+                              pace,
+                              color=fill_color,
+                              alpha=fill_alpha)
+
         # Colorbar
         if colorbar:
             plt.colorbar(im,
@@ -1331,6 +1416,57 @@ class GPX():
         axes.set_xlabel("Distance [km]")
         axes.set_ylabel("Pace [min/km]")
 
+    def expert_ascent_rate_graph(
+            self,
+            axes: Axes):
+        # Clear axes
+        axes.clear()
+
+        ascent_rates = [None, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+        nb_ascent_rates = [0 for i in ascent_rates]
+        nb_points = 0
+
+        # Compute number of points for each ascent rate zone
+        for track in self.gpx.tracks:
+            for track_segment in track.trkseg:
+                nb_points += len(track_segment.trkpt)
+                for track_point in track_segment.trkpt:
+                    i = len(ascent_rates) - 1
+                    while i > 0 and abs(track_point.ascent_rate) < ascent_rates[i]:
+                        i -= 1
+                    nb_ascent_rates[i] += 1
+
+        # Compute percentage for each ascent rate zone
+        percent_ascent_rate = [(nb * 100) / nb_points for nb in nb_ascent_rates]
+
+        # Create position and labels
+        y_pos = range(1, len(ascent_rates)+1)
+        y_labels = [f"{x} %" if x is not None else "" for x in ascent_rates]
+
+        # Plot horizontal bar graph
+        rects = axes.barh(y=y_pos,
+                          width=percent_ascent_rate,
+                          color=["lightgray", "lightgreen",
+                                 "limegreen", "green",
+                                 "yellow", "gold",
+                                 "orange", "red",
+                                 "purple", "black"])
+        
+        # Add legend on bars (percentiles)
+        largest_percentile = max(percent_ascent_rate)
+        large_percentiles = [f"{p:.1f} %" if abs(p - largest_percentile) < 10 else "" for p in percent_ascent_rate]
+        small_percentiles = [f"{p:.1f} %" if abs(p - largest_percentile) >= 10 else "" for p in percent_ascent_rate]
+        axes.bar_label(rects, small_percentiles,
+                       padding=5, color="black", fontweight="bold")
+        axes.bar_label(rects, large_percentiles,
+                       padding=-40, color="white", fontweight="bold")
+        
+        # Set y-ticks with labels
+        axes.set_yticks(y_pos, labels=y_labels)
+
+        # Add title
+        axes.set_title("Ascent rate")
+
     def expert_data_table(
             self,
             parameters: Dict):
@@ -1339,6 +1475,11 @@ class GPX():
         if axes is None:
             logging.error("No axes provided for data table")
             return
+        
+        # Compute table bounding box
+        pos = axes.get_position()
+        bbox = [pos.x0, pos.y0, pos.width / 2, pos.height]
+        bbox = [pos.x0 - 0.1, 0, pos.width, 1]
 
         # Row labels
         row_labels = [
@@ -1368,7 +1509,8 @@ class GPX():
         table = axes.table(cellText=data,
                            rowLabels=row_labels,
                            edges="open",
-                           bbox=parameters.get("bbox"))
+                           bbox=bbox)
+                        #    bbox=parameters.get("bbox"))
         
         # Font size
         table.auto_set_font_size(False)
@@ -1389,50 +1531,38 @@ class GPX():
         # Remove axis
         axes.axis("off")
 
-    def expert_ascent_rate_graph(
+    def expert_made_with_ezgpx(
             self,
             axes: Axes):
-        ascent_rates = [None, 1, 5, 10, 20]
-        nb_ascent_rates = [0 for i in ascent_rates]
-        nb_points = 0
+        # Clear axes
+        axes.clear()
 
-        # Move to a Gpx method?
-        for track in self.gpx.tracks:
-            for track_segment in track.trkseg:
-                nb_points += len(track_segment.trkpt)
-                for track_point in track_segment.trkpt:
-                    i = len(ascent_rates)-1
-                    while i > 0 and track_point.ascent_rate < ascent_rates[i]:
-                        i -= 1
-                    nb_ascent_rates[i] += 1
+        # Plot text
+        text_kwargs = dict(ha="center",
+                           va="center",
+                           fontsize=26,
+                           color="black",
+                           rotation=0,
+                           bbox=dict(boxstyle="square",
+                                     ec="black",
+                                     fc="lightgray"))
+        axes.text(0.5 , 0.5, "Made with ezGPX", **text_kwargs)
 
-        percent_ascent_rate = [(nb * 100) / nb_points for nb in nb_ascent_rates]
-
-        y_pos = range(1, len(ascent_rates)+1)
-        y_labels = [f"{x} %" if x is not None else "" for x in ascent_rates]
-        rects = axes.barh(y=y_pos,
-                          width=percent_ascent_rate,
-                          color=["green", "yellow", "orange", "red", "black"])
-        large_percentiles = [f"{p:.1f} %" if p > 40 else '' for p in percent_ascent_rate]
-        small_percentiles = [f"{p:.1f} %" if p <= 40 else '' for p in percent_ascent_rate]
-        axes.bar_label(rects, small_percentiles,
-                       padding=5, color='black', fontweight='bold')
-        axes.bar_label(rects, large_percentiles,
-                       padding=-40, color='white', fontweight='bold')
-        axes.set_yticks(y_pos, labels=y_labels)
-        axes.set_title("Ascent rate")
+        # Remove axes
+        axes.axis("off")
 
     # Use dict to pass parameters    
     def expert_plot(
             self,
-            figsize: Tuple[int, int] = (14,8),
-            subplot: Tuple[int, int] = (1,1),
+            figsize: Tuple[int, int] = (16,9),
+            subplots: Tuple[int, int] = (1,1),
             map_position: Optional[Tuple[int, int]] = (0,0),
             map_size: float = 10,
             map_color: str = "#101010",
             map_cmap: Optional[mpl.colors.Colormap] = None,
             map_colorbar: bool = False,
-            start_stop_colors: Optional[Tuple[str, str]] = None,
+            start_point_color: Optional[str] = None,
+            stop_point_color: Optional[str] = None,
             way_points_color: Optional[str] = None,
             background: Optional[str] = "World_Imagery",
             lat_offset: float = 0.001,
@@ -1441,19 +1571,24 @@ class GPX():
             ypixels: Optional[int] = None,
             dpi: int = 96,
             elevation_profile_position: Optional[Tuple[int, int]] = (1,0), # None
-            elevation_profile_grid: bool = False,
             elevation_profile_size: float = 10,
             elevation_profile_color: str = "#101010",
             elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
             elevation_profile_colorbar: bool = False,
+            elevation_profile_grid: bool = False,
+            elevation_profile_fill_color: Optional[str] = None,
+            elevation_profile_fill_alpha: float = 0.5,
             pace_graph_position: Optional[Tuple[int, int]] = (2,0), # None
-            pace_graph_grid: bool = False,
             pace_graph_size: float = 10,
             pace_graph_color: str = "#101010",
             pace_graph_cmap: Optional[mpl.colors.Colormap] = None,
             pace_graph_colorbar: bool = False,
+            pace_graph_grid: bool = False,
+            pace_graph_fill_color: Optional[str] = None,
+            pace_graph_fill_alpha: float = 0.5,
             pace_graph_threshold: float = 60.0,
             ascent_rate_graph_position: Optional[Tuple[int, int]] = (0,1), # None
+            made_with_ezgpx_position: Optional[Tuple[int, int]] = (0,1), # None
             shared_color: str = "#101010",
             shared_cmap: Optional[mpl.colors.Colormap] = None,
             shared_colorbar: bool = False,
@@ -1472,11 +1607,11 @@ class GPX():
                                            distance_from_start=True)
 
         # Create figure with axes
-        fig, axs = plt.subplots(nrows=subplot[0],
-                                ncols=subplot[1],
+        fig, axs = plt.subplots(nrows=subplots[0],
+                                ncols=subplots[1],
                                 figsize=figsize,
                                 gridspec_kw={"width_ratios": [3, 1],
-                                             "height_ratios": [1 for i in range(subplot[0])]})
+                                             "height_ratios": [1 for i in range(subplots[0])]})
         
         # Add title
         if title is not None:
@@ -1485,7 +1620,7 @@ class GPX():
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
         
-        # Where to put it???
+        # Set figure layout
         fig.tight_layout()
 
         # Initialize im
@@ -1493,14 +1628,16 @@ class GPX():
 
         # Handle map plot
         if map_position is not None:
-            if (True): # Check if map_position is correct
+            # Check if map_position is correct
+            if self.check_axes(subplots, map_position):
                 # Plot map on subplot
                 im = self.expert_map(axs[map_position[0], map_position[1]],
                                      size=map_size,
                                      color=map_color,
                                      cmap=map_cmap,
                                      colorbar=map_colorbar if not shared_colorbar else False,
-                                     start_stop_colors=start_stop_colors,
+                                     start_point_color=start_point_color,
+                                     stop_point_color=stop_point_color,
                                      way_points_color=way_points_color,
                                      background=background,
                                      lat_offset=lat_offset,
@@ -1509,75 +1646,81 @@ class GPX():
                                      ypixels=ypixels,
                                      dpi=dpi)
             else:
-                logging.error(f"Invalid map position: no subplot {map_position} in a {subplot} array of plots")
+                logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
                 return
             
-        # if map_colorbar and im:
-        #     fig.colorbar(im,
-        #                  cax=axs[0, 1]) # aspect arg to change width?
+        # Handle elevation profile plot
+        if elevation_profile_position is not None:
+            # Check if elevation_profile_position is correct
+            if self.check_axes(subplots, elevation_profile_position):
+                # Plot elevation profile on subplot
+                self.expert_elevation_profile(axs[elevation_profile_position[0], elevation_profile_position[1]],
+                                              size=elevation_profile_size,
+                                              color=elevation_profile_color,
+                                              cmap=elevation_profile_cmap,
+                                              colorbar=elevation_profile_colorbar,
+                                              grid=elevation_profile_grid,
+                                              fill_color=elevation_profile_fill_color,
+                                              fill_alpha=elevation_profile_fill_alpha)
+            else:
+                logging.error(f"Invalid elevation_profile_position argument: no subplot {elevation_profile_position} in a {subplots} array of plots")
+                return
+            
+        # Handle pace graph plot
+        if pace_graph_position is not None:
+            # Check if pace_graph_position is correct
+            if self.check_axes(subplots, pace_graph_position):
+                # Plot pace on subplot
+                self.expert_pace_graph(axs[pace_graph_position[0], pace_graph_position[1]],
+                                       size=pace_graph_size,
+                                       color=pace_graph_color,
+                                       cmap=pace_graph_cmap,
+                                       colorbar=pace_graph_colorbar,
+                                       grid=pace_graph_grid,
+                                       fill_color=pace_graph_fill_color,
+                                       fill_alpha=pace_graph_fill_alpha,
+                                       threshold=pace_graph_threshold)
+            else:
+                logging.error(f"Invalid pace_graph_position argument: no subplot {pace_graph_position} in a {subplots} array of plots")
+                return
+            
+        # Handle data table plot
+        if data_table_position is not None:
+            # Check if data_table_position is correct
+            if self.check_axes(subplots, data_table_position):
+                # Create parameters
+                data_table_parameters = {"axes": axs[data_table_position[0], data_table_position[1]]}
+                # Plot data table on subplot
+                self.expert_data_table(data_table_parameters)
+            else:
+                logging.error(f"Invalid data_table_position argument: no subplot {data_table_position} in a {subplots} array of plots")
+                return
+            
+        # Handle ascent rate bar graph
+        if ascent_rate_graph_position is not None:
+            # Check if ascent_rate_graph_position is correct
+            if self.check_axes(subplots, ascent_rate_graph_position):
+                # Plot bar graph on subplot
+                self.expert_ascent_rate_graph(axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
+            else:
+                logging.error(f"Invalid ascent_rate_graph_position position: no subplot {ascent_rate_graph_position} in a {subplots} array of plots")
+                return
+
+        # Handle ascent rate bar graph
+        if made_with_ezgpx_position is not None:
+            # Check if made_with_ezgpx_position is correct
+            if self.check_axes(subplots, made_with_ezgpx_position):
+                # Plot text on subplot
+                self.expert_made_with_ezgpx(axs[made_with_ezgpx_position[0], made_with_ezgpx_position[1]])
+            else:
+                logging.error(f"Invalid made_with_ezgpx_position argument: no subplot {made_with_ezgpx_position} in a {subplots} array of plots")
+                return
             
         if shared_color and im:
             if shared_cmap is None:
                 shared_cmap = mpl.cm.get_cmap("viridis", 12)
             fig.colorbar(im,
                          ax=axs.ravel().tolist())
-
-            
-        # Handle elevation profile plot
-        if elevation_profile_position is not None:
-            if (True): # Check if elevation_profile_position is correct
-                # Plot elevation profile on subplot
-                self.expert_elevation_profile(axs[elevation_profile_position[0], elevation_profile_position[1]],
-                                                   grid=elevation_profile_grid,
-                                                   size=elevation_profile_size,
-                                                   color=elevation_profile_color,
-                                                   cmap=elevation_profile_cmap,
-                                                   colorbar=elevation_profile_colorbar)
-            else:
-                logging.error(f"Invalid elevation profile position: no subplot {elevation_profile_position} in a {subplot} array of plots")
-                return
-            
-        # Handle pace graph plot
-        if pace_graph_position is not None:
-            if (True): # Check if pace_graph_position is correct
-                # Plot pace on subplot
-                self.expert_pace_graph(axs[pace_graph_position[0], pace_graph_position[1]],
-                                       grid=pace_graph_grid,
-                                       size=pace_graph_size,
-                                       color=pace_graph_color,
-                                       cmap=pace_graph_cmap,
-                                       colorbar=pace_graph_colorbar,
-                                       threshold=pace_graph_threshold)
-            else:
-                logging.error(f"Invalid elevation profile position: no subplot {elevation_profile_position} in a {subplot} array of plots")
-                return
-            
-        # Handle data table plot
-        if data_table_position is not None:
-            if (True): # Check if data_table_position is correct
-                # Compute table bounding box
-                pos = axs[data_table_position[0], data_table_position[1]].get_position()
-                bbox = [pos.x0, pos.y0, pos.width / 2, pos.height]
-                print(bbox)
-                bbox = [pos.x0, 0, pos.width, 1]
-                print(bbox)
-                # Create parameters
-                data_table_parameters = {"axes": axs[data_table_position[0], data_table_position[1]],
-                                         "bbox": bbox}
-                # Plot data table on subplot
-                self.expert_data_table(data_table_parameters)
-            else:
-                logging.error(f"Invalid data table position: no subplot {data_table_position} in a {subplot} array of plots")
-                return
-            
-        # Handle ascent rate bar graph
-        if ascent_rate_graph_position is not None:
-            if (True): # Check if ascent_rate_graph_position is correct
-                # Plot bar graph on subplot
-                self.expert_ascent_rate_graph(axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
-            else:
-                logging.error(f"Invalid ascent rate graph position: no subplot {ascent_rate_graph_position} in a {subplot} array of plots")
-                return
             
         # MAKE FUNCTION ??
         # Save or display plot
