@@ -60,3 +60,4 @@
 - Update docstring (style + content [description from xsd])
 - Add units to docstrings
 - Set precisions during parsing
+- Add meridia, plot with basemap
