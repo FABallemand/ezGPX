@@ -4,6 +4,6 @@ matplotlib
 basemap
 gmplot
 folium
-pepermap
+papermap
 pytest
 fitparse
