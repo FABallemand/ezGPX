@@ -1976,6 +1976,7 @@ class GPX():
             dpi: int = 96,
             interval: float = 20,
             fps: int = 24,
+            bitrate: int = 1800,
             repeat: bool = True,
             title: Optional[str] = None,
             title_fontsize: int = 20,
@@ -2104,7 +2105,17 @@ class GPX():
             if not os.path.exists(directory_path):
                 logging.error("Provided path does not exist")
                 return
-            ani.save(file_path, fps=fps, dpi=dpi)
+            # ani.save(file_path, fps=fps, dpi=dpi)
+            writer = None
+            if file_path.endswith(".mp4"):
+                writer = animation.FFMpegWriter(fps=15,
+                                                metadata=dict(artist='Me'),
+                                                bitrate=bitrate)
+            elif file_path.endswith(".gif"):
+                writer = animation.PillowWriter(fps=15,
+                                                metadata=dict(artist='Me'),
+                                                bitrate=bitrate)
+            ani.save(file_path, writer=writer)
         else:
             ani.show()
 

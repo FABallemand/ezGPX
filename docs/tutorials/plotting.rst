@@ -35,7 +35,7 @@ This method relies on the well known Matplotlib Python library to create simple 
                         watermark=True,
                         file_path="img.png")
 
-.. image:: ../../img/matplotlib_plot_1.png
+.. image:: ../../img/matplotlib_plot_1.jpg
   :width: 500
   :alt: Matplotlib plot
 
@@ -122,8 +122,8 @@ PaperMap
   :width: 500
   :alt: PaperMap plot
 
-Expert Plot
-^^^^^^^^^^^
+Matplotlib Animation
+^^^^^^^^^^^^^^^^^^^^
 
 This method creates animations of the activity contained in a GPX file.
 
@@ -155,6 +155,10 @@ This method creates animations of the activity contained in a GPX file.
                              title_fontsize=15,
                              watermark=True,
                              file_path="video_1.mp4")
+
+.. image:: ../../img/matplotlib_animation_1.gif
+  :width: 500
+  :alt: Matplotlib animation
 
 Expert Plot
 ^^^^^^^^^^^
@@ -214,6 +218,6 @@ This is the most advanced plotting method built into ezGPX. It allows to plot th
                     watermark=False,
                     file_path="img.png")
 
-.. image:: ../../img/expert_plot_1.png
+.. image:: ../../img/expert_plot_1.jpg
   :width: 500
-  :alt: PaperMap plot
+  :alt: Matplotlib "expert" plot
