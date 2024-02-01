@@ -624,8 +624,8 @@ class GPX():
     
     def to_dataframe(
             self,
-            projection: bool = False,
             elevation: bool = True,
+            time: bool = True,
             speed: bool = False,
             pace: bool = False,
             ascent_rate: bool = False,
@@ -636,10 +636,10 @@ class GPX():
 
         Parameters
         ----------
-        projection : bool, optional
-            Toggle projection, by default False
         elevation : bool, optional
             Toggle elevation, by default True
+        time : bool, optional
+            Toggle time, by default False
         speed : bool, optional
             Toggle speed, by default False
         pace : bool, optional
@@ -656,12 +656,14 @@ class GPX():
         pd.DataFrame
             Dataframe containing data from GPX.
         """
+        # Disable time related values if no time data available
         if not self.time_data:
+            time = False
             speed = False
             pace = False
             ascent_speed = False
-        return self.gpx.to_dataframe(projection,
-                                     elevation,
+        return self.gpx.to_dataframe(elevation,
+                                     time,
                                      speed,
                                      pace,
                                      ascent_rate,
@@ -982,7 +984,7 @@ class GPX():
 #### Expert Plot ##############################################################
 ###############################################################################
     
-    def check_axes(
+    def check_axes_position(
             self,
             subplots: Tuple[int, int],
             position: Tuple[int, int]):
@@ -1045,37 +1047,37 @@ class GPX():
 
         # Some sort of magic to achieve the correct map aspect ratio
         # CREATE FUNCTION (also used in anmation??)
-        lat_offset = 1e-5
-        lon_offset = 1e-5
-        delta_lat = max_lat - min_lat
-        delta_lon = max_lon - min_lon
-        r = delta_lon / delta_lat # Current map aspect ratio
-        pos = axes.get_position() # Axes bounding box
-        print(f"pos.width = {pos.width}")
-        print(f"pos.height = {pos.height}")
-        r_ref = pos.width / pos.height # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        # lat_offset = 1e-5
+        # lon_offset = 1e-5
+        # delta_lat = max_lat - min_lat
+        # delta_lon = max_lon - min_lon
+        # r = delta_lon / delta_lat # Current map aspect ratio
+        # pos = axes.get_position() # Axes bounding box
+        # print(f"pos.width = {pos.width}")
+        # print(f"pos.height = {pos.height}")
+        # r_ref = pos.width / pos.height # Target map aspect ratio, Adapt in function of the shape of the subplot...
 
-        tolerance = 1e-9
-        # while (not isclose(r, r_ref, abs_tol=tolerance) or 
-        #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
-        #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
-        while not isclose(r, r_ref, abs_tol=tolerance):
-            if r > r_ref:
-                min_lat = max(0, min_lat - lat_offset)
-                max_lat = min(max_lat + lat_offset, 90)
-                delta_lat = max_lat - min_lat
-            if r < r_ref:
-                min_lon = max(0, min_lon - lon_offset)
-                max_lon = min(max_lon + lon_offset, 180)
-                delta_lon = max_lon - min_lon
-            r = delta_lon / delta_lat
+        # tolerance = 1e-9
+        # # while (not isclose(r, r_ref, abs_tol=tolerance) or 
+        # #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
+        # #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
+        # while not isclose(r, r_ref, abs_tol=tolerance):
+        #     if r > r_ref:
+        #         min_lat = max(0, min_lat - lat_offset)
+        #         max_lat = min(max_lat + lat_offset, 90)
+        #         delta_lat = max_lat - min_lat
+        #     if r < r_ref:
+        #         min_lon = max(0, min_lon - lon_offset)
+        #         max_lon = min(max_lon + lon_offset, 180)
+        #         delta_lon = max_lon - min_lon
+        #     r = delta_lon / delta_lat
 
-        print(f"delta_lon = {delta_lon}")
-        print(f"delta_lat = {delta_lat}")
-        print(f"r_ref = {r_ref}")
-        print(f"r = {r}")
-        print(f"delta_lon % pos.width = {delta_lon % pos.width}")
-        print(f"delta_lat % pos.height = {delta_lat % pos.height}")
+        # print(f"delta_lon = {delta_lon}")
+        # print(f"delta_lat = {delta_lat}")
+        # print(f"r_ref = {r_ref}")
+        # print(f"r = {r}")
+        # print(f"delta_lon % pos.width = {delta_lon % pos.width}")
+        # print(f"delta_lat % pos.height = {delta_lat % pos.height}")
 
         # Create map
         map = Basemap(projection="cyl",
@@ -1149,6 +1151,7 @@ class GPX():
     def expert_elevation_profile(
             self,
             axes: Axes,
+            x_type: str,
             size: float = 10,
             color: str = "#101010",
             cmap: Optional[mpl.colors.Colormap] = None,
@@ -1160,7 +1163,17 @@ class GPX():
         axes.clear()
 
         # Compute x values
-        x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+        x = None
+        x_label = ""
+        if x_type == "distance":
+            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+            x_label = "Distance [km]"
+        elif x_type == "time":
+            x = self.dataframe["time"].values
+            x_label = "Time"
+        else:
+            logging.error(f"Invalid x_type argument {x_type}")
+            return
 
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
@@ -1185,7 +1198,7 @@ class GPX():
                               [0 for i in range(len(x))],
                               self.dataframe["ele"].values,
                               color=fill_color,
-                              alpha=0.5)
+                              alpha=fill_alpha)
               
         # Colorbar
         if colorbar:
@@ -1193,13 +1206,14 @@ class GPX():
                          ax=axes)
 
         # Axis labels
-        axes.set_xlabel("Distance [km]")
+        axes.set_xlabel(x_label)
         axes.set_ylabel("Elevation [m]")
 
     # x axis time instead of distance
     def expert_pace_graph(
             self,
             axes: Axes,
+            x_type: str,
             size: float = 10,
             color: str = "#101010",
             cmap: Optional[mpl.colors.Colormap] = None,
@@ -1212,7 +1226,17 @@ class GPX():
         axes.clear()
 
         # Compute x values
-        x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+        x = None
+        x_label = ""
+        if x_type == "distance":
+            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+            x_label = "Distance [km]"
+        elif x_type == "time":
+            x = self.dataframe["time"].values
+            x_label = "Time"
+        else:
+            logging.error(f"Invalid x_type argument {x_type}")
+            return
 
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
@@ -1259,7 +1283,7 @@ class GPX():
                          ax=axes)
 
         # Axis labels
-        axes.set_xlabel("Distance [km]")
+        axes.set_xlabel(x_label)
         axes.set_ylabel("Pace [min/km]")
 
     def expert_ascent_rate_graph(
@@ -1315,12 +1339,9 @@ class GPX():
 
     def expert_data_table(
             self,
-            parameters: Dict):
-        # Retrieve axes
-        axes = parameters.get("axes")
-        if axes is None:
-            logging.error("No axes provided for data table")
-            return
+            axes: Axes):
+        # Clear axes
+        axes.clear()
         
         # Compute table bounding box
         pos = axes.get_position()
@@ -1377,6 +1398,25 @@ class GPX():
         # Remove axis
         axes.axis("off")
 
+    def expert_image(
+            self,
+            axes: Axes,
+            img_path: str,
+            img_legend: str):
+        # Clear axes
+        axes.clear()
+        
+        # Plot image
+        img = plt.imread(img_path)
+        axes.imshow(img)
+
+        # Add title
+        axes.set_title(img_legend)
+
+        # Remove axes ticks
+        axes.set_xticks([])
+        axes.set_yticks([])
+
     def expert_made_with_ezgpx(
             self,
             axes: Axes):
@@ -1397,12 +1437,13 @@ class GPX():
         # Remove axes
         axes.axis("off")
 
-    # Use dict to pass parameters    
     def expert_plot(
             self,
             figsize: Tuple[int, int] = (16,9),
             subplots: Tuple[int, int] = (1,1),
-            map_position: Optional[Tuple[int, int]] = (0,0),
+            width_ratios: List = None,
+            height_ratios: List = None,
+            map_position: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]] = (0,0),
             map_size: float = 10,
             map_color: str = "#101010",
             map_cmap: Optional[mpl.colors.Colormap] = None,
@@ -1416,6 +1457,7 @@ class GPX():
             ypixels: Optional[int] = None,
             dpi: int = 96,
             elevation_profile_position: Optional[Tuple[int, int]] = (1,0), # None
+            elevation_profile_x_type: Optional[str] = None, # "distance", "time"
             elevation_profile_size: float = 10,
             elevation_profile_color: str = "#101010",
             elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
@@ -1424,6 +1466,7 @@ class GPX():
             elevation_profile_fill_color: Optional[str] = None,
             elevation_profile_fill_alpha: float = 0.5,
             pace_graph_position: Optional[Tuple[int, int]] = (2,0), # None
+            pace_graph_x_type: Optional[str] = None, # "distance", "time"
             pace_graph_size: float = 10,
             pace_graph_color: str = "#101010",
             pace_graph_cmap: Optional[mpl.colors.Colormap] = None,
@@ -1433,30 +1476,38 @@ class GPX():
             pace_graph_fill_alpha: float = 0.5,
             pace_graph_threshold: float = 60.0,
             ascent_rate_graph_position: Optional[Tuple[int, int]] = (0,1), # None
+            data_table_position: Optional[Tuple[int, int]] = (1,1), # None
+            img_position: Optional[Tuple[int, int]] = None,
+            img_path: Optional[str] = None,
+            img_legend: Optional[str] = None,
             made_with_ezgpx_position: Optional[Tuple[int, int]] = (0,1), # None
             shared_color: str = "#101010",
             shared_cmap: Optional[mpl.colors.Colormap] = None,
             shared_colorbar: bool = False,
-            data_table_position: Optional[Tuple[int, int]] = (1,1), # None
             title: Optional[str] = None,
             title_fontsize: int = 20,
             watermark: bool = False,
             file_path: Optional[str] = None):
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe(projection=True,
-                                           elevation=True,
+        self.dataframe = self.to_dataframe(elevation=True,
+                                           time=True,
                                            speed=True,
                                            pace=True,
                                            ascent_rate=True,
                                            ascent_speed=True,
                                            distance_from_start=True)
-
+        
         # Create figure with axes
         fig, axs = plt.subplots(nrows=subplots[0],
                                 ncols=subplots[1],
                                 figsize=figsize,
-                                gridspec_kw={"width_ratios": [3, 1],
-                                             "height_ratios": [1 for i in range(subplots[0])]})
+                                layout="constrained",
+                                gridspec_kw={"width_ratios": width_ratios,
+                                             "height_ratios": height_ratios})
+        
+        # Reshape axs for single line/column plots
+        if subplots[0] == 1 or subplots[1] == 1:
+            axs = axs.reshape((subplots[0], subplots[1]))
         
         # Add title
         if title is not None:
@@ -1464,44 +1515,82 @@ class GPX():
                 fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
-        
-        # Set figure layout
-        fig.tight_layout()
 
         # Initialize im
         im = None
 
         # Handle map plot
+        map_ax = None
         if map_position is not None:
-            # Check if map_position is correct
-            if self.check_axes(subplots, map_position):
-                # Set axes aspect ratio
-                axs[map_position[0], map_position[1]].set_aspect(3 / 1, adjustable="datalim")
+            if isinstance(map_position, tuple):
+                # Check if map_position is correct
+                if not self.check_axes_position(subplots, map_position):
+                    logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
+                    return
+                
+                # Retrieve map axis
+                map_ax = axs[map_position[0], map_position[1]]
 
-                # Plot map on subplot
-                im = self.expert_map(axs[map_position[0], map_position[1]],
-                                     size=map_size,
-                                     color=map_color,
-                                     cmap=map_cmap,
-                                     colorbar=map_colorbar if not shared_colorbar else False,
-                                     start_point_color=start_point_color,
-                                     stop_point_color=stop_point_color,
-                                     way_points_color=way_points_color,
-                                     background=background,
-                                     offset_percentage=offset_percentage,
-                                     xpixels=xpixels,
-                                     ypixels=ypixels,
-                                     dpi=dpi)
+                # Set axes aspect ratio
+                width_ratio = 1
+                height_ratio = 1
+                if width_ratios is not None:
+                    width_ratio = width_ratios[map_position[0]]
+                if height_ratios is not None:
+                    height_ratio = height_ratios[map_position[1]]
+                map_ax.set_aspect(width_ratio / height_ratio, adjustable="datalim")                
             else:
-                logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
-                return
+                # Check if map_position is correct
+                for map_p in map_position:
+                    if not self.check_axes_position(subplots, map_p):
+                        logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
+                        return
+                    
+                gridspec = axs[0, 0].get_subplotspec().get_gridspec()
+
+                # Remove unused subplots and retrieve subfigure span
+                # USE LAMBDA OR SOMETHING CLEANER
+                min_row = map_position[0][0]
+                max_row = map_position[0][0]
+                min_col = map_position[0][1]
+                max_col = map_position[0][1]
+                for map_p in map_position:
+                    axs[map_p].remove()
+                    if map_p[0] < min_row:
+                        min_row = map_p[0]
+                    if map_p[0] > max_row:
+                        max_row = map_p[0]
+                    if map_p[1] < min_col:
+                        min_col = map_p[1]
+                    if map_p[1] > max_col:
+                        max_col = map_p[1]
+
+                subfig = fig.add_subfigure(gridspec[min_row:max_row+1, min_col:max_col+1])
+                # subfig.set_facecolor("0.75") # For testing purpose
+                map_ax = subfig.subplots(nrows=1, ncols=1)
+
+            # Plot map on subplot
+            im = self.expert_map(map_ax,
+                                 size=map_size,
+                                 color=map_color,
+                                 cmap=map_cmap,
+                                 colorbar=map_colorbar if not shared_colorbar else False,
+                                 start_point_color=start_point_color,
+                                 stop_point_color=stop_point_color,
+                                 way_points_color=way_points_color,
+                                 background=background,
+                                 offset_percentage=offset_percentage,
+                                 xpixels=xpixels,
+                                 ypixels=ypixels,
+                                 dpi=dpi)
             
         # Handle elevation profile plot
         if elevation_profile_position is not None:
             # Check if elevation_profile_position is correct
-            if self.check_axes(subplots, elevation_profile_position):
+            if self.check_axes_position(subplots, elevation_profile_position):
                 # Plot elevation profile on subplot
                 self.expert_elevation_profile(axs[elevation_profile_position[0], elevation_profile_position[1]],
+                                              x_type=elevation_profile_x_type,
                                               size=elevation_profile_size,
                                               color=elevation_profile_color,
                                               cmap=elevation_profile_cmap,
@@ -1516,9 +1605,10 @@ class GPX():
         # Handle pace graph plot
         if pace_graph_position is not None:
             # Check if pace_graph_position is correct
-            if self.check_axes(subplots, pace_graph_position):
+            if self.check_axes_position(subplots, pace_graph_position):
                 # Plot pace on subplot
                 self.expert_pace_graph(axs[pace_graph_position[0], pace_graph_position[1]],
+                                       x_type=pace_graph_x_type,
                                        size=pace_graph_size,
                                        color=pace_graph_color,
                                        cmap=pace_graph_cmap,
@@ -1531,32 +1621,42 @@ class GPX():
                 logging.error(f"Invalid pace_graph_position argument: no subplot {pace_graph_position} in a {subplots} array of plots")
                 return
             
-        # Handle data table plot
-        if data_table_position is not None:
-            # Check if data_table_position is correct
-            if self.check_axes(subplots, data_table_position):
-                # Create parameters
-                data_table_parameters = {"axes": axs[data_table_position[0], data_table_position[1]]}
-                # Plot data table on subplot
-                self.expert_data_table(data_table_parameters)
-            else:
-                logging.error(f"Invalid data_table_position argument: no subplot {data_table_position} in a {subplots} array of plots")
-                return
-            
         # Handle ascent rate bar graph
         if ascent_rate_graph_position is not None:
             # Check if ascent_rate_graph_position is correct
-            if self.check_axes(subplots, ascent_rate_graph_position):
+            if self.check_axes_position(subplots, ascent_rate_graph_position):
                 # Plot bar graph on subplot
                 self.expert_ascent_rate_graph(axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
             else:
                 logging.error(f"Invalid ascent_rate_graph_position position: no subplot {ascent_rate_graph_position} in a {subplots} array of plots")
                 return
+            
+        # Handle data table plot
+        if data_table_position is not None:
+            # Check if data_table_position is correct
+            if self.check_axes_position(subplots, data_table_position):
+                # Plot data table on subplot
+                self.expert_data_table(axs[data_table_position[0], data_table_position[1]])
+            else:
+                logging.error(f"Invalid data_table_position argument: no subplot {data_table_position} in a {subplots} array of plots")
+                return
+            
+        # Handle image
+        if img_position is not None:
+            # Check if img_position is correct
+            if self.check_axes_position(subplots, img_position):
+                # Plot image on subplot
+                self.expert_image(axs[img_position[0], img_position[1]],
+                                  img_path,
+                                  img_legend)
+            else:
+                logging.error(f"Invalid img_position argument: no subplot {img_position} in a {subplots} array of plots")
+                return
 
         # Handle ascent rate bar graph
         if made_with_ezgpx_position is not None:
             # Check if made_with_ezgpx_position is correct
-            if self.check_axes(subplots, made_with_ezgpx_position):
+            if self.check_axes_position(subplots, made_with_ezgpx_position):
                 # Plot text on subplot
                 self.expert_made_with_ezgpx(axs[made_with_ezgpx_position[0], made_with_ezgpx_position[1]])
             else:
@@ -1566,10 +1666,13 @@ class GPX():
         if shared_color and im:
             if shared_cmap is None:
                 shared_cmap = mpl.cm.get_cmap("viridis", 12)
-            fig.colorbar(im,
-                         ax=axs.ravel().tolist())
+
+
+            cb_ax = fig.add_axes([1.025, 0, 0.02, 1])
+            cbar = fig.colorbar(im, cax=cb_ax)
+            # fig.colorbar(im,
+            #              ax=axs.ravel().tolist())
             
-        # MAKE FUNCTION ??
         # Save or display plot
         if file_path is not None:
             # Check if provided path exists
@@ -1982,6 +2085,10 @@ class GPX():
             title_fontsize: int = 20,
             watermark: bool = False,
             file_path: str = None):
+        """
+        Crashes may be due to parameters exceeding system capabilities.
+        Try reducing fps and/or bitrate.
+        """
         # Create dataframe containing data from the GPX file
         self.dataframe = self.to_dataframe(projection=True,
                                            elevation=True,
@@ -2108,12 +2215,12 @@ class GPX():
             # ani.save(file_path, fps=fps, dpi=dpi)
             writer = None
             if file_path.endswith(".mp4"):
-                writer = animation.FFMpegWriter(fps=15,
-                                                metadata=dict(artist='Me'),
+                writer = animation.FFMpegWriter(fps=fps,
+                                                metadata=dict(artist="ezGPX"),
                                                 bitrate=bitrate)
             elif file_path.endswith(".gif"):
-                writer = animation.PillowWriter(fps=15,
-                                                metadata=dict(artist='Me'),
+                writer = animation.PillowWriter(fps=fps,
+                                                metadata=dict(artist="ezGPX"),
                                                 bitrate=bitrate)
             ani.save(file_path, writer=writer)
         else:

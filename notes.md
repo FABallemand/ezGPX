@@ -52,7 +52,6 @@
 - [gpxcsv](https://github.com/astrowonk/gpxcsv)
 
 # 📝 TO DO LIST !!
-- Change to project.toml (https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
 - Merge method
 - Garmin extensions
 - Compute length properly (improve haversine distance precision, 2D, 3D)
@@ -60,4 +59,7 @@
 - Update docstring (style + content [description from xsd])
 - Add units to docstrings
 - Set precisions during parsing
-- Add meridia, plot with basemap
+- Add meridian plot with basemap
+- Add support for emojis in plots
+- Remove unused projection stuff
+- Update to dataframe and to csv methods

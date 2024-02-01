@@ -919,8 +919,8 @@ class Gpx():
 
     def to_dataframe(
             self,
-            projection: bool = False,
             elevation: bool = True,
+            time: bool = False,
             speed: bool = False,
             pace: bool = False,
             ascent_rate: bool = False,
@@ -931,10 +931,10 @@ class Gpx():
 
         Parameters
         ----------
-        projection : bool, optional
-            Toggle projection, by default False
         elevation : bool, optional
             Toggle elevation, by default True
+        time : bool, optional
+            Toggle time, by default False
         speed : bool, optional
             Toggle speed, by default False
         pace : bool, optional
@@ -952,8 +952,6 @@ class Gpx():
             Dataframe containing data from GPX.
         """
         test_point = self.first_point()
-        if projection and test_point._x is None:
-            logging.warning(f"Converting GPX to dataframe with missing projection data.")
         if speed and test_point.speed is None:
             self.compute_points_speed()
         if pace and test_point.pace is None:
@@ -978,9 +976,11 @@ class Gpx():
                             track_point_dict["ele"] = track_point.ele
                         else:
                             track_point_dict["ele"] = 0
-                    if projection:
-                        track_point_dict["x"] = track_point._x
-                        track_point_dict["y"] = track_point._y
+                    if time:
+                        if track_point.time is not None:
+                            track_point_dict["time"] = track_point.time
+                        else:
+                            track_point_dict["time"] = 0
                     if speed:
                         track_point_dict["speed"] = track_point.speed
                     if pace:
