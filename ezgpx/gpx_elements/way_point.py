@@ -116,23 +116,3 @@ class WayPoint():
         self.ascent_rate: float = None
         self.ascent_speed: float = None
         self.distance_from_start: float = None
-
-        # Projection
-        self._x: int = None
-        self._y: int = None
-
-    def project(self, projection: str):
-        """
-        Project point.
-
-        Parameters
-        ----------
-        projection : str
-            Projection.
-        """
-        if projection in ["web_mercator_projection", "web_mercator", "wm"]:
-            self._x, self._y = web_mercator_projection(self.lat, self.lon)
-        elif projection in ["lambert_conformal_conic_projection", "lambert_conformal_conic", "lcc"]:
-            self._x, self._y = lambert_conformal_conic_projection(self.lat, self.lon, 90.0, 135.0, 45.0, 45.0)
-        else:
-            logging.error(f"Invalid projection: {projection}")

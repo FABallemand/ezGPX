@@ -978,7 +978,7 @@ class Gpx():
                             track_point_dict["ele"] = 0
                     if time:
                         if track_point.time is not None:
-                            track_point_dict["time"] = track_point.time
+                            track_point_dict["time"] = track_point.time.replace(tzinfo=timezone.utc).astimezone(tz=None)
                         else:
                             track_point_dict["time"] = 0
                     if speed:
@@ -1027,7 +1027,7 @@ class Gpx():
             columns =  ["lat", "lon"]
 
         elevation = False
-        projection = False
+        time = False
         speed = False
         pace = False
         ascent_rate = False
@@ -1035,8 +1035,8 @@ class Gpx():
         
         if "ele" in columns:
             elevation = True
-        if "x" in columns or "y" in columns:
-            projection = True
+        if "time":
+            time = True
         if "speed" in columns:
             speed = True
         if "pace" in columns:
@@ -1046,20 +1046,4 @@ class Gpx():
         if "ascent_speed" in columns:
             ascent_speed = True
 
-        return self.to_dataframe(projection, elevation, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=columns, header=header, index=index)
-
-###############################################################################
-#### Projection ###############################################################
-###############################################################################
-
-    def project(self, projection: str):
-        """
-        Project tracks.
-
-        Parameters
-        ----------
-        projection : str
-            Projection.
-        """
-        for track in self.tracks:
-            track.project(projection)
+        return self.to_dataframe(elevation, time, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=columns, header=header, index=index)

@@ -28,15 +28,3 @@ class TrackSegment():
         self.tag: str = tag
         self.trkpt: List[WayPoint] = [] if trkpt is None else trkpt
         self.extensions: Extensions = extensions
-
-    def project(self, projection: str):
-        """
-        Project points.
-
-        Parameters
-        ----------
-        projection : str
-            Projection.
-        """
-        for point in self.trkpt:
-            point.project(projection)

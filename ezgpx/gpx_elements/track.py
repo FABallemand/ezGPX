@@ -57,15 +57,3 @@ class Track():
         self.type: str = type
         self.extensions: Extensions = extensions
         self.trkseg: List[TrackSegment] = [] if trkseg is None else trkseg
-
-    def project(self, projection: str):
-        """
-        Project segments.
-
-        Parameters
-        ----------
-        projection : str
-            Projection.
-        """
-        for segment in self.trkseg:
-            segment.project(projection)

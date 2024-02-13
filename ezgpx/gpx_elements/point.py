@@ -39,7 +39,4 @@ class Point():
         self._x: int = None
         self._y: int = None
 
-    def project(self):
-        self._x, self._y = web_mercator_projection(self.lat, self.lon)
-
     

@@ -61,5 +61,3 @@
 - Set precisions during parsing
 - Add meridian plot with basemap
 - Add support for emojis in plots
-- Remove unused projection stuff
-- Update to dataframe and to csv methods
