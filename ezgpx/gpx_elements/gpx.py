@@ -978,9 +978,9 @@ class Gpx():
                             track_point_dict["ele"] = 0
                     if time:
                         if track_point.time is not None:
-                            track_point_dict["time"] = track_point.time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+                            track_point_dict["time"] = str(track_point.time.replace(tzinfo=timezone.utc).astimezone(tz=None))
                         else:
-                            track_point_dict["time"] = 0
+                            track_point_dict["time"] = ""
                     if speed:
                         track_point_dict["speed"] = track_point.speed
                     if pace:

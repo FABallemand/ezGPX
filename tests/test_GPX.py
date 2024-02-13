@@ -51,7 +51,7 @@ class TestGPX():
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
         # Test
-        assert(gpx.file_name() == "strava_run_1.gpx")
+        assert(gpx.file_name == "strava_run_1.gpx")
 
     def test_name(self):
         # Parse GPX Files
@@ -238,8 +238,8 @@ class TestGPX():
     def test_to_dataframe(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        df = gpx.to_dataframe()
-        reference_df = pd.read_csv(os.path.join(FILES_DIRECTORY, "strava_run_1_test.csv"))
+        df = gpx.to_dataframe(elevation=True, time=True)
+        reference_df = pd.read_csv(os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.csv"))
         # Test
         assert(reference_df.equals(df))
 
@@ -260,7 +260,7 @@ class TestGPX():
     def test_to_csv(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        gpx.to_csv("tmp/strava_run_1.csv", columns=["lat", "lon", "ele"])
+        gpx.to_csv("tmp/strava_run_1.csv", columns=["lat", "lon", "ele", "time"])
         # Test
         assert(filecmp.cmp("tmp/strava_run_1.csv", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.csv"), False))
 
