@@ -1,7 +1,5 @@
 import datetime
 
-from ..utils import web_mercator_projection
-
 class Point():
     """
     ptType element in GPX file.
@@ -35,8 +33,5 @@ class Point():
         self.lon: float = lon
         self.ele: float = ele
         self.time: datetime = time
-
-        self._x: int = None
-        self._y: int = None
 
     

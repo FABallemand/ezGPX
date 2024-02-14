@@ -58,6 +58,6 @@
 - Tests
 - Update docstring (style + content [description from xsd])
 - Add units to docstrings
-- Set precisions during parsing
 - Add meridian plot with basemap
-- Add support for emojis in plots
+- Add support for all emojis in plots
+- HAndle errors properly

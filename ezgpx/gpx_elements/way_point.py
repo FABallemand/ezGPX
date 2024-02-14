@@ -3,7 +3,6 @@ import datetime
 
 from .extensions import Extensions
 from .link import Link
-from ..utils import web_mercator_projection, lambert_conformal_conic_projection
 
 class WayPoint():
     """

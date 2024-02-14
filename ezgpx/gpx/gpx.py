@@ -57,64 +57,71 @@ class GPX():
         extensions_schemas : bool, optional
             Toggle extensions schema verificaton during parsing, by default False
         """
-        if file_path is not None and os.path.exists(file_path):
-            self.file_path: str = file_path
-            self.file_name: str = os.path.basename(file_path)
-            self.gpx: Gpx = None
-            self.gpx_parser: GPXParser = None
-            self.kml_parser: KMLParser = None
-            self.fit_parser: FitParser = None
-            self.precisions: Dict = None
-            self.time_data: bool = False
-            self.time_format: str = None
-            self.dataframe: pd.DataFrame = None
+        self.gpx: Gpx = None
+        self.gpx_parser: GPXParser = None
+        self.kml_parser: KMLParser = None
+        self.fit_parser: FitParser = None
+        self.precisions: Dict = None
+        self.time_data: bool = False
+        self.time_format: str = None
+        self.dataframe: pd.DataFrame = None
 
-            # GPX
-            if file_path.endswith(".gpx"):
-                self.gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
-                self.gpx = self.gpx_parser.gpx
-                self.precisions = self.gpx_parser.precisions
-                self.time_data = self.gpx_parser.time_data
-                self.time_format = self.gpx_parser.time_format
+        if file_path is not None:
+            if os.path.exists(file_path):
+                self.file_path: str = file_path
+                self.file_name: str = os.path.basename(file_path)
 
-            # KML
-            elif file_path.endswith(".kml"):
-                self.kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
-                self.gpx = self.kml_parser.gpx
-                self.precisions = self.kml_parser.precisions
-                self.time_format = self.kml_parser.time_format
+                # GPX
+                if file_path.endswith(".gpx"):
+                    self.gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
+                    self.gpx = self.gpx_parser.gpx
+                    self.precisions = self.gpx_parser.precisions
+                    self.time_data = self.gpx_parser.time_data
+                    self.time_format = self.gpx_parser.time_format
 
-            # KMZ
-            elif file_path.endswith(".kmz"):
-                kmz = ZipFile(file_path, 'r')
-                kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
-                if "doc.kml" not in kmls:
-                    logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
-                kml = kmz.open("doc.kml", 'r').read()
-                self.write_tmp_kml("tmp.kml", kml)
-                self.kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
-                self.gpx = self.kml_parser.gpx
-                self.precisions = self.kml_parser.precisions
-                self.time_format = self.kml_parser.time_format
-                os.remove("tmp.kml")
-            
-            # FIT
-            elif file_path.endswith(".fit"):
-                self.fit_parser = FitParser(file_path)
-                self.gpx = self.fit_parser.gpx
-                self.precisions = self.fit_parser.precisions
-                self.time_format = self.fit_parser.time_format
+                # KML
+                elif file_path.endswith(".kml"):
+                    self.kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
+                    self.gpx = self.kml_parser.gpx
+                    self.precisions = self.kml_parser.precisions
+                    self.time_format = self.kml_parser.time_format
 
-            # NOT SUPPORTED
+                # KMZ
+                elif file_path.endswith(".kmz"):
+                    kmz = ZipFile(file_path, 'r')
+                    kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
+                    if "doc.kml" not in kmls:
+                        logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
+                    kml = kmz.open("doc.kml", 'r').read()
+                    self.write_tmp_kml("tmp.kml", kml)
+                    self.kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
+                    self.gpx = self.kml_parser.gpx
+                    self.precisions = self.kml_parser.precisions
+                    self.time_format = self.kml_parser.time_format
+                    os.remove("tmp.kml")
+                
+                # FIT
+                elif file_path.endswith(".fit"):
+                    self.fit_parser = FitParser(file_path)
+                    self.gpx = self.fit_parser.gpx
+                    self.precisions = self.fit_parser.precisions
+                    self.time_format = self.fit_parser.time_format
+
+                # NOT SUPPORTED
+                else:
+                    logging.error("Unable to parse this type of file...\nYou may consider renaming your file with the proper file extension.")
+                self.gpx_writer: GPXWriter = GPXWriter(
+                    self.gpx, precisions=self.precisions, time_format=self.time_format)
+                self.kml_writer: KMLWriter = KMLWriter(
+                    self.gpx, precisions=self.precisions, time_format=self.time_format)
             else:
-                logging.error("Unable to parse this type of file...\nYou may consider renaming your file with the proper file extension.")
-            self.gpx_writer: GPXWriter = GPXWriter(
-                self.gpx, precisions=self.precisions, time_format=self.time_format)
-            self.kml_writer: KMLWriter = KMLWriter(
-                self.gpx, precisions=self.precisions, time_format=self.time_format)
+                logging.warning("File path does not exist")
+                pass
         else:
-            logging.warning("File path does not exist")
-            pass
+            self.file_path: str = None
+            self.file_name: str = None
+            self.gpx = Gpx()
+            
 
     def write_tmp_kml(
             self,
@@ -599,43 +606,6 @@ class GPX():
         epsilon = degrees(tolerance/EARTH_RADIUS)
         self.gpx.simplify(epsilon)
 
-    def merge(self, gpx: GPX):
-        """
-        _summary_
-
-        Parameters
-        ----------
-        gpx : GPX
-            _description_
-        """
-        # TODO
-        if self.gpx.tag is None:
-            self.gpx.tag = gpx.gpx.tag
-        if self.gpx.creator is None:
-            self.gpx.creator = gpx.gpx.creator
-        if self.gpx.xmlns is None:
-            self.gpx.xmlns = gpx.gpx.xmlns
-        if self.gpx.version is None:
-            self.gpx.version = gpx.gpx.version
-        if self.gpx.xmlns_xsi is None:
-            self.gpx.xmlns_xsi = gpx.gpx.xmlns_xsi
-        self.gpx.xsi_schema_location.extend(gpx.gpx.xsi_schema_location)
-        if self.gpx.xmlns_gpxtpx is None:
-            self.gpx.xmlns_gpxtpx = gpx.gpx.xmlns_gpxtpx
-        if self.gpx.xmlns_gpxx is None:
-            self.gpx.xmlns_gpxx = gpx.gpx.xmlns_gpxx
-        if self.gpx.xmlns_gpxtrk is None:
-            self.gpx.xmlns_gpxtrk = gpx.gpx.xmlns_gpxtrk
-        if self.gpx.xmlns_wptx1 is None:
-            self.gpx.xmlns_wptx1 = gpx.gpx.xmlns_wptx1
-        if self.gpx.metadata is None:
-            self.gpx.metadata = gpx.gpx.metadata
-        self.gpx.wpt.extend(gpx.gpx.wpt)
-        self.gpx.rte.extend(gpx.gpx.rte)
-        self.gpx.tracks.extend(gpx.gpx.tracks)
-        if self.gpx.extensions is None:
-            self.gpx.extensions = gpx.gpx.extensions
-
 ###############################################################################
 #### Exports ##################################################################
 ###############################################################################
@@ -740,7 +710,7 @@ class GPX():
         Parameters
         ----------
         path : str
-            Path to the .gpx file.
+            Path to the new .gpx file.
         xml_schema : bool, optional
             Toggle schema verification after writting, by default True
         xml_extensions_schemas : bool, optional
