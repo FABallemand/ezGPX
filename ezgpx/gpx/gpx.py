@@ -1168,9 +1168,10 @@ class GPX():
             x = self.dataframe["distance_from_start"] / 1000 # Convert to km
             x_label = "Distance [km]"
         elif x_type == "time":
-            x = self.dataframe["time"]
-            # x = [t.to_pydatetime().time() for t in tmp_x]
-            # x = [t.to_pydatetime() for t in tmp_x]
+            x = self.dataframe["time"].tolist()
+            x = [h.split(" ")[1] for h in x]
+            x = [h.split("+")[0] for h in x]
+            # x = [datetime.strptime(h, "%H:%M:%S").time() for h in x]
             x_label = "Time"
         else:
             logging.error(f"Invalid x_type argument {x_type}")
@@ -1211,12 +1212,9 @@ class GPX():
         axes.set_ylabel("Elevation [m]")
 
         # Axis ticks
-        # WTF ???
-        # if x_type == "time":
-        #     x_ticks = axes.get_xticks()
-        #     print(x_ticks)
-        #     print(type(x_ticks[0]))
-        #     axes.set_xticks(x_ticks)
+        if x_label == "Time":
+            x_tick_step = int(len(x) / 10)
+            axes.set_xticks(x[::x_tick_step])
 
     def expert_pace_graph(
             self,
@@ -1240,7 +1238,10 @@ class GPX():
             x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
             x_label = "Distance [km]"
         elif x_type == "time":
-            x = self.dataframe["time"].values
+            x = self.dataframe["time"].tolist()
+            x = [h.split(" ")[1] for h in x]
+            x = [h.split("+")[0] for h in x]
+            # x = [datetime.strptime(h, "%H:%M:%S").time() for h in x]
             x_label = "Time"
         else:
             logging.error(f"Invalid x_type argument {x_type}")
@@ -1293,6 +1294,11 @@ class GPX():
         # Axis labels
         axes.set_xlabel(x_label)
         axes.set_ylabel("Pace [min/km]")
+
+        # Axis ticks
+        if x_label == "Time":
+            x_tick_step = int(len(x) / 10)
+            axes.set_xticks(x[::x_tick_step])
 
     def expert_ascent_rate_graph(
             self,
