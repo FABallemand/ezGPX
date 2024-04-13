@@ -1,4 +1,5 @@
 xmlschema
+importlib_resources
 pandas
 matplotlib
 basemap
