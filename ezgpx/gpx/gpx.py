@@ -1,16 +1,19 @@
 import os
+import errno
+import warnings
 from typing import Optional, Union, List, Tuple, Dict, NewType
 import logging
 from zipfile import ZipFile
 import webbrowser
 from datetime import datetime
 from math import degrees, isclose
+
 import pandas as pd
 import numpy as np
 
 from fitparse import FitFile
 
-import matplotlib as mpl
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -25,13 +28,13 @@ from folium.features import DivIcon
 
 from papermap import PaperMap
 
-from ..gpx_elements import Gpx, WayPoint
+from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
 from ..gpx_parser import GPXParser
 from ..kml_parser import KMLParser
 from ..fit_parser import FitParser
 from ..gpx_writer import GPXWriter
 from ..kml_writer import KMLWriter
-from ..utils import haversine_distance, EARTH_RADIUS
+from ..utils import EARTH_RADIUS
 
 GPX = NewType("GPX", object) # GPX forward declaration for type hint
 
@@ -57,73 +60,83 @@ class GPX():
         extensions_schemas : bool, optional
             Toggle extensions schema verificaton during parsing, by default False
         """
+        # GPX file description
+        self.file_path: str = None
+        self.file_name: str = None
+        
+        # GPX file content
         self.gpx: Gpx = None
-        self.gpx_parser: GPXParser = None
-        self.kml_parser: KMLParser = None
-        self.fit_parser: FitParser = None
+        self._ele_data: bool = False
+        self._time_data: bool = False
         self.precisions: Dict = None
-        self.time_data: bool = False
         self.time_format: str = None
-        self.dataframe: pd.DataFrame = None
 
-        if file_path is not None:
-            if os.path.exists(file_path):
-                self.file_path: str = file_path
-                self.file_name: str = os.path.basename(file_path)
+        # Parsers
+        self._gpx_parser: GPXParser = None
+        self._kml_parser: KMLParser = None
+        self._fit_parser: FitParser = None
 
-                # GPX
-                if file_path.endswith(".gpx"):
-                    self.gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
-                    self.gpx = self.gpx_parser.gpx
-                    self.precisions = self.gpx_parser.precisions
-                    self.time_data = self.gpx_parser.time_data
-                    self.time_format = self.gpx_parser.time_format
+        # Utility attributes
+        self._dataframe: pd.DataFrame = None
 
-                # KML
-                elif file_path.endswith(".kml"):
-                    self.kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
-                    self.gpx = self.kml_parser.gpx
-                    self.precisions = self.kml_parser.precisions
-                    self.time_format = self.kml_parser.time_format
+        # Valid file
+        if isinstance(file_path, str) and os.path.exists(file_path):
+            self.file_path = file_path
+            self.file_name = os.path.basename(file_path)
 
-                # KMZ
-                elif file_path.endswith(".kmz"):
-                    kmz = ZipFile(file_path, 'r')
-                    kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
-                    if "doc.kml" not in kmls:
-                        logging.warning("Unable to parse this file: Expected to find doc.kml inside KMZ file.")
-                    kml = kmz.open("doc.kml", 'r').read()
-                    self.write_tmp_kml("tmp.kml", kml)
-                    self.kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
-                    self.gpx = self.kml_parser.gpx
-                    self.precisions = self.kml_parser.precisions
-                    self.time_format = self.kml_parser.time_format
-                    os.remove("tmp.kml")
-                
-                # FIT
-                elif file_path.endswith(".fit"):
-                    self.fit_parser = FitParser(file_path)
-                    self.gpx = self.fit_parser.gpx
-                    self.precisions = self.fit_parser.precisions
-                    self.time_format = self.fit_parser.time_format
+            # GPX
+            if file_path.endswith(".gpx"):
+                self._gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
+                self.gpx = self._gpx_parser.gpx
+                self._ele_data = self._gpx_parser.ele_data
+                self._time_data = self._gpx_parser.time_data
+                self.precisions = self._gpx_parser.precisions
+                self.time_format = self._gpx_parser.time_format
 
-                # NOT SUPPORTED
-                else:
-                    logging.error("Unable to parse this type of file...\nYou may consider renaming your file with the proper file extension.")
-                self.gpx_writer: GPXWriter = GPXWriter(
-                    self.gpx, precisions=self.precisions, time_format=self.time_format)
-                self.kml_writer: KMLWriter = KMLWriter(
-                    self.gpx, precisions=self.precisions, time_format=self.time_format)
-            else:
-                logging.warning("File path does not exist")
-                pass
-        else:
-            self.file_path: str = None
-            self.file_name: str = None
-            self.gpx = Gpx()
+            # KML
+            elif file_path.endswith(".kml"):
+                self._kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
+                self.gpx = self._kml_parser.gpx
+                self.precisions = self._kml_parser.precisions
+                self.time_format = self._kml_parser.time_format
+
+            # KMZ
+            elif file_path.endswith(".kmz"):
+                kmz = ZipFile(file_path, 'r')
+                kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
+                if "doc.kml" not in kmls:
+                    raise Exception(f"Unable to parse file: {file_path}"
+                                    "Expected to find doc.kml inside KMZ file.")
+                kml = kmz.open("doc.kml", 'r').read()
+                self._write_tmp_kml("tmp.kml", kml)
+                self._kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
+                self.gpx = self._kml_parser.gpx
+                self.precisions = self._kml_parser.precisions
+                self.time_format = self._kml_parser.time_format
+                os.remove("tmp.kml")
             
+            # FIT
+            elif file_path.endswith(".fit"):
+                self._fit_parser = FitParser(file_path)
+                self.gpx = self._fit_parser.gpx
+                self.precisions = self._fit_parser.precisions
+                self.time_format = self._fit_parser.time_format
 
-    def write_tmp_kml(
+            # NOT SUPPORTED
+            else:
+                raise ValueError(f"Unable to parse this type of file: {file_path}"
+                                 "Consider renaming your file with the proper file extension.")
+
+            self._gpx_writer: GPXWriter = GPXWriter(
+                self.gpx, precisions=self.precisions, time_format=self.time_format)
+            self._kml_writer: KMLWriter = KMLWriter(
+                self.gpx, precisions=self.precisions, time_format=self.time_format)
+            
+        # Invalid file path
+        else:
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+            
+    def _write_tmp_kml(
             self,
             path: str ="tmp.kml",
             kml_string: Optional[bytes] = None):
@@ -142,6 +155,9 @@ class GPX():
                 f.write(kml_string)
 
     def __str__(self) -> str:
+        return self._gpx_writer.gpx_to_string(self.gpx)
+    
+    def __repr__(self):
         return f"file_path = {self.file_path}\ngpx = {self.gpx}"
     
 ###############################################################################
@@ -272,7 +288,7 @@ class GPX():
 
     def distance(self) -> float:
         """
-        Returns the distance (meters) of the tracks contained in the GPX.
+        Returns the distance (meters) of tracks contained in the GPX.
 
         Returns
         -------
@@ -283,7 +299,7 @@ class GPX():
 
     def ascent(self) -> float:
         """
-        Returns the ascent (meters) of the tracks contained in the GPX.
+        Returns the ascent (meters) of tracks contained in the GPX.
 
         Returns
         -------
@@ -294,7 +310,7 @@ class GPX():
 
     def descent(self) -> float:
         """
-        Returns the descent (meters) of the tracks contained in the GPX.
+        Returns the descent (meters) of tracks contained in the GPX.
 
         Returns
         -------
@@ -333,7 +349,7 @@ class GPX():
 
     def min_elevation(self) -> float:
         """
-        Returns the minimum elevation (meters) in the tracks contained in the GPX.
+        Returns the minimum elevation (meters) in tracks contained in the GPX.
 
         Returns
         -------
@@ -344,7 +360,7 @@ class GPX():
 
     def max_elevation(self) -> float:
         """
-        Returns the maximum elevation (meters) in the tracks contained in the GPX.
+        Returns the maximum elevation (meters) in tracks contained in the GPX.
 
         Returns
         -------
@@ -550,21 +566,21 @@ class GPX():
 
     def remove_metadata(self):
         """
-        Remove metadata (ie: metadata will not be written when saving the GPX object as a .gpx file).
+        Remove metadata.
         """
-        self.gpx_writer.metadata = False
+        self.gpx.remove_metadata()
 
     def remove_elevation(self):
         """
-        Remove elevation data (ie: elevation data will not be written when saving the GPX object as a .gpx file).
+        Remove elevation data.
         """
-        self.gpx_writer.ele = False
+        self.gpx.remove_elevation()
 
     def remove_time(self):
         """
-        Remove time data (ie: time data will not be written when saving the GPX object as a .gpx file).
+        Remove time data.
         """
-        self.gpx_writer.time = False
+        self.gpx.remove_time()
 
 ###############################################################################
 #### Error Correction #########################################################
@@ -590,12 +606,12 @@ class GPX():
         self.gpx.remove_close_points(min_dist, max_dist)
 
 ###############################################################################
-#### ... ######################################################################
+#### Simplification ###########################################################
 ###############################################################################
 
     def simplify(self, tolerance: float = 2):
         """
-        Simplify the tracks using Ramer-Douglas-Peucker algorithm.
+        Simplify tracks using Ramer-Douglas-Peucker algorithm.
 
         Parameters
         ----------
@@ -607,48 +623,51 @@ class GPX():
         self.gpx.simplify(epsilon)
 
 ###############################################################################
-#### Exports ##################################################################
+#### Merge ####################################################################
 ###############################################################################
 
-    def to_gpx_string(self) -> str:
-        """
-        Convert the GPX object to a string.
+    @staticmethod
+    def merge(gpx_1: GPX, gpx_2: GPX) -> GPX:
 
-        Returns
-        -------
-        str
-            String representingth GPX object.
-        """
-        return self.gpx_writer.gpx_to_string(self.gpx)
+        # Create new GPX instance
+        merged_gpx = GPX()
+
+        # Fill new GPX instance
+        merged_gpx.gpx.tag = "gpx"
+        merged_gpx.gpx.creator = "ezGPX"
+        merged_gpx.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
+        merged_gpx.gpx.version = "1.1"
+        merged_gpx.gpx.xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        merged_gpx.gpx.xsi_schema_location = ["http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+        merged_gpx.gpx.xmlns_gpxtpx = None #TODO
+        merged_gpx.gpx.xmlns_gpxtrk = None #TODO
+        merged_gpx.gpx.xmlns_wptx1 = None #TODO
+        merged_gpx.gpx.metadata = None #TODO
+        merged_gpx.gpx.wpt = gpx_1.gpx.wpt + gpx_2.gpx.wpt
+        merged_gpx.gpx.rte = gpx_1.gpx.rte + gpx_2.gpx.rte
+        merged_gpx.gpx.trk = gpx_1.gpx.trk + gpx_2.gpx.trk
+        merged_gpx.gpx.extensions = None #TODO
+
+        # Return new GPX instance
+        return merged_gpx
+
+###############################################################################
+#### Exports ##################################################################
+###############################################################################
     
     def to_dataframe(
             self,
-            elevation: bool = True,
-            time: bool = True,
-            speed: bool = False,
-            pace: bool = False,
-            ascent_rate: bool = False,
-            ascent_speed: bool = False,
-            distance_from_start: bool = False) -> pd.DataFrame:
+            values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
+        Missing values are filled with default values (0 for elevation, empty string for time).
 
         Parameters
         ----------
-        elevation : bool, optional
-            Toggle elevation, by default True
-        time : bool, optional
-            Toggle time, by default False
-        speed : bool, optional
-            Toggle speed, by default False
-        pace : bool, optional
-            Toggle pace, by default False
-        ascent_rate : bool, optional
-            Toggle ascent rate, by default False
-        ascent_speed : bool, optional
-            Toggle ascent speed, by default False
-        distance_from_start : bool, optional
-            Toggle distance from start, by default False
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
 
         Returns
         -------
@@ -656,24 +675,33 @@ class GPX():
             Dataframe containing data from GPX.
         """
         # Disable time related values if no time data available
-        if not self.time_data:
-            time = False
-            speed = False
-            pace = False
-            ascent_speed = False
-        return self.gpx.to_dataframe(elevation,
-                                     time,
-                                     speed,
-                                     pace,
-                                     ascent_rate,
-                                     ascent_speed,
-                                     distance_from_start)
+        if not self._time_data:
+            if any([v in ["time", "speed", "pace", "ascent_speed"] for v in values]):
+                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
+                              "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                              UserWarning)
+            values.remove("time")
+            values.remove("speed")
+            values.remove("pace")
+            values.remove("ascent_speed")
+
+        # Disable elevation related values if no elevation data available
+        if not self._ele_data:
+            if any([v in ["ele", "ascent_rate", "ascent_speed"] for v in values]):
+                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
+                              "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                              UserWarning)
+            values.remove("ele")
+            values.remove("ascent_rate")
+            values.remove("ascent_speed")
+
+        return self.gpx.to_dataframe(values)
 
     def to_csv(
             self,
             path: str = None,
+            values: List[str] = None,
             sep: str = ",",
-            columns: List[str] = None,
             header: bool = True,
             index: bool = False) -> Union[str, None]:
         """
@@ -683,10 +711,12 @@ class GPX():
         ----------
         path : str, optional
             Path to the .csv file, by default None
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
         sep : str, optional
             Separator, by default ","
-        columns : List[str], optional
-            List of columns to write, by default None
         header : bool, optional
             Toggle header, by default True
         index : bool, optional
@@ -697,11 +727,26 @@ class GPX():
         str
             CSV like string if path is set to None.
         """
-        return self.gpx.to_csv(path, sep, columns, header, index)
+        return self.gpx.to_csv(path, sep, values, header, index)
     
     def to_gpx(
             self,
             path: str,
+            properties: bool = True,
+            bounds_fields: List[str] = Bounds.fields,
+            copyright_fields: List[str] = Copyright.fields,
+            email_fields: List[str] = Email.fields,
+            extensions_fields: List[str] = Extensions.fields,
+            gpx_fields: List[str] = Gpx.fields,
+            link_fields: List[str] = Link.fields,
+            metadata_fields: List[str] = Metadata.fields,
+            person_fields: List[str] = Person.fields,
+            point_segment_fields: List[str] = PointSegment.fields,
+            point_fields: List[str] = Point.fields,
+            route_fields: List[str] = Route.fields,
+            track_segment_fields: List[str] = TrackSegment.fields,
+            track_fields: List[str] = Track.fields,
+            way_point_fields: List[str] = WayPoint.fields,
             xml_schema: bool = True,
             xml_extensions_schemas: bool = False) -> bool:
         """
@@ -721,7 +766,24 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.gpx_writer.write(path, xml_schema, xml_extensions_schemas)
+        return self._gpx_writer.write(file_path=path,
+                                      properties=properties,
+                                      bounds_fields=bounds_fields,
+                                      copyright_fields=copyright_fields,
+                                      email_fields=email_fields,
+                                      extensions_fields=extensions_fields,
+                                      gpx_fields=gpx_fields,
+                                      link_fields=link_fields,
+                                      metadata_fields=metadata_fields,
+                                      person_fields=person_fields,
+                                      point_segment_fields=point_segment_fields,
+                                      point_fields=point_fields,
+                                      route_fields=route_fields,
+                                      track_segment_fields=track_segment_fields,
+                                      track_fields=track_fields,
+                                      way_point_fields=way_point_fields,
+                                      xml_schema=xml_schema,
+                                      xml_extensions_schemas=xml_extensions_schemas)
     
     def to_kml(
             self,
@@ -745,7 +807,7 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        return self.kml_writer.write(path, styles, xml_schema)
+        return self._kml_writer.write(path, styles, xml_schema)
     
 ###############################################################################
 #### Matplotlib Plot ##########################################################
@@ -756,7 +818,7 @@ class GPX():
             figsize: Tuple[int, int] = (16, 9),
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -771,7 +833,7 @@ class GPX():
             watermark: bool = False,
             file_path: str = None):
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe(projection=True,
+        self._dataframe = self.to_dataframe(projection=True,
                                            elevation=True,
                                            speed=True,
                                            pace=True,
@@ -836,7 +898,7 @@ class GPX():
             figsize: Tuple[int, int] = (16, 9),
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -849,7 +911,7 @@ class GPX():
             watermark: bool = False,
             file_path: str = None):
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe(elevation=True,
+        self._dataframe = self.to_dataframe(elevation=True,
                                            time=True,
                                            speed=True,
                                            pace=True,
@@ -870,7 +932,7 @@ class GPX():
         max_lat, max_lon = min(max_lat + offset, 90),  min(max_lon + offset, 180)
         
         # Some sort of magic to achieve the correct map aspect ratio
-        # CREATE FUNCTION (also used in anmation??)
+        # CREATE FUNCTION (also used in animation??)
         lat_offset = 1e-5
         lon_offset = 1e-5
         delta_lat = max_lat - min_lat
@@ -921,17 +983,15 @@ class GPX():
                             verbose=True)
             
         # Scatter track points
-        x, y = map(self.dataframe["lon"], self.dataframe["lat"]) # Project track points
-        x, y = x.tolist(), y.tolist()                            # Convert to list
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
-            im = map.scatter(self.dataframe["lon"],
-                             self.dataframe["lat"],
+            im = map.scatter(self._dataframe["lon"],
+                             self._dataframe["lat"],
                              s=size,
-                             c=self.dataframe[color],
+                             c=self._dataframe[color],
                              cmap=cmap)
         else:
-            im = map.scatter(self.dataframe["lon"],
-                             self.dataframe["lat"],
+            im = map.scatter(self._dataframe["lon"],
+                             self._dataframe["lat"],
                              s=size,
                              color=color)
             
@@ -1022,7 +1082,7 @@ class GPX():
             axes: Axes,
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -1109,17 +1169,17 @@ class GPX():
                             verbose=True)
             
         # Scatter track points
-        x, y = map(self.dataframe["lon"], self.dataframe["lat"]) # Project track points
+        x, y = map(self._dataframe["lon"], self._dataframe["lat"]) # Project track points
         x, y = x.tolist(), y.tolist()                            # Convert to list
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
-            im = map.scatter(self.dataframe["lon"],
-                             self.dataframe["lat"],
+            im = map.scatter(self._dataframe["lon"],
+                             self._dataframe["lat"],
                              s=size,
-                             c=self.dataframe[color],
+                             c=self._dataframe[color],
                              cmap=cmap)
         else:
-            im = map.scatter(self.dataframe["lon"],
-                             self.dataframe["lat"],
+            im = map.scatter(self._dataframe["lon"],
+                             self._dataframe["lat"],
                              s=size,
                              color=color)
             
@@ -1153,7 +1213,7 @@ class GPX():
             x_type: str,
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             grid: bool = False,
             fill_color: Optional[str] = None,
@@ -1165,10 +1225,10 @@ class GPX():
         x = None
         x_label = ""
         if x_type == "distance":
-            x = self.dataframe["distance_from_start"] / 1000 # Convert to km
+            x = self._dataframe["distance_from_start"] / 1000 # Convert to km
             x_label = "Distance [km]"
         elif x_type == "time":
-            x = self.dataframe["time"].tolist()
+            x = self._dataframe["time"].tolist()
             x = [h.split(" ")[1] for h in x]
             x = [h.split("+")[0] for h in x]
             # x = [datetime.strptime(h, "%H:%M:%S").time() for h in x]
@@ -1180,13 +1240,13 @@ class GPX():
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
             im = axes.scatter(x,
-                              self.dataframe["ele"],
+                              self._dataframe["ele"],
                               s=size,
-                              c=self.dataframe[color],
+                              c=self._dataframe[color],
                               cmap=cmap)
         else:
             im = axes.scatter(x,
-                              self.dataframe["ele"],
+                              self._dataframe["ele"],
                               s=size,
                               color=color)
 
@@ -1198,7 +1258,7 @@ class GPX():
         if fill_color:
             axes.fill_between(x,
                               [0 for i in range(len(x))],
-                              self.dataframe["ele"],
+                              self._dataframe["ele"],
                               color=fill_color,
                               alpha=fill_alpha)
               
@@ -1222,7 +1282,7 @@ class GPX():
             x_type: str,
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             grid: bool = False,
             fill_color: Optional[str] = None,
@@ -1235,10 +1295,10 @@ class GPX():
         x = None
         x_label = ""
         if x_type == "distance":
-            x = self.dataframe["distance_from_start"].values / 1000 # Convert to km
+            x = self._dataframe["distance_from_start"].values / 1000 # Convert to km
             x_label = "Distance [km]"
         elif x_type == "time":
-            x = self.dataframe["time"].tolist()
+            x = self._dataframe["time"].tolist()
             x = [h.split(" ")[1] for h in x]
             x = [h.split("+")[0] for h in x]
             # x = [datetime.strptime(h, "%H:%M:%S").time() for h in x]
@@ -1250,8 +1310,8 @@ class GPX():
         # Plot
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
             # Remove lowest values
-            pace = self.dataframe["pace"].values
-            color = self.dataframe[color]
+            pace = self._dataframe["pace"].values
+            color = self._dataframe[color]
             tmp = [(x, p, c) for (x, p, c) in list(zip(x, pace, color)) if p < threshold]
             x = [x for (x, p, c) in tmp]
             pace = [p for (x, p, c) in tmp]
@@ -1263,7 +1323,7 @@ class GPX():
                               cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
             # Remove lowest values
-            pace = self.dataframe["pace"].values
+            pace = self._dataframe["pace"].values
             tmp = [(x, p) for (x,p) in list(zip(x, pace)) if p < threshold]
             x = [x for (x,p) in tmp]
             pace = [p for (x,p) in tmp]
@@ -1311,7 +1371,7 @@ class GPX():
         nb_points = 0
 
         # Compute number of points for each ascent rate zone
-        for track in self.gpx.tracks:
+        for track in self.gpx.trk:
             for track_segment in track.trkseg:
                 nb_points += len(track_segment.trkpt)
                 for track_point in track_segment.trkpt:
@@ -1443,7 +1503,7 @@ class GPX():
             map_position: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]] = (0,0),
             map_size: float = 10,
             map_color: str = "#101010",
-            map_cmap: Optional[mpl.colors.Colormap] = None,
+            map_cmap: Optional[matplotlib.colors.Colormap] = None,
             map_colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -1457,7 +1517,7 @@ class GPX():
             elevation_profile_x_type: Optional[str] = None, # "distance", "time"
             elevation_profile_size: float = 10,
             elevation_profile_color: str = "#101010",
-            elevation_profile_cmap: Optional[mpl.colors.Colormap] = None,
+            elevation_profile_cmap: Optional[matplotlib.colors.Colormap] = None,
             elevation_profile_colorbar: bool = False,
             elevation_profile_grid: bool = False,
             elevation_profile_fill_color: Optional[str] = None,
@@ -1466,7 +1526,7 @@ class GPX():
             pace_graph_x_type: Optional[str] = None, # "distance", "time"
             pace_graph_size: float = 10,
             pace_graph_color: str = "#101010",
-            pace_graph_cmap: Optional[mpl.colors.Colormap] = None,
+            pace_graph_cmap: Optional[matplotlib.colors.Colormap] = None,
             pace_graph_colorbar: bool = False,
             pace_graph_grid: bool = False,
             pace_graph_fill_color: Optional[str] = None,
@@ -1479,14 +1539,14 @@ class GPX():
             img_legend: Optional[str] = None,
             made_with_ezgpx_position: Optional[Tuple[int, int]] = (0,1), # None
             shared_color: str = "#101010",
-            shared_cmap: Optional[mpl.colors.Colormap] = None,
+            shared_cmap: Optional[matplotlib.colors.Colormap] = None,
             shared_colorbar: bool = False,
             title: Optional[str] = None,
             title_fontsize: int = 20,
             watermark: bool = False,
             file_path: Optional[str] = None):
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe(elevation=True,
+        self._dataframe = self.to_dataframe(elevation=True,
                                            time=True,
                                            speed=True,
                                            pace=True,
@@ -1666,7 +1726,7 @@ class GPX():
             
         if shared_color and im:
             if shared_cmap is None:
-                shared_cmap = mpl.cm.get_cmap("viridis", 12)
+                shared_cmap = matplotlib.cm.get_cmap("viridis", 12)
 
 
             cb_ax = fig.add_axes([1.025, 0, 0.02, 1])
@@ -1741,11 +1801,11 @@ class GPX():
         
         # Scatter start and stop points with different color
         if start_stop_colors:
-            map.scatter([self.gpx.tracks[0].trkseg[0].trkpt[0].lat],
-                        [self.gpx.tracks[0].trkseg[0].trkpt[0].lon],
+            map.scatter([self.gpx.trk[0].trkseg[0].trkpt[0].lat],
+                        [self.gpx.trk[0].trkseg[0].trkpt[0].lon],
                         start_stop_colors[0], size=5, marker=True)
-            map.scatter([self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lat],
-                        [self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lon],
+            map.scatter([self.gpx.trk[-1].trkseg[-1].trkpt[-1].lat],
+                        [self.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                         start_stop_colors[1], size=5, marker=True)
             
         # Scatter way points with different color
@@ -1821,9 +1881,9 @@ class GPX():
 
         # Scatter start and stop points with different color
         if start_stop_colors:
-            folium.Marker([self.gpx.tracks[0].trkseg[0].trkpt[0].lat, self.gpx.tracks[0].trkseg[0].trkpt[0].lon],
+            folium.Marker([self.gpx.trk[0].trkseg[0].trkpt[0].lat, self.gpx.trk[0].trkseg[0].trkpt[0].lon],
                           popup="<b>Start</b>", tooltip="Start", icon=folium.Icon(color=start_stop_colors[0])).add_to(m)
-            folium.Marker([self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lat, self.gpx.tracks[-1].trkseg[-1].trkpt[-1].lon],
+            folium.Marker([self.gpx.trk[-1].trkseg[-1].trkpt[-1].lat, self.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                           popup="<b>Stop</b>", tooltip="Stop", icon=folium.Icon(color=start_stop_colors[1])).add_to(m)
         
         # Scatter way points with different color
@@ -1962,7 +2022,7 @@ class GPX():
             figsize: Tuple[int, int] = (16, 9),
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -1978,7 +2038,7 @@ class GPX():
             watermark: bool = False,
             file_path: str = None):
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe(elevation=True,
+        self._dataframe = self.to_dataframe(elevation=True,
                                            speed=True,
                                            pace=True,
                                            ascent_rate=True,
@@ -1986,8 +2046,8 @@ class GPX():
                                            distance_from_start=True)
         
         # Retrieve useful data
-        lat = self.dataframe["lat"].values
-        lon = self.dataframe["lon"].values
+        lat = self._dataframe["lat"].values
+        lon = self._dataframe["lon"].values
         min_lat, min_lon, max_lat, max_lon = self.bounds()
 
         # Create figure with axes
@@ -2069,7 +2129,7 @@ class GPX():
             figsize: Tuple[int, int] = (16, 9),
             size: float = 10,
             color: str = "#101010",
-            cmap: Optional[mpl.colors.Colormap] = None,
+            cmap: Optional[matplotlib.colors.Colormap] = None,
             colorbar: bool = False,
             start_point_color: Optional[str] = None,
             stop_point_color: Optional[str] = None,
@@ -2090,11 +2150,11 @@ class GPX():
         Try reducing fps and/or bitrate.
         """
         # Create dataframe containing data from the GPX file
-        self.dataframe = self.to_dataframe()
+        self._dataframe = self.to_dataframe()
         
         # Retrieve useful data
-        lat = self.dataframe["lat"].values
-        lon = self.dataframe["lon"].values
+        lat = self._dataframe["lat"].values
+        lon = self._dataframe["lon"].values
         
         # Create figure
         fig = plt.figure(figsize=figsize)

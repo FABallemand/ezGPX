@@ -3,6 +3,8 @@ class Email():
     """
     emailType element in GPX file.
     """
+    fields = ["id", "domain"]
+    mandatory_fields = ["id", "domain"]
 
     def __init__(
             self,

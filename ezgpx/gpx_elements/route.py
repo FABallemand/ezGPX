@@ -7,6 +7,9 @@ class Route():
     """
     rteType element in GPX file.
     """
+    fields = ["name", "cmt", "desc", "src", "link", "number", "type",
+              "extensions", "rtept"]
+    mandatory_fields = []
 
     def __init__(
             self,

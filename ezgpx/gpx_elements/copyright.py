@@ -3,6 +3,8 @@ class Copyright():
     """
     copyrightType element in GPX file.
     """
+    fields = ["author", "year", "licence"]
+    mandatory_fields = ["author"]
 
     def __init__(
             self,

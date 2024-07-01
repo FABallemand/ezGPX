@@ -108,6 +108,6 @@ def perpendicular_distance(start_point, end_point, point) -> float:
 
     a, b, c = line_coefficients(start_point, end_point)
 
-    d = abs(a*point.lon + b*point.lat + c) / m.sqrt(a*a + b*b)
+    d = abs(a * point.lon + b * point.lat + c) / m.sqrt(a * a + b * b)
     
     return d

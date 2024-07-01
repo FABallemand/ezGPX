@@ -1,5 +1,8 @@
 import os
-from importlib_resources import files
+try:
+    from importlib.resources import files
+except ImportError:
+    from importlib_resources import files
 from typing import Union, List, Tuple
 import logging
 import xmlschema
@@ -17,6 +20,8 @@ class Gpx():
     """
     gpxType element in GPX file.
     """
+    fields = ["version", "creator", "metadata", "wpt", "rte", "trk", "extensions"]
+    mandatory_fields = ["version", "creator"]
 
     def __init__(
             self,
@@ -33,7 +38,7 @@ class Gpx():
             metadata: Metadata = None,
             wpt: List[WayPoint] = None,
             rte: List[Route] = None,
-            tracks: List[Track] = None,
+            trk: List[Track] = None,
             extensions: Extensions = None) -> None:
         """
         Initialize Gpx instance.
@@ -66,7 +71,7 @@ class Gpx():
             Way points, by default None
         rte : List[Route], optional
             Routes, by default None
-        tracks : List[Track], optional
+        trk : List[Track], optional
             List of tracks, by default None
         extensions : Extensions, optional
             Extensions, by default None
@@ -88,17 +93,17 @@ class Gpx():
 
         self.metadata: Metadata = metadata
         if wpt is None:
-            self.wpt:List[WayPoint] = []
+            self.wpt: List[WayPoint] = []
         else:
-            self.wpt:List[WayPoint] = wpt
+            self.wpt: List[WayPoint] = wpt
         if rte is None:
             self.rte: List[Route] = []
         else:
             self.rte: List[Route] = rte
-        if tracks is None:
-            self.tracks: List[Track] = []
+        if trk is None:
+            self.trk: List[Track] = []
         else:
-            self.tracks: List[Track] = tracks
+            self.trk: List[Track] = trk
         self.extensions: Extensions = extensions
 
 ###############################################################################
@@ -177,7 +182,7 @@ class Gpx():
         str
             Activity name.
         """
-        return self.tracks[0].name
+        return self.trk[0].name
     
     def set_name(self, new_name: str) -> None:
         """
@@ -188,7 +193,7 @@ class Gpx():
         new_name : str
             New name.
         """
-        self.tracks[0].name = new_name
+        self.trk[0].name = new_name
 
 ###############################################################################
 #### Points ###################################################################
@@ -204,7 +209,7 @@ class Gpx():
             Number of points in the GPX.
         """
         nb_pts = 0
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 nb_pts += len(track_segment.trkpt)
         return nb_pts
@@ -218,7 +223,7 @@ class Gpx():
         WayPoint
             First point.
         """
-        return self.tracks[0].trkseg[0].trkpt[0]
+        return self.trk[0].trkseg[0].trkpt[0]
 
     def last_point(self) -> WayPoint:
         """
@@ -229,7 +234,7 @@ class Gpx():
         WayPoint
             Last point.
         """
-        return self.tracks[-1].trkseg[-1].trkpt[-1]
+        return self.trk[-1].trkseg[-1].trkpt[-1]
     
     def bounds(self) -> Tuple[float, float, float, float]:
         """
@@ -240,12 +245,12 @@ class Gpx():
         Tuple[float, float, float, float]
             Min latitude, min longitude, max latitude, max longitude.
         """
-        min_lat = self.tracks[0].trkseg[0].trkpt[0].lat
-        min_lon = self.tracks[0].trkseg[0].trkpt[0].lon
+        min_lat = self.trk[0].trkseg[0].trkpt[0].lat
+        min_lon = self.trk[0].trkseg[0].trkpt[0].lon
         max_lat = min_lat
         max_lon = min_lon
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.lat < min_lat:
@@ -282,12 +287,12 @@ class Gpx():
         Tuple[WayPoint, WayPoint, WayPoint, WayPoint]
             Min latitude point, min longitude point, max latitude point, max longitude point
         """
-        min_lat_point = self.tracks[0].trkseg[0].trkpt[0]
-        min_lon_point = self.tracks[0].trkseg[0].trkpt[0]
-        max_lat_point = self.tracks[0].trkseg[0].trkpt[0]
-        max_lon_point = self.tracks[0].trkseg[0].trkpt[0]
+        min_lat_point = self.trk[0].trkseg[0].trkpt[0]
+        min_lon_point = self.trk[0].trkseg[0].trkpt[0]
+        max_lat_point = self.trk[0].trkseg[0].trkpt[0]
+        max_lon_point = self.trk[0].trkseg[0].trkpt[0]
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.lat < min_lat_point.lat:
@@ -306,7 +311,7 @@ class Gpx():
 
     def distance(self) -> float:
         """
-        Compute the total distance (meters) of the tracks contained in the Gpx element.
+        Compute the total distance (meters) of tracks contained in the Gpx element.
 
         Returns
         -------
@@ -314,8 +319,8 @@ class Gpx():
             Distance (meters).
         """
         dst = 0.0
-        previous_point = self.tracks[0].trkseg[0].trkpt[0]
-        for track in self.tracks:
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     dst += haversine_distance(previous_point, track_point)
@@ -327,9 +332,9 @@ class Gpx():
         Compute distance from start at each point.
         """
         dst = 0.0
-        previous_point = self.tracks[0].trkseg[0].trkpt[0]
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
         previous_point.distance_from_start = dst
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     dst += haversine_distance(previous_point, track_point)
@@ -338,7 +343,7 @@ class Gpx():
     
     def ascent(self) -> float:
         """
-        Compute the total ascent (meters) of the tracks contained in the Gpx element.
+        Compute the total ascent (meters) of tracks contained in the Gpx element.
 
         Returns
         -------
@@ -346,8 +351,8 @@ class Gpx():
             Ascent (meters).
         """
         ascent = 0
-        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
-        for track in self.tracks:
+        previous_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ele > previous_elevation:
@@ -357,7 +362,7 @@ class Gpx():
     
     def descent(self) -> float:
         """
-        Compute the total descent (meters) of the tracks contained in the Gpx element.
+        Compute the total descent (meters) of tracks contained in the Gpx element.
 
         Returns
         -------
@@ -365,8 +370,8 @@ class Gpx():
             Descent (meters).
         """
         descent = 0
-        previous_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
-        for track in self.tracks:
+        previous_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ele < previous_elevation:
@@ -380,7 +385,7 @@ class Gpx():
         """
         previous_point = self.first_point()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     distance = haversine_distance(previous_point, track_point)
@@ -404,7 +409,7 @@ class Gpx():
         min_ascent_rate = 100.0
         self.compute_points_ascent_rate()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ascent_rate < min_ascent_rate:
@@ -424,7 +429,7 @@ class Gpx():
         max_ascent_rate = -1.0
         self.compute_points_ascent_rate() # Check if it needs to be done
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ascent_rate > max_ascent_rate:
@@ -434,15 +439,15 @@ class Gpx():
     
     def min_elevation(self) -> float:
         """
-        Compute minimum elevation (meters) in the tracks contained in the Gpx element.
+        Compute minimum elevation (meters) in tracks contained in the Gpx element.
 
         Returns
         -------
         float
             Minimum elevation (meters).
         """
-        min_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
-        for track in self.tracks:
+        min_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ele < min_elevation:
@@ -451,15 +456,15 @@ class Gpx():
     
     def max_elevation(self) -> float:
         """
-        Compute maximum elevation (meters) in the tracks contained in the Gpx element.
+        Compute maximum elevation (meters) in tracks contained in the Gpx element.
 
         Returns
         -------
         float
             Maximum elevation (meters).
         """
-        max_elevation = self.tracks[0].trkseg[0].trkpt[0].ele
-        for track in self.tracks:
+        max_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ele > max_elevation:
@@ -479,7 +484,7 @@ class Gpx():
         datetime
             UTC start time.
         """
-        return self.tracks[0].trkseg[0].trkpt[0].time
+        return self.trk[0].trkseg[0].trkpt[0].time
     
     def utc_stop_time(self):
         """
@@ -490,7 +495,7 @@ class Gpx():
         datetime
             UTC stop time.
         """
-        return self.tracks[-1].trkseg[-1].trkpt[-1].time
+        return self.trk[-1].trkseg[-1].trkpt[-1].time
     
     def start_time(self) -> datetime:
         """
@@ -503,7 +508,7 @@ class Gpx():
         """
         start_time = None
         try:
-            start_time = self.tracks[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+            start_time = self.trk[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
         except:
             logging.error("Unable to find activity start time")
         return start_time
@@ -519,7 +524,7 @@ class Gpx():
         """
         stop_time = None
         try:
-            stop_time = self.tracks[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+            stop_time = self.trk[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
         except:
             logging.error("Unable to find activity stop time")
         return stop_time
@@ -557,9 +562,9 @@ class Gpx():
         """
         stopped_time = self.start_time() - self.start_time() # Better way to do it?
 
-        previous_point = self.tracks[0].trkseg[0].trkpt[0]
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
 
-        for track in self.tracks:
+        for track in self.trk:
             for segment in track.trkseg:
                 for point in segment.trkpt:
                     if haversine_distance(previous_point, point) < tolerance:
@@ -625,7 +630,7 @@ class Gpx():
         """
         previous_point = self.first_point()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     distance = haversine_distance(previous_point, track_point) / 1000 # Convert to kilometers
@@ -648,7 +653,7 @@ class Gpx():
         min_speed = 1000.0
         self.compute_points_speed()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.speed < min_speed:
@@ -668,7 +673,7 @@ class Gpx():
         max_speed = -1.0
         self.compute_points_speed()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.speed > max_speed:
@@ -704,7 +709,7 @@ class Gpx():
         """
         self.compute_points_speed()
 
-        for track in self.tracks:
+        for track in self.trk:
             for segment in track.trkseg:
                 for point in segment.trkpt:
                     try:
@@ -724,7 +729,7 @@ class Gpx():
         min_pace = 1000.0
         self.compute_points_pace()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.pace < min_pace:
@@ -744,7 +749,7 @@ class Gpx():
         max_pace = -1.0
         self.compute_points_pace()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.pace > max_pace:
@@ -758,7 +763,7 @@ class Gpx():
         """
         previous_point = self.first_point()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     ascent = (track_point.ele - previous_point.ele) / 1000 # Convert to kilometers
@@ -781,7 +786,7 @@ class Gpx():
         min_ascent_speed = 1000.0
         self.compute_points_ascent_speed()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ascent_speed < min_ascent_speed:
@@ -801,7 +806,7 @@ class Gpx():
         max_ascent_speed = -1.0
         self.compute_points_ascent_speed()
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if track_point.ascent_speed > max_ascent_speed:
@@ -810,12 +815,40 @@ class Gpx():
         return max_ascent_speed
     
 ###############################################################################
+#### Data Removal #############################################################
+###############################################################################
+
+    def remove_metadata(self):
+        """
+        Remove metadata.
+        """
+        self.metadata = None
+
+    def remove_elevation(self):
+        """
+        Remove elevation data.
+        """
+        for track in self.trk:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    track_point.ele = None
+
+    def remove_time(self):
+        """
+        Remove time data.
+        """
+        for track in self.trk:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    track_point.time = None
+    
+###############################################################################
 #### Error Correction #########################################################
 ###############################################################################
     
     def remove_points(self, remove_factor: int = 2):
         count = 0
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     if count % remove_factor == 0:
@@ -839,7 +872,7 @@ class Gpx():
         previous_point = None
         gps_errors = []
 
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
 
                 new_trkpt = []
@@ -873,7 +906,7 @@ class Gpx():
         point_1 = None
         point_2 = None
         
-        for track in self.tracks:
+        for track in self.trk:
             for segment in track.trkseg:
 
                 new_trkpt = []
@@ -902,14 +935,14 @@ class Gpx():
 
     def simplify(self, epsilon):
         """
-        Simplify GPX tracks using Ramer-Douglas-Peucker algorithm.
+        Simplify GPX trk using Ramer-Douglas-Peucker algorithm.
 
         Parameters
         ----------
         epsilon : _type_
             Tolerance.
         """
-        for track in self.tracks:
+        for track in self.trk:
             for segment in track.trkseg:
                 segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)
 
@@ -919,38 +952,37 @@ class Gpx():
 
     def to_dataframe(
             self,
-            elevation: bool = True,
-            time: bool = False,
-            speed: bool = False,
-            pace: bool = False,
-            ascent_rate: bool = False,
-            ascent_speed: bool = False,
-            distance_from_start: bool = False) -> pd.DataFrame:
+            values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
+        Missing values are filled with default values (0 for elevation, empty string for time).
 
         Parameters
         ----------
-        elevation : bool, optional
-            Toggle elevation, by default True
-        time : bool, optional
-            Toggle time, by default False
-        speed : bool, optional
-            Toggle speed, by default False
-        pace : bool, optional
-            Toggle pace, by default False
-        ascent_rate : bool, optional
-            Toggle ascent rate, by default False
-        ascent_speed : bool, optional
-            Toggle ascent speed, by default False
-        distance_from_start : bool, optional
-            Toggle distance from start, by default False
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
 
         Returns
         -------
         pd.DataFrame
             Dataframe containing data from GPX.
         """
+        # Retrieve parameters
+        if values is None:
+            values =  ["lat", "lon"]
+        lat = "lat" in values
+        lon = "lon" in values
+        ele = "ele" in values
+        time = "time" in values
+        speed = "speed" in values
+        pace = "pace" in values
+        ascent_rate = "ascent_rate" in values
+        ascent_speed = "ascent_speed" in values
+        distance_from_start = "distance_from_start" in values
+
+        # Compute required values
         test_point = self.first_point()
         if speed and test_point.speed is None:
             self.compute_points_speed()
@@ -963,15 +995,17 @@ class Gpx():
         if distance_from_start and test_point.distance_from_start is None:
             self.compute_points_distance_from_start()
 
+        # Create dataframe
         route_info = []
-        for track in self.tracks:
+        for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    track_point_dict = {
-                        "lat": track_point.lat,
-                        "lon": track_point.lon
-                    }
-                    if elevation:
+                    track_point_dict = {}
+                    if lat:
+                        track_point_dict["lat"] = track_point.lat
+                    if lon:
+                        track_point_dict["lon"] = track_point.lon
+                    if ele:
                         if track_point.ele is not None:
                             track_point_dict["ele"] = track_point.ele
                         else:
@@ -998,8 +1032,8 @@ class Gpx():
     def to_csv(
             self,
             path: str = None,
+            values: List[str] = None,
             sep: str = ",",
-            columns: List[str] = None,
             header: bool = True,
             index: bool = False) -> Union[str, None]:
         """
@@ -1009,10 +1043,12 @@ class Gpx():
         ----------
         path : str, optional
             Path to the .csv file, by default None
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
         sep : str, optional
             Separator, by default ","
-        columns : List[str], optional
-            List of columns to write, by default None
         header : bool, optional
             Toggle header, by default True
         index : bool, optional
@@ -1023,8 +1059,8 @@ class Gpx():
         str
             CSV like string if path is set to None.
         """
-        if columns is None:
-            columns =  ["lat", "lon"]
+        if values is None:
+            values =  ["lat", "lon"]
 
         elevation = False
         time = False
@@ -1033,17 +1069,17 @@ class Gpx():
         ascent_rate = False
         ascent_speed = False
         
-        if "ele" in columns:
+        if "ele" in values:
             elevation = True
         if "time":
             time = True
-        if "speed" in columns:
+        if "speed" in values:
             speed = True
-        if "pace" in columns:
+        if "pace" in values:
             pace = True
-        if "ascent_rate" in columns:
+        if "ascent_rate" in values:
             ascent_rate = True
-        if "ascent_speed" in columns:
+        if "ascent_speed" in values:
             ascent_speed = True
 
-        return self.to_dataframe(elevation, time, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=columns, header=header, index=index)
+        return self.to_dataframe(elevation, time, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=values, header=header, index=index)

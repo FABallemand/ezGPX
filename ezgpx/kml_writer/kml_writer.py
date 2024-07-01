@@ -207,7 +207,10 @@ class KMLWriter(Writer):
         """
         linestring_ = ET.SubElement(element, "LineString")
         linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
-        coordinates = self.gpx.to_csv(path=None, columns=["lon", "lat", "ele"], header=False).replace("\n", " ")
+        if self.ele:
+            coordinates = self.gpx.to_csv(path=None, columns=["lon", "lat", "ele"], header=False).replace("\n", " ")
+        else:
+            coordinates = self.gpx.to_csv(path=None, columns=["lon", "lat"], header=False).replace("\n", " ")
         linestring_, _ = self.add_subelement(linestring_, "coordinates", coordinates)
         return element
     

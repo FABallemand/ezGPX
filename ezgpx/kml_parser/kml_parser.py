@@ -150,7 +150,7 @@ class KMLParser(XMLParser):
                     trkseg.append(TrackSegment(trkpt=trkpt))
 
                 tracks = [Track(name=placemark_data["name"], trkseg=trkseg)]
-                self.gpx.tracks = tracks
+                self.gpx.trk = tracks
             else:
                 logging.error("Oops, not yet implemented...")
 

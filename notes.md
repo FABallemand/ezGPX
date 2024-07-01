@@ -60,4 +60,6 @@
 - Add units to docstrings
 - Add meridian plot with basemap
 - Add support for all emojis in plots
-- HAndle errors properly
+- Handle errors properly and remove logging
+- Fix doc
+- Normalize class names and attributes with GPX names

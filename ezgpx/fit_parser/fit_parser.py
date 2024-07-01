@@ -105,7 +105,7 @@ class FitParser(Parser):
             trkpt.append(WayPoint("trkpt", lat, lon, alt, time))
         trkseg = TrackSegment(trkpt=trkpt)
         trk = Track(trkseg=[trkseg])
-        self.gpx.tracks = [trk]
+        self.gpx.trk = [trk]
 
     def add_properties(self):
         self.gpx.creator = "ezGPX"

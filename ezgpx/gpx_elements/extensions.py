@@ -3,6 +3,7 @@ class Extensions():
     """
     extensionsType element in GPX file.
     """
+    fields = [] # TODO
 
     def __init__(
             self,

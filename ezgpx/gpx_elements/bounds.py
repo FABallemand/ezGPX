@@ -3,6 +3,8 @@ class Bounds():
     """
     boundsType element in GPX file.
     """
+    fields = ["minlat", "minlon", "maxlat", "maxlon"]
+    mandatory_fields = []
 
     def __init__(
             self,

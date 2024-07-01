@@ -7,6 +7,8 @@ class TrackSegment():
     """
     trksegType in GPX file.
     """
+    fields = ["trkpt", "extensions"]
+    mandatory_fields = []
     
     def __init__(
             self,

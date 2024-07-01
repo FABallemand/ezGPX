@@ -8,6 +8,10 @@ class WayPoint():
     """
     wptType element in GPX file.
     """
+    fields = ["lat", "lon", "ele", "time", "mag_var", "geo_id_height", "name",
+              "cmt", "desc", "src", "link", "sym", "type", "fix", "sat",
+              "hdop", "vdop", "pdop", "age_of_gps_data", "dgpsid", "extensions"]
+    mandatory_fields = ["lat", "lon"]
 
     def __init__(
             self,

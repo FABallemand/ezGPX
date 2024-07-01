@@ -42,7 +42,7 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)
     if d_max > epsilon:
         # Recursive call
         result_1 = ramer_douglas_peucker(points[0:i_max+1], epsilon)
-        result_2 = ramer_douglas_peucker(points[i_max: len(points)], epsilon)
+        result_2 = ramer_douglas_peucker(points[i_max:len(points)], epsilon)
 
         # Build result list
         result = result_1 + result_2[1:]

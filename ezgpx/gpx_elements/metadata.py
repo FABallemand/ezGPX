@@ -7,6 +7,9 @@ class Metadata():
     """
     metadataType element in GPX file.
     """
+    fields = ["name", "desc", "author", "copyright", "link",
+              "time", "keywords", "bounds", "extensions"]
+    mandatory_fields = []
 
     def __init__(
             self,

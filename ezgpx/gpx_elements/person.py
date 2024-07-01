@@ -5,6 +5,8 @@ class Person():
     """
     personType element in GPX file.
     """
+    fields = ["name", "email", "link"]
+    mandatory_fields = []
 
     def __init__(
             self,

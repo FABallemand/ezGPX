@@ -3,6 +3,8 @@ class Link():
     """
     linkType element in GPX file.
     """
+    fields = ["href", "text", "type"]
+    mandatory_fields = ["href"]
 
     def __init__(
             self,

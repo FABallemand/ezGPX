@@ -8,6 +8,9 @@ class Track():
     """
     trkType element in GPX file.
     """
+    fields = ["name", "cmt", "desc", "link", "number", "type",
+              "extensions", "trkseg"]
+    mandatory_fields = []
 
     def __init__(
             self,

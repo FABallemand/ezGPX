@@ -40,11 +40,17 @@ class GPXParser(XMLParser):
     def find_precisions(self):
         """
         Find decimal precision of any type of value in a GPX file (latitude, elevation...).
+        Also find if the GPX file contains elevation data.
         """
         # Point
         track = self.xml_root.findall("topo:trk", self.name_space)[0]
         segment = track.findall("topo:trkseg", self.name_space)[0]
         point = segment.findall("topo:trkpt", self.name_space)[0]
+
+        if self.find_text(point, "topo:ele") is not None:
+            self.ele_data = True
+        else:
+            self.ele_data = False
 
         self.precisions["lat_lon"] = self.find_precision(point.get("lat"))
         self.precisions["elevation"] = self.find_precision(self.find_text(point, "topo:ele"))
@@ -84,10 +90,12 @@ class GPXParser(XMLParser):
 
     def find_time_format(self):
         """
-        Find the time format used in GPX file. 
+        Find the time format used in GPX file.
+        Also find if the GPX file contains time data.
         """
         time = self.find_time_element()
         if time is None:
+            self.time_data = False
             logging.warning("No time element in GPX file.")
             return
 
@@ -452,7 +460,7 @@ class GPXParser(XMLParser):
         """
         tracks = self.xml_root.findall("topo:trk", self.name_space)
         for track in tracks:
-            self.gpx.tracks.append(self.parse_track(track))
+            self.gpx.trk.append(self.parse_track(track))
 
     def parse_root_extensions(self):
         """

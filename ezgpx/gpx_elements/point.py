@@ -4,6 +4,8 @@ class Point():
     """
     ptType element in GPX file.
     """
+    fields = ["lat", "lon", "ele", "time"]
+    mandatory_fields = ["lat", "lon"]
 
     def __init__(
             self,
