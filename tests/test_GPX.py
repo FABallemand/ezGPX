@@ -238,31 +238,31 @@ class TestGPX():
     def test_to_dataframe(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        df = gpx.to_dataframe(elevation=True, time=True)
-        reference_df = pd.read_csv(os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.csv"))
+        df = gpx.to_dataframe(values=["lat", "lon", "ele", "time"])
+        reference_df = pd.read_csv(os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"))
         # Test
         assert(reference_df.equals(df))
 
     def test_to_gpx(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        gpx.to_gpx("tmp/strava_run_1.gpx", xml_schema=False)
+        gpx.to_gpx("tmp/strava_run_1_test.gpx", xml_schema=False)
         # Test
-        assert(filecmp.cmp("tmp/strava_run_1.gpx", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.gpx"), False))
+        assert(filecmp.cmp("tmp/strava_run_1_test.gpx", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.gpx"), False))
         
     def test_to_kml(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
         gpx.to_kml("tmp/strava_run_1_test.kml", styles=None, xml_schema=False)
         # Test
-        assert(filecmp.cmp("tmp/strava_run_1_test.kml", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.kml"), False))
+        assert(filecmp.cmp("tmp/strava_run_1_test.kml", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.kml"), False))
 
     def test_to_csv(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        gpx.to_csv("tmp/strava_run_1.csv", columns=["lat", "lon", "ele", "time"])
+        gpx.to_csv("tmp/strava_run_1_test.csv", values=["lat", "lon", "ele", "time"])
         # Test
-        assert(filecmp.cmp("tmp/strava_run_1.csv", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1_test.csv"), False))
+        assert(filecmp.cmp("tmp/strava_run_1_test.csv", os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"), False))
 
     #==== Plots ==============================================================#
 
@@ -349,7 +349,7 @@ class TestGPX():
 
     #==== Destroy ============================================================#
 
-    def test_destroy(self, remove_tmp: bool = True):
+    def test_destroy(self, remove_tmp: bool = False):
         # Remove temporary folder
         if remove_tmp:
             rmtree("tmp", True)

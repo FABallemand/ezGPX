@@ -1,12 +1,10 @@
 import os
-from typing import Optional, Union, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
-import xmlschema
-from datetime import datetime
 
 from ..writer import Writer
-from ..gpx_elements import Gpx
+from ...gpx_elements import Gpx
 
 DEFAULT_NORMAL_STYLE = {
     "color": "ff0000ff",
@@ -208,9 +206,9 @@ class KMLWriter(Writer):
         linestring_ = ET.SubElement(element, "LineString")
         linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
         if self.ele:
-            coordinates = self.gpx.to_csv(path=None, columns=["lon", "lat", "ele"], header=False).replace("\n", " ")
+            coordinates = self.gpx.to_csv(path=None, values=["lon", "lat", "ele"], header=False).replace("\n", " ")
         else:
-            coordinates = self.gpx.to_csv(path=None, columns=["lon", "lat"], header=False).replace("\n", " ")
+            coordinates = self.gpx.to_csv(path=None, values=["lon", "lat"], header=False).replace("\n", " ")
         linestring_, _ = self.add_subelement(linestring_, "coordinates", coordinates)
         return element
     

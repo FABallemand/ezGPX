@@ -1,13 +1,12 @@
 import os
 import errno
 import warnings
-from typing import Optional, Union, List, Tuple, Dict
+from typing import List, Dict
 import logging
 import xml.etree.ElementTree as ET
-from datetime import datetime
 
 from ..writer import Writer
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
+from ...gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
 from .gpx_writer_method_behavior_creator import GPXWriterMethodBehaviorCreator
 
 class GPXWriter(Writer):

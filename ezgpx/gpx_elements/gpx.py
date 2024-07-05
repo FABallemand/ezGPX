@@ -1,4 +1,3 @@
-import os
 try:
     from importlib.resources import files
 except ImportError:
@@ -1060,26 +1059,6 @@ class Gpx():
             CSV like string if path is set to None.
         """
         if values is None:
-            values =  ["lat", "lon"]
+            values = ["lat", "lon"]
 
-        elevation = False
-        time = False
-        speed = False
-        pace = False
-        ascent_rate = False
-        ascent_speed = False
-        
-        if "ele" in values:
-            elevation = True
-        if "time":
-            time = True
-        if "speed" in values:
-            speed = True
-        if "pace" in values:
-            pace = True
-        if "ascent_rate" in values:
-            ascent_rate = True
-        if "ascent_speed" in values:
-            ascent_speed = True
-
-        return self.to_dataframe(elevation, time, speed, pace, ascent_rate, ascent_speed).to_csv(path, sep=sep, columns=values, header=header, index=index)
+        return self.to_dataframe(values).to_csv(path, sep=sep, header=header, index=index)

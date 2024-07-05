@@ -11,12 +11,9 @@ from math import degrees, isclose
 import pandas as pd
 import numpy as np
 
-from fitparse import FitFile
-
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from mpl_toolkits.basemap import Basemap
 import matplotlib.animation as animation
 
@@ -29,11 +26,11 @@ from folium.features import DivIcon
 from papermap import PaperMap
 
 from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
-from ..gpx_parser import GPXParser
-from ..kml_parser import KMLParser
-from ..fit_parser import FitParser
-from ..gpx_writer import GPXWriter
-from ..kml_writer import KMLWriter
+from ..parser.gpx_parser import GPXParser
+from ..parser.kml_parser import KMLParser
+from ..parser.fit_parser import FitParser
+from ..writer.gpx_writer import GPXWriter
+from ..writer.kml_writer import KMLWriter
 from ..utils import EARTH_RADIUS
 
 GPX = NewType("GPX", object) # GPX forward declaration for type hint
@@ -727,7 +724,7 @@ class GPX():
         str
             CSV like string if path is set to None.
         """
-        return self.gpx.to_csv(path, sep, values, header, index)
+        return self.gpx.to_csv(path, values, sep, header, index)
     
     def to_gpx(
             self,

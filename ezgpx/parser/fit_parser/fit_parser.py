@@ -1,14 +1,12 @@
 import os
-from typing import Optional, Union
+from typing import Optional
 import logging
-import pandas as pd
 from datetime import datetime
-from math import pi
 
 from fitparse import FitFile
 
 from ..parser import Parser, DEFAULT_PRECISION
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
+from ...gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
 class FitParser(Parser):
     """

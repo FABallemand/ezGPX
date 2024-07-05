@@ -5,7 +5,7 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 
 from ..xml_parser import XMLParser
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
+from ...gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
 
 class GPXParser(XMLParser):
     """
