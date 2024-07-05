@@ -1,37 +1,33 @@
 # Configuration file for the Sphinx documentation builder.
 #
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
+# For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-
-import os
-import sys
-sys.path.insert(0, os.path.abspath('..'))
-
-
 # -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'ezGPX'
-copyright = '2023, Fabien ALLEMAND'
+copyright = '2024, Fabien ALLEMAND'
 author = 'Fabien ALLEMAND'
-
+release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
+# extensions = [
+#     # 'recommonmark',
+#     'sphinx.ext.autodoc',
+#     'sphinx.ext.viewcode',
+#     'sphinx_rtd_theme'
+# ]
+
 extensions = [
-    # 'recommonmark',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinx_rtd_theme'
+   'sphinx.ext.duration',
+   'sphinx.ext.doctest',
+   'sphinx.ext.autodoc',
+   'sphinx.ext.viewcode',
+   'sphinx.ext.autosummary',
+   'sphinx_rtd_theme'
 ]
 
 autodoc_mock_imports = [
@@ -62,6 +58,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
 # -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.

@@ -20,14 +20,6 @@ ezgpx.utils.distance module
    :undoc-members:
    :show-inheritance:
 
-ezgpx.utils.projections module
-------------------------------
-
-.. automodule:: ezgpx.utils.projections
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

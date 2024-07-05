@@ -1,7 +1,8 @@
-ezgpx
+ezGPX
 =====
 
 .. toctree::
    :maxdepth: 4
 
-   ezgpx.rst
+   ezgpx
+   tests
