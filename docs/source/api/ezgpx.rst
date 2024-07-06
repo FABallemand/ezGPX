@@ -7,12 +7,12 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   ezgpx.gpx
-   ezgpx.gpx_elements
-   ezgpx.parser
-   ezgpx.schemas
-   ezgpx.utils
-   ezgpx.writer
+   ezgpx.gpx.rst
+   ezgpx.gpx_elements.rst
+   ezgpx.parser.rst
+   ezgpx.schemas.rst
+   ezgpx.utils.rst
+   ezgpx.writer.rst
 
 Module contents
 ---------------
