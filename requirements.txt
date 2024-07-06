@@ -1,3 +1,4 @@
+lxml
 xmlschema
 importlib_resources
 pandas
