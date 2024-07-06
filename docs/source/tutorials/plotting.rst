@@ -35,7 +35,7 @@ This method relies on the well known Matplotlib Python library to create simple 
                         watermark=True,
                         file_path="img.png")
 
-.. image:: ../../img/matplotlib_plot_1.jpg
+.. image:: ../../../img/matplotlib_plot_1.jpg
   :width: 500
   :alt: Matplotlib plot
 
@@ -62,7 +62,7 @@ This method uses the Google map engine to display the content of the GPX file in
                 file_path="map.html",
                 open=False)
 
-.. image:: ../../img/gmap_plot_1.png
+.. image:: ../../../img/gmap_plot_1.png
   :width: 500
   :alt: gmplot plot
 
@@ -92,7 +92,7 @@ The interactive HTML page resulting from this method allows you to visualize the
                     file_path="map.html",
                     open=True)
 
-.. image:: ../../img/folium_plot_1.png
+.. image:: ../../../img/folium_plot_1.png
   :width: 500
   :alt: Folium plot
 
@@ -118,7 +118,7 @@ PaperMap
                       grid_size = 1000,
                       file_path = "map.pdf")
 
-.. image:: ../../img/papermap_plot_1.png
+.. image:: ../../../img/papermap_plot_1.png
   :width: 500
   :alt: PaperMap plot
 
@@ -156,7 +156,7 @@ This method creates animations of the activity contained in a GPX file.
                              watermark=True,
                              file_path="video_1.mp4")
 
-.. image:: ../../img/matplotlib_animation_1.gif
+.. image:: ../../../img/matplotlib_animation_1.gif
   :width: 500
   :alt: Matplotlib animation
 
@@ -218,6 +218,6 @@ This is the most advanced plotting method built into ezGPX. It allows to plot th
                     watermark=False,
                     file_path="img.png")
 
-.. image:: ../../img/expert_plot_1.jpg
+.. image:: ../../../img/expert_plot_1.jpg
   :width: 500
   :alt: Matplotlib "expert" plot

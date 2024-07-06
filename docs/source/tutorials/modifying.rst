@@ -88,6 +88,6 @@ In the following example, one manage to go from 3263 track points to only 1082. 
     # Save GPX
     gpx.to_gpx("file_simplified.gpx")
 
-.. image:: ../../img/simplify_1.png
+.. image:: ../../../img/simplify_1.png
   :width: 500
   :alt: Track plot followed by the simplified track plot
