@@ -349,7 +349,7 @@ class TestGPX():
 
     #==== Destroy ============================================================#
 
-    def test_destroy(self, remove_tmp: bool = False):
+    def test_destroy(self, remove_tmp: bool = True):
         # Remove temporary folder
         if remove_tmp:
             rmtree("tmp", True)

@@ -1061,4 +1061,5 @@ class Gpx():
         if values is None:
             values = ["lat", "lon"]
 
-        return self.to_dataframe(values).to_csv(path, sep=sep, header=header, index=index)
+        # Argument columns is required for KML writer (keep values order)
+        return self.to_dataframe(values).to_csv(path, sep=sep, columns=values, header=header, index=index)
