@@ -57,8 +57,9 @@ class GPXWriterMethodBehaviorCreator():
         code = ('def _add_extensions(writer, element, extensions):'
                 '\n\tif extensions is not None:'
                 '\n\t\textensions_ = ET.SubElement(element, extensions.tag)')
-        for field in extensions_fields:
-            code += f'\n\t\tlink_, _ = writer.add_subelement(extensions_, "{field}", extensions.{field})'
+        if extensions_fields is not None:
+            for field in extensions_fields:
+                code += f'\n\t\textensions_, _ = writer.add_subelement(extensions_, "{field}", extensions.values["{field}"])'
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_extensions>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_extensions")
@@ -101,7 +102,7 @@ class GPXWriterMethodBehaviorCreator():
         if "bounds" in metadata_fields:
             code += '\n\t\tmetadata_ = writer.add_bounds(metadata_, metadata.bounds)'
         if "extensions" in metadata_fields:
-            code += '\n\t\tmetadata_ = writer.add_extensions(metadata_, metadata.extensions)'
+            code += '\n\t\tmetadata_ = writer.add_metadata_extensions(metadata_, metadata.extensions)'
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_metadata>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_metadata")
@@ -170,7 +171,7 @@ class GPXWriterMethodBehaviorCreator():
         if "type" in route_fields:
             code += '\n\t\troute_, _ = writer.add_subelement(route_, "type", route.type)'
         if "extensions" in route_fields:
-            code += '\n\t\troute_ = writer.add_extensions(route_, route.extensions)'
+            code += '\n\t\troute_ = writer.add_rte_extensions(route_, route.extensions)'
         if "rtept" in route_fields:
             code += ('\n\t\tfor way_point in route.rtept:'
                      '\n\t\t\troute_ = writer.add_way_point(route_, way_point)')
@@ -184,7 +185,7 @@ class GPXWriterMethodBehaviorCreator():
                 '\n\tif track_segment is not None:'
                 '\n\t\ttrack_segment_ = ET.SubElement(element, track_segment.tag)')
         if "extensions" in track_segment_fields:
-            code += '\n\t\ttrack_segment_ = writer.add_extensions(track_segment_, track_segment.extensions)'
+            code += '\n\t\ttrack_segment_ = writer.add_trkseg_extensions(track_segment_, track_segment.extensions)'
         if "trkpt" in track_segment_fields:
             code += ('\n\t\tfor track_point in track_segment.trkpt:'
                      '\n\t\t\ttrack_segment_ = writer.add_way_point(track_segment_, track_point)')
@@ -212,7 +213,7 @@ class GPXWriterMethodBehaviorCreator():
         if "type" in track_fields:
             code += '\n\t\ttrack_, _ = writer.add_subelement(track_, "type", track.type)'
         if "extensions" in track_fields:
-            code += '\n\t\ttrack_ = writer.add_extensions(track_, track.extensions)'
+            code += '\n\t\ttrack_ = writer.add_trk_extensions(track_, track.extensions)'
         if "trkseg" in track_fields:
             code += ('\n\t\tfor track_seg in track.trkseg:'
                      '\n\t\t\ttrack_ = writer.add_track_segment(track_, track_seg)')
@@ -266,7 +267,7 @@ class GPXWriterMethodBehaviorCreator():
         if "dgpsid" in way_point_fields:
             code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)'
         if "extensions" in way_point_fields:
-            code += '\n\t\ttrack_ = writer.add_extensions(way_point_, way_point.extensions)'
+            code += '\n\t\ttrack_ = writer.add_wpt_extensions(way_point_, way_point.extensions)'
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_way_point>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_way_point")

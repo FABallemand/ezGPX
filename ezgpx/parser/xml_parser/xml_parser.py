@@ -13,25 +13,25 @@ class XMLParser(Parser):
     def __init__(
             self,
             file_path: Optional[str] = None,
-            name_space: Optional[dict] = None,
             xml_schema: bool = True,
             xml_extensions_schemas: bool = False) -> None:
         """
         Initialize XML Parser instance.
 
-        Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
-            name_space (dict, optional): File XML name spaces.
-            check_xml_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
-            xml_extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
+        Parameters
+        ----------
+        file_path : Optional[str], optional
+            Path to the file to parse, by default None
+        xml_schema : bool, optional
+            Toggle  schema verification during parsing, by default True
+        xml_extensions_schemas : bool, optional
+            Toggle extensions schema verificaton durign parsing.
+            Requires internet connection and is not guaranted to work,
+            by default False
         """
         super().__init__(file_path)
         
-        self.name_space: dict = None
-        if name_space is None:
-            self.name_space = {}
-        else:
-            self.name_space = name_space
+        self.name_space: dict = dict([node for _, node in ET.iterparse(file_path, events=["start-ns"])])
 
         self.xml_schema: bool = xml_schema
         self.xml_extensions_schemas: bool = xml_extensions_schemas

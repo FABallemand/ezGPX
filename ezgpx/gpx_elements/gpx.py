@@ -840,6 +840,34 @@ class Gpx():
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
                     track_point.time = None
+
+    def remove_extensions(self):
+        """
+        Remove extensions data.
+        """
+        # Remove extensions from gpx
+        self.extensions = None
+
+        # Remove extensions from metadata
+        self.metadata.extensions = None
+
+        # Remove extensions from waypoints
+        for pt in self.wpt:
+            pt.extensions = None
+
+        # Remove extensions from routes
+        for rt in self.rte:
+            rt.extensions = None
+
+        # Remove extensions from tracks
+        for track in self.trk:
+            track.extensions = None
+            # Remove extensions from track segments
+            for track_segment in track.trkseg:
+                track_segment.extensions = None
+                for track_point in track_segment.trkpt:
+                    # Remove extensions from track points
+                    track_point.extensions = None
     
 ###############################################################################
 #### Error Correction #########################################################

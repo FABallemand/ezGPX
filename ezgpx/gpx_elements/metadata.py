@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from .extensions import Extensions
 from .link import Link
 from .person import Person
 
@@ -22,7 +23,7 @@ class Metadata():
             time: datetime = None,
             keywords: str = None,
             bounds: str = None,
-            extensions: str = None) -> None:
+            extensions: Extensions = None) -> None:
         """
         Initialize Metadata instance.
 
@@ -46,7 +47,7 @@ class Metadata():
             Keywords, by default None
         bounds : str, optional
             Bounds, by default None
-        extensions : str, optional
+        extensions : Extensions, optional
             Extensions, by default None
         """
         self.tag: str = tag

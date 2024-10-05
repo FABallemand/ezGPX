@@ -89,6 +89,7 @@ class GPX():
                 self._time_data = self._gpx_parser.time_data
                 self.precisions = self._gpx_parser.precisions
                 self.time_format = self._gpx_parser.time_format
+                self.extensions_fields = self._gpx_parser.extensions_fields
 
             # KML
             elif file_path.endswith(".kml"):
@@ -124,10 +125,11 @@ class GPX():
                 raise ValueError(f"Unable to parse this type of file: {file_path}"
                                  "Consider renaming your file with the proper file extension.")
 
-            self._gpx_writer: GPXWriter = GPXWriter(
-                self.gpx, precisions=self.precisions, time_format=self.time_format)
-            self._kml_writer: KMLWriter = KMLWriter(
-                self.gpx, precisions=self.precisions, time_format=self.time_format)
+            self._gpx_writer: GPXWriter = GPXWriter(self.gpx,
+                precisions=self.precisions, time_format=self.time_format,
+                extensions_fields=self.extensions_fields)
+            self._kml_writer: KMLWriter = KMLWriter(self.gpx,
+                precisions=self.precisions, time_format=self.time_format)
             
         # Invalid file path
         else:
@@ -578,6 +580,12 @@ class GPX():
         Remove time data.
         """
         self.gpx.remove_time()
+
+    def remove_extensions(self):
+        """
+        Remove extensions data.
+        """
+        self.gpx.remove_extensions()
 
 ###############################################################################
 #### Error Correction #########################################################

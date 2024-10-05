@@ -19,7 +19,8 @@ class GPXWriter(Writer):
             gpx: Gpx = None,
             file_path: str = None,
             precisions: Dict = None,
-            time_format: str = None) -> None:
+            time_format: str = None,
+            extensions_fields: Dict = None) -> None:
         """
         Initialize GPXWriter instance.
 
@@ -40,7 +41,6 @@ class GPXWriter(Writer):
         self._add_bounds = placeholder_behavior
         self._add_copyright = placeholder_behavior
         self._add_email = placeholder_behavior
-        self._add_extensions = placeholder_behavior
         self._add_link = placeholder_behavior
         self._add_metadata = placeholder_behavior
         self._add_person = placeholder_behavior
@@ -51,9 +51,17 @@ class GPXWriter(Writer):
         self._add_track = placeholder_behavior
         self._add_way_point = placeholder_behavior
 
+        self._add_gpx_extensions = placeholder_behavior
+        self._add_metadata_extensions = placeholder_behavior
+        self._add_wpt_extensions = placeholder_behavior
+        self._add_rte_extensions = placeholder_behavior
+        self._add_trk_extensions = placeholder_behavior
+        self._add_trkseg_extensions = placeholder_behavior
+
         # Parameters
         self.precisions: Dict = precisions
-        self.time_format = time_format
+        self.time_format: str = time_format
+        self.extensions_fields: Dict = extensions_fields
 
         # Utility attributes
         self.gpx_string: str = ""
@@ -97,37 +105,6 @@ class GPXWriter(Writer):
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_email(self, element, email)
-
-    def add_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
-        """
-        Add Extensions instance element to GPX element.
-
-        Args:
-            element (xml.etree.ElementTree.Element): GPX element.
-            extensions (Extensions): Extensions instance to add.
-
-        Returns:
-            xml.etree.ElementTree.Element: GPX element.
-        """
-        # if extensions is not None:
-        #     extensions_ = ET.SubElement(element, extensions.tag)
-        #     extensions_, _ = self.add_subelement(extensions_, "display_color", extensions.display_color)
-        #     extensions_, _ = self.add_subelement_number(extensions_, "distance", extensions.distance, self.precisions["distance"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "total_elapsed_time", extensions.total_elapsed_time, self.precisions["duration"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "moving_time", extensions.moving_time, self.precisions["duration"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "stopped_time", extensions.stopped_time, self.precisions["duration"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "moving_speed", extensions.moving_speed, self.precisions["speed"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "max_speed", extensions.max_speed, self.precisions["speed"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "max_elevation", extensions.max_elevation, self.precisions["elevation"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "min_elevation", extensions.min_elevation, self.precisions["elevation"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "ascent", extensions.ascent, self.precisions["elevation"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "descent", extensions.descent, self.precisions["elevation"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "avg_ascent_rate", extensions.avg_ascent_rate, self.precisions["rate"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "max_ascent_rate", extensions.max_descent_rate, self.precisions["rate"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "avg_descent_rate", extensions.avg_descent_rate, self.precisions["rate"])
-        #     extensions_, _ = self.add_subelement_number(extensions_, "max_descent_rate", extensions.max_descent_rate, self.precisions["rate"])
-        # return element
-        return self._add_extensions(self, element, extensions)
     
     def add_link(self, element: ET.Element, link: Link) -> ET.Element:
         """
@@ -245,6 +222,84 @@ class GPXWriter(Writer):
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_way_point(self, element, way_point)
+    
+    def add_gpx_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to gpx GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_gpx_extensions(self, element, extensions)
+    
+    def add_metadata_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to metadata GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_metadata_extensions(self, element, extensions)
+    
+    def add_wpt_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to wpt GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_wpt_extensions(self, element, extensions)
+    
+    def add_rte_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to rte GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_rte_extensions(self, element, extensions)
+    
+    def add_trk_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to trk GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_trk_extensions(self, element, extensions)
+    
+    def add_trkseg_extensions(self, element: ET.Element, extensions: Extensions) -> ET.Element:
+        """
+        Add Extensions instance element to trkseg GPX element.
+
+        Args:
+            element (xml.etree.ElementTree.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+
+        Returns:
+            xml.etree.ElementTree.Element: GPX element.
+        """
+        return self._add_trkseg_extensions(self, element, extensions)
 
     def createSchemaLocationString(self, xsi_schema_location: list[str]):
         """
@@ -371,7 +426,7 @@ class GPXWriter(Writer):
                 self.add_root_tracks()
 
             # Extensions
-            if self.extensions_fields:
+            if self.extensions_fields.get("gpx"):
                 self.add_root_extensions()
 
             # Convert data to string
@@ -405,7 +460,7 @@ class GPXWriter(Writer):
             bounds_fields: List[str] = Bounds.fields,
             copyright_fields: List[str] = Copyright.fields,
             email_fields: List[str] = Email.fields,
-            extensions_fields: List[str] = Extensions.fields,
+            extensions_fields: dict = Extensions.fields,
             gpx_fields: List[str] = Gpx.fields,
             link_fields: List[str] = Link.fields,
             metadata_fields: List[str] = Metadata.fields,
@@ -448,7 +503,7 @@ class GPXWriter(Writer):
         self.bound_fields = bounds_fields
         self.copyright_fields = copyright_fields
         self.email_fields = email_fields
-        self.extensions_fields = extensions_fields
+        self.extensions_fields_ = extensions_fields # TODO later, ability to personalise fields
         self.gpx_fields = gpx_fields
         self.link_fields = link_fields
         self.metadata_fields = metadata_fields
@@ -478,12 +533,10 @@ class GPXWriter(Writer):
                           "Missing mandatory fields will automatically be added.")
             self.way_point_fields.append("lon")
 
-
         # Create methods behaviors
         self._add_bounds = self.behavior_creator.add_bounds_creator(self.bound_fields)
         self._add_copyright = self.behavior_creator.add_copyright_creator(self.copyright_fields)
         self._add_email = self.behavior_creator.add_email_creator(self.email_fields)
-        self._add_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields)
         self._add_link = self.behavior_creator.add_link_creator(self.link_fields)
         self._add_metadata = self.behavior_creator.add_metadata_creator(self.metadata_fields)
         self._add_person = self.behavior_creator.add_person_creator(self.person_fields)
@@ -493,6 +546,13 @@ class GPXWriter(Writer):
         self._add_track_segment = self.behavior_creator.add_track_segment_creator(self.track_segment_fields)
         self._add_track = self.behavior_creator.add_track_creator(self.track_fields)
         self._add_way_point = self.behavior_creator.add_way_point_creator(self.way_point_fields)
+
+        self._add_gpx_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("gpx"))
+        self._add_metadata_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("metadata"))
+        self._add_wpt_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("wpt"))
+        self._add_rte_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("rte"))
+        self._add_trk_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("trk"))
+        self._add_trkseg_extensions = self.behavior_creator.add_extensions_creator(self.extensions_fields.get("trkseg"))
 
         # Write .gpx file
         self.gpx_to_string()
