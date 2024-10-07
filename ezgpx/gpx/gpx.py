@@ -65,8 +65,8 @@ class GPX():
         self.gpx: Gpx = None
         self._ele_data: bool = False
         self._time_data: bool = False
-        self.precisions: Dict = None
-        self.time_format: str = None
+        self._precisions: Dict = None
+        self._time_format: str = None
 
         # Parsers
         self._gpx_parser: GPXParser = None
@@ -87,16 +87,15 @@ class GPX():
                 self.gpx = self._gpx_parser.gpx
                 self._ele_data = self._gpx_parser.ele_data
                 self._time_data = self._gpx_parser.time_data
-                self.precisions = self._gpx_parser.precisions
-                self.time_format = self._gpx_parser.time_format
-                self.extensions_fields = self._gpx_parser.extensions_fields
+                self._precisions = self._gpx_parser.precisions
+                self._time_format = self._gpx_parser.time_format
 
             # KML
             elif file_path.endswith(".kml"):
                 self._kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self._kml_parser.gpx
-                self.precisions = self._kml_parser.precisions
-                self.time_format = self._kml_parser.time_format
+                self._precisions = self._kml_parser.precisions
+                self._time_format = self._kml_parser.time_format
 
             # KMZ
             elif file_path.endswith(".kmz"):
@@ -109,16 +108,16 @@ class GPX():
                 self._write_tmp_kml("tmp.kml", kml)
                 self._kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
                 self.gpx = self._kml_parser.gpx
-                self.precisions = self._kml_parser.precisions
-                self.time_format = self._kml_parser.time_format
+                self._precisions = self._kml_parser.precisions
+                self._time_format = self._kml_parser.time_format
                 os.remove("tmp.kml")
             
             # FIT
             elif file_path.endswith(".fit"):
                 self._fit_parser = FitParser(file_path)
                 self.gpx = self._fit_parser.gpx
-                self.precisions = self._fit_parser.precisions
-                self.time_format = self._fit_parser.time_format
+                self._precisions = self._fit_parser.precisions
+                self._time_format = self._fit_parser.time_format
 
             # NOT SUPPORTED
             else:
@@ -126,10 +125,10 @@ class GPX():
                                  "Consider renaming your file with the proper file extension.")
 
             self._gpx_writer: GPXWriter = GPXWriter(self.gpx,
-                precisions=self.precisions, time_format=self.time_format,
-                extensions_fields=self.extensions_fields)
+                precisions=self._precisions, time_format=self._time_format,
+                extensions_fields=self._gpx_parser.extensions_fields if self._gpx_parser else {})
             self._kml_writer: KMLWriter = KMLWriter(self.gpx,
-                precisions=self.precisions, time_format=self.time_format)
+                precisions=self._precisions, time_format=self._time_format)
             
         # Invalid file path
         else:

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 import logging
 
 from ..gpx_elements import Gpx
@@ -11,7 +11,10 @@ class Parser():
     File parser.
     """
 
-    def __init__(self, file_path: Optional[str] = None) -> None:
+    def __init__(
+            self,
+            file_path: Optional[str] = None,
+            name_spaces: Dict = None) -> None:
         """
         Initialize Parser instance.
 
@@ -20,6 +23,8 @@ class Parser():
         """
         self.file_path: str = file_path
 
+        self.ele_data: bool = False
+        self.time_data:bool = False
         self.precisions: dict = {
             "lat_lon": DEFAULT_PRECISION,
             "elevation": DEFAULT_PRECISION,
@@ -29,10 +34,9 @@ class Parser():
             "rate": DEFAULT_PRECISION,
             "default": DEFAULT_PRECISION
             }
-        self.time_data: bool = False
         self.time_format: str = DEFAULT_TIME_FORMAT
 
-        self.gpx: Gpx = Gpx()
+        self.gpx: Gpx = Gpx(xmlns=name_spaces)
 
     def find_precision(self, number: Union[int, float, str]) -> int:
         """

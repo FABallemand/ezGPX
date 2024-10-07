@@ -2,7 +2,7 @@ try:
     from importlib.resources import files
 except ImportError:
     from importlib_resources import files
-from typing import Union, List, Tuple
+from typing import Union, List, Dict, Tuple
 import logging
 import xmlschema
 import pandas as pd
@@ -25,71 +25,27 @@ class Gpx():
     def __init__(
             self,
             tag: str = "gpx",
-            creator: str = None,
-            xmlns: str = None,
             version: str = None,
-            xmlns_xsi: str = None,
+            creator: str = None,
             xsi_schema_location: List[str] = None,
-            xmlns_gpxtpx: str = None,
-            xmlns_gpxx: str = None,
-            xmlns_gpxtrk: str = None,
-            xmlns_wptx1: str = None,
+            xmlns: Dict = None,
             metadata: Metadata = None,
             wpt: List[WayPoint] = None,
             rte: List[Route] = None,
             trk: List[Track] = None,
             extensions: Extensions = None) -> None:
-        """
-        Initialize Gpx instance.
-
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "gpx"
-        creator : str, optional
-            Creator, by default None
-        xmlns : str, optional
-            XML xmlns, by default None
-        version : str, optional
-            Version, by default None
-        xmlns_xsi : str, optional
-            XML xmlns_xsi, by default None
-        xsi_schema_location : List[str], optional
-            XML schema location, by default None
-        xmlns_gpxtpx : str, optional
-            ???, by default None
-        xmlns_gpxx : str, optional
-            ???, by default None
-        xmlns_gpxtrk : str, optional
-            ???, by default None
-        xmlns_wptx1 : str, optional
-            ???, by default None
-        metadata : Metadata, optional
-            Metadata, by default None
-        wpt : List[WayPoint], optional
-            Way points, by default None
-        rte : List[Route], optional
-            Routes, by default None
-        trk : List[Track], optional
-            List of tracks, by default None
-        extensions : Extensions, optional
-            Extensions, by default None
-        """
+                
         self.tag: str = tag
-        self.creator: str = creator
-        self.xmlns: str = xmlns
         self.version: str = version
-
-        self.xmlns_xsi: str = xmlns_xsi
+        self.creator: str = creator
         if xsi_schema_location is None:
-            self.xsi_schema_location: str = []
+            self.xsi_schema_location: List[str] = []
         else:
-            self.xsi_schema_location: str = xsi_schema_location
-        self.xmlns_gpxtpx: str = xmlns_gpxtpx
-        self.xmlns_gpxx: str = xmlns_gpxx
-        self.xmlns_gpxtrk: str = xmlns_gpxtrk
-        self.xmlns_wptx1: str = xmlns_wptx1
-
+            self.xsi_schema_location: List[str] = xsi_schema_location
+        if xmlns is None:
+            self.xmlns: Dict = {}
+        else:
+            self.xmlns: Dict = xmlns
         self.metadata: Metadata = metadata
         if wpt is None:
             self.wpt: List[WayPoint] = []

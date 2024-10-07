@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
@@ -29,9 +29,10 @@ class XMLParser(Parser):
             Requires internet connection and is not guaranted to work,
             by default False
         """
-        super().__init__(file_path)
-        
-        self.name_space: dict = dict([node for _, node in ET.iterparse(file_path, events=["start-ns"])])
+        self.name_spaces: dict = dict([node for _, node in ET.iterparse(file_path, events=["start-ns"])])
+        self.extensions_fields: Dict = {}
+
+        super().__init__(file_path, self.name_spaces)
 
         self.xml_schema: bool = xml_schema
         self.xml_extensions_schemas: bool = xml_extensions_schemas

@@ -53,17 +53,17 @@ class GPXWriterMethodBehaviorCreator():
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_email")
         return func
     
-    def add_extensions_creator(self, extensions_fields):
-        code = ('def _add_extensions(writer, element, extensions):'
-                '\n\tif extensions is not None:'
-                '\n\t\textensions_ = ET.SubElement(element, extensions.tag)')
-        if extensions_fields is not None:
-            for field in extensions_fields:
-                code += f'\n\t\textensions_, _ = writer.add_subelement(extensions_, "{field}", extensions.values["{field}"])'
-        code += '\n\treturn element'
-        compiled_code = compile(code, "<_add_extensions>", "exec")
-        func = FunctionType(compiled_code.co_consts[0], globals(), "_add_extensions")
-        return func
+    # def add_extensions_creator(self, extensions_fields):
+    #     code = ('def _add_extensions(writer, element, extensions):'
+    #             '\n\tif extensions is not None:'
+    #             '\n\t\textensions_ = ET.SubElement(element, extensions.tag)')
+    #     if extensions_fields is not None:
+    #         for k, v in extensions_fields:
+    #             code += f'\n\t\textensions_, _ = writer.add_extensions_element(extensions_, "{k}", extensions.values["{field}"])'
+    #     code += '\n\treturn element'
+    #     compiled_code = compile(code, "<_add_extensions>", "exec")
+    #     func = FunctionType(compiled_code.co_consts[0], globals(), "_add_extensions")
+    #     return func
     
     def add_link_creator(self, link_fields):
         code = ('def _add_link(writer, element, link):'
@@ -102,7 +102,8 @@ class GPXWriterMethodBehaviorCreator():
         if "bounds" in metadata_fields:
             code += '\n\t\tmetadata_ = writer.add_bounds(metadata_, metadata.bounds)'
         if "extensions" in metadata_fields:
-            code += '\n\t\tmetadata_ = writer.add_metadata_extensions(metadata_, metadata.extensions)'
+            # code += '\n\t\tmetadata_ = writer.add_metadata_extensions(metadata_, metadata.extensions)'
+            code += '\n\t\tmetadata_ = writer.add_extensions(metadata_, metadata.extensions, writer.extensions_fields.get("metadata"))'
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_metadata>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_metadata")
@@ -171,7 +172,8 @@ class GPXWriterMethodBehaviorCreator():
         if "type" in route_fields:
             code += '\n\t\troute_, _ = writer.add_subelement(route_, "type", route.type)'
         if "extensions" in route_fields:
-            code += '\n\t\troute_ = writer.add_rte_extensions(route_, route.extensions)'
+            # code += '\n\t\troute_ = writer.add_rte_extensions(route_, route.extensions)'
+            code += '\n\t\troute_ = writer.add_extensions(route_, route.extensions, writer.extensions_fields.get("rte"))'
         if "rtept" in route_fields:
             code += ('\n\t\tfor way_point in route.rtept:'
                      '\n\t\t\troute_ = writer.add_way_point(route_, way_point)')
@@ -185,10 +187,11 @@ class GPXWriterMethodBehaviorCreator():
                 '\n\tif track_segment is not None:'
                 '\n\t\ttrack_segment_ = ET.SubElement(element, track_segment.tag)')
         if "extensions" in track_segment_fields:
-            code += '\n\t\ttrack_segment_ = writer.add_trkseg_extensions(track_segment_, track_segment.extensions)'
+            # code += '\n\t\ttrack_segment_ = writer.add_trkseg_extensions(track_segment_, track_segment.extensions)'
+            code += '\n\t\ttrack_segment_ = writer.add_extensions(track_segment_, track_segment.extensions, writer.extensions_fields.get("trkseg"))'
         if "trkpt" in track_segment_fields:
             code += ('\n\t\tfor track_point in track_segment.trkpt:'
-                     '\n\t\t\ttrack_segment_ = writer.add_way_point(track_segment_, track_point)')
+                     '\n\t\t\ttrack_segment_ = writer.add_track_point(track_segment_, track_point)')
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_track_segment>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_track_segment")
@@ -213,7 +216,8 @@ class GPXWriterMethodBehaviorCreator():
         if "type" in track_fields:
             code += '\n\t\ttrack_, _ = writer.add_subelement(track_, "type", track.type)'
         if "extensions" in track_fields:
-            code += '\n\t\ttrack_ = writer.add_trk_extensions(track_, track.extensions)'
+            # code += '\n\t\ttrack_ = writer.add_trk_extensions(track_, track.extensions)'
+            code += '\n\t\ttrack_ = writer.add_extensions(track_, track.extensions, writer.extensions_fields.get("trk"))'
         if "trkseg" in track_fields:
             code += ('\n\t\tfor track_seg in track.trkseg:'
                      '\n\t\t\ttrack_ = writer.add_track_segment(track_, track_seg)')
@@ -267,8 +271,61 @@ class GPXWriterMethodBehaviorCreator():
         if "dgpsid" in way_point_fields:
             code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)'
         if "extensions" in way_point_fields:
-            code += '\n\t\ttrack_ = writer.add_wpt_extensions(way_point_, way_point.extensions)'
+            # code += '\n\t\tway_point_ = writer.add_wpt_extensions(way_point_, way_point.extensions)'
+            code += '\n\t\tway_point_ = writer.add_extensions(way_point_, way_point.extensions, writer.extensions_fields.get("wpt"))'
         code += '\n\treturn element'
         compiled_code = compile(code, "<_add_way_point>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_way_point")
+        return func
+    
+    def add_track_point_creator(self, way_point_fields):
+        code = ('def _add_track_point(writer, element, way_point):'
+                '\n\tif way_point is not None:'
+                '\n\t\tway_point_ = ET.SubElement(element, way_point.tag)')
+        if "lat" in way_point_fields:
+            code += '\n\t\twriter.setIfNotNone(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
+        if "lon" in way_point_fields:
+            code += '\n\t\twriter.setIfNotNone(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
+        if "ele" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ele", way_point.ele, writer.precisions["elevation"])'
+        if "time" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_time(way_point_, "time", way_point.time, writer.time_format)'
+        if "magvar" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "magvar", way_point.mag_var, writer.precisions["default"])'
+        if "geoidheight" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "geoidheight", way_point.geo_id_height, writer.precisions["default"])'
+        if "name" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "name", way_point.name)'
+        if "cmt" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "cmt", way_point.cmt)'
+        if "desc" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "desc", way_point.desc)'
+        if "src" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "src", way_point.src)'
+        if "link" in way_point_fields:
+            code += '\n\t\tway_point_ = writer.add_link(way_point_, way_point.link)'
+        if "sym" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "sym", way_point.sym)'
+        if "type" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "type", way_point.type)'
+        if "fix" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "fix", way_point.fix)'
+        if "sat" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "sat", way_point.sat, 0)'
+        if "hdop" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "hdop", way_point.hdop, writer.precisions["default"])'
+        if "vdop" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "vdop", way_point.vdop, writer.precisions["default"])'
+        if "pdop" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "pdop", way_point.pdop, writer.precisions["default"])'
+        if "ageofgpsdata" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ageofgpsdata", way_point.age_of_gps_data, writer.precisions["default"])'
+        if "dgpsid" in way_point_fields:
+            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)'
+        if "extensions" in way_point_fields:
+            # code += '\n\t\tway_point_ = writer.add_trkpt_extensions(way_point_, way_point.extensions)'
+            code += '\n\t\tway_point_ = writer.add_extensions(way_point_, way_point.extensions, writer.extensions_fields.get("trkpt"))'
+        code += '\n\treturn element'
+        compiled_code = compile(code, "<_add_track_point>", "exec")
+        func = FunctionType(compiled_code.co_consts[0], globals(), "_add_track_point")
         return func
