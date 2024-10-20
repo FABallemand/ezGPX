@@ -8,7 +8,7 @@ Name
 
 The name of the activity is easily accessible and editable using the :py:meth:`~name` and :py:meth:`~set_name` methods.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -25,11 +25,12 @@ Points
 ^^^^^^
 
 ezGPX provides access to information related to points and their coordinates such as:
-* The number of points
-* The bounds (ie: minimum and maximum latitude and longitude)
-* The coordinates of the center
-* The first and last point
-* The extreme points (ie: the points at which minimum and maximum latitude and longitude are reached)
+
+- The number of points
+- The bounds (ie: minimum and maximum latitude and longitude)
+- The coordinates of the center
+- The first and last point
+- The extreme points (ie: the points at which minimum and maximum latitude and longitude are reached)
 
 ::
 

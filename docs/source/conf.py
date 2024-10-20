@@ -19,7 +19,7 @@
 project = 'ezGPX'
 copyright = '2024, Fabien ALLEMAND'
 author = 'Fabien ALLEMAND'
-release = '0.2.0'
+release = '0.2.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
