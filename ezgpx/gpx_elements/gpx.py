@@ -169,28 +169,6 @@ class Gpx():
                 nb_pts += len(track_segment.trkpt)
         return nb_pts
     
-    def first_point(self) -> WayPoint:
-        """
-        Return GPX first point.
-
-        Returns
-        -------
-        WayPoint
-            First point.
-        """
-        return self.trk[0].trkseg[0].trkpt[0]
-
-    def last_point(self) -> WayPoint:
-        """
-        Return GPX last point.
-
-        Returns
-        -------
-        WayPoint
-            Last point.
-        """
-        return self.trk[-1].trkseg[-1].trkpt[-1]
-    
     def bounds(self) -> Tuple[float, float, float, float]:
         """
         Find minimum and maximum latitude and longitude.
@@ -232,6 +210,28 @@ class Gpx():
         center_lat = min_lat + (max_lat - min_lat) / 2
         center_lon = min_lon + (max_lon - min_lon) / 2
         return center_lat, center_lon
+    
+    def first_point(self) -> WayPoint:
+        """
+        Return GPX first point.
+
+        Returns
+        -------
+        WayPoint
+            First point.
+        """
+        return self.trk[0].trkseg[0].trkpt[0]
+
+    def last_point(self) -> WayPoint:
+        """
+        Return GPX last point.
+
+        Returns
+        -------
+        WayPoint
+            Last point.
+        """
+        return self.trk[-1].trkseg[-1].trkpt[-1]
     
     def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
@@ -334,6 +334,40 @@ class Gpx():
                     previous_elevation = track_point.ele
         return descent
     
+    def min_elevation(self) -> float:
+        """
+        Compute minimum elevation (meters) in tracks contained in the Gpx element.
+
+        Returns
+        -------
+        float
+            Minimum elevation (meters).
+        """
+        min_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.ele < min_elevation:
+                        min_elevation = track_point.ele
+        return min_elevation
+    
+    def max_elevation(self) -> float:
+        """
+        Compute maximum elevation (meters) in tracks contained in the Gpx element.
+
+        Returns
+        -------
+        float
+            Maximum elevation (meters).
+        """
+        max_elevation = self.trk[0].trkseg[0].trkpt[0].ele
+        for track in self.trk:
+            for track_segment in track.trkseg:
+                for track_point in track_segment.trkpt:
+                    if track_point.ele > max_elevation:
+                        max_elevation = track_point.ele
+        return max_elevation
+    
     def compute_points_ascent_rate(self) -> None:
         """
         Compute ascent rate at each point.
@@ -390,41 +424,7 @@ class Gpx():
                     if track_point.ascent_rate > max_ascent_rate:
                         max_ascent_rate = track_point.ascent_rate
 
-        return max_ascent_rate                
-    
-    def min_elevation(self) -> float:
-        """
-        Compute minimum elevation (meters) in tracks contained in the Gpx element.
-
-        Returns
-        -------
-        float
-            Minimum elevation (meters).
-        """
-        min_elevation = self.trk[0].trkseg[0].trkpt[0].ele
-        for track in self.trk:
-            for track_segment in track.trkseg:
-                for track_point in track_segment.trkpt:
-                    if track_point.ele < min_elevation:
-                        min_elevation = track_point.ele
-        return min_elevation
-    
-    def max_elevation(self) -> float:
-        """
-        Compute maximum elevation (meters) in tracks contained in the Gpx element.
-
-        Returns
-        -------
-        float
-            Maximum elevation (meters).
-        """
-        max_elevation = self.trk[0].trkseg[0].trkpt[0].ele
-        for track in self.trk:
-            for track_segment in track.trkseg:
-                for track_point in track_segment.trkpt:
-                    if track_point.ele > max_elevation:
-                        max_elevation = track_point.ele
-        return max_elevation
+        return max_ascent_rate
     
 ###############################################################################
 #### Time #####################################################################
@@ -545,12 +545,12 @@ class Gpx():
     
     def avg_speed(self) -> float:
         """
-        Compute the average speed (kilometers per hour) during the activity.
+        Compute the average speed (kilometres per hour) during the activity.
 
         Returns
         -------
         float
-            Average speed (kilometers per hour).
+            Average speed (kilometres per hour).
         """
         # Compute and convert total elapsed time
         total_elapsed_time = self.total_elapsed_time()
@@ -563,12 +563,12 @@ class Gpx():
     
     def avg_moving_speed(self) -> float:
         """
-        Compute the average moving speed (kilometers per hour) during the activity.
+        Compute the average moving speed (kilometres per hour) during the activity.
 
         Returns
         -------
         float
-            Average moving speed (kilometers per hour).
+            Average moving speed (kilometres per hour).
         """
         # Compute and convert moving time
         moving_time = self.moving_time()
@@ -581,7 +581,7 @@ class Gpx():
     
     def compute_points_speed(self) -> None:
         """
-        Compute speed (kilometers per hour) at each track point.
+        Compute speed (kilometres per hour) at each track point.
         """
         previous_point = self.first_point()
 
@@ -714,7 +714,7 @@ class Gpx():
     
     def compute_points_ascent_speed(self) -> None:
         """
-        Compute ascent speed (kilometers per hour) at each track point.
+        Compute ascent speed (kilometres per hour) at each track point.
         """
         previous_point = self.first_point()
 
@@ -731,7 +731,7 @@ class Gpx():
 
     def min_ascent_speed(self) -> float:
         """
-        Return the minimum ascent speed (kilometers per hour) during the activity.
+        Return the minimum ascent speed (kilometres per hour) during the activity.
 
         Returns
         -------
@@ -751,7 +751,7 @@ class Gpx():
 
     def max_ascent_speed(self) -> float:
         """
-        Return the maximum ascent speed (kilometers per hour) during the activity.
+        Return the maximum ascent speed (kilometres per hour) during the activity.
 
         Returns
         -------
@@ -805,25 +805,31 @@ class Gpx():
         self.extensions = None
 
         # Remove extensions from metadata
-        self.metadata.extensions = None
+        if self.metadata is not None:
+            self.metadata.extensions = None
 
         # Remove extensions from waypoints
-        for pt in self.wpt:
-            pt.extensions = None
+        if self.wpt is not None:
+            for pt in self.wpt:
+                pt.extensions = None
 
         # Remove extensions from routes
-        for rt in self.rte:
-            rt.extensions = None
+        if self.rte is not None:
+            for rt in self.rte:
+                rt.extensions = None
 
         # Remove extensions from tracks
-        for track in self.trk:
-            track.extensions = None
-            # Remove extensions from track segments
-            for track_segment in track.trkseg:
-                track_segment.extensions = None
-                for track_point in track_segment.trkpt:
-                    # Remove extensions from track points
-                    track_point.extensions = None
+        if self.trk is not None:
+            for track in self.trk:
+                track.extensions = None
+                # Remove extensions from track segments
+                if track.trkseg is not None:
+                    for track_segment in track.trkseg:
+                        track_segment.extensions = None
+                        if track_segment.trkpt is not None:
+                            for track_point in track_segment.trkpt:
+                                # Remove extensions from track points
+                                track_point.extensions = None
     
 ###############################################################################
 #### Error Correction #########################################################

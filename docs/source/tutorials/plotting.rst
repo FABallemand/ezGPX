@@ -3,6 +3,8 @@ Plotting
 
 ezGPX currently provides many different ways to plot a :py:class:`~ezgpx.gpx.GPX` object.
 
+.. warning:: These features are likely to be deprecated and removed in future versions.
+
 Matplotlib
 ^^^^^^^^^^
 

@@ -4,7 +4,7 @@ Modifying
 Remove Data
 ^^^^^^^^^^^
 
-All data contained in a GPX file are not always relevant. By working with :py:class:`~ezgpx.gpx.GPX` objects, it is possible to remove useless data such as metadata, elevation and time data.
+Not all the data contained in a GPX file is always relevant. With :py:class:`~ezgpx.gpx.GPX` objects, it is possible to remove unused data such as metadata, elevation and time data, as well as all data contained in extensions. This is particularily useful when using devices with limited storage space or computing power. A GPX file of a 10 km run downloaded from Strava weighing 345.4 kB can be reduced to a 52.5 kB file (ie: only 15.2 % of the original file size).
 
 ::
 
@@ -22,23 +22,8 @@ All data contained in a GPX file are not always relevant. By working with :py:cl
     # Remove time data
     gpx.remove_time()
 
-    # Write new simplified GPX file
-    gpx.to_gpx("new_file.gpx")
-
-Remove GPS Errors
-^^^^^^^^^^^^^^^^^
-
-GPS devices sometimes loose signal generating errors in GPX files. The most noticeable errors (single isolated points) can be found and removed as follow.
-
-::
-
-    import ezgpx
-
-    # Parse GPX file
-    gpx = ezgpx.GPX("file.gpx")
-
-    # Remove GPS errors
-    gpx.remove_gps_errors()
+    # Remove extensions data
+    gpx.remove_extensions()
 
     # Write new simplified GPX file
     gpx.to_gpx("new_file.gpx")
@@ -46,7 +31,7 @@ GPS devices sometimes loose signal generating errors in GPX files. The most noti
 Simplify Track
 ^^^^^^^^^^^^^^
 
-It is sometimes usefull to reduce the amount of track points contained in a GPX file especially when working with low power and low capacity GPS devices. The :py:meth:`~simplify` allows to reduce the number of points while keeping a great precision.
+It is sometimes usefull to reduce the amount of track points contained in a GPX file especially when dealing with low power or low capacity devices. The :py:meth:`~simplify` method reduces the number of points while maintaining good precision.
 
 ::
 
@@ -61,7 +46,7 @@ It is sometimes usefull to reduce the amount of track points contained in a GPX 
     # Write new simplified GPX file
     gpx.to_gpx("new_file.gpx")
 
-In the following example, one manage to go from 3263 track points to only 1082. This correspond to a 69% decrease in points and allows to save 704.6 kB (ie: 85.4% of the original file size) by reducing the file size from 824.8 kB to 120.2 kB.
+In the following example, a 42 km run downloaded from Strava went from 3263 track points to only 1082. This correspond to a 69% decrease in points and allows to save 704.6 kB (ie: 85.4 % of the original file size) by reducing the file size from 824.8 kB to 120.2 kB.  It is clear that the algorithm used only removes points that do not provide significant information preserving the shape of the track.
 
 ::
 
@@ -91,3 +76,21 @@ In the following example, one manage to go from 3263 track points to only 1082. 
 .. image:: ../../../img/simplify_1.png
   :width: 500
   :alt: Track plot followed by the simplified track plot
+
+Remove GPS Errors
+^^^^^^^^^^^^^^^^^
+
+GPS devices sometimes lose signal generating errors in GPX files. The most noticeable errors (single isolated points) can be found and removed as follow.
+
+::
+
+    import ezgpx
+
+    # Parse GPX file
+    gpx = ezgpx.GPX("file.gpx")
+
+    # Remove GPS errors
+    gpx.remove_gps_errors()
+
+    # Write new simplified GPX file
+    gpx.to_gpx("new_file.gpx")

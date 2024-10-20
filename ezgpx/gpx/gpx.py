@@ -224,6 +224,28 @@ class GPX():
             Number of points in the GPX.
         """
         return self.gpx.nb_points()
+    
+    def bounds(self) -> Tuple[float, float, float, float]:
+        """
+        Find minimum and maximum latitude and longitude.
+
+        Returns
+        -------
+        Tuple[float, float, float, float]
+            Min latitude, min longitude, max latitude, max longitude.
+        """
+        return self.gpx.bounds()
+
+    def center(self) -> Tuple[float, float]:
+        """
+        Return the coordinates of the center point.
+
+        Returns
+        -------
+        Tuple[float, float]
+            Latitude and longitude of the center point.
+        """
+        return self.gpx.center()
 
     def first_point(self) -> WayPoint:
         """
@@ -246,28 +268,6 @@ class GPX():
             Last point.
         """
         return self.gpx.last_point()
-
-    def bounds(self) -> Tuple[float, float, float, float]:
-        """
-        Find minimum and maximum latitude and longitude.
-
-        Returns
-        -------
-        Tuple[float, float, float, float]
-            Min latitude, min longitude, max latitude, max longitude.
-        """
-        return self.gpx.bounds()
-
-    def center(self) -> Tuple[float, float]:
-        """
-        Return the coordinates of the center point.
-
-        Returns
-        -------
-        Tuple[float, float]
-            Latitude and longitude of the center point.
-        """
-        return self.gpx.center()
     
     def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
@@ -317,6 +317,28 @@ class GPX():
         """
         return self.gpx.descent()
     
+    def min_elevation(self) -> float:
+        """
+        Returns the minimum elevation (meters) in tracks contained in the GPX.
+
+        Returns
+        -------
+        float
+            Minimum elevation (meters).
+        """
+        return self.gpx.min_elevation()
+
+    def max_elevation(self) -> float:
+        """
+        Returns the maximum elevation (meters) in tracks contained in the GPX.
+
+        Returns
+        -------
+        float
+            Maximum elevation (meters).
+        """
+        return self.gpx.max_elevation()
+    
     def compute_points_ascent_rate(self) -> None:
         """
         Compute ascent rate at each point.
@@ -344,28 +366,6 @@ class GPX():
             Maximum ascent rate.
         """
         return self.gpx.max_ascent_rate()
-
-    def min_elevation(self) -> float:
-        """
-        Returns the minimum elevation (meters) in tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Minimum elevation (meters).
-        """
-        return self.gpx.min_elevation()
-
-    def max_elevation(self) -> float:
-        """
-        Returns the maximum elevation (meters) in tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Maximum elevation (meters).
-        """
-        return self.gpx.max_elevation()
     
 ###############################################################################
 #### Time #####################################################################
@@ -432,29 +432,29 @@ class GPX():
 
     def avg_speed(self) -> float:
         """
-        Return average speed (kilometers per hour) during the activity.
+        Return average speed (kilometres per hour) during the activity.
 
         Returns
         -------
         float
-            Average speed (kilometers per hour).
+            Average speed (kilometres per hour).
         """
         return self.gpx.avg_speed()
 
     def avg_moving_speed(self) -> float:
         """
-        Return average moving speed (kilometers per hour) during the activity.
+        Return average moving speed (kilometres per hour) during the activity.
 
         Returns
         -------
         float
-            Average moving speed (kilometers per hour).
+            Average moving speed (kilometres per hour).
         """
         return self.gpx.avg_moving_speed()
     
     def compute_points_speed(self) -> None:
         """
-        Compute speed (kilometers per hour) at each track point.
+        Compute speed (kilometres per hour) at each track point.
         """
         self.gpx.compute_points_speed()
 
@@ -532,13 +532,13 @@ class GPX():
     
     def compute_points_ascent_speed(self) -> None:
         """
-        Compute ascent speed (kilometers per hour) at each track point.
+        Compute ascent speed (kilometres per hour) at each track point.
         """
         self.gpx.compute_points_ascent_speed()
 
     def min_ascent_speed(self) -> float:
         """
-        Return the minimum ascent speed (kilometers per hour) during the activity.
+        Return the minimum ascent speed (kilometres per hour) during the activity.
 
         Returns
         -------
@@ -549,7 +549,7 @@ class GPX():
 
     def max_ascent_speed(self) -> float:
         """
-        Return the maximum ascent speed (kilometers per hour) during the activity.
+        Return the maximum ascent speed (kilometres per hour) during the activity.
 
         Returns
         -------
@@ -2162,7 +2162,7 @@ class GPX():
             watermark: bool = False,
             file_path: str = None):
         """
-        Crashes may be due to parameters exceeding system capabilities.
+        Crashes may be due to parametres exceeding system capabilities.
         Try reducing fps and/or bitrate.
         """
         # Create dataframe containing data from the GPX file
