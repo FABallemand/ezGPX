@@ -32,7 +32,7 @@ ezGPX provides access to information related to points and their coordinates suc
 - The first and last point
 - The extreme points (ie: the points at which minimum and maximum latitude and longitude are reached)
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -62,7 +62,7 @@ There are several methods to compute insights related to distance and elevation.
 
 .. note:: Distances are expressed in metres (m) and rates in percentage (%).
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -96,7 +96,7 @@ Time
 
 If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-stamp at each point), many useful informations can be accessed.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -123,7 +123,7 @@ If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-s
 
 .. note:: Speeds are expressed in kilometres per hour (km/h) and paces in minutes per kilometre (min/km).
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 

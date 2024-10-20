@@ -6,7 +6,7 @@ Save as GPX file
 
 The :py:meth:`~to_gpx` method allows to export a :py:class:`~ezgpx.gpx.GPX` object as a `GPX <https://en.wikipedia.org/wiki/GPS_Exchange_Format>`_ file.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -23,7 +23,7 @@ Save as KML file
 
 The :py:meth:`~to_kml` method allows to export a :py:class:`~ezgpx.gpx.GPX` object as a `KML <https://en.wikipedia.org/wiki/Keyhole_Markup_Language>`_ file.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -40,7 +40,7 @@ Save as CSV file
 
 The :py:meth:`~to_csv` method allows to export a :py:class:`~ezgpx.gpx.GPX` object as a `CSV <https://en.wikipedia.org/wiki/Comma-separated_values>`_ file.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 
@@ -57,7 +57,7 @@ Convert to Pandas Dataframe
 
 The :py:meth:`~to_dataframe` method allows to convert a :py:class:`~ezgpx.gpx.GPX` object to a `Pandas Dataframe <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
 
-::
+.. code-block:: python
 
     from ezgpx import GPX
 

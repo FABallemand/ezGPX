@@ -12,7 +12,7 @@ This method relies on the well known Matplotlib Python library to create simple 
 
 .. warning:: Requires :py:mod:`~basemap`.
 
-::
+.. code-block:: python
 
     import ezgpx
     import matplotlib as mpl
@@ -48,7 +48,7 @@ This method uses the Google map engine to display the content of the GPX file in
 
 .. warning:: Requires :py:mod:`~gmplot`.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -75,7 +75,7 @@ The interactive HTML page resulting from this method allows you to visualize the
 
 .. warning:: Requires :py:mod:`~folium`.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -103,7 +103,7 @@ PaperMap
 
 .. warning:: Requires :py:mod:`~papermap`.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -131,7 +131,7 @@ This method creates animations of the activity contained in a GPX file.
 
 .. warning:: Requires :py:mod:`~basemap`.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -169,7 +169,7 @@ This is the most advanced plotting method built into ezGPX. It allows to plot th
 
 .. warning:: Requires :py:mod:`~basemap`.
 
-::
+.. code-block:: python
 
     import ezgpx
 

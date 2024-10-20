@@ -10,7 +10,7 @@ During Parsing
 
 It is possible to check during parsing, in which case an invalid GPX file will raise an error.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -22,7 +22,7 @@ Test a :py:class:`~ezgpx.gpx.GPX` Object
 
 A :py:class:`~ezgpx.gpx.GPX` object can directly be checked.
 
-::
+.. code-block:: python
 
     import ezgpx
 
@@ -36,7 +36,7 @@ After Writting
 
 It is possible to check whether a written GPX file follows XML schemas.
 
-::
+.. code-block:: python
 
     import ezgpx
 
