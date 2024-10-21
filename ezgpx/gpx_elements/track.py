@@ -1,10 +1,11 @@
 from typing import List
 
-from .extensions import *
+from .extensions import Extensions
+from .gpx_element import GpxElement
 from .link import Link
-from .track_segment import *
+from .track_segment import TrackSegment
 
-class Track():
+class Track(GpxElement):
     """
     trkType element in GPX file.
     """

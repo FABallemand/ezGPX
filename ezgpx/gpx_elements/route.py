@@ -1,9 +1,10 @@
 from typing import List
 from .extensions import Extensions
+from .gpx_element import GpxElement
 from .link import Link
 from .way_point import WayPoint
 
-class Route():
+class Route(GpxElement):
     """
     rteType element in GPX file.
     """

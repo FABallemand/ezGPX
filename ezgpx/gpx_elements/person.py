@@ -1,7 +1,8 @@
 from .email import Email
+from .gpx_element import GpxElement
 from .link import Link
 
-class Person():
+class Person(GpxElement):
     """
     personType element in GPX file.
     """

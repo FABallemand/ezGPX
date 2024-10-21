@@ -1,5 +1,6 @@
+from .gpx_element import GpxElement
 
-class Extensions():
+class Extensions(GpxElement):
     """
     extensionsType element in GPX file.
     """

@@ -1,6 +1,8 @@
 import datetime
 
-class Point():
+from .gpx_element import GpxElement
+
+class Point(GpxElement):
     """
     ptType element in GPX file.
     """
@@ -35,5 +37,3 @@ class Point():
         self.lon: float = lon
         self.ele: float = ele
         self.time: datetime = time
-
-    

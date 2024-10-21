@@ -1,10 +1,11 @@
+from .gpx_element import GpxElement
 
-class Bounds():
+class Bounds(GpxElement):
     """
     boundsType element in GPX file.
     """
     fields = ["minlat", "minlon", "maxlat", "maxlon"]
-    mandatory_fields = []
+    mandatory_fields = ["minlat", "minlon", "maxlat", "maxlon"]
 
     def __init__(
             self,

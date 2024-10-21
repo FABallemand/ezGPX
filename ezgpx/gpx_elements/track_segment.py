@@ -1,9 +1,10 @@
 from typing import List
 
 from .extensions import Extensions
+from .gpx_element import GpxElement
 from .way_point import WayPoint
 
-class TrackSegment():
+class TrackSegment(GpxElement):
     """
     trksegType in GPX file.
     """

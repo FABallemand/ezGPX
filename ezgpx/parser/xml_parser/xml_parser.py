@@ -106,7 +106,7 @@ class XMLParser(Parser):
             Union[str, None]: Text from sub-element.
         """
         try:
-            text_ = element.find(sub_element, self.name_space).text
+            text_ = element.find(sub_element, self.name_spaces).text
         except:
             text_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
@@ -124,7 +124,7 @@ class XMLParser(Parser):
             Union[int, None]: Integer value from sub-element.
         """
         try:
-            int_ = int(element.find(sub_element, self.name_space).text)
+            int_ = int(element.find(sub_element, self.name_spaces).text)
         except:
             int_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
@@ -142,7 +142,7 @@ class XMLParser(Parser):
             Union[float, None]: Floating point value from sub-element.
         """
         try:
-            float_ = float(element.find(sub_element, self.name_space).text)
+            float_ = float(element.find(sub_element, self.name_spaces).text)
         except:
             float_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
@@ -160,7 +160,7 @@ class XMLParser(Parser):
             Union[datetime, None]: Floating point value from sub-element.
         """
         try:
-            time_ = datetime.strptime(element.find(sub_element, self.name_space).text, self.time_format)
+            time_ = datetime.strptime(element.find(sub_element, self.name_spaces).text, self.time_format)
         except:
             time_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")

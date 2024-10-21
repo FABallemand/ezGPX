@@ -2,6 +2,7 @@ from .bounds import *
 from .copyright import *
 from .email import *
 from .extensions import *
+from .gpx_element import *
 from .gpx import *
 from .link import *
 from .metadata import *

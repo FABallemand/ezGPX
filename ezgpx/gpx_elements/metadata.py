@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from .extensions import Extensions
+from .gpx_element import GpxElement
 from .link import Link
 from .person import Person
 
-class Metadata():
+class Metadata(GpxElement):
     """
     metadataType element in GPX file.
     """

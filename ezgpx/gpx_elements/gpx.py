@@ -13,9 +13,10 @@ from .way_point import WayPoint
 from .route import Route
 from .track import Track
 from .extensions import Extensions
+from .gpx_element import GpxElement
 from ..utils import haversine_distance, ramer_douglas_peucker
 
-class Gpx():
+class Gpx(GpxElement):
     """
     gpxType element in GPX file.
     """

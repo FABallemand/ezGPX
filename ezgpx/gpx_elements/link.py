@@ -1,5 +1,6 @@
+from .gpx_element import GpxElement
 
-class Link():
+class Link(GpxElement):
     """
     linkType element in GPX file.
     """

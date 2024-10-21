@@ -1,10 +1,10 @@
-import logging
 import datetime
 
 from .extensions import Extensions
+from .gpx_element import GpxElement
 from .link import Link
 
-class WayPoint():
+class WayPoint(GpxElement):
     """
     wptType element in GPX file.
     """
