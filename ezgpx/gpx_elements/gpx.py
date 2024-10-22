@@ -2,25 +2,29 @@ try:
     from importlib.resources import files
 except ImportError:
     from importlib_resources import files
-from typing import Union, List, Dict, Tuple
-import logging
-import xmlschema
-import pandas as pd
-from datetime import datetime, timezone
 
-from .metadata import Metadata
-from .way_point import WayPoint
-from .route import Route
-from .track import Track
+import logging
+from datetime import datetime, timezone
+from typing import Dict, List, Tuple, Union
+
+import pandas as pd
+import xmlschema
+
+from ..utils import haversine_distance, ramer_douglas_peucker
 from .extensions import Extensions
 from .gpx_element import GpxElement
-from ..utils import haversine_distance, ramer_douglas_peucker
+from .metadata import Metadata
+from .route import Route
+from .track import Track
+from .way_point import WayPoint
+
 
 class Gpx(GpxElement):
     """
     gpxType element in GPX file.
     """
-    fields = ["version", "creator", "metadata", "wpt", "rte", "trk", "extensions"]
+    fields = ["version", "creator", "metadata",
+              "wpt", "rte", "trk", "extensions"]
     mandatory_fields = ["version", "creator"]
 
     def __init__(
@@ -35,7 +39,7 @@ class Gpx(GpxElement):
             rte: List[Route] = None,
             trk: List[Track] = None,
             extensions: Extensions = None) -> None:
-                
+
         self.tag: str = tag
         self.version: str = version
         self.creator: str = creator
@@ -85,16 +89,20 @@ class Gpx(GpxElement):
         # GPX
         if file_path.endswith(".gpx"):
             if self.version == "1.1":
-                schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd"))
+                schema = xmlschema.XMLSchema(
+                    files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd"))
             elif self.version == "1.0":
-                schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd"))
+                schema = xmlschema.XMLSchema(
+                    files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd"))
             else:
-                logging.error("Unable to check XML schema (unsupported GPX version)")
+                logging.error(
+                    "Unable to check XML schema (unsupported GPX version)")
                 return False
 
         # KML
         elif file_path.endswith(".kml"):
-            schema = xmlschema.XMLSchema(files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd"))
+            schema = xmlschema.XMLSchema(
+                files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd"))
 
         # KMZ
         elif file_path.endswith(".kmz"):
@@ -102,29 +110,33 @@ class Gpx(GpxElement):
 
         # FIT
         elif file_path.endswith(".fit"):
-            logging.error("Unable to check XML schema (fit files are not XML files)")
+            logging.error(
+                "Unable to check XML schema (fit files are not XML files)")
             return False
-        
+
         # NOT SUPPORTED
         else:
-            logging.error("Unable to check XML schema (unable to identify file type)")
+            logging.error(
+                "Unable to check XML schema (unable to identify file type)")
             return False
 
         if schema is not None:
             return schema.is_valid(file_path)
         else:
-            logging.error("Unable to check XML schema (unable to load XML schema)")
+            logging.error(
+                "Unable to check XML schema (unable to load XML schema)")
             return False
-            
+
     def check_xml_extensions_schemas(self, file_path: str) -> bool:
-        gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
+        gpx_schemas = [
+            s for s in self.xsi_schema_location if s.endswith(".xsd")]
         for gpx_schema in gpx_schemas:
-            logging.debug(f"schema = {gpx_schema}")
+            logging.debug("schema = %s", gpx_schema)
             schema = xmlschema.XMLSchema(gpx_schema)
             if not schema.is_valid(file_path):
-                logging.error(f"File does not follow {gpx_schema}")
+                logging.error("File does not follow %s", gpx_schema)
                 return False
-            
+
 ###############################################################################
 #### Name #####################################################################
 ###############################################################################
@@ -139,7 +151,7 @@ class Gpx(GpxElement):
             Activity name.
         """
         return self.trk[0].name
-    
+
     def set_name(self, new_name: str) -> None:
         """
         Set name.
@@ -169,7 +181,7 @@ class Gpx(GpxElement):
             for track_segment in track.trkseg:
                 nb_pts += len(track_segment.trkpt)
         return nb_pts
-    
+
     def bounds(self) -> Tuple[float, float, float, float]:
         """
         Find minimum and maximum latitude and longitude.
@@ -197,7 +209,6 @@ class Gpx(GpxElement):
                         max_lon = track_point.lon
         return min_lat, min_lon, max_lat, max_lon
 
-
     def center(self) -> Tuple[float, float]:
         """
         Compute the center coordinates of the track.
@@ -211,7 +222,7 @@ class Gpx(GpxElement):
         center_lat = min_lat + (max_lat - min_lat) / 2
         center_lon = min_lon + (max_lon - min_lon) / 2
         return center_lat, center_lon
-    
+
     def first_point(self) -> WayPoint:
         """
         Return GPX first point.
@@ -233,7 +244,7 @@ class Gpx(GpxElement):
             Last point.
         """
         return self.trk[-1].trkseg[-1].trkpt[-1]
-    
+
     def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
         Find extreme points in track, i.e.: points with lowest and highest latitude and longitude.
@@ -260,7 +271,7 @@ class Gpx(GpxElement):
                     if track_point.lon > max_lon_point.lon:
                         max_lon_point = track_point
         return min_lat_point, min_lon_point, max_lat_point, max_lon_point
-    
+
 ###############################################################################
 #### Distance and Elevation ###################################################
 ###############################################################################
@@ -282,7 +293,7 @@ class Gpx(GpxElement):
                     dst += haversine_distance(previous_point, track_point)
                     previous_point = track_point
         return dst
-    
+
     def compute_points_distance_from_start(self):
         """
         Compute distance from start at each point.
@@ -296,7 +307,7 @@ class Gpx(GpxElement):
                     dst += haversine_distance(previous_point, track_point)
                     track_point.distance_from_start = dst
                     previous_point = track_point
-    
+
     def ascent(self) -> float:
         """
         Compute the total ascent (meters) of tracks contained in the Gpx element.
@@ -315,7 +326,7 @@ class Gpx(GpxElement):
                         ascent += track_point.ele - previous_elevation
                     previous_elevation = track_point.ele
         return ascent
-    
+
     def descent(self) -> float:
         """
         Compute the total descent (meters) of tracks contained in the Gpx element.
@@ -334,7 +345,7 @@ class Gpx(GpxElement):
                         descent += previous_elevation - track_point.ele
                     previous_elevation = track_point.ele
         return descent
-    
+
     def min_elevation(self) -> float:
         """
         Compute minimum elevation (meters) in tracks contained in the Gpx element.
@@ -351,7 +362,7 @@ class Gpx(GpxElement):
                     if track_point.ele < min_elevation:
                         min_elevation = track_point.ele
         return min_elevation
-    
+
     def max_elevation(self) -> float:
         """
         Compute maximum elevation (meters) in tracks contained in the Gpx element.
@@ -368,7 +379,7 @@ class Gpx(GpxElement):
                     if track_point.ele > max_elevation:
                         max_elevation = track_point.ele
         return max_elevation
-    
+
     def compute_points_ascent_rate(self) -> None:
         """
         Compute ascent rate at each point.
@@ -382,7 +393,8 @@ class Gpx(GpxElement):
                     ascent = track_point.ele - previous_point.ele
                     try:
                         track_point.ascent_rate = (ascent * 100) / distance
-                        logging.debug(f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
+                        logging.debug(
+                            f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
                     except:
                         track_point.ascent_rate = 0.0
                     previous_point = track_point
@@ -405,7 +417,7 @@ class Gpx(GpxElement):
                     if track_point.ascent_rate < min_ascent_rate:
                         min_ascent_rate = track_point.ascent_rate
 
-        return min_ascent_rate 
+        return min_ascent_rate
 
     def max_ascent_rate(self) -> float:
         """
@@ -417,7 +429,7 @@ class Gpx(GpxElement):
             Maximum ascent rate.
         """
         max_ascent_rate = -1.0
-        self.compute_points_ascent_rate() # Check if it needs to be done
+        self.compute_points_ascent_rate()  # Check if it needs to be done
 
         for track in self.trk:
             for track_segment in track.trkseg:
@@ -426,11 +438,11 @@ class Gpx(GpxElement):
                         max_ascent_rate = track_point.ascent_rate
 
         return max_ascent_rate
-    
+
 ###############################################################################
 #### Time #####################################################################
 ###############################################################################
-    
+
     def utc_start_time(self) -> datetime:
         """
         Return the activity UTC start time.
@@ -441,7 +453,7 @@ class Gpx(GpxElement):
             UTC start time.
         """
         return self.trk[0].trkseg[0].trkpt[0].time
-    
+
     def utc_stop_time(self):
         """
         Return the activity UTC stop time.
@@ -452,7 +464,7 @@ class Gpx(GpxElement):
             UTC stop time.
         """
         return self.trk[-1].trkseg[-1].trkpt[-1].time
-    
+
     def start_time(self) -> datetime:
         """
         Return the activity start time.
@@ -464,11 +476,12 @@ class Gpx(GpxElement):
         """
         start_time = None
         try:
-            start_time = self.trk[0].trkseg[0].trkpt[0].time.replace(tzinfo=timezone.utc).astimezone(tz=None) 
+            start_time = self.trk[0].trkseg[0].trkpt[0].time.replace(
+                tzinfo=timezone.utc).astimezone(tz=None)
         except:
             logging.error("Unable to find activity start time")
         return start_time
-    
+
     def stop_time(self) -> datetime:
         """
         Return the activity stop time.
@@ -480,11 +493,12 @@ class Gpx(GpxElement):
         """
         stop_time = None
         try:
-            stop_time = self.trk[-1].trkseg[-1].trkpt[-1].time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+            stop_time = self.trk[-1].trkseg[-1].trkpt[-1].time.replace(
+                tzinfo=timezone.utc).astimezone(tz=None)
         except:
             logging.error("Unable to find activity stop time")
         return stop_time
-    
+
     def total_elapsed_time(self) -> datetime:
         """
         Compute the total elapsed time.
@@ -500,7 +514,7 @@ class Gpx(GpxElement):
         except:
             logging.error("Unable to compute activity total elapsed time")
         return total_elapsed_time
-    
+
     def stopped_time(self, tolerance: float = 2.45) -> datetime:
         """
         Compute the stopped time during activity.
@@ -516,7 +530,7 @@ class Gpx(GpxElement):
         datetime
             Stopped time.
         """
-        stopped_time = self.start_time() - self.start_time() # Better way to do it?
+        stopped_time = self.start_time() - self.start_time()  # Better way to do it?
 
         previous_point = self.trk[0].trkseg[0].trkpt[0]
 
@@ -528,7 +542,7 @@ class Gpx(GpxElement):
                     previous_point = point
 
         return stopped_time
-    
+
     def moving_time(self) -> datetime:
         """
         Compute the moving time during the activity.
@@ -539,11 +553,11 @@ class Gpx(GpxElement):
             Moving time.
         """
         return self.total_elapsed_time() - self.stopped_time()
-    
+
 ###############################################################################
 #### Speed and Pace ###########################################################
 ###############################################################################
-    
+
     def avg_speed(self) -> float:
         """
         Compute the average speed (kilometres per hour) during the activity.
@@ -561,7 +575,7 @@ class Gpx(GpxElement):
         distance = self.distance() / 1000
 
         return distance/total_elapsed_time
-    
+
     def avg_moving_speed(self) -> float:
         """
         Compute the average moving speed (kilometres per hour) during the activity.
@@ -579,7 +593,7 @@ class Gpx(GpxElement):
         distance = self.distance() / 1000
 
         return distance / moving_time
-    
+
     def compute_points_speed(self) -> None:
         """
         Compute speed (kilometres per hour) at each track point.
@@ -589,8 +603,11 @@ class Gpx(GpxElement):
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    distance = haversine_distance(previous_point, track_point) / 1000 # Convert to kilometers
-                    time = (track_point.time - previous_point.time).total_seconds() / 3600 # Convert to hours
+                    distance = haversine_distance(
+                        previous_point, track_point) / 1000  # Convert to kilometers
+                    # Convert to hours
+                    time = (track_point.time -
+                            previous_point.time).total_seconds() / 3600
                     try:
                         track_point.speed = distance / time
                     except:
@@ -636,7 +653,7 @@ class Gpx(GpxElement):
                         max_speed = track_point.speed
 
         return max_speed
-    
+
     def avg_pace(self) -> float:
         """
         Compute the average pace (minute per kilometer) during the activity.
@@ -647,7 +664,7 @@ class Gpx(GpxElement):
             Average pace (minute per kilometer).
         """
         return 60.0 / self.avg_speed()
-    
+
     def avg_moving_pace(self) -> float:
         """
         Compute the average moving pace (minute per kilometer) during the activity.
@@ -658,7 +675,7 @@ class Gpx(GpxElement):
             Average moving pace (minute per kilometer).
         """
         return 60.0 / self.avg_moving_speed()
-    
+
     def compute_points_pace(self) -> None:
         """
         Compute pace at each track point.
@@ -671,7 +688,8 @@ class Gpx(GpxElement):
                     try:
                         point.pace = 60.0 / point.speed
                     except:
-                        point.pace = self.avg_moving_pace() # Fill with average moving space (first point)
+                        # Fill with average moving space (first point)
+                        point.pace = self.avg_moving_pace()
 
     def min_pace(self) -> float:
         """
@@ -712,7 +730,7 @@ class Gpx(GpxElement):
                         max_pace = track_point.pace
 
         return max_pace
-    
+
     def compute_points_ascent_speed(self) -> None:
         """
         Compute ascent speed (kilometres per hour) at each track point.
@@ -722,8 +740,11 @@ class Gpx(GpxElement):
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    ascent = (track_point.ele - previous_point.ele) / 1000 # Convert to kilometers
-                    time = (track_point.time - previous_point.time).total_seconds() / 3600 # Convert to hours
+                    ascent = (track_point.ele - previous_point.ele) / \
+                        1000  # Convert to kilometers
+                    # Convert to hours
+                    time = (track_point.time -
+                            previous_point.time).total_seconds() / 3600
                     try:
                         track_point.ascent_speed = ascent / time
                     except:
@@ -769,7 +790,7 @@ class Gpx(GpxElement):
                         max_ascent_speed = track_point.ascent_speed
 
         return max_ascent_speed
-    
+
 ###############################################################################
 #### Data Removal #############################################################
 ###############################################################################
@@ -831,11 +852,11 @@ class Gpx(GpxElement):
                             for track_point in track_segment.trkpt:
                                 # Remove extensions from track points
                                 track_point.extensions = None
-    
+
 ###############################################################################
 #### Error Correction #########################################################
 ###############################################################################
-    
+
     def remove_points(self, remove_factor: int = 2):
         count = 0
         for track in self.trk:
@@ -871,7 +892,8 @@ class Gpx(GpxElement):
                     # GPS error
                     if previous_point is not None and haversine_distance(previous_point,
                                                                          track_point) > error_distance:
-                        logging.warning(f"Point {track_point} has been removed (GPS error)")
+                        logging.warning(
+                            "Point %s has been removed (GPS error)", track_point)
                         gps_errors.append(track_point)
                     # No GPS error
                     else:
@@ -895,7 +917,7 @@ class Gpx(GpxElement):
         """
         point_1 = None
         point_2 = None
-        
+
         for track in self.trk:
             for segment in track.trkseg:
 
@@ -910,7 +932,7 @@ class Gpx(GpxElement):
                     else:
                         if ((haversine_distance(point_1, point_2) < min_dist
                              or haversine_distance(point_2, point) < min_dist)
-                            and haversine_distance(point_1, point) < max_dist):
+                                and haversine_distance(point_1, point) < max_dist):
                             point_2 = point
                         else:
                             new_trkpt.append(point_2)
@@ -961,7 +983,7 @@ class Gpx(GpxElement):
         """
         # Retrieve parameters
         if values is None:
-            values =  ["lat", "lon"]
+            values = ["lat", "lon"]
         lat = "lat" in values
         lon = "lon" in values
         ele = "ele" in values
@@ -1002,7 +1024,8 @@ class Gpx(GpxElement):
                             track_point_dict["ele"] = 0
                     if time:
                         if track_point.time is not None:
-                            track_point_dict["time"] = str(track_point.time.replace(tzinfo=timezone.utc).astimezone(tz=None))
+                            track_point_dict["time"] = str(track_point.time.replace(
+                                tzinfo=timezone.utc).astimezone(tz=None))
                         else:
                             track_point_dict["time"] = ""
                     if speed:
@@ -1018,7 +1041,7 @@ class Gpx(GpxElement):
                     route_info.append(track_point_dict)
         df = pd.DataFrame(route_info)
         return df
-    
+
     def to_csv(
             self,
             path: str = None,

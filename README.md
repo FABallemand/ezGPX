@@ -4,6 +4,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/ezgpx)
 ![GitHub last commit](https://img.shields.io/github/last-commit/FABallemand/ezGPX/main)
 [![Documentation Status](https://readthedocs.org/projects/ezgpx/badge/?version=latest)](https://ezgpx.readthedocs.io/en/latest/?badge=latest)
+[![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/ezgpx)
 <!-- ![CI](https://github.com/FABallemand/ezGPX/actions/workflows/ci.yml/badge.svg?event=push) -->
 

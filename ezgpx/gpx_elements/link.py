@@ -1,5 +1,6 @@
 from .gpx_element import GpxElement
 
+
 class Link(GpxElement):
     """
     linkType element in GPX file.
@@ -12,7 +13,7 @@ class Link(GpxElement):
             tag: str = "link",
             href: str = None,
             text: str = None,
-            type: str = None) -> None:
+            type_: str = None) -> None:
         """
         Initialize Link instance.
 
@@ -30,5 +31,4 @@ class Link(GpxElement):
         self.tag: str = tag
         self.href: str = href
         self.text: str = text
-        self.type: str = type
-        
+        self.type: str = type_

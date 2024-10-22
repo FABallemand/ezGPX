@@ -5,6 +5,7 @@ from .gpx_element import GpxElement
 from .link import Link
 from .track_segment import TrackSegment
 
+
 class Track(GpxElement):
     """
     trkType element in GPX file.
@@ -22,7 +23,7 @@ class Track(GpxElement):
             src: str = None,
             link: Link = None,
             number: int = None,
-            type: str = None,
+            type_: str = None,
             extensions: Extensions = None,
             trkseg: List[TrackSegment] = None):
         """
@@ -58,6 +59,6 @@ class Track(GpxElement):
         self.src: str = src
         self.link: Link = link
         self.number: int = number
-        self.type: str = type
+        self.type: str = type_
         self.extensions: Extensions = extensions
         self.trkseg: List[TrackSegment] = [] if trkseg is None else trkseg

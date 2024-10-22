@@ -1,5 +1,6 @@
 from .gpx_element import GpxElement
 
+
 class Email(GpxElement):
     """
     emailType element in GPX file.

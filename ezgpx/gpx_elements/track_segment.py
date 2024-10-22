@@ -4,13 +4,14 @@ from .extensions import Extensions
 from .gpx_element import GpxElement
 from .way_point import WayPoint
 
+
 class TrackSegment(GpxElement):
     """
     trksegType in GPX file.
     """
     fields = ["trkpt", "extensions"]
     mandatory_fields = []
-    
+
     def __init__(
             self,
             tag: str = "trkseg",

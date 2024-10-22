@@ -4,6 +4,7 @@ from .gpx_element import GpxElement
 from .link import Link
 from .way_point import WayPoint
 
+
 class Route(GpxElement):
     """
     rteType element in GPX file.
@@ -20,8 +21,8 @@ class Route(GpxElement):
             desc: str = None,
             src: str = None,
             link: Link = None,
-            number: int = None, # non negative integer
-            type: str = None,
+            number: int = None,  # non negative integer
+            type_: str = None,
             extensions: Extensions = None,
             rtept: List[WayPoint] = None) -> None:
         """
@@ -55,6 +56,6 @@ class Route(GpxElement):
         self.src: str = src
         self.link: Link = link
         self.number: int = number
-        self.type: str = type
+        self.type: str = type_
         self.extensions: Extensions = extensions
         self.rtept: List[WayPoint] = [] if rtept is None else rtept

@@ -7,6 +7,9 @@ Description
 
 .. image:: https://img.shields.io/github/last-commit/FABallemand/ezGPX/main
 
+.. image:: https://img.shields.io/badge/linting-pylint-yellowgreen
+    :target: https://github.com/pylint-dev/pylint
+
 .. image:: https://img.shields.io/pypi/dm/ezGPX
 
 .. note:: TLDR: Easy to use Python library for GPX files.

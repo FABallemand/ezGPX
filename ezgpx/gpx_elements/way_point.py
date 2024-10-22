@@ -4,6 +4,7 @@ from .extensions import Extensions
 from .gpx_element import GpxElement
 from .link import Link
 
+
 class WayPoint(GpxElement):
     """
     wptType element in GPX file.
@@ -20,7 +21,7 @@ class WayPoint(GpxElement):
             lon: float = None,
             ele: float = None,
             time: datetime = None,
-            mag_var: float = None, # 0 <= value < 360
+            mag_var: float = None,  # 0 <= value < 360
             geo_id_height: float = None,
             name: str = None,
             cmt: str = None,
@@ -28,14 +29,14 @@ class WayPoint(GpxElement):
             src: str = None,
             link: Link = None,
             sym: str = None,
-            type: str = None,
-            fix: str = None, # none, 2d, 3d, dgps, pps
-            sat: int = None, # non negative integer
+            type_: str = None,
+            fix: str = None,  # none, 2d, 3d, dgps, pps
+            sat: int = None,  # non negative integer
             hdop: float = None,
             vdop: float = None,
             pdop: float = None,
             age_of_gps_data: float = None,
-            dgpsid: int = None, # 0 <= value <= 1023
+            dgpsid: int = None,  # 0 <= value <= 1023
             extensions: Extensions = None) -> None:
         """
         Initialize WayPoint instance.
@@ -103,7 +104,7 @@ class WayPoint(GpxElement):
         self.src: str = src
         self.link: Link = link
         self.sym: str = sym
-        self.type: str = type
+        self.type: str = type_
         self.fix: str = fix
         self.sat: int = sat
         self.hdop: float = hdop

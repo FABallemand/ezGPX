@@ -1,5 +1,6 @@
 from .gpx_element import GpxElement
 
+
 class Extensions(GpxElement):
     """
     extensionsType element in GPX file.
@@ -10,6 +11,6 @@ class Extensions(GpxElement):
     def __init__(
             self,
             tag: str = "extensions",
-            values: dict = {}):
+            values: dict = None):
         self.tag: str = tag
-        self.values: dict = values
+        self.values: dict = values if values is not None else {}

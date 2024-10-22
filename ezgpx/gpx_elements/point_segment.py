@@ -3,6 +3,7 @@ from typing import List
 from .gpx_element import GpxElement
 from .point import Point
 
+
 class PointSegment(GpxElement):
     """
     ptsegType element in GPX file.

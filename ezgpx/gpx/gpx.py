@@ -1,39 +1,38 @@
-import os
 import errno
-import warnings
-from typing import Optional, Union, List, Tuple, Dict, NewType
 import logging
-from zipfile import ZipFile
+import os
+import warnings
 import webbrowser
 from datetime import datetime
 from math import degrees, isclose
-
-import pandas as pd
-import numpy as np
-
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
-from mpl_toolkits.basemap import Basemap
-import matplotlib.animation as animation
-
-import gmplot
+from typing import Dict, List, NewType, Optional, Tuple, Union
+from zipfile import ZipFile
 
 import folium
-from folium.plugins import MiniMap
+import gmplot
+import matplotlib
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from folium.features import DivIcon
-
+from folium.plugins import MiniMap
+from matplotlib.axes import Axes
+from mpl_toolkits.basemap import Basemap
 from papermap import PaperMap
 
-from ..gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, PointSegment, Point, Route, TrackSegment, Track, WayPoint
+from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
+                            Metadata, Person, Point, PointSegment, Route,
+                            Track, TrackSegment, WayPoint)
+from ..parser.fit_parser import FitParser
 from ..parser.gpx_parser import GPXParser
 from ..parser.kml_parser import KMLParser
-from ..parser.fit_parser import FitParser
+from ..utils import EARTH_RADIUS
 from ..writer.gpx_writer import GPXWriter
 from ..writer.kml_writer import KMLWriter
-from ..utils import EARTH_RADIUS
 
-GPX = NewType("GPX", object) # GPX forward declaration for type hint
+GPX = NewType("GPX", object)  # GPX forward declaration for type hint
+
 
 class GPX():
     """
@@ -60,7 +59,7 @@ class GPX():
         # GPX file description
         self.file_path: str = None
         self.file_name: str = None
-        
+
         # GPX file content
         self.gpx: Gpx = None
         self._ele_data: bool = False
@@ -83,7 +82,8 @@ class GPX():
 
             # GPX
             if file_path.endswith(".gpx"):
-                self._gpx_parser = GPXParser(file_path, xml_schema, xml_extensions_schemas)
+                self._gpx_parser = GPXParser(
+                    file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self._gpx_parser.gpx
                 self._ele_data = self._gpx_parser.ele_data
                 self._time_data = self._gpx_parser.time_data
@@ -92,7 +92,8 @@ class GPX():
 
             # KML
             elif file_path.endswith(".kml"):
-                self._kml_parser = KMLParser(file_path, xml_schema, xml_extensions_schemas)
+                self._kml_parser = KMLParser(
+                    file_path, xml_schema, xml_extensions_schemas)
                 self.gpx = self._kml_parser.gpx
                 self._precisions = self._kml_parser.precisions
                 self._time_format = self._kml_parser.time_format
@@ -100,18 +101,20 @@ class GPX():
             # KMZ
             elif file_path.endswith(".kmz"):
                 kmz = ZipFile(file_path, 'r')
-                kmls = [info.filename for info in kmz.infolist() if info.filename.endswith(".kml")]
+                kmls = [info.filename for info in kmz.infolist(
+                ) if info.filename.endswith(".kml")]
                 if "doc.kml" not in kmls:
                     raise Exception(f"Unable to parse file: {file_path}"
                                     "Expected to find doc.kml inside KMZ file.")
                 kml = kmz.open("doc.kml", 'r').read()
                 self._write_tmp_kml("tmp.kml", kml)
-                self._kml_parser = KMLParser("tmp.kml", xml_schema, xml_extensions_schemas)
+                self._kml_parser = KMLParser(
+                    "tmp.kml", xml_schema, xml_extensions_schemas)
                 self.gpx = self._kml_parser.gpx
                 self._precisions = self._kml_parser.precisions
                 self._time_format = self._kml_parser.time_format
                 os.remove("tmp.kml")
-            
+
             # FIT
             elif file_path.endswith(".fit"):
                 self._fit_parser = FitParser(file_path)
@@ -125,18 +128,19 @@ class GPX():
                                  "Consider renaming your file with the proper file extension.")
 
             self._gpx_writer: GPXWriter = GPXWriter(self.gpx,
-                precisions=self._precisions, time_format=self._time_format,
-                extensions_fields=self._gpx_parser.extensions_fields if self._gpx_parser else {})
+                                                    precisions=self._precisions, time_format=self._time_format,
+                                                    extensions_fields=self._gpx_parser.extensions_fields if self._gpx_parser else {})
             self._kml_writer: KMLWriter = KMLWriter(self.gpx,
-                precisions=self._precisions, time_format=self._time_format)
-            
+                                                    precisions=self._precisions, time_format=self._time_format)
+
         # Invalid file path
         else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
-            
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+
     def _write_tmp_kml(
             self,
-            path: str ="tmp.kml",
+            path: str = "tmp.kml",
             kml_string: Optional[bytes] = None):
         """
         Write temproray .KML file in order to parse KMZ file.
@@ -154,14 +158,14 @@ class GPX():
 
     def __str__(self) -> str:
         return self._gpx_writer.gpx_to_string(self.gpx)
-    
+
     def __repr__(self):
         return f"file_path = {self.file_path}\ngpx = {self.gpx}"
-    
+
 ###############################################################################
 #### Schemas ##################################################################
 ###############################################################################
-    
+
     def check_xml_schema(self) -> bool:
         """
         Check XML schema.
@@ -172,7 +176,7 @@ class GPX():
             True if the file follows XML schemas.
         """
         return self.gpx.check_xml_schema(self.file_path)
-    
+
     def check_xml_extensions_schemas(self) -> bool:
         """
         Check XML extension schemas.
@@ -183,7 +187,7 @@ class GPX():
             True if the file follows XML schemas.
         """
         return self.gpx.check_xml_extensions_schemas(self.file_path)
-    
+
 ###############################################################################
 #### Name #####################################################################
 ###############################################################################
@@ -198,7 +202,7 @@ class GPX():
             Activity name.
         """
         return self.gpx.name()
-    
+
     def set_name(self, new_name: str) -> None:
         """
         Set name.
@@ -224,7 +228,7 @@ class GPX():
             Number of points in the GPX.
         """
         return self.gpx.nb_points()
-    
+
     def bounds(self) -> Tuple[float, float, float, float]:
         """
         Find minimum and maximum latitude and longitude.
@@ -268,7 +272,7 @@ class GPX():
             Last point.
         """
         return self.gpx.last_point()
-    
+
     def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
         Find extreme points in track, i.e.: points with lowest and highest latitude and longitude.
@@ -279,7 +283,7 @@ class GPX():
             Min latitude point, min longitude point, max latitude point, max longitude point
         """
         return self.gpx.extreme_points()
-    
+
 ###############################################################################
 #### Distance and Elevation ###################################################
 ###############################################################################
@@ -316,7 +320,7 @@ class GPX():
             Descent (meters).
         """
         return self.gpx.descent()
-    
+
     def min_elevation(self) -> float:
         """
         Returns the minimum elevation (meters) in tracks contained in the GPX.
@@ -338,7 +342,7 @@ class GPX():
             Maximum elevation (meters).
         """
         return self.gpx.max_elevation()
-    
+
     def compute_points_ascent_rate(self) -> None:
         """
         Compute ascent rate at each point.
@@ -355,7 +359,7 @@ class GPX():
             Minimum ascent rate.
         """
         return self.gpx.min_ascent_rate()
-    
+
     def max_ascent_rate(self) -> float:
         """
         Return activity maximum ascent rate.
@@ -366,7 +370,7 @@ class GPX():
             Maximum ascent rate.
         """
         return self.gpx.max_ascent_rate()
-    
+
 ###############################################################################
 #### Time #####################################################################
 ###############################################################################
@@ -425,7 +429,7 @@ class GPX():
             Moving time.
         """
         return self.gpx.moving_time()
-    
+
 ###############################################################################
 #### Speed and Pace ###########################################################
 ###############################################################################
@@ -451,7 +455,7 @@ class GPX():
             Average moving speed (kilometres per hour).
         """
         return self.gpx.avg_moving_speed()
-    
+
     def compute_points_speed(self) -> None:
         """
         Compute speed (kilometres per hour) at each track point.
@@ -479,7 +483,7 @@ class GPX():
             Maximum speed.
         """
         return self.gpx.max_speed()
-    
+
     def avg_pace(self) -> float:
         """
         Return average pace (minutes per kilometer) during the activity.
@@ -501,7 +505,7 @@ class GPX():
             Average moving pace (minutes per kilometer).
         """
         return self.gpx.avg_moving_pace()
-    
+
     def compute_points_pace(self) -> None:
         """
         Compute pace at each track point.
@@ -529,7 +533,7 @@ class GPX():
             Maximum pace.
         """
         return self.gpx.max_pace()
-    
+
     def compute_points_ascent_speed(self) -> None:
         """
         Compute ascent speed (kilometres per hour) at each track point.
@@ -557,7 +561,7 @@ class GPX():
             Maximum ascent speed.
         """
         return self.gpx.max_ascent_speed()
-    
+
 ###############################################################################
 #### Data Removal #############################################################
 ###############################################################################
@@ -642,15 +646,16 @@ class GPX():
         merged_gpx.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
         merged_gpx.gpx.version = "1.1"
         merged_gpx.gpx.xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
-        merged_gpx.gpx.xsi_schema_location = ["http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
-        merged_gpx.gpx.xmlns_gpxtpx = None #TODO
-        merged_gpx.gpx.xmlns_gpxtrk = None #TODO
-        merged_gpx.gpx.xmlns_wptx1 = None #TODO
-        merged_gpx.gpx.metadata = None #TODO
+        merged_gpx.gpx.xsi_schema_location = [
+            "http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+        merged_gpx.gpx.xmlns_gpxtpx = None  # TODO
+        merged_gpx.gpx.xmlns_gpxtrk = None  # TODO
+        merged_gpx.gpx.xmlns_wptx1 = None  # TODO
+        merged_gpx.gpx.metadata = None  # TODO
         merged_gpx.gpx.wpt = gpx_1.gpx.wpt + gpx_2.gpx.wpt
         merged_gpx.gpx.rte = gpx_1.gpx.rte + gpx_2.gpx.rte
         merged_gpx.gpx.trk = gpx_1.gpx.trk + gpx_2.gpx.trk
-        merged_gpx.gpx.extensions = None #TODO
+        merged_gpx.gpx.extensions = None  # TODO
 
         # Return new GPX instance
         return merged_gpx
@@ -658,7 +663,7 @@ class GPX():
 ###############################################################################
 #### Exports ##################################################################
 ###############################################################################
-    
+
     def to_dataframe(
             self,
             values: List[str] = None) -> pd.DataFrame:
@@ -733,7 +738,7 @@ class GPX():
             CSV like string if path is set to None.
         """
         return self.gpx.to_csv(path, values, sep, header, index)
-    
+
     def to_gpx(
             self,
             path: str,
@@ -789,7 +794,7 @@ class GPX():
                                       way_point_fields=way_point_fields,
                                       xml_schema=xml_schema,
                                       xml_extensions_schemas=xml_extensions_schemas)
-    
+
     def to_kml(
             self,
             path: str,
@@ -813,7 +818,7 @@ class GPX():
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
         return self._kml_writer.write(path, styles, xml_schema)
-    
+
 ###############################################################################
 #### Matplotlib Plot ##########################################################
 ###############################################################################
@@ -839,12 +844,12 @@ class GPX():
             file_path: str = None):
         # Create dataframe containing data from the GPX file
         self._dataframe = self.to_dataframe(projection=True,
-                                           elevation=True,
-                                           speed=True,
-                                           pace=True,
-                                           ascent_rate=True,
-                                           ascent_speed=True,
-                                           distance_from_start=True)
+                                            elevation=True,
+                                            speed=True,
+                                            pace=True,
+                                            ascent_rate=True,
+                                            ascent_speed=True,
+                                            distance_from_start=True)
 
         # Create figure and axes
         fig, ax = plt.subplots(nrows=1,
@@ -852,11 +857,12 @@ class GPX():
                                figsize=figsize,
                                gridspec_kw={"width_ratios": [figsize[0]],
                                             "height_ratios": [figsize[1]]})
-        
+
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(
+                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 
@@ -865,7 +871,7 @@ class GPX():
 
         # Set axes aspect ratio
         ax.set_aspect(figsize[1] / figsize[0], adjustable="datalim")
-        pos = ax.get_position() # Axes bounding box
+        pos = ax.get_position()  # Axes bounding box
         print(f"pos.width = {pos.width}")
         print(f"pos.height = {pos.height}")
 
@@ -897,7 +903,7 @@ class GPX():
             plt.show()
 
         return fig, ax
-    
+
     def matplotlib_plot(
             self,
             figsize: Tuple[int, int] = (16, 9),
@@ -915,17 +921,18 @@ class GPX():
             title_fontsize: int = 20,
             watermark: bool = False,
             file_path: str = None):
-        dynamic_colors = ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]
+        dynamic_colors = ["ele", "speed", "pace",
+                          "vertical_drop", "ascent_rate", "ascent_speed"]
 
         # Create dataframe containing data from the GPX file
         values = ["lat", "lon"]
         if color in dynamic_colors:
             values.append(color)
         self._dataframe = self.to_dataframe(values)
-        
+
         # Create figure
         fig = plt.figure(figsize=figsize)
-        
+
         # Compute track boundaries
         min_lat, min_lon, max_lat, max_lon = self.bounds()
 
@@ -940,18 +947,19 @@ class GPX():
         max_lat = min(max_lat + offset, 90)
         min_lon = max(-180, min_lon - offset)
         max_lon = min(max_lon + offset, 180)
-        
+
         # Some sort of magic to achieve the correct map aspect ratio
         # CREATE FUNCTION (also used in animation??)
         lat_offset = 1e-5
         lon_offset = 1e-5
         delta_lat = abs(max_lat - min_lat)
         delta_lon = abs(max_lon - min_lon)
-        r = delta_lon / delta_lat # Current map aspect ratio
-        r_ref = figsize[0] / figsize[1] # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        r = delta_lon / delta_lat  # Current map aspect ratio
+        # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        r_ref = figsize[0] / figsize[1]
 
         tolerance = 1e-3
-        # while (not isclose(r, r_ref, abs_tol=tolerance) or 
+        # while (not isclose(r, r_ref, abs_tol=tolerance) or
         #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
         #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
         while not isclose(r, r_ref, abs_tol=tolerance):
@@ -971,7 +979,7 @@ class GPX():
                       llcrnrlat=min_lat,
                       urcrnrlon=max_lon,
                       urcrnrlat=max_lat)
-        
+
         # Add background
         if background is None:
             pass
@@ -991,7 +999,7 @@ class GPX():
             map.arcgisimage(service=background,
                             dpi=dpi,
                             verbose=True)
-            
+
         # Scatter track points
         if color in dynamic_colors:
             im = map.scatter(self._dataframe["lon"],
@@ -1004,7 +1012,7 @@ class GPX():
                              self._dataframe["lat"],
                              s=size,
                              color=color)
-            
+
         # Scatter start point with different color
         if start_point_color:
             map.scatter(self._dataframe["lon"][0], self._dataframe["lat"][0],
@@ -1018,10 +1026,10 @@ class GPX():
         # Scatter way points with different color
         if way_points_color:
             for way_point in self.gpx.wpt:
-                x, y = map(way_point.lon, way_point.lat) # Project way point
+                x, y = map(way_point.lon, way_point.lat)  # Project way point
                 map.scatter(x, y, marker="D",
                             color=way_points_color)      # Scatter way point
-            
+
         # Colorbar
         if colorbar:
             fig.colorbar(im)
@@ -1029,7 +1037,8 @@ class GPX():
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(
+                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 
@@ -1052,7 +1061,7 @@ class GPX():
 ###############################################################################
 #### Expert Plot ##############################################################
 ###############################################################################
-    
+
     def check_axes_position(
             self,
             subplots: Tuple[int, int],
@@ -1079,11 +1088,11 @@ class GPX():
         # Check row index
         if row < 0 or row >= nb_rows:
             return False
-        
+
         # Check column index
         if column < 0 or column >= nb_columns:
             return False
-        
+
         # Valid position
         return True
 
@@ -1104,7 +1113,7 @@ class GPX():
             dpi: int = 96):
         # Clear axes
         axes.clear()
-        
+
         # Compute track boundaries
         min_lat, min_lon, max_lat, max_lon = self.bounds()
 
@@ -1126,14 +1135,15 @@ class GPX():
         lon_offset = 1e-5
         delta_lat = abs(max_lat - min_lat)
         delta_lon = abs(max_lon - min_lon)
-        r = delta_lon / delta_lat # Current map aspect ratio
-        pos = axes.get_position() # Axes bounding box
+        r = delta_lon / delta_lat  # Current map aspect ratio
+        pos = axes.get_position()  # Axes bounding box
         print(f"pos.width = {pos.width}")
         print(f"pos.height = {pos.height}")
-        r_ref = pos.width / pos.height # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        r_ref = pos.width / pos.height
 
         tolerance = 1e-3
-        # while (not isclose(r, r_ref, abs_tol=tolerance) or 
+        # while (not isclose(r, r_ref, abs_tol=tolerance) or
         #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
         #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
         # while not isclose(r, r_ref, abs_tol=tolerance):
@@ -1161,7 +1171,7 @@ class GPX():
                       urcrnrlon=max_lon,
                       urcrnrlat=max_lat,
                       ax=axes)
-        
+
         # Add background
         if background is None:
             pass
@@ -1183,9 +1193,10 @@ class GPX():
                             # ypixels=ypixels,
                             dpi=dpi,
                             verbose=True)
-            
+
         # Scatter track points
-        x, y = map(self._dataframe["lon"], self._dataframe["lat"]) # Project track points
+        # Project track points
+        x, y = map(self._dataframe["lon"], self._dataframe["lat"])
         x, y = x.tolist(), y.tolist()                            # Convert to list
         if color in ["ele", "speed", "pace", "vertical_drop", "ascent_rate", "ascent_speed"]:
             im = map.scatter(self._dataframe["lon"],
@@ -1198,7 +1209,7 @@ class GPX():
                              self._dataframe["lat"],
                              s=size,
                              color=color)
-            
+
         # Scatter start point with different color
         if start_point_color:
             map.scatter(self._dataframe["lon"][0], self._dataframe["lat"][0],
@@ -1212,10 +1223,10 @@ class GPX():
         # Scatter way points with different color
         if way_points_color:
             for way_point in self.gpx.wpt:
-                x, y = map(way_point.lon, way_point.lat) # Project way point
+                x, y = map(way_point.lon, way_point.lat)  # Project way point
                 map.scatter(x, y, marker="D",
                             color=way_points_color)      # Scatter way point
-            
+
         # Colorbar
         if colorbar:
             plt.colorbar(im,
@@ -1241,7 +1252,7 @@ class GPX():
         x = None
         x_label = ""
         if x_type == "distance":
-            x = self._dataframe["distance_from_start"] / 1000 # Convert to km
+            x = self._dataframe["distance_from_start"] / 1000  # Convert to km
             x_label = "Distance [km]"
         elif x_type == "time":
             x = self._dataframe["time"].tolist()
@@ -1277,7 +1288,7 @@ class GPX():
                               self._dataframe["ele"],
                               color=fill_color,
                               alpha=fill_alpha)
-              
+
         # Colorbar
         if colorbar:
             plt.colorbar(im,
@@ -1311,7 +1322,8 @@ class GPX():
         x = None
         x_label = ""
         if x_type == "distance":
-            x = self._dataframe["distance_from_start"].values / 1000 # Convert to km
+            # Convert to km
+            x = self._dataframe["distance_from_start"].values / 1000
             x_label = "Distance [km]"
         elif x_type == "time":
             x = self._dataframe["time"].tolist()
@@ -1328,7 +1340,8 @@ class GPX():
             # Remove lowest values
             pace = self._dataframe["pace"].values
             color = self._dataframe[color]
-            tmp = [(x, p, c) for (x, p, c) in list(zip(x, pace, color)) if p < threshold]
+            tmp = [(x, p, c) for (x, p, c) in list(
+                zip(x, pace, color)) if p < threshold]
             x = [x for (x, p, c) in tmp]
             pace = [p for (x, p, c) in tmp]
             color = [c for (x, p, c) in tmp]
@@ -1336,17 +1349,17 @@ class GPX():
                               pace,
                               s=size,
                               c=color,
-                              cmap=cmap) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
+                              cmap=cmap)  # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`) is no longer supported. Convert to a numpy array before indexing instead.
         else:
             # Remove lowest values
             pace = self._dataframe["pace"].values
-            tmp = [(x, p) for (x,p) in list(zip(x, pace)) if p < threshold]
-            x = [x for (x,p) in tmp]
-            pace = [p for (x,p) in tmp]
+            tmp = [(x, p) for (x, p) in list(zip(x, pace)) if p < threshold]
+            x = [x for (x, p) in tmp]
+            pace = [p for (x, p) in tmp]
             im = axes.scatter(x,
                               pace,
                               s=size,
-                              color=color) # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
+                              color=color)  # .values to avoid -> Multi-dimensional indexing (e.g. `obj[:, None]`)
         axes.invert_yaxis()
 
         # Grid
@@ -1397,7 +1410,8 @@ class GPX():
                     nb_ascent_rates[i] += 1
 
         # Compute percentage for each ascent rate zone
-        percent_ascent_rate = [(nb * 100) / nb_points for nb in nb_ascent_rates]
+        percent_ascent_rate = [
+            (nb * 100) / nb_points for nb in nb_ascent_rates]
 
         # Create position and labels
         y_pos = range(1, len(ascent_rates)+1)
@@ -1411,16 +1425,18 @@ class GPX():
                                  "yellow", "gold",
                                  "orange", "red",
                                  "purple", "black"])
-        
+
         # Add legend on bars (percentiles)
         largest_percentile = max(percent_ascent_rate)
-        large_percentiles = [f"{p:.1f} %" if abs(p - largest_percentile) < 10 else "" for p in percent_ascent_rate]
-        small_percentiles = [f"{p:.1f} %" if abs(p - largest_percentile) >= 10 else "" for p in percent_ascent_rate]
+        large_percentiles = [f"{p:.1f} %" if abs(
+            p - largest_percentile) < 10 else "" for p in percent_ascent_rate]
+        small_percentiles = [f"{p:.1f} %" if abs(
+            p - largest_percentile) >= 10 else "" for p in percent_ascent_rate]
         axes.bar_label(rects, small_percentiles,
                        padding=5, color="black", fontweight="bold")
         axes.bar_label(rects, large_percentiles,
                        padding=-40, color="white", fontweight="bold")
-        
+
         # Set y-ticks with labels
         axes.set_yticks(y_pos, labels=y_labels)
 
@@ -1432,10 +1448,10 @@ class GPX():
             axes: Axes):
         # Clear axes
         axes.clear()
-        
+
         # Compute table bounding box
         pos = axes.get_position()
-        bbox = [pos.x0, pos.y0, pos.width, pos.height] # No change
+        bbox = [pos.x0, pos.y0, pos.width, pos.height]  # No change
 
         # Row labels
         row_labels = [
@@ -1478,7 +1494,7 @@ class GPX():
             img_legend: str):
         # Clear axes
         axes.clear()
-        
+
         # Plot image
         img = plt.imread(img_path)
         axes.imshow(img)
@@ -1505,18 +1521,19 @@ class GPX():
                            bbox=dict(boxstyle="square",
                                      ec="black",
                                      fc="lightgray"))
-        axes.text(0.5 , 0.5, "Made with ezGPX", **text_kwargs)
+        axes.text(0.5, 0.5, "Made with ezGPX", **text_kwargs)
 
         # Remove axes
         axes.axis("off")
 
     def expert_plot(
             self,
-            figsize: Tuple[int, int] = (16,9),
-            subplots: Tuple[int, int] = (1,1),
+            figsize: Tuple[int, int] = (16, 9),
+            subplots: Tuple[int, int] = (1, 1),
             width_ratios: List = None,
             height_ratios: List = None,
-            map_position: Optional[Union[Tuple[int, int], List[Tuple[int, int]]]] = (0,0),
+            map_position: Optional[Union[Tuple[int, int],
+                                         List[Tuple[int, int]]]] = (0, 0),
             map_size: float = 10,
             map_color: str = "#101010",
             map_cmap: Optional[matplotlib.colors.Colormap] = None,
@@ -1529,8 +1546,10 @@ class GPX():
             xpixels: int = 400,
             ypixels: Optional[int] = None,
             dpi: int = 96,
-            elevation_profile_position: Optional[Tuple[int, int]] = (1,0), # None
-            elevation_profile_x_type: Optional[str] = None, # "distance", "time"
+            elevation_profile_position: Optional[Tuple[int, int]] = (
+                1, 0),  # None
+            # "distance", "time"
+            elevation_profile_x_type: Optional[str] = None,
             elevation_profile_size: float = 10,
             elevation_profile_color: str = "#101010",
             elevation_profile_cmap: Optional[matplotlib.colors.Colormap] = None,
@@ -1538,8 +1557,8 @@ class GPX():
             elevation_profile_grid: bool = False,
             elevation_profile_fill_color: Optional[str] = None,
             elevation_profile_fill_alpha: float = 0.5,
-            pace_graph_position: Optional[Tuple[int, int]] = (2,0), # None
-            pace_graph_x_type: Optional[str] = None, # "distance", "time"
+            pace_graph_position: Optional[Tuple[int, int]] = (2, 0),  # None
+            pace_graph_x_type: Optional[str] = None,  # "distance", "time"
             pace_graph_size: float = 10,
             pace_graph_color: str = "#101010",
             pace_graph_cmap: Optional[matplotlib.colors.Colormap] = None,
@@ -1548,12 +1567,14 @@ class GPX():
             pace_graph_fill_color: Optional[str] = None,
             pace_graph_fill_alpha: float = 0.5,
             pace_graph_threshold: float = 60.0,
-            ascent_rate_graph_position: Optional[Tuple[int, int]] = (0,1), # None
-            data_table_position: Optional[Tuple[int, int]] = (1,1), # None
+            ascent_rate_graph_position: Optional[Tuple[int, int]] = (
+                0, 1),  # None
+            data_table_position: Optional[Tuple[int, int]] = (1, 1),  # None
             img_position: Optional[Tuple[int, int]] = None,
             img_path: Optional[str] = None,
             img_legend: Optional[str] = None,
-            made_with_ezgpx_position: Optional[Tuple[int, int]] = (0,1), # None
+            made_with_ezgpx_position: Optional[Tuple[int, int]] = (
+                0, 1),  # None
             shared_color: str = "#101010",
             shared_cmap: Optional[matplotlib.colors.Colormap] = None,
             shared_colorbar: bool = False,
@@ -1563,13 +1584,13 @@ class GPX():
             file_path: Optional[str] = None):
         # Create dataframe containing data from the GPX file
         self._dataframe = self.to_dataframe(elevation=True,
-                                           time=True,
-                                           speed=True,
-                                           pace=True,
-                                           ascent_rate=True,
-                                           ascent_speed=True,
-                                           distance_from_start=True)
-        
+                                            time=True,
+                                            speed=True,
+                                            pace=True,
+                                            ascent_rate=True,
+                                            ascent_speed=True,
+                                            distance_from_start=True)
+
         # Create figure with axes
         fig, axs = plt.subplots(nrows=subplots[0],
                                 ncols=subplots[1],
@@ -1577,15 +1598,16 @@ class GPX():
                                 layout="constrained",
                                 gridspec_kw={"width_ratios": width_ratios,
                                              "height_ratios": height_ratios})
-        
+
         # Reshape axs for single line/column plots
         if subplots[0] == 1 or subplots[1] == 1:
             axs = axs.reshape((subplots[0], subplots[1]))
-        
+
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(
+                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 
@@ -1598,9 +1620,10 @@ class GPX():
             if isinstance(map_position, tuple):
                 # Check if map_position is correct
                 if not self.check_axes_position(subplots, map_position):
-                    logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
+                    logging.error(
+                        f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
                     return
-                
+
                 # Retrieve map axis
                 map_ax = axs[map_position]
 
@@ -1611,14 +1634,16 @@ class GPX():
                     width_ratio = width_ratios[map_position[0]]
                 if height_ratios is not None:
                     height_ratio = height_ratios[map_position[1]]
-                map_ax.set_aspect(width_ratio / height_ratio, adjustable="datalim")                
+                map_ax.set_aspect(width_ratio / height_ratio,
+                                  adjustable="datalim")
             else:
                 # Check if map_position is correct
                 for map_p in map_position:
                     if not self.check_axes_position(subplots, map_p):
-                        logging.error(f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
+                        logging.error(
+                            f"Invalid map_position argument: no subplot {map_position} in a {subplots} array of plots")
                         return
-                    
+
                 gridspec = axs[0, 0].get_subplotspec().get_gridspec()
 
                 # Remove unused subplots and retrieve subfigure span
@@ -1638,7 +1663,8 @@ class GPX():
                     if map_p[1] > max_col:
                         max_col = map_p[1]
 
-                subfig = fig.add_subfigure(gridspec[min_row:max_row+1, min_col:max_col+1])
+                subfig = fig.add_subfigure(
+                    gridspec[min_row:max_row+1, min_col:max_col+1])
                 # subfig.set_facecolor("0.75") # For testing purpose
                 map_ax = subfig.subplots(nrows=1, ncols=1)
 
@@ -1656,7 +1682,7 @@ class GPX():
                                  xpixels=xpixels,
                                  ypixels=ypixels,
                                  dpi=dpi)
-            
+
         # Handle elevation profile plot
         if elevation_profile_position is not None:
             # Check if elevation_profile_position is correct
@@ -1672,9 +1698,10 @@ class GPX():
                                               fill_color=elevation_profile_fill_color,
                                               fill_alpha=elevation_profile_fill_alpha)
             else:
-                logging.error(f"Invalid elevation_profile_position argument: no subplot {elevation_profile_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid elevation_profile_position argument: no subplot {elevation_profile_position} in a {subplots} array of plots")
                 return
-            
+
         # Handle pace graph plot
         if pace_graph_position is not None:
             # Check if pace_graph_position is correct
@@ -1691,19 +1718,22 @@ class GPX():
                                        fill_alpha=pace_graph_fill_alpha,
                                        threshold=pace_graph_threshold)
             else:
-                logging.error(f"Invalid pace_graph_position argument: no subplot {pace_graph_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid pace_graph_position argument: no subplot {pace_graph_position} in a {subplots} array of plots")
                 return
-            
+
         # Handle ascent rate bar graph
         if ascent_rate_graph_position is not None:
             # Check if ascent_rate_graph_position is correct
             if self.check_axes_position(subplots, ascent_rate_graph_position):
                 # Plot bar graph on subplot
-                self.expert_ascent_rate_graph(axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
+                self.expert_ascent_rate_graph(
+                    axs[ascent_rate_graph_position[0], ascent_rate_graph_position[1]])
             else:
-                logging.error(f"Invalid ascent_rate_graph_position position: no subplot {ascent_rate_graph_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid ascent_rate_graph_position position: no subplot {ascent_rate_graph_position} in a {subplots} array of plots")
                 return
-            
+
         # Handle data table plot
         if data_table_position is not None:
             # Check if data_table_position is correct
@@ -1715,9 +1745,10 @@ class GPX():
                 # Plot data table on subplot
                 self.expert_data_table(data_ax)
             else:
-                logging.error(f"Invalid data_table_position argument: no subplot {data_table_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid data_table_position argument: no subplot {data_table_position} in a {subplots} array of plots")
                 return
-            
+
         # Handle image
         if img_position is not None:
             # Check if img_position is correct
@@ -1727,7 +1758,8 @@ class GPX():
                                   img_path,
                                   img_legend)
             else:
-                logging.error(f"Invalid img_position argument: no subplot {img_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid img_position argument: no subplot {img_position} in a {subplots} array of plots")
                 return
 
         # Handle ascent rate bar graph
@@ -1737,19 +1769,19 @@ class GPX():
                 # Plot text on subplot
                 self.expert_made_with_ezgpx(axs[made_with_ezgpx_position])
             else:
-                logging.error(f"Invalid made_with_ezgpx_position argument: no subplot {made_with_ezgpx_position} in a {subplots} array of plots")
+                logging.error(
+                    f"Invalid made_with_ezgpx_position argument: no subplot {made_with_ezgpx_position} in a {subplots} array of plots")
                 return
-            
+
         if shared_color and im:
             if shared_cmap is None:
                 shared_cmap = matplotlib.cm.get_cmap("viridis", 12)
-
 
             cb_ax = fig.add_axes([1.025, 0, 0.02, 1])
             cbar = fig.colorbar(im, cax=cb_ax)
             # fig.colorbar(im,
             #              ax=axs.ravel().tolist())
-            
+
         # Save or display plot
         if file_path is not None:
             # Check if provided path exists
@@ -1814,7 +1846,7 @@ class GPX():
         if plot:
             map.plot(gpx_df["lat"], gpx_df["lon"],
                      color, edge_width=2.5)
-        
+
         # Scatter start and stop points with different color
         if start_stop_colors:
             map.scatter([self.gpx.trk[0].trkseg[0].trkpt[0].lat],
@@ -1823,13 +1855,13 @@ class GPX():
             map.scatter([self.gpx.trk[-1].trkseg[-1].trkpt[-1].lat],
                         [self.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                         start_stop_colors[1], size=5, marker=True)
-            
+
         # Scatter way points with different color
         if way_points_color:
             for way_point in self.gpx.wpt:
                 map.scatter([way_point.lat], [way_point.lon],
                             way_points_color, size=5, marker=True)
-        
+
         # Add title
         if title is not None:
             map.text(center_lat, center_lon, self.name(), color="#FFFFFF")
@@ -1887,7 +1919,7 @@ class GPX():
         m = folium.Map(location=[center_lat, center_lon],
                        zoom_start=zoom,
                        tiles=tiles)
-        
+
         # Plot track points
         gpx_df = self.to_dataframe()
         gpx_df["coordinates"] = list(
@@ -1901,7 +1933,7 @@ class GPX():
                           popup="<b>Start</b>", tooltip="Start", icon=folium.Icon(color=start_stop_colors[0])).add_to(m)
             folium.Marker([self.gpx.trk[-1].trkseg[-1].trkpt[-1].lat, self.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                           popup="<b>Stop</b>", tooltip="Stop", icon=folium.Icon(color=start_stop_colors[1])).add_to(m)
-        
+
         # Scatter way points with different color
         if way_points_color:
             for way_point in self.gpx.wpt:
@@ -1940,7 +1972,7 @@ class GPX():
 ###############################################################################
 #### PaperMap Plot ############################################################
 ###############################################################################
-            
+
     def papermap_plot(
             self,
             lat: Optional[float] = None,
@@ -2003,7 +2035,7 @@ class GPX():
             lat = center_lat
         if lon is None:
             lon = center_lon
-        
+
         pm = PaperMap(lat=lat,
                       lon=lon,
                       tile_server=tile_server,
@@ -2019,7 +2051,7 @@ class GPX():
                       background_color=background_color,
                       add_grid=add_grid,
                       grid_size=grid_size)
-        
+
         # Render map
         pm.render()
 
@@ -2031,7 +2063,6 @@ class GPX():
 ###############################################################################
 #### Animated Plot #########################################################
 ###############################################################################
-
 
     def _broken_matplotlib_animation_(
             self,
@@ -2055,12 +2086,12 @@ class GPX():
             file_path: str = None):
         # Create dataframe containing data from the GPX file
         self._dataframe = self.to_dataframe(elevation=True,
-                                           speed=True,
-                                           pace=True,
-                                           ascent_rate=True,
-                                           ascent_speed=True,
-                                           distance_from_start=True)
-        
+                                            speed=True,
+                                            pace=True,
+                                            ascent_rate=True,
+                                            ascent_speed=True,
+                                            distance_from_start=True)
+
         # Retrieve useful data
         lat = self._dataframe["lat"].values
         lon = self._dataframe["lon"].values
@@ -2068,15 +2099,16 @@ class GPX():
 
         # Create figure with axes
         fig, ax = plt.subplots(nrows=1,
-                                ncols=1,
-                                figsize=figsize,
-                                gridspec_kw={"width_ratios": [figsize[0]],
+                               ncols=1,
+                               figsize=figsize,
+                               gridspec_kw={"width_ratios": [figsize[0]],
                                             "height_ratios": [figsize[1]]})
-        
+
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(
+                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 
@@ -2100,7 +2132,7 @@ class GPX():
         map.arcgisimage(service=background,
                         dpi=dpi,
                         verbose=True)
-        
+
         # Create empty line
         # Add marker, marker style...
         line, = ax.plot([], [], color=color, linewidth=size)
@@ -2113,8 +2145,10 @@ class GPX():
                 line.set_ydata([])
 
             try:
-                line.set_xdata(np.concatenate((line.get_xdata(), np.array([lon[i]]))))
-                line.set_ydata(np.concatenate((line.get_ydata(), np.array([lat[i]]))))
+                line.set_xdata(np.concatenate(
+                    (line.get_xdata(), np.array([lon[i]]))))
+                line.set_ydata(np.concatenate(
+                    (line.get_ydata(), np.array([lat[i]]))))
             except:
                 print("No more data point, you need to stop!!")
 
@@ -2124,8 +2158,8 @@ class GPX():
         ani = animation.FuncAnimation(fig=fig,
                                       func=animate,
                                       frames=len(lat),
-                                      interval=interval, # Delay between frames in ms
-                                      repeat=True if file_path is None else repeat) # ?
+                                      interval=interval,  # Delay between frames in ms
+                                      repeat=True if file_path is None else repeat)  # ?
 
         # Save or display plot
         if file_path is not None:
@@ -2139,7 +2173,7 @@ class GPX():
             ani.show()
 
         return fig, ax
-    
+
     def matplotlib_animation(
             self,
             figsize: Tuple[int, int] = (16, 9),
@@ -2167,14 +2201,14 @@ class GPX():
         """
         # Create dataframe containing data from the GPX file
         self._dataframe = self.to_dataframe()
-        
+
         # Retrieve useful data
         lat = self._dataframe["lat"].values
         lon = self._dataframe["lon"].values
-        
+
         # Create figure
         fig = plt.figure(figsize=figsize)
-        
+
         # Compute track boundaries
         min_lat, min_lon, max_lat, max_lon = self.bounds()
 
@@ -2182,19 +2216,21 @@ class GPX():
         delta_max = max(max_lat - min_lat, max_lon - min_lon)
         offset = delta_max * offset_percentage
         min_lat, min_lon = max(0, min_lat - offset), max(0, min_lon - offset)
-        max_lat, max_lon = min(max_lat + offset, 90),  min(max_lon + offset, 180)
-        
+        max_lat, max_lon = min(
+            max_lat + offset, 90),  min(max_lon + offset, 180)
+
         # Some sort of magic to achieve the correct map aspect ratio
         # CREATE FUNCTION (also used in anmation??)
         lat_offset = 1e-5
         lon_offset = 1e-5
         delta_lat = max_lat - min_lat
         delta_lon = max_lon - min_lon
-        r = delta_lon / delta_lat # Current map aspect ratio
-        r_ref = figsize[0] / figsize[1] # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        r = delta_lon / delta_lat  # Current map aspect ratio
+        # Target map aspect ratio, Adapt in function of the shape of the subplot...
+        r_ref = figsize[0] / figsize[1]
 
         tolerance = 1e-3
-        # while (not isclose(r, r_ref, abs_tol=tolerance) or 
+        # while (not isclose(r, r_ref, abs_tol=tolerance) or
         #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
         #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
         while not isclose(r, r_ref, abs_tol=tolerance):
@@ -2214,7 +2250,7 @@ class GPX():
                       llcrnrlat=min_lat,
                       urcrnrlon=max_lon,
                       urcrnrlat=max_lat)
-        
+
         # Add background
         if background is None:
             pass
@@ -2234,7 +2270,7 @@ class GPX():
             map.arcgisimage(service=background,
                             dpi=dpi,
                             verbose=True)
-            
+
         # Create empty line
         # Add marker, marker style...
         line, = fig.gca().plot([], [], color=color, linewidth=size)
@@ -2247,8 +2283,10 @@ class GPX():
                 line.set_ydata([])
 
             try:
-                line.set_xdata(np.concatenate((line.get_xdata(), np.array([lon[i]]))))
-                line.set_ydata(np.concatenate((line.get_ydata(), np.array([lat[i]]))))
+                line.set_xdata(np.concatenate(
+                    (line.get_xdata(), np.array([lon[i]]))))
+                line.set_ydata(np.concatenate(
+                    (line.get_ydata(), np.array([lat[i]]))))
             except:
                 print("No more data point, you need to stop!!")
 
@@ -2258,9 +2296,9 @@ class GPX():
         ani = animation.FuncAnimation(fig=fig,
                                       func=animate,
                                       frames=len(lat),
-                                      interval=interval, # Delay between frames in ms
-                                      repeat=repeat if file_path is None else False) # ?
-            
+                                      interval=interval,  # Delay between frames in ms
+                                      repeat=repeat if file_path is None else False)  # ?
+
         # Colorbar
         # if colorbar:
         #     fig.colorbar(im)
@@ -2268,7 +2306,8 @@ class GPX():
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(
+                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 

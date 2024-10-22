@@ -1,5 +1,6 @@
 from .gpx_element import GpxElement
 
+
 class Bounds(GpxElement):
     """
     boundsType element in GPX file.

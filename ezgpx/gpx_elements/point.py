@@ -2,6 +2,7 @@ import datetime
 
 from .gpx_element import GpxElement
 
+
 class Point(GpxElement):
     """
     ptType element in GPX file.

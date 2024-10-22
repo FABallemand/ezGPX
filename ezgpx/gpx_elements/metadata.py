@@ -5,6 +5,7 @@ from .gpx_element import GpxElement
 from .link import Link
 from .person import Person
 
+
 class Metadata(GpxElement):
     """
     metadataType element in GPX file.
@@ -19,7 +20,7 @@ class Metadata(GpxElement):
             name: str = None,
             desc: str = None,
             author: Person = None,
-            copyright: str = None,
+            copyright_: str = None,
             link: Link = None,
             time: datetime = None,
             keywords: str = None,
@@ -55,7 +56,7 @@ class Metadata(GpxElement):
         self.name: str = name
         self.desc: str = desc
         self.author: Person = author
-        self.copyright: str = copyright
+        self.copyright: str = copyright_
         self.link: Link = link
         self.time: datetime = time
         self.keywords: str = keywords

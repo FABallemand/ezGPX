@@ -1,5 +1,6 @@
 from .gpx_element import GpxElement
 
+
 class Copyright(GpxElement):
     """
     copyrightType element in GPX file.
