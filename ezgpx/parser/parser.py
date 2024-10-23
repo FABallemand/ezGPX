@@ -6,6 +6,7 @@ from ..gpx_elements import Gpx
 DEFAULT_PRECISION = 10
 DEFAULT_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
+
 class Parser():
     """
     File parser.
@@ -24,7 +25,7 @@ class Parser():
         self.file_path: str = file_path
 
         self.ele_data: bool = False
-        self.time_data:bool = False
+        self.time_data: bool = False
         self.precisions: dict = {
             "lat_lon": DEFAULT_PRECISION,
             "elevation": DEFAULT_PRECISION,
@@ -33,7 +34,7 @@ class Parser():
             "speed": DEFAULT_PRECISION,
             "rate": DEFAULT_PRECISION,
             "default": DEFAULT_PRECISION
-            }
+        }
         self.time_format: str = DEFAULT_TIME_FORMAT
 
         self.gpx: Gpx = Gpx(xmlns=name_spaces)
@@ -54,20 +55,23 @@ class Parser():
         """
         if number is None:
             return DEFAULT_PRECISION
-        
-        if type(number) == int:
+
+        if isinstance(number, int):
             return 0
-        elif type(number) == float:
+        elif isinstance(number, float):
             number = str(number)
-        elif type(number) == str:
+        elif isinstance(number, str):
             try:
-                test = float(number)
+                float(number)
             except OSError as err:
-                logging.exception(f"OS error: {err}")
+                logging.exception("OS error: %s", err)
             except ValueError:
-                logging.exception("Could not convert data ({number}) to a floating point value.")
+                logging.exception("Could not convert data (%s) to a floating"
+                                  "point value.", number)
             except Exception as err:
-                logging.exception(f"Unexpected {err}, {type(err)}.\nUnable to find precision of number: {number}")
+                logging.exception("Unexpected %s, %s."
+                                  "Unable to find precision of number: %s",
+                                  err, type(err), number)
                 raise
 
         if "." in number:

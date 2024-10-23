@@ -1,11 +1,11 @@
-import os
-from typing import Optional, Union, Tuple
+from typing import Union, Tuple
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from ..gpx_elements import Gpx
 from ..parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+
 
 class Writer():
     """
@@ -45,7 +45,9 @@ class Writer():
         if value is not None:
             element.set(field, value)
 
-    def add_subelement(self, element: ET.Element, sub_element: str, text: str) -> Tuple[ET.Element, Union[ET.Element, None]]:
+    def add_subelement(
+            self, element: ET.Element, sub_element: str,
+            text: str) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -62,8 +64,11 @@ class Writer():
             sub_element_ = ET.SubElement(element, sub_element)
             sub_element_.text = text
         return element, sub_element_
-    
-    def add_subelement_number(self, element: ET.Element, sub_element: str, number: Union[int, float], precision: int = DEFAULT_PRECISION) -> Tuple[ET.Element, Union[ET.Element, None]]:
+
+    def add_subelement_number(
+            self, element: ET.Element, sub_element: str,
+            number: Union[int, float],
+            precision: int = DEFAULT_PRECISION) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -79,15 +84,17 @@ class Writer():
         sub_element_ = None
         if number is not None:
             sub_element_ = ET.SubElement(element, sub_element)
-            if type(number) is int:
+            if isinstance(number, int):
                 sub_element_.text = str(number)
-            elif type(number) is float:
-                sub_element_.text = "{:.{}f}".format(number, precision)
+            elif isinstance(number, float):
+                sub_element_.text = f"{number:.{precision}f}"
             else:
                 logging.error("Invalid number type.")
         return element, sub_element_
-    
-    def add_subelement_time(self, element: ET.Element, sub_element: str, time: datetime, format: str = DEFAULT_TIME_FORMAT) -> ET.Element:
+
+    def add_subelement_time(
+            self, element: ET.Element, sub_element: str, time: datetime,
+            format_: str = DEFAULT_TIME_FORMAT) -> ET.Element:
         """
         Add sub-element to GPX element.
 
@@ -104,11 +111,11 @@ class Writer():
         if time is not None:
             sub_element_ = ET.SubElement(element, sub_element)
             try:
-                sub_element_.text = time.strftime(format)
+                sub_element_.text = time.strftime(format_)
             except:
                 logging.error("Invalid time format.")
         return element, sub_element_
-    
+
     def check_xml_schemas(
             self,
             xml_schema: bool = False,
@@ -137,7 +144,8 @@ class Writer():
         # Check XML extension schemas
         if xml_extensions_schemas:
             if not self.gpx.check_xml_extensions_schemas(self.file_path):
-                logging.error("Invalid GPX file (does not follow XML extensions schemas).")
+                logging.error(
+                    "Invalid GPX file (does not follow XML extensions schemas).")
                 return False
-            
+
         return True

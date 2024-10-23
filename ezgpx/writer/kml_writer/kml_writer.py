@@ -10,18 +10,19 @@ DEFAULT_NORMAL_STYLE = {
     "color": "ff0000ff",
     "width": 2,
     "fill": 0
-    }
+}
 
 DEFAULT_HIGHLIGHT_STYLE = {
     "color": "ff0000ff",
     "width": 2,
     "fill": 0
-    }
+}
 
 DEFAULT_STYLES = [
     ("normal", DEFAULT_NORMAL_STYLE),
     ("highlight", DEFAULT_HIGHLIGHT_STYLE)
-    ]
+]
+
 
 class KMLWriter(Writer):
     """
@@ -33,7 +34,7 @@ class KMLWriter(Writer):
             gpx: Gpx = None,
             file_path: str = None,
             properties: bool = True,
-            metadata: bool = True, # unused
+            metadata: bool = True,  # unused
             way_points: bool = True,
             routes: bool = True,
             extensions: bool = True,
@@ -41,7 +42,7 @@ class KMLWriter(Writer):
             time: bool = True,
             precisions: Dict = None,
             time_format: str = None,
-            styles: List[Tuple[str, Dict]] = DEFAULT_STYLES) -> None:
+            styles: List[Tuple[str, Dict]] = None) -> None:
         """
         Initialize GPXWriter instance.
         """
@@ -61,10 +62,12 @@ class KMLWriter(Writer):
         self.precisions: Dict = precisions
         self.time_format = time_format
 
-        self.styles = styles
+        self.styles = styles if styles is not None else DEFAULT_STYLES
 
+        # Utility attributes
+        self.gpx_string: str = ""
         self.kml_root = None
-    
+
     def add_pair(self, element: ET.Element, key: str, style_url: str) -> ET.Element:
         """
         Add StyleMap to KML element.
@@ -87,8 +90,8 @@ class KMLWriter(Writer):
         pair_, _ = self.add_subelement(pair_, "key", key)
         pair_, _ = self.add_subelement(pair_, "styleUrl", style_url)
         return element
-    
-    def add_stylemap(self, element: ET.Element, id: str) -> ET.Element:
+
+    def add_stylemap(self, element: ET.Element, id_: str) -> ET.Element:
         """
         Add StyleMap to KML element.
 
@@ -96,7 +99,7 @@ class KMLWriter(Writer):
         ----------
         element : ET.Element
             KML element.
-        id : str
+        id_ : str
             StyleMap element id.
 
         Returns
@@ -105,13 +108,14 @@ class KMLWriter(Writer):
             KML element.
         """
         stylemap_ = ET.SubElement(element, "StyleMap")
-        self.setIfNotNone(stylemap_, "id", id)
+        self.setIfNotNone(stylemap_, "id", id_)
         style_id = 1
-        for style_key, style in self.styles:
-            stylemap_ = self.add_pair(stylemap_, style_key, "#style" + str(style_id))
+        for style_key, _ in self.styles:  # _ used to be called style
+            stylemap_ = self.add_pair(
+                stylemap_, style_key, "#style" + str(style_id))
             style_id += 1
         return element
-    
+
     def add_polystyle(self, element: ET.Element, style: Dict) -> ET.Element:
         """
         Add PolyStyle to KML element.
@@ -130,12 +134,13 @@ class KMLWriter(Writer):
         """
         polystyle_ = ET.SubElement(element, "PolyStyle")
         try:
-            polystyle_, _ = self.add_subelement_number(polystyle_, "fill", style["fill"])
+            polystyle_, _ = self.add_subelement_number(
+                polystyle_, "fill", style["fill"])
         except:
             logging.warning("No fill attribute in style")
             polystyle_, _ = self.add_subelement_number(polystyle_, "fill", 0)
         return element
-    
+
     def add_linestyle(self, element: ET.Element, style: Dict) -> ET.Element:
         """
         Add LineStyle to KML element.
@@ -154,18 +159,21 @@ class KMLWriter(Writer):
         """
         linestyle_ = ET.SubElement(element, "LineStyle")
         try:
-            linestyle_, _ = self.add_subelement(linestyle_, "color", style["color"])
+            linestyle_, _ = self.add_subelement(
+                linestyle_, "color", style["color"])
         except:
             logging.warning("No color attribute in style")
-            linestyle_, _ = self.add_subelement(linestyle_, "color", "ff0000ff")
+            linestyle_, _ = self.add_subelement(
+                linestyle_, "color", "ff0000ff")
         try:
-            linestyle_, _ = self.add_subelement_number(linestyle_, "width", style["width"])
+            linestyle_, _ = self.add_subelement_number(
+                linestyle_, "width", style["width"])
         except:
             logging.warning("No width attribute in style")
             linestyle_, _ = self.add_subelement_number(linestyle_, "width", 2)
         return element
-    
-    def add_style(self, element: ET.Element, id: str, style: Dict) -> ET.Element:
+
+    def add_style(self, element: ET.Element, id_: str, style: Dict) -> ET.Element:
         """
         Add Style to KML element.
 
@@ -173,7 +181,7 @@ class KMLWriter(Writer):
         ----------
         element : ET.Element
             KML element.
-        id : str
+        id_ : str
             Style element id.
         style : Dict
             Line style.
@@ -184,11 +192,11 @@ class KMLWriter(Writer):
             KML element.
         """
         style_ = ET.SubElement(element, "Style")
-        self.setIfNotNone(style_, "id", id)
+        self.setIfNotNone(style_, "id", id_)
         style_ = self.add_linestyle(style_, style)
         style_ = self.add_polystyle(style_, style)
         return element
-    
+
     def add_linestring(self, element: ET.Element) -> ET.Element:
         """
         Add LineString to KML element.
@@ -204,14 +212,18 @@ class KMLWriter(Writer):
             KML element.
         """
         linestring_ = ET.SubElement(element, "LineString")
-        linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
+        linestring_, _ = self.add_subelement_number(
+            linestring_, "tessellate", 1)
         if self.ele:
-            coordinates = self.gpx.to_csv(path=None, values=["lon", "lat", "ele"], header=False).replace("\n", " ")
+            coordinates = self.gpx.to_csv(
+                path=None, values=["lon", "lat", "ele"], header=False).replace("\n", " ")
         else:
-            coordinates = self.gpx.to_csv(path=None, values=["lon", "lat"], header=False).replace("\n", " ")
-        linestring_, _ = self.add_subelement(linestring_, "coordinates", coordinates)
+            coordinates = self.gpx.to_csv(
+                path=None, values=["lon", "lat"], header=False).replace("\n", " ")
+        linestring_, _ = self.add_subelement(
+            linestring_, "coordinates", coordinates)
         return element
-    
+
     def add_placemark(self, element: ET.Element) -> ET.Element:
         """
         Add Placemark to KML element.
@@ -227,8 +239,10 @@ class KMLWriter(Writer):
             KML element.
         """
         placemark_ = ET.SubElement(element, "Placemark")
-        placemark_, _ = self.add_subelement(placemark_, "name", self.gpx.name())
-        placemark_, _ = self.add_subelement(placemark_, "styleUrl", "#stylemap")
+        placemark_, _ = self.add_subelement(
+            placemark_, "name", self.gpx.name())
+        placemark_, _ = self.add_subelement(
+            placemark_, "styleUrl", "#stylemap")
         placemark_ = self.add_linestring(placemark_)
         return element
 
@@ -248,10 +262,10 @@ class KMLWriter(Writer):
         """
         document_ = ET.SubElement(element, "Document")
         document_, _ = self.add_subelement(document_, "name", self.file_name)
-        id = 1
-        for style_key, style in self.styles:
+        id_ = 1
+        for _, style in self.styles:  # _ used to be called style_key
             document_ = self.add_style(document_, "style" + str(id), style)
-            id += 1
+            id_ += 1
         document_ = self.add_stylemap(document_, "stylemap")
         document_ = self.add_placemark(document_)
         return element
@@ -263,7 +277,7 @@ class KMLWriter(Writer):
         logging.info("Preparing Document...")
 
         self.kml_root = self.add_document(self.kml_root)
-    
+
     def add_root_properties(self) -> None:
         """
         Add properties to the GPX root element.
@@ -303,7 +317,8 @@ class KMLWriter(Writer):
             self.gpx_string = ET.tostring(self.kml_root, encoding="unicode")
             # self.gpx_string = ET.tostring(kml_root, encoding="utf-8")
 
-            logging.info(f"GPX successfully converted to string:\n{self.gpx_string}")
+            logging.info("GPX successfully converted to string:\n%s",
+                         self.gpx_string)
 
             return self.gpx_string
 
@@ -313,9 +328,9 @@ class KMLWriter(Writer):
         """
         # Open/create KML file
         try:
-            f = open(self.file_path, "w")
+            f = open(self.file_path, "w", encoding="utf-8")
         except OSError:
-            logging.exception(f"Could not open/read file: {self.file_path}")
+            logging.exception("Could not open/read file: %s", self.file_path)
             raise
         # Write KML file
         with f:
@@ -352,11 +367,11 @@ class KMLWriter(Writer):
             return False
         self.file_path = file_path
         self.file_name = os.path.basename(self.file_path)
-        
+
         # Update style
         if styles is not None:
             self.styles = styles
-        
+
         # Write .kml file
         self.gpx_to_string()
         self.write_gpx()

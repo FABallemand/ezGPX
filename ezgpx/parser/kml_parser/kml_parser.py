@@ -4,7 +4,8 @@ import logging
 import xml.etree.ElementTree as ET
 
 from ..xml_parser import XMLParser
-from ...gpx_elements import Bounds, Copyright, Email, Extensions, Gpx, Link, Metadata, Person, Point, PointSegment, Route, TrackSegment, Track, WayPoint
+from ...gpx_elements import Gpx, TrackSegment, Track, WayPoint
+
 
 class KMLParser(XMLParser):
     """
@@ -26,11 +27,8 @@ class KMLParser(XMLParser):
         """
         if not file_path.endswith(".kml"):
             return
-        super().__init__(file_path,
-                         {"opengis": "http://www.opengis.net/kml/2.2"},
-                         check_xml_schemas,
-                         xml_extensions_schemas)
-        
+        super().__init__(file_path, check_xml_schemas, xml_extensions_schemas)
+
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
         else:
@@ -41,9 +39,11 @@ class KMLParser(XMLParser):
         Find decimal precision of any type of value in a KML file (latitude, elevation...).
         """
         # Point
-        documents = self.xml_root.findall("opengis:Document", self.name_space)
-        placemarks = documents[0].findall("opengis:Placemark", self.name_space)
-        linestrings = placemarks[0].findall("opengis:LineString", self.name_space)
+        documents = self.xml_root.findall("opengis:Document", self.name_spaces)
+        placemarks = documents[0].findall(
+            "opengis:Placemark", self.name_spaces)
+        linestrings = placemarks[0].findall(
+            "opengis:LineString", self.name_spaces)
         coordinates = self.find_text(linestrings[0], "opengis:coordinates")
 
         coordinates = coordinates.replace("\n", "").replace("\t", "")
@@ -87,15 +87,16 @@ class KMLParser(XMLParser):
         """
         if placemark is None:
             return None
-        
+
         placemark_data = {}
-        
+
         placemark_data["name"] = self.find_text(placemark, "opengis:name")
 
         placemark_data["linestrings_data"] = []
-        linestrings = placemark.findall("opengis:LineString", self.name_space)
+        linestrings = placemark.findall("opengis:LineString", self.name_spaces)
         for linestring in linestrings:
-            placemark_data["linestrings_data"].append(self.find_text(linestring, "opengis:coordinates"))
+            placemark_data["linestrings_data"].append(
+                self.find_text(linestring, "opengis:coordinates"))
 
         return placemark_data
 
@@ -112,11 +113,11 @@ class KMLParser(XMLParser):
         """
         if document is None:
             return None
-        
+
         # name = self.find_text(document, "opengis:name")
 
         placemmarks_data = []
-        placemarks = document.findall("opengis:Placemark", self.name_space)
+        placemarks = document.findall("opengis:Placemark", self.name_spaces)
         for placemark in placemarks:
             placemmarks_data.append(self.parse_placemark(placemark))
 
@@ -126,7 +127,7 @@ class KMLParser(XMLParser):
         """
         Parse Document elements from KML file.
         """
-        documents = self.xml_root.findall("opengis:Document", self.name_space)
+        documents = self.xml_root.findall("opengis:Document", self.name_spaces)
         for document in documents:
             placemarks_data = self.parse_document(document)
 
@@ -135,7 +136,8 @@ class KMLParser(XMLParser):
                 linestrings_data = placemark_data["linestrings_data"]
                 trkseg = []
                 for coordinates in linestrings_data:
-                    coordinates = coordinates.replace("\n", "").replace("\t", "")
+                    coordinates = coordinates.replace(
+                        "\n", "").replace("\t", "")
                     if coordinates[-1] == " ":
                         coordinates = coordinates[:-1]
                     coordinates = coordinates.split(" ")
@@ -158,7 +160,8 @@ class KMLParser(XMLParser):
         self.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
         self.gpx.version = "1.1"
         self.gpx.xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
-        self.gpx.xsi_schema_location = ["http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+        self.gpx.xsi_schema_location = [
+            "http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
 
     def parse(self) -> Gpx:
         """
@@ -172,7 +175,8 @@ class KMLParser(XMLParser):
             self.xml_tree = ET.parse(self.file_path)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
-            logging.exception(f"Unexpected {err}, {type(err)}.\nUnable to parse KML file.")
+            logging.exception("Unexpected %s, %s.\n"
+                              "Unable to parse KML file.", err, type(err))
             raise
 
         # Add properties

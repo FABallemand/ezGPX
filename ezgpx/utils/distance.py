@@ -6,6 +6,7 @@ import logging
 # https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
 EARTH_RADIUS = 6378.137 * 1000
 
+
 def haversine_distance(point_1, point_2) -> float:
     """
     Compute Haversine distance (meters) between to points.
@@ -29,10 +30,12 @@ def haversine_distance(point_1, point_2) -> float:
 
     sin_1 = m.sin(delta_lat/2)
     sin_2 = m.sin(delta_long/2)
-    a = m.sqrt(sin_1 * sin_1 + m.cos(m.radians(point_1.lat)) * m.cos(m.radians(point_2.lat)) * sin_2 * sin_2)
+    a = m.sqrt(sin_1 * sin_1 + m.cos(m.radians(point_1.lat))
+               * m.cos(m.radians(point_2.lat)) * sin_2 * sin_2)
     d = 2 * EARTH_RADIUS * m.asin(a)
 
     return d
+
 
 def distance(point_1, point_2) -> float:
     """
@@ -101,13 +104,13 @@ def perpendicular_distance(start_point, end_point, point) -> float:
         except:
             a = 1
             b = 0
-            c = point_1.lon  
+            c = point_1.lon
             logging.debug("Vertical line")
-            
+
         return a, b, c
 
     a, b, c = line_coefficients(start_point, end_point)
 
     d = abs(a * point.lon + b * point.lat + c) / m.sqrt(a * a + b * b)
-    
+
     return d

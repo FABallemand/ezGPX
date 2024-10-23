@@ -1,8 +1,8 @@
 from typing import List
-import logging
 from math import degrees
 
 from .distance import EARTH_RADIUS, perpendicular_distance
+
 
 def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)):
     """
@@ -14,7 +14,10 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)
     points : List
         List of points defining the track to simplify.
     epsilon : float, optional
-        Ramer-Douglas-Peucker threshold distance (higher value means more simplifications), by default degrees(2/EARTH_RADIUS) (ie: the angle corresponding to a distance of 2 metres at the surface of the earth).
+        Ramer-Douglas-Peucker threshold distance (higher value means
+        more simplifications), by default degrees(2/EARTH_RADIUS)
+        (ie: the angle corresponding to a distance of 2 metres at
+        the surface of the earth).
 
     Returns
     -------

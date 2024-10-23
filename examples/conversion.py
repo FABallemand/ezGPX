@@ -10,7 +10,7 @@ gpx.to_gpx("new_file.gpx")
 gpx.to_kml("new_file.kml")
 
 # Save as CSV file
-gpx.to_csv("new_file.csv", columns=["lat", "lon", "ele"])
+gpx.to_csv("new_file.csv", values=["lat", "lon", "ele"])
 
 # Convert to Pandas Dataframe
 df = gpx.to_dataframe()

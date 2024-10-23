@@ -1,9 +1,11 @@
+import warnings
 from typing import Dict, Optional, Union
 import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
 from ..parser import Parser
+
 
 class XMLParser(Parser):
     """
@@ -29,7 +31,8 @@ class XMLParser(Parser):
             Requires internet connection and is not guaranted to work,
             by default False
         """
-        self.name_spaces: dict = dict([node for _, node in ET.iterparse(file_path, events=["start-ns"])])
+        self.name_spaces: dict = dict(
+            [node for _, node in ET.iterparse(file_path, events=["start-ns"])])
         self.extensions_fields: Dict = {}
 
         super().__init__(file_path, self.name_spaces)
@@ -54,10 +57,10 @@ class XMLParser(Parser):
         try:
             text_ = element.get(sub_element)
         except:
-            logging.debug(f"{element} has no attribute {sub_element}.")
+            logging.debug("%s has no attribute %s.", element, sub_element)
             text_ = None
         return text_
-    
+
     def get_int(self, element, sub_element: str) -> Union[int, None]:
         """
         Get integer value from sub-element.
@@ -75,7 +78,7 @@ class XMLParser(Parser):
             logging.debug(f"{element} has no attribute {sub_element}.")
             int_ = None
         return int_
-    
+
     def get_float(self, element, sub_element: str) -> Union[float, None]:
         """
         Get floating point value from sub-element.
@@ -93,7 +96,7 @@ class XMLParser(Parser):
             logging.debug(f"{element} has no attribute {sub_element}.")
             float_ = None
         return float_
-    
+
     def find_text(self, element, sub_element: str) -> Union[str, None]:
         """
         Find text from sub-element.
@@ -111,7 +114,7 @@ class XMLParser(Parser):
             text_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
         return text_
-    
+
     def find_int(self, element, sub_element: str) -> Union[int, None]:
         """
         Find integer value from sub-element.
@@ -129,7 +132,7 @@ class XMLParser(Parser):
             int_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
         return int_
-    
+
     def find_float(self, element, sub_element: str) -> Union[float, None]:
         """
         Find float point value from sub-element.
@@ -147,7 +150,7 @@ class XMLParser(Parser):
             float_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
         return float_
-    
+
     def find_time(self, element, sub_element: str) -> Union[datetime, None]:
         """
         Find time value from sub-element.
@@ -160,12 +163,13 @@ class XMLParser(Parser):
             Union[datetime, None]: Floating point value from sub-element.
         """
         try:
-            time_ = datetime.strptime(element.find(sub_element, self.name_spaces).text, self.time_format)
+            time_ = datetime.strptime(element.find(
+                sub_element, self.name_spaces).text, self.time_format)
         except:
             time_ = None
             logging.debug(f"{element} has no attribute {sub_element}.")
         return time_
-    
+
     def check_xml_schemas(self):
         """
         Check XML schemas during parsing.
@@ -173,11 +177,9 @@ class XMLParser(Parser):
         # Check XML schema
         if self.xml_schema:
             if not self.gpx.check_xml_schema(self.file_path):
-                logging.error("Invalid GPX file (does not follow XML schema).")
-                raise
+                raise ValueError("Invalid GPX file (does not follow XML schema).")
 
         # Check XML extension schemas
         if self.xml_extensions_schemas:
             if not self.gpx.check_xml_extensions_schemas(self.file_path):
-                logging.error("Invalid GPX file (does not follow XML extensions schemas).")
-                raise
+                raise ValueError("Invalid GPX file (does not follow XML extensions schemas).")
