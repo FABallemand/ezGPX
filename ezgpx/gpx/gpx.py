@@ -1,3 +1,4 @@
+from __future__ import annotations
 import errno
 import logging
 import os
@@ -5,7 +6,7 @@ import warnings
 import webbrowser
 from datetime import datetime
 from math import degrees, isclose
-from typing import Dict, List, NewType, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import folium
@@ -31,7 +32,7 @@ from ..utils import EARTH_RADIUS
 from ..writer.gpx_writer import GPXWriter
 from ..writer.kml_writer import KMLWriter
 
-GPX = NewType("GPX", object)  # GPX forward declaration for type hint
+# GPX = NewType("GPX", object)  # GPX forward declaration for type hint
 
 
 class GPX():
@@ -104,8 +105,9 @@ class GPX():
                 kmls = [info.filename for info in kmz.infolist(
                 ) if info.filename.endswith(".kml")]
                 if "doc.kml" not in kmls:
-                    raise Exception(f"Unable to parse file: {file_path}"
-                                    "Expected to find doc.kml inside KMZ file.")
+                    raise Exception("Unable to parse file: %s"
+                                    "Expected to find doc.kml inside KMZ file.",
+                                    file_path)
                 kml = kmz.open("doc.kml", 'r').read()
                 self._write_tmp_kml("tmp.kml", kml)
                 self._kml_parser = KMLParser(
@@ -149,7 +151,7 @@ class GPX():
         try:
             f = open(path, "wb")
         except OSError:
-            logging.exception(f"Could not open/read file: {path}")
+            logging.exception("Could not open/read file: %s", path)
             raise
         # Write KML file
         with f:
@@ -157,7 +159,7 @@ class GPX():
                 f.write(kml_string)
 
     def __str__(self) -> str:
-        return self._gpx_writer.gpx_to_string(self.gpx)
+        return self._gpx_writer.gpx_to_string()
 
     def __repr__(self):
         return f"file_path = {self.file_path}\ngpx = {self.gpx}"
@@ -636,7 +638,21 @@ class GPX():
 
     @staticmethod
     def merge(gpx_1: GPX, gpx_2: GPX) -> GPX:
+        """
+        Merge GPX objects in a new instance.
 
+        Parameters
+        ----------
+        gpx_1 : GPX
+            First GPX object
+        gpx_2 : GPX
+            Second GPX object
+
+        Returns
+        -------
+        GPX
+            Merged GPX (new instance)
+        """
         # Create new GPX instance
         merged_gpx = GPX()
 
@@ -746,7 +762,7 @@ class GPX():
             bounds_fields: List[str] = Bounds.fields,
             copyright_fields: List[str] = Copyright.fields,
             email_fields: List[str] = Email.fields,
-            extensions_fields: List[str] = Extensions.fields,
+            extensions_fields: Dict = Extensions.fields,
             gpx_fields: List[str] = Gpx.fields,
             link_fields: List[str] = Link.fields,
             metadata_fields: List[str] = Metadata.fields,
@@ -757,6 +773,7 @@ class GPX():
             track_segment_fields: List[str] = TrackSegment.fields,
             track_fields: List[str] = Track.fields,
             way_point_fields: List[str] = WayPoint.fields,
+            track_point_fields: List[str] = None,
             xml_schema: bool = True,
             xml_extensions_schemas: bool = False) -> bool:
         """
@@ -776,6 +793,51 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
+        bounds_fields = (bounds_fields
+                             if bounds_fields is not None
+                             else Bounds.fields)
+        copyright_fields = (copyright_fields
+                            if copyright_fields is not None
+                            else Copyright.fields)
+        email_fields = (email_fields
+                        if email_fields is not None
+                        else Email.fields)
+        extensions_fields = (extensions_fields
+                             if extensions_fields is not None
+                             else Extensions.fields)
+        gpx_fields = (gpx_fields
+                      if gpx_fields is not None
+                      else Gpx.fields)
+        link_fields = (link_fields
+                       if link_fields is not None
+                       else Link.fields)
+        metadata_fields = (metadata_fields
+                           if metadata_fields is not None
+                           else Metadata.fields)
+        person_fields = (person_fields
+                         if person_fields is not None
+                         else Person.fields)
+        point_segment_fields = (point_segment_fields
+                                if point_segment_fields is not None
+                                else PointSegment.fields)
+        point_fields = (point_fields
+                        if point_fields is not None
+                        else Point.fields)
+        route_fields = (route_fields
+                        if route_fields is not None
+                        else Route.fields)
+        track_segment_fields = (track_segment_fields
+                                if track_segment_fields is not None
+                                else TrackSegment.fields)
+        track_fields = (track_fields
+                        if track_fields is not None
+                        else Track.fields)
+        way_point_fields = (way_point_fields
+                            if way_point_fields is not None
+                            else WayPoint.fields)
+        track_point_fields = (track_point_fields
+                              if track_point_fields is not None
+                              else WayPoint.fields)
         return self._gpx_writer.write(file_path=path,
                                       properties=properties,
                                       bounds_fields=bounds_fields,
@@ -835,21 +897,16 @@ class GPX():
             way_points_color: Optional[str] = None,
             background: Optional[str] = None,
             offset_percentage: float = 0.04,
-            xpixels: int = 400,
-            ypixels: Optional[int] = None,
+            # xpixels: int = 400,
+            # ypixels: Optional[int] = None, # TODO
             dpi: int = 96,
             title: Optional[str] = None,
             title_fontsize: int = 20,
             watermark: bool = False,
             file_path: str = None):
         # Create dataframe containing data from the GPX file
-        self._dataframe = self.to_dataframe(projection=True,
-                                            elevation=True,
-                                            speed=True,
-                                            pace=True,
-                                            ascent_rate=True,
-                                            ascent_speed=True,
-                                            distance_from_start=True)
+        values=[] # TODO
+        self._dataframe = self.to_dataframe(values)
 
         # Create figure and axes
         fig, ax = plt.subplots(nrows=1,

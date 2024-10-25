@@ -65,7 +65,7 @@ class GPXWriter(Writer):
 
         # Fields
         self.properties: bool = None
-        self.bound_fields: List[str] = None
+        self.bounds_fields: List[str] = None
         self.copyright_fields: List[str] = None
         self.email_fields: List[str] = None
         self.extensions_fields_: Dict = None
@@ -495,9 +495,9 @@ class GPXWriter(Writer):
 
         # Save parameters
         self.properties = properties
-        self.bound_fields = (bounds_fields
-                             if bounds_fields is not None
-                             else Bounds.fields)
+        self.bounds_fields = (bounds_fields
+                              if bounds_fields is not None
+                              else Bounds.fields)
         self.copyright_fields = (copyright_fields
                                  if copyright_fields is not None
                                  else Copyright.fields)
@@ -561,7 +561,7 @@ class GPXWriter(Writer):
 
         # Create methods behaviors
         self._add_bounds = self.behavior_creator.add_bounds_creator(
-            self.bound_fields)
+            self.bounds_fields)
         self._add_copyright = self.behavior_creator.add_copyright_creator(
             self.copyright_fields)
         self._add_email = self.behavior_creator.add_email_creator(

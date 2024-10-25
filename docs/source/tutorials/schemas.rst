@@ -17,8 +17,8 @@ It is possible to check during parsing, in which case an invalid GPX file will r
     # Check GPX schema when parsing file
     gpx = ezgpx.GPX("file.gpx", check_xml_schemas=True, extensions_schemas=False)
 
-Test a :py:class:`~ezgpx.gpx.GPX` Object
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Checking a :py:class:`~ezgpx.gpx.GPX` Object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A :py:class:`~ezgpx.gpx.GPX` object can directly be checked.
 
@@ -28,8 +28,11 @@ A :py:class:`~ezgpx.gpx.GPX` object can directly be checked.
 
     gpx = GPX("file.gpx", check_xml_schemas=False)
 
-    # Check GPX schema and extensions schemas from GPX instance
-    gpx.check_xml_schemas(extensions_schemas=True)
+    # Check GPX schema from GPX instance
+    gpx.check_xml_schema()
+
+    # Check extensions schemas from GPX instance
+    gpx.check_xml_extensions_schemas()
 
 After Writting
 ^^^^^^^^^^^^^^
