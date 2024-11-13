@@ -805,7 +805,7 @@ class GPX():
                         else Email.fields)
         extensions_fields = (extensions_fields
                              if extensions_fields is not None
-                             else self._gpx_writer.extensions_fields)
+                             else self._gpx_parser.extensions_fields)
         gpx_fields = (gpx_fields
                       if gpx_fields is not None
                       else Gpx.fields)

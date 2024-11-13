@@ -500,6 +500,7 @@ class GPXWriter(Writer):
         self.email_fields = (email_fields
                              if email_fields is not None
                              else Email.fields)
+        print(extensions_fields)
         self.extensions_fields = (extensions_fields
                                   if extensions_fields is not None
                                   else {})
