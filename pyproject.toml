@@ -56,7 +56,6 @@ dependencies = [
     "basemap",
     "gmplot",
     "folium",
-    "papermap",
     "pytest",
 ]
 

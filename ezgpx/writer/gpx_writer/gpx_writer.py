@@ -489,7 +489,7 @@ class GPXWriter(Writer):
         self.file_path = file_path
         self.file_name = os.path.basename(self.file_path)
 
-        # Save parameters
+        # Set parameters
         self.properties = properties
         self.bounds_fields = (bounds_fields
                               if bounds_fields is not None
@@ -500,7 +500,6 @@ class GPXWriter(Writer):
         self.email_fields = (email_fields
                              if email_fields is not None
                              else Email.fields)
-        print(extensions_fields)
         self.extensions_fields = (extensions_fields
                                   if extensions_fields is not None
                                   else {})
@@ -538,23 +537,50 @@ class GPXWriter(Writer):
                                    if track_point_fields is not None
                                    else WayPoint.fields)
 
-        # Correct parameters
-        if "lat" not in self.point_fields:
-            warnings.warn("Point element must have 'lat' and 'lon' fields."
-                          "Missing mandatory fields will automatically be added.")
-            self.point_fields.append("lat")
-        if "lon" not in self.point_fields:
-            warnings.warn("Point element must have 'lat' and 'lon' fields."
-                          "Missing mandatory fields will automatically be added.")
-            self.point_fields.append("lon")
-        if "lat" not in self.way_point_fields:
-            warnings.warn("WayPoint element must have 'lat' and 'lon' fields."
-                          "Missing mandatory fields will automatically be added.")
-            self.way_point_fields.append("lat")
-        if "lon" not in self.way_point_fields:
-            warnings.warn("WayPoint element must have 'lat' and 'lon' fields."
-                          "Missing mandatory fields will automatically be added.")
-            self.way_point_fields.append("lon")
+        # Check mandatory parameters
+        def check_mandatory_fields(element, fields, mandatory_fields):
+            if any(f not in fields for f in mandatory_fields):
+                warnings.warn(f"{element} element must have following fields: {mandatory_fields}"
+                            "Missing mandatory fields will automatically be added.")
+                fields = list(set(fields + mandatory_fields))
+            return fields
+       
+        self.bounds_fields = check_mandatory_fields("Bounds",
+                                                    self.bounds_fields,
+                                                    Bounds.mandatory_fields)
+        self.copyright_fields = check_mandatory_fields("Copyright",
+                                                       self.copyright_fields,
+                                                       Copyright.mandatory_fields)
+        self.email_fields = check_mandatory_fields("Email", self.email_fields,
+                                                   Email.mandatory_fields)
+        self.gpx_fields = check_mandatory_fields("Gpx", self.gpx_fields,
+                                                 Gpx.mandatory_fields)
+        self.link_fields = check_mandatory_fields("Link", self.link_fields,
+                                                  Link.mandatory_fields)
+        self.metadata_fields = check_mandatory_fields("Metadata",
+                                                      self.metadata_fields,
+                                                      Metadata.mandatory_fields)
+        self.person_fields = check_mandatory_fields("Person",
+                                                    self.person_fields,
+                                                    Person.mandatory_fields)
+        self.point_segment_fields = check_mandatory_fields("PointSegment",
+                                                           self.point_segment_fields,
+                                                           PointSegment.mandatory_fields)
+        self.point_fields = check_mandatory_fields("Point", self.point_fields,
+                                                   Point.mandatory_fields)
+        self.route_fields = check_mandatory_fields("Route", self.route_fields,
+                                                   Route.mandatory_fields)
+        self.track_segment_fields = check_mandatory_fields("TrackSegment",
+                                                           self.track_segment_fields,
+                                                           TrackSegment.mandatory_fields)
+        self.track_fields = check_mandatory_fields("Track", self.track_fields,
+                                                   Track.mandatory_fields)
+        self.way_point_fields = check_mandatory_fields("WayPoint",
+                                                       self.way_point_fields,
+                                                       WayPoint.mandatory_fields)
+        self.track_point_fields = check_mandatory_fields("TrackPoint",
+                                                         self.track_point_fields,
+                                                         WayPoint.mandatory_fields)
 
         # Create methods behaviors
         self._add_bounds = self.behavior_creator.add_bounds_creator(

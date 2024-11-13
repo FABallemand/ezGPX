@@ -6,6 +6,5 @@ matplotlib
 basemap
 gmplot
 folium
-papermap
 pytest
 fitparse

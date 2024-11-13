@@ -42,15 +42,6 @@ gpx.folium_plot(tiles="OpenStreetMap",
                 file_path="map_2.html",
                 open=True)
 
-# Plot with Papermap
-gpx.papermap_plot(tile_server="OpenStreetMap",
-                  size="a4",
-                  use_landscape=True,
-                  scale=25000,
-                  dpi=300,
-                  add_grid=True,
-                  grid_size=1000,
-                  file_path="map_1.pdf")
 
 # Expert plot
 gpx.expert_plot(figsize=(16, 9),
@@ -115,3 +106,20 @@ gpx.matplotlib_animation(figsize=(16, 9),
                          title_fontsize=15,
                          watermark=True,
                          file_path="video_1.mp4")
+
+##############################################################################
+
+# Plot with Papermap
+# See: https://pypi.org/project/papermap/0.2.2/
+
+from papermap import PaperMap
+
+# Create map
+lat, lon = gpx.center()
+pm = PaperMap(lat=lat, lon=lon)
+
+# Render map
+pm.render()
+
+# Save map
+pm.save("map.pdf")

@@ -20,7 +20,6 @@ from folium.features import DivIcon
 from folium.plugins import MiniMap
 from matplotlib.axes import Axes
 from mpl_toolkits.basemap import Basemap
-from papermap import PaperMap
 
 from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
                             Metadata, Person, Point, PointSegment, Route,
@@ -2026,97 +2025,6 @@ class GPX():
         # Open map in web browser
         if open:
             webbrowser.open(file_path)
-
-###############################################################################
-#### PaperMap Plot ############################################################
-###############################################################################
-
-    def papermap_plot(
-            self,
-            lat: Optional[float] = None,
-            lon: Optional[float] = None,
-            tile_server: str = "OpenStreetMap",
-            api_key: Optional[str] = None,
-            size: str = "a4",
-            use_landscape: bool = True,
-            margin_top: int = 10,
-            margin_right: int = 10,
-            margin_bottom: int = 10,
-            margin_left: int = 10,
-            scale: int = 25000,
-            dpi: int = 300,
-            background_color: str = "#FFF",
-            add_grid: bool = False,
-            grid_size: int = 1000,
-            file_path: Optional[str] = None):
-        """
-        Create background map of the GPX using PaperMap.
-
-        Parameters
-        ----------
-        lat : Optional[float], optional
-            Latitude of the center of the map, by default None
-        lon : Optional[float], optional
-            Longitude of the center of the map, by default None
-        tile_server : str, optional
-            Tile server to serve as the base of the paper map, by default "OpenStreetMap"
-        api_key : Optional[str], optional
-            API key for the chosen tile server (if applicable), by default None
-        size : str, optional
-            Size of the paper map, by default "a4"
-        use_landscape : bool, optional
-            Use landscape orientation, by default True
-        margin_top : int, optional
-            Top margin (in mm), by default 10
-        margin_right : int, optional
-            Right margin (in mm), by default 10
-        margin_bottom : int, optional
-            Bottom margin (in mm), by default 10
-        margin_left : int, optional
-            Left margin (in mm), by default 10
-        scale : int, optional
-            Scale of the paper map, by default 25000
-        dpi : int, optional
-            Dots per inch, by default 300
-        background_color : str, optional
-            Background color of the paper map, by default "#FFF"
-        add_grid : bool, optional
-            Add a coordinate grid overlay to the paper map, by default False
-        grid_size : int, optional
-            Size of the grid squares (if applicable, in meters), by default 1000
-        file_path : Optional[str], optional
-            Path to save plot, by default None
-        """
-        # Create map
-        center_lat, center_lon = self.center()
-        if lat is None:
-            lat = center_lat
-        if lon is None:
-            lon = center_lon
-
-        pm = PaperMap(lat=lat,
-                      lon=lon,
-                      tile_server=tile_server,
-                      api_key=api_key,
-                      size=size,
-                      use_landscape=use_landscape,
-                      margin_top=margin_top,
-                      margin_right=margin_right,
-                      margin_bottom=margin_bottom,
-                      margin_left=margin_left,
-                      scale=scale,
-                      dpi=dpi,
-                      background_color=background_color,
-                      add_grid=add_grid,
-                      grid_size=grid_size)
-
-        # Render map
-        pm.render()
-
-        # Save map
-        if file_path is None:
-            file_path = self.file_path[:-4] + ".pdf"
-        pm.save(file_path)
 
 ###############################################################################
 #### Animated Plot #########################################################
