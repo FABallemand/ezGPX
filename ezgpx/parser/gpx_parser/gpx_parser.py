@@ -18,7 +18,7 @@ class GPXParser(XMLParser):
     def __init__(
             self,
             file_path: Optional[str] = None,
-            check_xml_schemas: bool = True,
+            xml_schemas: bool = True,
             xml_extensions_schemas: bool = False) -> None:
         """
         Initialize GPXParser instance.
@@ -27,7 +27,7 @@ class GPXParser(XMLParser):
         ----------
         file_path : Optional[str], optional
             Path to the file to parse, by default None
-        check_xml_schemas : bool, optional
+        xml_schemas : bool, optional
             Toggle schema verification during parsing, by default True
         xml_extensions_schemas : bool, optional
             Toggle extensions schema verificaton durign parsing.
@@ -38,7 +38,7 @@ class GPXParser(XMLParser):
             return
 
         super().__init__(file_path,
-                         check_xml_schemas,
+                         xml_schemas,
                          xml_extensions_schemas)
 
         if self.file_path is not None and os.path.exists(self.file_path):
@@ -74,9 +74,10 @@ class GPXParser(XMLParser):
         """
         # Use time from metadata
         metadata = self.xml_root.find("metadata", self.name_spaces)
-        time = metadata.findtext("time", namespaces=self.name_spaces)
-        if time is not None:
-            return time
+        if metadata is not None:
+            time = metadata.findtext("time", namespaces=self.name_spaces)
+            if time is not None:
+                return time
 
         # Use time from track point
         track = self.xml_root.findall("trk", self.name_spaces)[
@@ -275,7 +276,7 @@ class GPXParser(XMLParser):
 
         return Person(tag, name, email, link)
 
-    def __parse_point_segment(self, point_segment, tag: str = "ptseg") -> Union[PointSegment, None]:
+    def _parse_point_segment(self, point_segment, tag: str = "ptseg") -> Union[PointSegment, None]:
         """
         Parse ptsegType element from GPX file.
 

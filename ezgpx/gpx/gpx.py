@@ -129,11 +129,12 @@ class GPX():
                 raise ValueError(f"Unable to parse this type of file: {file_path}"
                                  "Consider renaming your file with the proper file extension.")
 
-            self._gpx_writer: GPXWriter = GPXWriter(self.gpx,
-                                                    precisions=self._precisions, time_format=self._time_format,
-                                                    extensions_fields=self._gpx_parser.extensions_fields if self._gpx_parser else {})
+            # Writers
+            self._gpx_writer: GPXWriter = GPXWriter(self.gpx, self._precisions,
+                                                    self._time_format)
             self._kml_writer: KMLWriter = KMLWriter(self.gpx,
-                                                    precisions=self._precisions, time_format=self._time_format)
+                                                    precisions=self._precisions,
+                                                    time_format=self._time_format)
 
         # Invalid file path
         else:
@@ -759,20 +760,20 @@ class GPX():
             self,
             path: str,
             properties: bool = True,
-            bounds_fields: List[str] = Bounds.fields,
-            copyright_fields: List[str] = Copyright.fields,
-            email_fields: List[str] = Email.fields,
-            extensions_fields: Dict = Extensions.fields,
-            gpx_fields: List[str] = Gpx.fields,
-            link_fields: List[str] = Link.fields,
-            metadata_fields: List[str] = Metadata.fields,
-            person_fields: List[str] = Person.fields,
-            point_segment_fields: List[str] = PointSegment.fields,
-            point_fields: List[str] = Point.fields,
-            route_fields: List[str] = Route.fields,
-            track_segment_fields: List[str] = TrackSegment.fields,
-            track_fields: List[str] = Track.fields,
-            way_point_fields: List[str] = WayPoint.fields,
+            bounds_fields: List[str] = None,
+            copyright_fields: List[str] = None,
+            email_fields: List[str] = None,
+            extensions_fields: Dict = None,
+            gpx_fields: List[str] = None,
+            link_fields: List[str] = None,
+            metadata_fields: List[str] = None,
+            person_fields: List[str] = None,
+            point_segment_fields: List[str] = None,
+            point_fields: List[str] = None,
+            route_fields: List[str] = None,
+            track_segment_fields: List[str] = None,
+            track_fields: List[str] = None,
+            way_point_fields: List[str] = None,
             track_point_fields: List[str] = None,
             xml_schema: bool = True,
             xml_extensions_schemas: bool = False) -> bool:
@@ -794,8 +795,8 @@ class GPX():
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
         bounds_fields = (bounds_fields
-                             if bounds_fields is not None
-                             else Bounds.fields)
+                         if bounds_fields is not None
+                         else Bounds.fields)
         copyright_fields = (copyright_fields
                             if copyright_fields is not None
                             else Copyright.fields)
@@ -804,7 +805,7 @@ class GPX():
                         else Email.fields)
         extensions_fields = (extensions_fields
                              if extensions_fields is not None
-                             else Extensions.fields)
+                             else self._gpx_writer.extensions_fields)
         gpx_fields = (gpx_fields
                       if gpx_fields is not None
                       else Gpx.fields)

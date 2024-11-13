@@ -20,25 +20,21 @@ class GPXWriter(Writer):
     def __init__(
             self,
             gpx: Gpx = None,
-            file_path: str = None,
             precisions: Dict = None,
-            time_format: str = None,
-            extensions_fields: Dict = None) -> None:
+            time_format: str = None) -> None:
         """
         Initialize GPXWriter instance.
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
-            file_path (str, optional): Path to the file to write. Defaults to None.
             precisions (dict, optional): Decimal precision for each type of value. Defaults to None.
             time_format (dict, optional): Time format. Defaults to None.
         """
-        super().__init__(gpx, file_path)
+        super().__init__(gpx)
 
         # Parameters
         self.precisions: Dict = precisions
         self.time_format: str = time_format
-        self.extensions_fields: Dict = extensions_fields
 
         # Utility attributes
         self.file_name: str = ""
@@ -68,7 +64,7 @@ class GPXWriter(Writer):
         self.bounds_fields: List[str] = None
         self.copyright_fields: List[str] = None
         self.email_fields: List[str] = None
-        self.extensions_fields_: Dict = None
+        self.extensions_fields: Dict = None
         self.gpx_fields: List[str] = None
         self.link_fields: List[str] = None
         self.metadata_fields: List[str] = None
@@ -506,7 +502,7 @@ class GPXWriter(Writer):
                              else Email.fields)
         self.extensions_fields = (extensions_fields
                                   if extensions_fields is not None
-                                  else Extensions.fields)
+                                  else {})
         self.gpx_fields = (gpx_fields
                            if gpx_fields is not None
                            else Gpx.fields)

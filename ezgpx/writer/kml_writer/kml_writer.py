@@ -32,7 +32,6 @@ class KMLWriter(Writer):
     def __init__(
             self,
             gpx: Gpx = None,
-            file_path: str = None,
             properties: bool = True,
             metadata: bool = True,  # unused
             way_points: bool = True,
@@ -46,7 +45,7 @@ class KMLWriter(Writer):
         """
         Initialize GPXWriter instance.
         """
-        super().__init__(gpx, file_path)
+        super().__init__(gpx)
         self.file_name: str = ""
         self.kml_string: str = ""
 

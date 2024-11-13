@@ -14,8 +14,7 @@ class Writer():
 
     def __init__(
             self,
-            gpx: Gpx = None,
-            file_path: str = None) -> None:
+            gpx: Gpx = None) -> None:
         """
         Initialize Writer instance.
 
@@ -23,11 +22,9 @@ class Writer():
         ----------
         gpx : Gpx, optional
             Gpx instance to write, by default None
-        file_path : str, optional
-            Path to the file to write, by default None
         """
         self.gpx: Gpx = gpx
-        self.file_path: str = file_path
+        self.file_path: str = None
 
     def setIfNotNone(self, element: ET.Element, field: str, value):
         """
@@ -135,6 +132,7 @@ class Writer():
         bool
             True if the written file follows all verified schemas.
         """
+        # TODO: Check for file_path
         # Check XML schema
         if xml_schema:
             if not self.gpx.check_xml_schema(self.file_path):

@@ -130,6 +130,7 @@ class Gpx(GpxElement):
     def check_xml_extensions_schemas(self, file_path: str) -> bool:
         gpx_schemas = [
             s for s in self.xsi_schema_location if s.endswith(".xsd")]
+        gpx_schemas.remove("http://www.topografix.com/GPX/1/1/gpx.xsd")
         for gpx_schema in gpx_schemas:
             logging.debug("schema = %s", gpx_schema)
             schema = xmlschema.XMLSchema(gpx_schema)
