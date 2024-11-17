@@ -3,8 +3,8 @@ from typing import Optional, List, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
 
-from ..writer import Writer
-from ...gpx_elements import Gpx
+from .writer import Writer
+from ..gpx_elements import Gpx
 
 DEFAULT_NORMAL_STYLE = {
     "color": "ff0000ff",

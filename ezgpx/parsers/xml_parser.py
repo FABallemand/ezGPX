@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
-from ..parser import Parser
+from .parser import Parser
 
 
 class XMLParser(Parser):

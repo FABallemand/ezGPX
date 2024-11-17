@@ -3,8 +3,8 @@ from typing import Optional, Union, List, Dict
 import logging
 import xml.etree.ElementTree as ET
 
-from ..xml_parser import XMLParser
-from ...gpx_elements import Gpx, TrackSegment, Track, WayPoint
+from .xml_parser import XMLParser
+from ..gpx_elements import Gpx, TrackSegment, Track, WayPoint
 
 
 class KMLParser(XMLParser):

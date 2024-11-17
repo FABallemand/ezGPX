@@ -5,8 +5,8 @@ from datetime import datetime
 
 from fitparse import FitFile
 
-from ..parser import Parser, DEFAULT_PRECISION
-from ...gpx_elements import Gpx, TrackSegment, Track, WayPoint
+from .parser import Parser, DEFAULT_PRECISION
+from ..gpx_elements import Gpx, TrackSegment, Track, WayPoint
 
 
 class FitParser(Parser):

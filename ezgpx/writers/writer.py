@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from ..gpx_elements import Gpx
-from ..parser import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+from ..parsers import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 
 
 class Writer():
