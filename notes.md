@@ -56,12 +56,13 @@
 - Compute length properly (improve haversine distance precision, 2D, 3D)
 - Tests
 - Update docstring (style + content [description from xsd])
-- - Normalize class names and attributes with GPX names
+- Normalize class names and attributes with GPX names
 - Add units to docstrings
 - Add meridian plot with basemap
 - Add support for all emojis in plots
 - Handle errors properly and remove logging
-- Update doc and examples
 - Add descent rate ?
 - Improve time computation for pauses ?
 - Add descent speed ?
+- Update README
+- Add polars to dict methods ??? (https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dict.html, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rows_by_key.html#polars.DataFrame.rows_by_key, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dicts.html#polars.DataFrame.to_dicts)

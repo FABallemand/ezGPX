@@ -5,7 +5,7 @@ import os
 import warnings
 from datetime import datetime
 from math import degrees
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Type
 from zipfile import ZipFile
 import pandas as pd
 
@@ -26,6 +26,8 @@ class GPX():
     """
     High level GPX object.
     """
+    TIME_RELATED_VALUES = ["time", "speed", "pace", "ascent_speed"]
+    ELEVATION_RELATED_VALUES = ["ele", "ascent_rate", "ascent_speed"]
 
     def __init__(
             self,
@@ -92,9 +94,8 @@ class GPX():
                 kmls = [info.filename for info in kmz.infolist(
                 ) if info.filename.endswith(".kml")]
                 if "doc.kml" not in kmls:
-                    raise FileNotFoundError("Unable to parse file: %s"
-                        "Expected to find doc.kml inside KMZ file.",
-                        file_path)
+                    raise FileNotFoundError(f"Unable to parse file: {file_path}"
+                        "Expected to find doc.kml inside KMZ file.")
                 kml = kmz.open("doc.kml", 'r').read()
                 self._write_tmp_kml("tmp.kml", kml)
                 self._kml_parser = KMLParser(
@@ -670,9 +671,36 @@ class GPX():
 #### Exports ##################################################################
 ###############################################################################
 
-    def to_dataframe(
-            self,
-            values: List[str] = None) -> pd.DataFrame:
+    def to_dict(
+            self, values: List[str] = None, orient: str = "dict",
+            into: Type[dict] = dict, index: bool = True) -> Dict:
+        """
+        Convert GPX object to dictionary.
+        Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
+
+        Parameters
+        ----------
+        values : List[str], optional
+            values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
+        orient : str, optional
+            Same as in Pandas.DataFrame.to_dict, by default "dict"
+        into : Type[dict], optional
+            Same as in Pandas.DataFrame.to_dict, by default dict
+        index : bool, optional
+            Same as in Pandas.DataFrame.to_dict, by default True
+
+        Returns
+        -------
+        Dict
+            Return a dictionary representing the GPX. The resulting
+            transformation depends on the `orient` parameter.
+        """
+        return self.gpx.to_dict(values, orient, into, index)
+
+    def to_pandas(self, values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
         Missing values are filled with default values (0 for elevation, empty string for time).
@@ -690,28 +718,65 @@ class GPX():
             Dataframe containing data from GPX.
         """
         # Disable time related values if no time data available
-        time_related_values = ["time", "speed", "pace", "ascent_speed"]
         if not self._time_data:
-            if any([v in time_related_values for v in values]):
+            if any(v in GPX.TIME_RELATED_VALUES for v in values):
                 warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
                               "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
                               UserWarning)
-            for v in time_related_values:
+            for v in GPX.TIME_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
 
         # Disable elevation related values if no elevation data available
-        elevation_related_values = ["ele", "ascent_rate", "ascent_speed"]
         if not self._ele_data:
-            if any([v in elevation_related_values for v in values]):
+            if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
                 warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
                               "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
                               UserWarning)
-            for v in elevation_related_values:
+            for v in GPX.ELEVATION_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
 
-        return self.gpx.to_dataframe(values)
+        return self.gpx.to_pandas(values)
+    
+    def to_polars(self, values: List[str] = None) -> pd.DataFrame:
+        """
+        Convert GPX object to Polars Dataframe.
+        Missing values are filled with default values (0 for elevation, empty string for time).
+
+        Parameters
+        ----------
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe containing data from GPX.
+        """
+        # Disable time related values if no time data available
+        if not self._time_data:
+            if any(v in GPX.TIME_RELATED_VALUES for v in values):
+                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
+                              "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                              UserWarning)
+            for v in GPX.TIME_RELATED_VALUES:
+                if v in values:
+                    values.remove(v)
+
+        # Disable elevation related values if no elevation data available
+        if not self._ele_data:
+            if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
+                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
+                              "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                              UserWarning)
+            for v in GPX.ELEVATION_RELATED_VALUES:
+                if v in values:
+                    values.remove(v)
+
+        return self.gpx.to_polars(values)
 
     def to_csv(
             self,
@@ -719,7 +784,7 @@ class GPX():
             values: List[str] = None,
             sep: str = ",",
             header: bool = True,
-            index: bool = False) -> Union[str, None]:
+            index: bool = False) -> Union[str, None]: # TODO: select pandas vs polars
         """
         Write the GPX object track coordinates to a .csv file.
 

@@ -5,9 +5,10 @@ except ImportError:
 
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Type
 
 import pandas as pd
+import polars as pl
 import xmlschema
 
 from ..utils import haversine_distance, ramer_douglas_peucker
@@ -963,12 +964,91 @@ class Gpx(GpxElement):
 #### Exports ##################################################################
 ###############################################################################
 
-    def to_dataframe(
-            self,
-            values: List[str] = None) -> pd.DataFrame:
+    def to_dict(
+            self, values: List[str] = None, orient: str = "dict",
+            into: Type[dict] = dict, index: bool = True) -> Dict:
+        """
+        Convert GPX object to dictionary.
+        Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
+
+        Parameters
+        ----------
+        values : List[str], optional
+            values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
+        orient : str, optional
+            Same as in Pandas.DataFrame.to_dict, by default "dict"
+        into : Type[dict], optional
+            Same as in Pandas.DataFrame.to_dict, by default dict
+        index : bool, optional
+            Same as in Pandas.DataFrame.to_dict, by default True
+
+        Returns
+        -------
+        Dict
+            Return a dictionary representing the GPX. The resulting
+            transformation depends on the `orient` parameter.
+        """
+        df = self.to_pandas(values)
+        return df.to_dict(orient, into, index)
+
+    def _to_dict_df(self, values: List[str] = None) -> Dict:
+        """
+        Convert GPX object to dictionary.
+
+        Parameters
+        ----------
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
+
+        Returns
+        -------
+        Dict
+            Dictionary containing data from GPX.
+        """
+        # Set default parameter
+        if values is None:
+            values = ["lat", "lon"]
+
+        # Compute required values
+        test_point = self.first_point()
+        if "speed" in values and test_point.speed is None:
+            self.compute_points_speed()
+        if "pace" in values and test_point.pace is None:
+            self.compute_points_pace()
+        if "ascent_rate" in values and test_point.ascent_rate is None:
+            self.compute_points_ascent_rate()
+        if "ascent_speed" in values and test_point.ascent_speed is None:
+            self.compute_points_ascent_speed()
+        if ("distance_from_start" in values and
+                test_point.distance_from_start is None):
+            self.compute_points_distance_from_start()
+
+        # Create dataframe
+        gpx_data = {}
+        for v in values:
+            if v == "time":
+                gpx_data[v] = [str(trkpt.time.replace(
+                                   tzinfo=timezone.utc).astimezone(tz=None))
+                               for trk in self.trk
+                               for trkseg in trk.trkseg
+                               for trkpt in trkseg.trkpt]
+            else:
+                gpx_data[v] = [getattr(trkpt, v)
+                               for trk in self.trk
+                               for trkseg in trk.trkseg
+                               for trkpt in trkseg.trkpt]
+        return gpx_data
+
+    def to_pandas(self, values: List[str] = None, index: bool = True) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
-        Missing values are filled with default values (0 for elevation, empty string for time).
+        Missing values are filled with default values (0 for numerical
+        values and empty string for text).
 
         Parameters
         ----------
@@ -982,66 +1062,27 @@ class Gpx(GpxElement):
         pd.DataFrame
             Dataframe containing data from GPX.
         """
-        # Retrieve parameters
-        if values is None:
-            values = ["lat", "lon"]
-        lat = "lat" in values
-        lon = "lon" in values
-        ele = "ele" in values
-        time = "time" in values
-        speed = "speed" in values
-        pace = "pace" in values
-        ascent_rate = "ascent_rate" in values
-        ascent_speed = "ascent_speed" in values
-        distance_from_start = "distance_from_start" in values
+        return pd.DataFrame(self._to_dict_df(values))
+    
+    def to_polars(self, values: List[str] = None) -> pl.DataFrame:
+        """
+        Convert GPX object to Polars Dataframe.
+        Missing values are filled with default values (0 for numerical
+        values and empty string for text).
 
-        # Compute required values
-        test_point = self.first_point()
-        if speed and test_point.speed is None:
-            self.compute_points_speed()
-        if pace and test_point.pace is None:
-            self.compute_points_pace()
-        if ascent_rate and test_point.ascent_rate is None:
-            self.compute_points_ascent_rate()
-        if ascent_speed and test_point.ascent_speed is None:
-            self.compute_points_ascent_speed()
-        if distance_from_start and test_point.distance_from_start is None:
-            self.compute_points_distance_from_start()
+        Parameters
+        ----------
+        values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
 
-        # Create dataframe
-        route_info = []
-        for track in self.trk:
-            for track_segment in track.trkseg:
-                for track_point in track_segment.trkpt:
-                    track_point_dict = {}
-                    if lat:
-                        track_point_dict["lat"] = track_point.lat
-                    if lon:
-                        track_point_dict["lon"] = track_point.lon
-                    if ele:
-                        if track_point.ele is not None:
-                            track_point_dict["ele"] = track_point.ele
-                        else:
-                            track_point_dict["ele"] = 0
-                    if time:
-                        if track_point.time is not None:
-                            track_point_dict["time"] = str(track_point.time.replace(
-                                tzinfo=timezone.utc).astimezone(tz=None))
-                        else:
-                            track_point_dict["time"] = ""
-                    if speed:
-                        track_point_dict["speed"] = track_point.speed
-                    if pace:
-                        track_point_dict["pace"] = track_point.pace
-                    if ascent_rate:
-                        track_point_dict["ascent_rate"] = track_point.ascent_rate
-                    if ascent_speed:
-                        track_point_dict["ascent_speed"] = track_point.ascent_speed
-                    if distance_from_start:
-                        track_point_dict["distance_from_start"] = track_point.distance_from_start
-                    route_info.append(track_point_dict)
-        df = pd.DataFrame(route_info)
-        return df
+        Returns
+        -------
+        pl.DataFrame
+            Dataframe containing data from GPX.
+        """
+        return pl.DataFrame(self._to_dict_df(values))
 
     def to_csv(
             self,
@@ -1077,4 +1118,4 @@ class Gpx(GpxElement):
             values = ["lat", "lon"]
 
         # Argument columns is required for KML writer (keep values order)
-        return self.to_dataframe(values).to_csv(path, sep=sep, columns=values, header=header, index=index)
+        return self.to_pandas(values).to_csv(path, sep=sep, columns=values, header=header, index=index)
