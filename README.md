@@ -9,7 +9,9 @@
 <!-- ![CI](https://github.com/FABallemand/ezGPX/actions/workflows/ci.yml/badge.svg?event=push) -->
 
 ## 🔎 Description
-Easy to use Python GPX library.
+ezGPX is an easy to use Python library for working with GPX files.
+
+Read, modify, write, and extract insights from your activity data with ease!
 
 - PyPi: https://pypi.org/project/ezgpx/
 - Documentation: https://ezgpx.readthedocs.io/en/latest/
