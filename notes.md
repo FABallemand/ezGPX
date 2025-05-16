@@ -52,6 +52,7 @@
 - [gpxcsv](https://github.com/astrowonk/gpxcsv)
 
 # 📝 TO DO LIST !!
+- Add str and repr methods to all class
 - Merge method
 - Compute length properly (improve haversine distance precision, 2D, 3D)
 - Tests

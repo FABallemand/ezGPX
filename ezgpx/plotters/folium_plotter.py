@@ -56,7 +56,7 @@ class FoliumPlotter(Plotter):
                        tiles=tiles)
 
         # Plot track points
-        gpx_df = self.gpx.to_dataframe()
+        gpx_df = self.gpx.to_pandas()
         gpx_df["coordinates"] = list(
             zip(gpx_df.lat, gpx_df.lon))
         folium.PolyLine(gpx_df["coordinates"],

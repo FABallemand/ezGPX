@@ -1,7 +1,7 @@
 import os
 import errno
 import warnings
-from typing import List, Dict
+from typing import Optional, List, Dict
 import logging
 import xml.etree.ElementTree as ET
 
@@ -30,11 +30,7 @@ class GPXWriter(Writer):
             precisions (dict, optional): Decimal precision for each type of value. Defaults to None.
             time_format (dict, optional): Time format. Defaults to None.
         """
-        super().__init__(gpx)
-
-        # Parameters
-        self.precisions: Dict = precisions
-        self.time_format: str = time_format
+        super().__init__(gpx, precisions, time_format)
 
         # Utility attributes
         self.file_name: str = ""
@@ -121,6 +117,11 @@ class GPXWriter(Writer):
         return self._add_email(self, element, email)
 
     def _add_extensions_rec(self, extensions_, values, extensions_fields) -> ET.Element:
+        print("========")
+        print(extensions_)
+        print(values)
+        print(extensions_fields)
+        print("========")
         if extensions_ is not None:
             # Add n-th level extensions
             for k0, v0 in values.items():
@@ -366,6 +367,7 @@ class GPXWriter(Writer):
         Add trck elements to the GPX root element.
         """
         logging.info("Preparing tracks...")
+        logging.info(f"{len(self.gpx.trk)} to prepare...")
 
         for track in self.gpx.trk:
             self.gpx_root = self.add_track(self.gpx_root, track)
@@ -446,21 +448,22 @@ class GPXWriter(Writer):
             self,
             file_path: str,
             properties: bool = True,
-            bounds_fields: List[str] = None,
-            copyright_fields: List[str] = None,
-            email_fields: List[str] = None,
-            extensions_fields: dict = None,
-            gpx_fields: List[str] = None,
-            link_fields: List[str] = None,
-            metadata_fields: List[str] = None,
-            person_fields: List[str] = None,
-            point_segment_fields: List[str] = None,
-            point_fields: List[str] = None,
-            route_fields: List[str] = None,
-            track_segment_fields: List[str] = None,
-            track_fields: List[str] = None,
-            way_point_fields: List[str] = None,
-            track_point_fields: List[str] = None,
+            bounds_fields: List[str] = Bounds.fields,
+            copyright_fields: List[str] = Copyright.fields,
+            email_fields: List[str] = Email.fields,
+            extensions_fields: Optional[Dict] = None,
+            gpx_fields: List[str] = Gpx.fields,
+            link_fields: List[str] = Link.fields,
+            metadata_fields: List[str] = Metadata.fields,
+            person_fields: List[str] = Person.fields,
+            point_segment_fields: List[str] = PointSegment.fields,
+            point_fields: List[str] = Point.fields,
+            route_fields: List[str] = Route.fields,
+            track_segment_fields: List[str] = TrackSegment.fields,
+            track_fields: List[str] = Track.fields,
+            way_point_fields: List[str] = WayPoint.fields,
+            track_point_fields: List[str] = WayPoint.fields,
+            mandatory_fields: bool = True,
             xml_schema: bool = False,
             xml_extensions_schemas: bool = False) -> bool:
         """
@@ -491,96 +494,69 @@ class GPXWriter(Writer):
 
         # Set parameters
         self.properties = properties
-        self.bounds_fields = (bounds_fields
-                              if bounds_fields is not None
-                              else Bounds.fields)
-        self.copyright_fields = (copyright_fields
-                                 if copyright_fields is not None
-                                 else Copyright.fields)
-        self.email_fields = (email_fields
-                             if email_fields is not None
-                             else Email.fields)
+        self.bounds_fields = bounds_fields
+        self.copyright_fields = copyright_fields
+        self.email_fields = email_fields
         self.extensions_fields = (extensions_fields
                                   if extensions_fields is not None
                                   else {})
-        self.gpx_fields = (gpx_fields
-                           if gpx_fields is not None
-                           else Gpx.fields)
-        self.link_fields = (link_fields
-                            if link_fields is not None
-                            else Link.fields)
-        self.metadata_fields = (metadata_fields
-                                if metadata_fields is not None
-                                else Metadata.fields)
-        self.person_fields = (person_fields
-                              if person_fields is not None
-                              else Person.fields)
-        self.point_segment_fields = (point_segment_fields
-                                     if point_segment_fields is not None
-                                     else PointSegment.fields)
-        self.point_fields = (point_fields
-                             if point_fields is not None
-                             else Point.fields)
-        self.route_fields = (route_fields
-                             if route_fields is not None
-                             else Route.fields)
-        self.track_segment_fields = (track_segment_fields
-                                     if track_segment_fields is not None
-                                     else TrackSegment.fields)
-        self.track_fields = (track_fields
-                             if track_fields is not None
-                             else Track.fields)
-        self.way_point_fields = (way_point_fields
-                                 if way_point_fields is not None
-                                 else WayPoint.fields)
-        self.track_point_fields = (track_point_fields
-                                   if track_point_fields is not None
-                                   else WayPoint.fields)
+        self.gpx_fields = gpx_fields
+        self.link_fields = link_fields
+        self.metadata_fields = metadata_fields
+        self.person_fields = person_fields
+        self.point_segment_fields = point_segment_fields
+        self.point_fields = point_fields
+        self.route_fields = route_fields
+        self.track_segment_fields = track_segment_fields
+        self.track_fields = track_fields
+        self.way_point_fields = way_point_fields
+        self.track_point_fields = track_point_fields
 
-        # Check mandatory parameters
-        def check_mandatory_fields(element, fields, mandatory_fields):
-            if any(f not in fields for f in mandatory_fields):
-                warnings.warn(f"{element} element must have following fields: {mandatory_fields}"
-                            "Missing mandatory fields will automatically be added.")
-                fields = list(set(fields + mandatory_fields))
-            return fields
-       
-        self.bounds_fields = check_mandatory_fields("Bounds",
-                                                    self.bounds_fields,
-                                                    Bounds.mandatory_fields)
-        self.copyright_fields = check_mandatory_fields("Copyright",
-                                                       self.copyright_fields,
-                                                       Copyright.mandatory_fields)
-        self.email_fields = check_mandatory_fields("Email", self.email_fields,
-                                                   Email.mandatory_fields)
-        self.gpx_fields = check_mandatory_fields("Gpx", self.gpx_fields,
-                                                 Gpx.mandatory_fields)
-        self.link_fields = check_mandatory_fields("Link", self.link_fields,
-                                                  Link.mandatory_fields)
-        self.metadata_fields = check_mandatory_fields("Metadata",
-                                                      self.metadata_fields,
-                                                      Metadata.mandatory_fields)
-        self.person_fields = check_mandatory_fields("Person",
-                                                    self.person_fields,
-                                                    Person.mandatory_fields)
-        self.point_segment_fields = check_mandatory_fields("PointSegment",
-                                                           self.point_segment_fields,
-                                                           PointSegment.mandatory_fields)
-        self.point_fields = check_mandatory_fields("Point", self.point_fields,
-                                                   Point.mandatory_fields)
-        self.route_fields = check_mandatory_fields("Route", self.route_fields,
-                                                   Route.mandatory_fields)
-        self.track_segment_fields = check_mandatory_fields("TrackSegment",
-                                                           self.track_segment_fields,
-                                                           TrackSegment.mandatory_fields)
-        self.track_fields = check_mandatory_fields("Track", self.track_fields,
-                                                   Track.mandatory_fields)
-        self.way_point_fields = check_mandatory_fields("WayPoint",
-                                                       self.way_point_fields,
-                                                       WayPoint.mandatory_fields)
-        self.track_point_fields = check_mandatory_fields("TrackPoint",
-                                                         self.track_point_fields,
-                                                         WayPoint.mandatory_fields)
+        # Check mandatory fields
+        if mandatory_fields:
+            def check_mandatory_fields(element, fields, mandatory_fields):
+                if any(f not in fields for f in mandatory_fields):
+                    warnings.warn(f"{element} element must have following fields: {mandatory_fields}"
+                                  "Missing mandatory fields will automatically be added.")
+                    fields = list(set(fields + mandatory_fields))
+                return fields
+        
+            self.bounds_fields = check_mandatory_fields("Bounds",
+                                                        self.bounds_fields,
+                                                        Bounds.mandatory_fields)
+            self.copyright_fields = check_mandatory_fields("Copyright",
+                                                           self.copyright_fields,
+                                                           Copyright.mandatory_fields)
+            self.email_fields = check_mandatory_fields("Email", self.email_fields,
+                                                       Email.mandatory_fields)
+            self.gpx_fields = check_mandatory_fields("Gpx", self.gpx_fields,
+                                                     Gpx.mandatory_fields)
+            self.link_fields = check_mandatory_fields("Link", self.link_fields,
+                                                      Link.mandatory_fields)
+            self.metadata_fields = check_mandatory_fields("Metadata",
+                                                          self.metadata_fields,
+                                                          Metadata.mandatory_fields)
+            self.person_fields = check_mandatory_fields("Person",
+                                                        self.person_fields,
+                                                        Person.mandatory_fields)
+            self.point_segment_fields = check_mandatory_fields("PointSegment",
+                                                               self.point_segment_fields,
+                                                               PointSegment.mandatory_fields)
+            self.point_fields = check_mandatory_fields("Point", self.point_fields,
+                                                       Point.mandatory_fields)
+            self.route_fields = check_mandatory_fields("Route", self.route_fields,
+                                                       Route.mandatory_fields)
+            self.track_segment_fields = check_mandatory_fields("TrackSegment",
+                                                               self.track_segment_fields,
+                                                               TrackSegment.mandatory_fields)
+            self.track_fields = check_mandatory_fields("Track", self.track_fields,
+                                                       Track.mandatory_fields)
+            self.way_point_fields = check_mandatory_fields("WayPoint",
+                                                           self.way_point_fields,
+                                                           WayPoint.mandatory_fields)
+            self.track_point_fields = check_mandatory_fields("TrackPoint",
+                                                             self.track_point_fields,
+                                                             WayPoint.mandatory_fields)
 
         # Create methods behaviors
         self._add_bounds = self.behavior_creator.add_bounds_creator(

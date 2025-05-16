@@ -235,10 +235,10 @@ class TestGPX():
 
     #==== Conversion and Saving ==============================================#
 
-    def test_to_dataframe(self):
+    def test_to_pandas(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        df = gpx.to_dataframe(values=["lat", "lon", "ele", "time"])
+        df = gpx.to_pandas(values=["lat", "lon", "ele", "time"])
         reference_df = pd.read_csv(os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"))
         # Test
         assert(reference_df.equals(df))

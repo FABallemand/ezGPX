@@ -42,7 +42,7 @@ class MatplotlibAnimPlotter(Plotter):
         Try reducing fps and/or bitrate.
         """
         # Create dataframe containing data from the GPX file
-        self._dataframe = self.gpx.to_dataframe()
+        self._dataframe = self.gpx.to_pandas()
 
         # Retrieve useful data
         lat = self._dataframe["lat"].values

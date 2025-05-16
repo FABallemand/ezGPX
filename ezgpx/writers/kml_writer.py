@@ -45,7 +45,7 @@ class KMLWriter(Writer):
         """
         Initialize GPXWriter instance.
         """
-        super().__init__(gpx)
+        super().__init__(gpx, precisions, time_format)
         self.file_name: str = ""
         self.kml_string: str = ""
 
@@ -57,9 +57,6 @@ class KMLWriter(Writer):
         self.extensions: bool = extensions
         self.ele: bool = ele
         self.time: bool = time
-
-        self.precisions: Dict = precisions
-        self.time_format = time_format
 
         self.styles = styles if styles is not None else DEFAULT_STYLES
 

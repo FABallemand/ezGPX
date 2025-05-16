@@ -1,6 +1,6 @@
 from typing import List
 from types import FunctionType
-
+import xml.etree.ElementTree as ET
 
 class GPXWriterMethodBehaviorCreator():
 

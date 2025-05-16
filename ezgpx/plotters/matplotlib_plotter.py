@@ -39,7 +39,7 @@ class MatplotlibPlotter(Plotter):
         values = ["lat", "lon"]
         if color in dynamic_colors:
             values.append(color)
-        self._dataframe = self.gpx.to_dataframe(values)
+        self._dataframe = self.gpx.to_pandas(values)
 
         # Create figure
         fig = plt.figure(figsize=figsize)

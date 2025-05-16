@@ -53,7 +53,7 @@ class GmapPlotter(Plotter):
         map = gmplot.GoogleMapPlotter(c_lat, c_lon, zoom)
 
         # Create dataframe containing data from the GPX file
-        gpx_df = self.gpx.to_dataframe()
+        gpx_df = self.gpx.to_pandas()
 
         # Scatter track points
         if scatter:

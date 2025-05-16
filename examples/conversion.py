@@ -13,4 +13,7 @@ gpx.to_kml("new_file.kml")
 gpx.to_csv("new_file.csv", values=["lat", "lon", "ele"])
 
 # Convert to Pandas Dataframe
-df = gpx.to_dataframe()
+df = gpx.to_pandas()
+
+# Convert to Polars Dataframe
+df = gpx.to_polars()

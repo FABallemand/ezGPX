@@ -1,10 +1,11 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from ..gpx_elements import Gpx
-from ..parsers import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+from ..parsers import (
+    DEFAULT_PRECISION, DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT)
 
 
 class Writer():
@@ -14,7 +15,9 @@ class Writer():
 
     def __init__(
             self,
-            gpx: Gpx = None) -> None:
+            gpx: Gpx = None,
+            precisions: Dict = None,
+            time_format: str = None) -> None:
         """
         Initialize Writer instance.
 
@@ -24,6 +27,14 @@ class Writer():
             Gpx instance to write, by default None
         """
         self.gpx: Gpx = gpx
+
+        self.precisions: Dict = (precisions
+                                 if precisions is not None
+                                 else DEFAULT_PRECISION_DICT)
+        self.time_format: str = (time_format
+                                 if time_format is not None
+                                 else DEFAULT_TIME_FORMAT)
+
         self.file_path: str = None
 
     def setIfNotNone(self, element: ET.Element, field: str, value):
