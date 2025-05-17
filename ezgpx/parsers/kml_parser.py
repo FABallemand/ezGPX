@@ -21,9 +21,13 @@ class KMLParser(XMLParser):
         Initialize KMLParser instance.
 
         Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
-            check_xml_schemas (bool, optional): Toggle schema verification during parsing. Defaults to True.
-            xml_extensions_schemas (bool, optional): Toggle extensions schema verificaton durign parsing. Requires internet connection and is not guaranted to work. Defaults to False.
+            file_path (str, optional): Path to the file to parse.
+                Defaults to None.
+            check_xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet
+                connection and is not guaranted to work. Defaults to False.
         """
         if not file_path.endswith(".kml"):
             return
@@ -80,10 +84,13 @@ class KMLParser(XMLParser):
         Parse Placemark element from KML file.
 
         Args:
-            placemark (xml.etree.ElementTree.Element): Parsed Placemark element.
+            placemark (xml.etree.ElementTree.Element): Parsed Placemark
+                element.
 
         Returns:
-            Union[List[Dict], None]: Informations contained in the Placemark element (the name of the Placemark (str) and the contents of the LineString (List[str])).
+            Union[List[Dict], None]: Informations contained in the
+                Placemark element (the name of the Placemark (str)
+                and the contents of the LineString (List[str])).
         """
         if placemark is None:
             return None
@@ -156,6 +163,10 @@ class KMLParser(XMLParser):
                 logging.error("Oops, not yet implemented...")
 
     def add_properties(self):
+        """
+        Add missing properties (properties that do not exist in KML/KMZ
+        files but mandatory in GPX files).
+        """
         self.gpx.creator = "ezGPX"
         self.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
         self.gpx.version = "1.1"

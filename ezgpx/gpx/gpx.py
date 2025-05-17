@@ -12,7 +12,6 @@ import pandas as pd
 from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
                             Metadata, Person, Point, PointSegment, Route,
                             Track, TrackSegment, WayPoint)
-from ..parsers import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 from ..parsers.fit_parser import FitParser
 from ..parsers.gpx_parser import GPXParser
 from ..parsers.kml_parser import KMLParser
@@ -73,7 +72,7 @@ class GPX():
         # Empty GPX instance
         # For advanced use only
         if file_path is None:
-            warnings.warn(f"No file path provided, creating an empty GPX instance.",
+            warnings.warn("No file path provided, creating an empty GPX instance.",
                           UserWarning)
             self.gpx = Gpx()
             # Writers
@@ -130,7 +129,7 @@ class GPX():
             else:
                 raise ValueError(f"Unable to parse this type of file: {file_path}"
                                  "Consider renaming your file with the proper file extension.")
-            
+
             # Writers
             self._gpx_writer = GPXWriter(self.gpx, self._precisions,
                                          self._time_format)
@@ -751,7 +750,7 @@ class GPX():
                     values.remove(v)
 
         return self.gpx.to_pandas(values)
-    
+
     def to_polars(self, values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Polars Dataframe.
@@ -797,7 +796,7 @@ class GPX():
             values: List[str] = None,
             sep: str = ",",
             header: bool = True,
-            index: bool = False) -> Union[str, None]: # TODO: select pandas vs polars
+            index: bool = False) -> Union[str, None]: # TODO select pandas vs polars
         """
         Write the GPX object track coordinates to a .csv file.
 
@@ -827,21 +826,21 @@ class GPX():
             self,
             path: str,
             properties: bool = True,
-            bounds_fields: List[str] = Bounds.fields,
-            copyright_fields: List[str] = Copyright.fields,
-            email_fields: List[str] = Email.fields,
+            bounds_fields: Optional[List[str]] = None,
+            copyright_fields: Optional[List[str]] = None,
+            email_fields: Optional[List[str]] = None,
             extensions_fields: Optional[Dict] = None,
-            gpx_fields: List[str] = Gpx.fields,
-            link_fields: List[str] = Link.fields,
-            metadata_fields: List[str] = Metadata.fields,
-            person_fields: List[str] = Person.fields,
-            point_segment_fields: List[str] = PointSegment.fields,
-            point_fields: List[str] = Point.fields,
-            route_fields: List[str] = Route.fields,
-            track_segment_fields: List[str] = TrackSegment.fields,
-            track_fields: List[str] = Track.fields,
-            way_point_fields: List[str] = WayPoint.fields,
-            track_point_fields: List[str] = WayPoint.fields,
+            gpx_fields: Optional[List[str]] = None,
+            link_fields: Optional[List[str]] = None,
+            metadata_fields: Optional[List[str]] = None,
+            person_fields: Optional[List[str]] = None,
+            point_segment_fields: Optional[List[str]] = None,
+            point_fields: Optional[List[str]] = None,
+            route_fields: Optional[List[str]] = None,
+            track_segment_fields: Optional[List[str]] = None,
+            track_fields: Optional[List[str]] = None,
+            way_point_fields: Optional[List[str]] = None,
+            track_point_fields: Optional[List[str]] = None,
             mandatory_fields: bool = True,
             xml_schema: bool = True,
             xml_extensions_schemas: bool = False) -> bool:
@@ -862,12 +861,54 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
+        bounds_fields = (bounds_fields
+                         if bounds_fields is not None
+                         else Bounds.fields)
+        copyright_fields = (copyright_fields
+                            if copyright_fields is not None
+                            else Copyright.fields)
+        email_fields = (email_fields
+                        if email_fields is not None
+                        else Email.fields)
         default_extensions_fields = (self._gpx_parser.extensions_fields
                                      if self._gpx_parser is not None
-                                     else None)
+                                     else {})
         extensions_fields = (extensions_fields
                              if extensions_fields is not None
                              else default_extensions_fields)
+        gpx_fields = (gpx_fields
+                      if gpx_fields is not None
+                      else Gpx.fields)
+        link_fields = (link_fields
+                       if link_fields is not None
+                       else Link.fields)
+        metadata_fields = (metadata_fields
+                           if metadata_fields is not None
+                           else Metadata.fields)
+        person_fields = (person_fields
+                         if person_fields is not None
+                         else Person.fields)
+        point_segment_fields = (point_segment_fields
+                                if point_segment_fields is not None
+                                else PointSegment.fields)
+        point_fields = (point_fields
+                        if point_fields is not None
+                        else Point.fields)
+        route_fields = (route_fields
+                        if route_fields is not None
+                        else Route.fields)
+        track_segment_fields = (track_segment_fields
+                                if track_segment_fields is not None
+                                else TrackSegment.fields)
+        track_fields = (track_fields
+                        if track_fields is not None
+                        else Track.fields)
+        way_point_fields = (way_point_fields
+                            if way_point_fields is not None
+                            else WayPoint.fields)
+        track_point_fields = (track_point_fields
+                              if track_point_fields is not None
+                              else WayPoint.fields)
         return self._gpx_writer.write(file_path=path,
                                       properties=properties,
                                       bounds_fields=bounds_fields,

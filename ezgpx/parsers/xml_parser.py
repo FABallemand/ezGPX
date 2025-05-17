@@ -54,11 +54,9 @@ class XMLParser(Parser):
         Returns:
             Union[str, None]: Text from sub-element.
         """
-        try:
-            text_ = element.get(sub_element)
-        except:
+        text_ = element.get(sub_element)
+        if text_ is None:
             logging.debug("%s has no attribute %s.", element, sub_element)
-            text_ = None
         return text_
 
     def get_int(self, element, sub_element: str) -> Union[int, None]:
@@ -72,11 +70,11 @@ class XMLParser(Parser):
         Returns:
             Union[int, None]: Integer value from sub-element.
         """
-        try:
-            int_ = int(element.get(sub_element))
-        except:
-            logging.debug(f"{element} has no attribute {sub_element}.")
-            int_ = None
+        int_ = element.get(sub_element)
+        if int_ is None:
+            logging.debug("%s has no attribute %s.", element, sub_element)
+        else:
+            int_ = int(int_)
         return int_
 
     def get_float(self, element, sub_element: str) -> Union[float, None]:
@@ -90,12 +88,33 @@ class XMLParser(Parser):
         Returns:
             Union[float, None]: Floating point value from sub-element.
         """
-        try:
-            float_ = float(element.get(sub_element))
-        except:
-            logging.debug(f"{element} has no attribute {sub_element}.")
-            float_ = None
+        float_ = element.get(sub_element)
+        if float_ is None:
+            logging.debug("%s has no attribute %s.", element, sub_element)
+        else:
+            float_ = float(float_)
         return float_
+    
+    def find_sub_element(self, element, sub_element: str) -> Union[ET.Element, None]:
+        """
+        Find sub-element.
+
+        Parameters
+        ----------
+        element : xml.etree.ElementTree.Element
+            Parsed element from GPX file.
+        sub_element : str
+            Sub-element name.
+
+        Returns
+        -------
+        Union[ET.Element, None]
+            Sub-element.
+        """
+        sub_element_ = element.find(sub_element, self.name_spaces)
+        if sub_element_ is None:
+            logging.debug("%s has no attribute %s.", element, sub_element)
+        return sub_element_
 
     def find_text(self, element, sub_element: str) -> Union[str, None]:
         """
@@ -108,12 +127,8 @@ class XMLParser(Parser):
         Returns:
             Union[str, None]: Text from sub-element.
         """
-        try:
-            text_ = element.find(sub_element, self.name_spaces).text
-        except:
-            text_ = None
-            logging.debug(f"{element} has no attribute {sub_element}.")
-        return text_
+        sub_element_ = self.find_sub_element(element, sub_element)
+        return None if sub_element_ is None else sub_element_.text
 
     def find_int(self, element, sub_element: str) -> Union[int, None]:
         """
@@ -126,12 +141,8 @@ class XMLParser(Parser):
         Returns:
             Union[int, None]: Integer value from sub-element.
         """
-        try:
-            int_ = int(element.find(sub_element, self.name_spaces).text)
-        except:
-            int_ = None
-            logging.debug(f"{element} has no attribute {sub_element}.")
-        return int_
+        sub_element_ = self.find_sub_element(element, sub_element)
+        return None if sub_element_ is None else int(sub_element_.text)
 
     def find_float(self, element, sub_element: str) -> Union[float, None]:
         """
@@ -144,12 +155,8 @@ class XMLParser(Parser):
         Returns:
             Union[float, None]: Floating point value from sub-element.
         """
-        try:
-            float_ = float(element.find(sub_element, self.name_spaces).text)
-        except:
-            float_ = None
-            logging.debug(f"{element} has no attribute {sub_element}.")
-        return float_
+        sub_element_ = self.find_sub_element(element, sub_element)
+        return None if sub_element_ is None else float(sub_element_.text)
 
     def find_time(self, element, sub_element: str) -> Union[datetime, None]:
         """
@@ -162,13 +169,9 @@ class XMLParser(Parser):
         Returns:
             Union[datetime, None]: Floating point value from sub-element.
         """
-        try:
-            time_ = datetime.strptime(element.find(
-                sub_element, self.name_spaces).text, self.time_format)
-        except:
-            time_ = None
-            logging.debug(f"{element} has no attribute {sub_element}.")
-        return time_
+        sub_element_ = self.find_sub_element(element, sub_element)
+        return (None if sub_element_ is None
+                else datetime.strptime(sub_element_.text, self.time_format))
 
     def check_xml_schemas(self):
         """
