@@ -1,7 +1,9 @@
 lxml
 xmlschema
 importlib_resources
+python-dateutil
 pandas
+polars
 matplotlib
 basemap
 gmplot

@@ -1,7 +1,7 @@
 from typing import Union, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..gpx_elements import Gpx
 from ..parsers import (
@@ -60,12 +60,13 @@ class Writer():
         Add sub-element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             sub_element (str): GPX sub-element.
             text (str): GPX sub-element text.
 
         Returns:
-            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+                GPX sub-element (if not None).
         """
         sub_element_ = None
         if text is not None:
@@ -81,13 +82,14 @@ class Writer():
         Add sub-element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             sub_element (str): GPX sub-element.
             number (Union[int, float], optional): GPX sub-element value.
             precision (int, optional): Precision. Defaults to DEFAULT_PRECISION.
 
         Returns:
-            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+                GPX sub-element (if not None).
         """
         sub_element_ = None
         if number is not None:
@@ -102,26 +104,25 @@ class Writer():
 
     def add_subelement_time(
             self, element: ET.Element, sub_element: str, time: datetime,
-            format_: str = DEFAULT_TIME_FORMAT) -> ET.Element:
+            format_: str = DEFAULT_TIME_FORMAT) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             sub_element (str): GPX sub-element.
             time (datetime, optional): GPX sub-element value.
             format (str, optional): Format. Defaults to DEFAULT_TIME_FORMAT.
 
         Returns:
-            Tuple[xml.etree.ElementTree.Element, Union[xml.etree.ElementTree.Element, None]]: GPX element and GPX sub-element (if not None).
+            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+                GPX sub-element (if not None).
         """
         sub_element_ = None
         if time is not None:
             sub_element_ = ET.SubElement(element, sub_element)
-            try:
-                sub_element_.text = time.strftime(format_)
-            except:
-                logging.error("Invalid time format.")
+            time_utc = time.astimezone(timezone.utc) # Convert to UTC
+            sub_element_.text = time_utc.strftime(format_)
         return element, sub_element_
 
     def check_xml_schemas(
@@ -143,7 +144,7 @@ class Writer():
         bool
             True if the written file follows all verified schemas.
         """
-        # TODO: Check for file_path
+        # TODO Check for file_path
         # Check XML schema
         if xml_schema:
             if not self.gpx.check_xml_schema(self.file_path):

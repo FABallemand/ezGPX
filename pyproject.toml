@@ -49,14 +49,18 @@ classifiers=[
     "Operating System :: OS Independent"
 ]
 dependencies = [
+    "lxml",
     "xmlschema",
-    "fitparse",
+    "importlib_resources",
+    "python-dateutil",
     "pandas",
+    "polars",
     "matplotlib",
     "basemap",
     "gmplot",
     "folium",
     "pytest",
+    "fitparse"
 ]
 
 [project.urls]

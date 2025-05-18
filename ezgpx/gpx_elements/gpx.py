@@ -129,6 +129,19 @@ class Gpx(GpxElement):
             return False
 
     def check_xml_extensions_schemas(self, file_path: str) -> bool:
+        """
+        Check XML extensions schemas.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to GPX file.
+
+        Returns
+        -------
+        bool
+            True if GPX file follows XML extensions schemas.
+        """
         gpx_schemas = [
             s for s in self.xsi_schema_location if s.endswith(".xsd")]
         gpx_schemas.remove("http://www.topografix.com/GPX/1/1/gpx.xsd")
@@ -395,9 +408,7 @@ class Gpx(GpxElement):
                     ascent = track_point.ele - previous_point.ele
                     try:
                         track_point.ascent_rate = (ascent * 100) / distance
-                        logging.debug(
-                            f"distance={distance} | ascent={ascent} | ascent_rate={track_point.ascent_rate}")
-                    except:
+                    except ZeroDivisionError:
                         track_point.ascent_rate = 0.0
                     previous_point = track_point
 
@@ -612,7 +623,7 @@ class Gpx(GpxElement):
                             previous_point.time).total_seconds() / 3600
                     try:
                         track_point.speed = distance / time
-                    except:
+                    except ZeroDivisionError:
                         track_point.speed = 0.0
                     previous_point = track_point
 
@@ -689,8 +700,8 @@ class Gpx(GpxElement):
                 for point in segment.trkpt:
                     try:
                         point.pace = 60.0 / point.speed
-                    except:
-                        # Fill with average moving space (first point)
+                    except ZeroDivisionError:
+                        # Fill with average moving pace (first point)
                         point.pace = self.avg_moving_pace()
 
     def min_pace(self) -> float:
@@ -749,7 +760,7 @@ class Gpx(GpxElement):
                             previous_point.time).total_seconds() / 3600
                     try:
                         track_point.ascent_speed = ascent / time
-                    except:
+                    except ZeroDivisionError:
                         track_point.ascent_speed = 0.0
                     previous_point = track_point
 
@@ -892,8 +903,8 @@ class Gpx(GpxElement):
 
                 for track_point in track_segment.trkpt:
                     # GPS error
-                    if previous_point is not None and haversine_distance(previous_point,
-                                                                         track_point) > error_distance:
+                    dst = haversine_distance(previous_point, track_point)
+                    if previous_point is not None and dst > error_distance:
                         logging.warning(
                             "Point %s has been removed (GPS error)", track_point)
                         gps_errors.append(track_point)
@@ -1044,7 +1055,7 @@ class Gpx(GpxElement):
                                for trkpt in trkseg.trkpt]
         return gpx_data
 
-    def to_pandas(self, values: List[str] = None, index: bool = True) -> pd.DataFrame:
+    def to_pandas(self, values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
         Missing values are filled with default values (0 for numerical
@@ -1063,7 +1074,7 @@ class Gpx(GpxElement):
             Dataframe containing data from GPX.
         """
         return pd.DataFrame(self._to_dict_df(values))
-    
+
     def to_polars(self, values: List[str] = None) -> pl.DataFrame:
         """
         Convert GPX object to Polars Dataframe.

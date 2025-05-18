@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 
+from .parser import POSSIBLE_TIME_FORMATS
 from .xml_parser import XMLParser
 from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
                             Metadata, Person, Point, PointSegment, Route,
@@ -75,18 +76,17 @@ class GPXParser(XMLParser):
         # Use time from metadata
         metadata = self.xml_root.find("metadata", self.name_spaces)
         if metadata is not None:
-            time = metadata.findtext("time", namespaces=self.name_spaces)
-            if time is not None:
-                return time
+            time_str = metadata.findtext("time", namespaces=self.name_spaces)
+            if time_str is not None:
+                return time_str
 
         # Use time from track point
-        track = self.xml_root.findall("trk", self.name_spaces)[
-            0]  # Optimise, load only once??
+        track = self.xml_root.findall("trk", self.name_spaces)[0]  # Optimise, load only once??
         segment = track.findall("trkseg", self.name_spaces)[0]
         point = segment.findall("trkpt", self.name_spaces)[0]
-        time = point.findtext("time", namespaces=self.name_spaces)
-        if time is not None:
-            return time
+        time_str = point.findtext("time", namespaces=self.name_spaces)
+        if time_str is not None:
+            return time_str
 
         # No time element at all...
         return None
@@ -96,18 +96,23 @@ class GPXParser(XMLParser):
         Find the time format used in GPX file.
         Also find if the GPX file contains time data.
         """
-        time = self._find_time_element()
-        if time is None:
+        time_str = self._find_time_element()
+        if time_str is None:
             self.time_data = False
             logging.warning("No time element in GPX file.")
             return
 
         self.time_data = True
-        try:
-            datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
-            self.time_format = "%Y-%m-%dT%H:%M:%SZ"
-        except:
-            self.time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+        for tf in POSSIBLE_TIME_FORMATS:
+            try:
+                datetime.strptime(time_str, tf)
+                self.time_format = tf
+                break
+            except ValueError:
+                pass
+        else:
+            logging.info("Unknown time format. "
+                         "Default time format will be used uppon writting.")
 
     def _parse_bounds(self, bounds, tag: str = "bounds") -> Union[Bounds, None]:
         """
@@ -316,7 +321,7 @@ class GPXParser(XMLParser):
         lat = self.get_float(point, "lat")
         lon = self.get_float(point, "lon")
         ele = self.find_float(point, "ele")
-        time = self.find_time(point, "time")  # Add namespace arg??
+        time = self.find_time(point, "time")
 
         return Point(tag, lat, lon, ele, time)
 

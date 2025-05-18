@@ -1,7 +1,7 @@
-import warnings
 from typing import Dict, Optional, Union
 import logging
 from datetime import datetime
+from dateutil import parser
 import xml.etree.ElementTree as ET
 
 from .parser import Parser
@@ -171,7 +171,7 @@ class XMLParser(Parser):
         """
         sub_element_ = self.find_sub_element(element, sub_element)
         return (None if sub_element_ is None
-                else datetime.strptime(sub_element_.text, self.time_format))
+                else parser.parse(sub_element_.text))
 
     def check_xml_schemas(self):
         """
