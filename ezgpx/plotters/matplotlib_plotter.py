@@ -39,13 +39,13 @@ class MatplotlibPlotter(Plotter):
         values = ["lat", "lon"]
         if color in dynamic_colors:
             values.append(color)
-        self._dataframe = self.gpx.to_pandas(values)
+        self._dataframe = self._gpx.to_pandas(values)
 
         # Create figure
         fig = plt.figure(figsize=figsize)
 
         # Compute track boundaries
-        min_lat, min_lon, max_lat, max_lon = self.gpx.bounds()
+        min_lat, min_lon, max_lat, max_lon = self._gpx.bounds()
 
         # Compute default offset
         delta_lat = abs(max_lat - min_lat)
@@ -85,61 +85,54 @@ class MatplotlibPlotter(Plotter):
             r = delta_lon / delta_lat
 
         # Create map
-        map = Basemap(projection="cyl",
-                      llcrnrlon=min_lon,
-                      llcrnrlat=min_lat,
-                      urcrnrlon=max_lon,
-                      urcrnrlat=max_lat)
+        map_ = Basemap(projection="cyl",
+                       llcrnrlon=min_lon,
+                       llcrnrlat=min_lat,
+                       urcrnrlon=max_lon,
+                       urcrnrlat=max_lat)
 
         # Add background
         if background is None:
             pass
         elif background == "bluemarble":
-            map.bluemarble()
+            map_.bluemarble()
         elif background == "shadedrelief":
-            map.shadedrelief()
+            map_.shadedrelief()
         elif background == "etopo":
-            map.etopo()
+            map_.etopo()
         elif background == "wms":
             wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
             wms_server = "http://wms.geosignal.fr/metropole?"
-            map.wmsimage(wms_server,
-                         layers=["Communes", "Nationales", "Regions"],
-                         verbose=True)
+            map_.wmsimage(wms_server,
+                          layers=["Communes", "Nationales", "Regions"],
+                          verbose=True)
         else:
-            map.arcgisimage(service=background,
-                            dpi=dpi,
-                            verbose=True)
+            map_.arcgisimage(service=background, dpi=dpi, verbose=True)
 
         # Scatter track points
         if color in dynamic_colors:
-            im = map.scatter(self._dataframe["lon"],
-                             self._dataframe["lat"],
-                             s=size,
-                             c=self._dataframe[color],
-                             cmap=cmap)
+            im = map_.scatter(self._dataframe["lon"], self._dataframe["lat"],
+                              s=size, c=self._dataframe[color], cmap=cmap)
         else:
-            im = map.scatter(self._dataframe["lon"],
-                             self._dataframe["lat"],
-                             s=size,
-                             color=color)
+            im = map_.scatter(self._dataframe["lon"], self._dataframe["lat"],
+                              s=size, color=color)
 
         # Scatter start point with different color
         if start_point_color:
-            map.scatter(self._dataframe["lon"][0], self._dataframe["lat"][0],
-                        marker="^", color=start_point_color)
+            map_.scatter(self._dataframe["lon"][0], self._dataframe["lat"][0],
+                         marker="^", color=start_point_color)
 
         # Scatter stop point with different color
         if stop_point_color:
-            map.scatter(self._dataframe["lon"].iloc[-1], self._dataframe["lat"].iloc[-1],
-                        marker="h", color=stop_point_color)
+            map_.scatter(self._dataframe["lon"].iloc[-1],
+                         self._dataframe["lat"].iloc[-1],
+                         marker="h", color=stop_point_color)
 
         # Scatter way points with different color
         if way_points_color:
-            for way_point in self.gpx.wpt:
-                x, y = map(way_point.lon, way_point.lat)  # Project way point
-                map.scatter(x, y, marker="D",
-                            color=way_points_color)      # Scatter way point
+            for way_point in self._gpx.wpt:
+                x, y = map_(way_point.lon, way_point.lat)  # Project way point
+                map_.scatter(x, y, marker="D", color=way_points_color)  # Scatter way point
 
         # Colorbar
         if colorbar:

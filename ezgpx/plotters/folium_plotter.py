@@ -15,7 +15,7 @@ class FoliumPlotter(Plotter):
     def plot(
             self,
             tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"
-            color: str = "#110000",
+            color: str = "#FFA800",
             start_stop_colors: Optional[Tuple[str, str]] = None,
             way_points_color: Optional[str] = None,
             minimap: bool = False,
@@ -50,28 +50,28 @@ class FoliumPlotter(Plotter):
             Open the plot in the default web browser, by default True
         """
         # Create map
-        center_lat, center_lon = self.gpx.center()
+        center_lat, center_lon = self._gpx.center()
         m = folium.Map(location=[center_lat, center_lon],
                        zoom_start=zoom,
                        tiles=tiles)
 
         # Plot track points
-        gpx_df = self.gpx.to_pandas()
+        gpx_df = self._gpx.to_pandas()
         gpx_df["coordinates"] = list(
             zip(gpx_df.lat, gpx_df.lon))
         folium.PolyLine(gpx_df["coordinates"],
-                        tooltip=self.gpx.name(), color=color).add_to(m)
+                        tooltip=self._gpx.name(), color=color).add_to(m)
 
         # Scatter start and stop points with different color
         if start_stop_colors:
-            folium.Marker([self.gpx.trk[0].trkseg[0].trkpt[0].lat, self.gpx.trk[0].trkseg[0].trkpt[0].lon],
+            folium.Marker([self._gpx.trk[0].trkseg[0].trkpt[0].lat, self._gpx.trk[0].trkseg[0].trkpt[0].lon],
                           popup="<b>Start</b>", tooltip="Start", icon=folium.Icon(color=start_stop_colors[0])).add_to(m)
-            folium.Marker([self.gpx.trk[-1].trkseg[-1].trkpt[-1].lat, self.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
+            folium.Marker([self._gpx.trk[-1].trkseg[-1].trkpt[-1].lat, self._gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                           popup="<b>Stop</b>", tooltip="Stop", icon=folium.Icon(color=start_stop_colors[1])).add_to(m)
 
         # Scatter way points with different color
         if way_points_color:
-            for way_point in self.gpx.wpt:
+            for way_point in self._gpx.wpt:
                 folium.Marker([way_point.lat, way_point.lon], popup="<i>Way point</i>",
                               tooltip="Way point", icon=folium.Icon(icon="info-sign", color=way_points_color)).add_to(m)
 
@@ -97,7 +97,7 @@ class FoliumPlotter(Plotter):
 
         # Save map
         if file_path is None:
-            file_path = file_path[:-4] + ".html"
+            file_path = self._gpx.file_path[:-4] + ".html"
         m.save(file_path)
 
         # Open map in web browser

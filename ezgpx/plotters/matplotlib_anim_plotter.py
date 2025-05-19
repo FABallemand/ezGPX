@@ -42,7 +42,7 @@ class MatplotlibAnimPlotter(Plotter):
         Try reducing fps and/or bitrate.
         """
         # Create dataframe containing data from the GPX file
-        self._dataframe = self.gpx.to_pandas()
+        self._dataframe = self._gpx.to_pandas()
 
         # Retrieve useful data
         lat = self._dataframe["lat"].values
@@ -52,7 +52,7 @@ class MatplotlibAnimPlotter(Plotter):
         fig = plt.figure(figsize=figsize)
 
         # Compute track boundaries
-        min_lat, min_lon, max_lat, max_lon = self.gpx.bounds()
+        min_lat, min_lon, max_lat, max_lon = self._gpx.bounds()
 
         # Add default offset
         delta_max = max(max_lat - min_lat, max_lon - min_lon)
@@ -87,11 +87,8 @@ class MatplotlibAnimPlotter(Plotter):
             r = delta_lon / delta_lat
 
         # Create map
-        map = Basemap(projection="cyl",
-                      llcrnrlon=min_lon,
-                      llcrnrlat=min_lat,
-                      urcrnrlon=max_lon,
-                      urcrnrlat=max_lat)
+        map = Basemap(projection="cyl", llcrnrlon=min_lon, llcrnrlat=min_lat,
+                      urcrnrlon=max_lon, urcrnrlat=max_lat)
 
         # Add background
         if background is None:
@@ -109,9 +106,7 @@ class MatplotlibAnimPlotter(Plotter):
                          layers=["Communes", "Nationales", "Regions"],
                          verbose=True)
         else:
-            map.arcgisimage(service=background,
-                            dpi=dpi,
-                            verbose=True)
+            map.arcgisimage(service=background, dpi=dpi, verbose=True)
 
         # Create empty line
         # Add marker, marker style...
@@ -135,9 +130,7 @@ class MatplotlibAnimPlotter(Plotter):
             return line,
 
         # Create animation
-        ani = animation.FuncAnimation(fig=fig,
-                                      func=animate,
-                                      frames=len(lat),
+        ani = animation.FuncAnimation(fig=fig, func=animate, frames=len(lat),
                                       interval=interval,  # Delay between frames in ms
                                       repeat=repeat if file_path is None else False)  # ?
 
