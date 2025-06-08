@@ -7,15 +7,17 @@ class Person(GpxElement):
     """
     personType element in GPX file.
     """
+
     fields = ["name", "email", "link"]
     mandatory_fields = []
 
     def __init__(
-            self,
-            tag: str = "person",
-            name: str = None,
-            email: Email = None,
-            link: Link = None) -> None:
+        self,
+        tag: str = "person",
+        name: str = None,
+        email: Email = None,
+        link: Link = None,
+    ) -> None:
         """
         Initialize Person instance.
 

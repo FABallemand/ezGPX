@@ -1,26 +1,18 @@
-import os
-from typing import Optional, List, Tuple, Dict
 import logging
+import os
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Tuple
 
-from .writer import Writer
 from ..gpx_elements import Gpx
+from .writer import Writer
 
-DEFAULT_NORMAL_STYLE = {
-    "color": "ff0000ff",
-    "width": 2,
-    "fill": 0
-}
+DEFAULT_NORMAL_STYLE = {"color": "ff0000ff", "width": 2, "fill": 0}
 
-DEFAULT_HIGHLIGHT_STYLE = {
-    "color": "ff0000ff",
-    "width": 2,
-    "fill": 0
-}
+DEFAULT_HIGHLIGHT_STYLE = {"color": "ff0000ff", "width": 2, "fill": 0}
 
 DEFAULT_STYLES = [
     ("normal", DEFAULT_NORMAL_STYLE),
-    ("highlight", DEFAULT_HIGHLIGHT_STYLE)
+    ("highlight", DEFAULT_HIGHLIGHT_STYLE),
 ]
 
 
@@ -30,18 +22,19 @@ class KMLWriter(Writer):
     """
 
     def __init__(
-            self,
-            gpx: Gpx = None,
-            properties: bool = True,
-            metadata: bool = True,  # unused
-            way_points: bool = True,
-            routes: bool = True,
-            extensions: bool = True,
-            ele: bool = True,
-            time: bool = True,
-            precisions: Dict = None,
-            time_format: str = None,
-            styles: List[Tuple[str, Dict]] = None) -> None:
+        self,
+        gpx: Gpx = None,
+        properties: bool = True,
+        metadata: bool = True,  # unused
+        way_points: bool = True,
+        routes: bool = True,
+        extensions: bool = True,
+        ele: bool = True,
+        time: bool = True,
+        precisions: Dict = None,
+        time_format: str = None,
+        styles: List[Tuple[str, Dict]] = None,
+    ) -> None:
         """
         Initialize GPXWriter instance.
         """
@@ -107,8 +100,7 @@ class KMLWriter(Writer):
         self.setIfNotNone(stylemap_, "id", id_)
         style_id = 1
         for style_key, _ in self.styles:  # _ used to be called style
-            stylemap_ = self.add_pair(
-                stylemap_, style_key, "#style" + str(style_id))
+            stylemap_ = self.add_pair(stylemap_, style_key, "#style" + str(style_id))
             style_id += 1
         return element
 
@@ -131,7 +123,8 @@ class KMLWriter(Writer):
         polystyle_ = ET.SubElement(element, "PolyStyle")
         try:
             polystyle_, _ = self.add_subelement_number(
-                polystyle_, "fill", style["fill"])
+                polystyle_, "fill", style["fill"]
+            )
         except:
             logging.warning("No fill attribute in style")
             polystyle_, _ = self.add_subelement_number(polystyle_, "fill", 0)
@@ -155,15 +148,14 @@ class KMLWriter(Writer):
         """
         linestyle_ = ET.SubElement(element, "LineStyle")
         try:
-            linestyle_, _ = self.add_subelement(
-                linestyle_, "color", style["color"])
+            linestyle_, _ = self.add_subelement(linestyle_, "color", style["color"])
         except:
             logging.warning("No color attribute in style")
-            linestyle_, _ = self.add_subelement(
-                linestyle_, "color", "ff0000ff")
+            linestyle_, _ = self.add_subelement(linestyle_, "color", "ff0000ff")
         try:
             linestyle_, _ = self.add_subelement_number(
-                linestyle_, "width", style["width"])
+                linestyle_, "width", style["width"]
+            )
         except:
             logging.warning("No width attribute in style")
             linestyle_, _ = self.add_subelement_number(linestyle_, "width", 2)
@@ -208,16 +200,16 @@ class KMLWriter(Writer):
             KML element.
         """
         linestring_ = ET.SubElement(element, "LineString")
-        linestring_, _ = self.add_subelement_number(
-            linestring_, "tessellate", 1)
+        linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
         if self.ele:
             coordinates = self.gpx.to_csv(
-                path=None, values=["lon", "lat", "ele"], header=False).replace("\n", " ")
+                path=None, values=["lon", "lat", "ele"], header=False
+            ).replace("\n", " ")
         else:
             coordinates = self.gpx.to_csv(
-                path=None, values=["lon", "lat"], header=False).replace("\n", " ")
-        linestring_, _ = self.add_subelement(
-            linestring_, "coordinates", coordinates)
+                path=None, values=["lon", "lat"], header=False
+            ).replace("\n", " ")
+        linestring_, _ = self.add_subelement(linestring_, "coordinates", coordinates)
         return element
 
     def add_placemark(self, element: ET.Element) -> ET.Element:
@@ -235,10 +227,8 @@ class KMLWriter(Writer):
             KML element.
         """
         placemark_ = ET.SubElement(element, "Placemark")
-        placemark_, _ = self.add_subelement(
-            placemark_, "name", self.gpx.name())
-        placemark_, _ = self.add_subelement(
-            placemark_, "styleUrl", "#stylemap")
+        placemark_, _ = self.add_subelement(placemark_, "name", self.gpx.name())
+        placemark_, _ = self.add_subelement(placemark_, "styleUrl", "#stylemap")
         placemark_ = self.add_linestring(placemark_)
         return element
 
@@ -313,8 +303,7 @@ class KMLWriter(Writer):
             self.gpx_string = ET.tostring(self.kml_root, encoding="unicode")
             # self.gpx_string = ET.tostring(kml_root, encoding="utf-8")
 
-            logging.info("GPX successfully converted to string:\n%s",
-                         self.gpx_string)
+            logging.info("GPX successfully converted to string:\n%s", self.gpx_string)
 
             return self.gpx_string
 
@@ -330,15 +319,16 @@ class KMLWriter(Writer):
             raise
         # Write KML file
         with f:
-            f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            f.write('<?xml version="1.0" encoding="UTF-8"?>')
             f.write(self.gpx_string)
 
     def write(
-            self,
-            file_path: str,
-            styles: Optional[List[Tuple[str, Dict]]] = None,
-            xml_schema: bool = False,
-            xml_extensions_schemas: bool = False) -> bool:
+        self,
+        file_path: str,
+        styles: Optional[List[Tuple[str, Dict]]] = None,
+        xml_schema: bool = False,
+        xml_extensions_schemas: bool = False,
+    ) -> bool:
         """
         Handle writing.
 

@@ -1,6 +1,4 @@
-
-
-class GpxElement():
+class GpxElement:
     """
     Base class for element in GPX file.
     Implements dunders functions.

@@ -10,22 +10,33 @@ class Metadata(GpxElement):
     """
     metadataType element in GPX file.
     """
-    fields = ["name", "desc", "author", "copyright", "link",
-              "time", "keywords", "bounds", "extensions"]
+
+    fields = [
+        "name",
+        "desc",
+        "author",
+        "copyright",
+        "link",
+        "time",
+        "keywords",
+        "bounds",
+        "extensions",
+    ]
     mandatory_fields = []
 
     def __init__(
-            self,
-            tag: str = "metadata",
-            name: str = None,
-            desc: str = None,
-            author: Person = None,
-            copyright_: str = None,
-            link: Link = None,
-            time: datetime = None,
-            keywords: str = None,
-            bounds: str = None,
-            extensions: Extensions = None) -> None:
+        self,
+        tag: str = "metadata",
+        name: str = None,
+        desc: str = None,
+        author: Person = None,
+        copyright_: str = None,
+        link: Link = None,
+        time: datetime = None,
+        keywords: str = None,
+        bounds: str = None,
+        extensions: Extensions = None,
+    ) -> None:
         """
         Initialize Metadata instance.
 

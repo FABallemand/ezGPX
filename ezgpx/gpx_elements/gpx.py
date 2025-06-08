@@ -5,7 +5,7 @@ except ImportError:
 
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple, Union, Type
+from typing import Dict, List, Tuple, Type, Union
 
 import pandas as pd
 import polars as pl
@@ -24,22 +24,23 @@ class Gpx(GpxElement):
     """
     gpxType element in GPX file.
     """
-    fields = ["version", "creator", "metadata",
-              "wpt", "rte", "trk", "extensions"]
+
+    fields = ["version", "creator", "metadata", "wpt", "rte", "trk", "extensions"]
     mandatory_fields = ["version", "creator"]
 
     def __init__(
-            self,
-            tag: str = "gpx",
-            version: str = None,
-            creator: str = None,
-            xsi_schema_location: List[str] = None,
-            xmlns: Dict = None,
-            metadata: Metadata = None,
-            wpt: List[WayPoint] = None,
-            rte: List[Route] = None,
-            trk: List[Track] = None,
-            extensions: Extensions = None) -> None:
+        self,
+        tag: str = "gpx",
+        version: str = None,
+        creator: str = None,
+        xsi_schema_location: List[str] = None,
+        xmlns: Dict = None,
+        metadata: Metadata = None,
+        wpt: List[WayPoint] = None,
+        rte: List[Route] = None,
+        trk: List[Track] = None,
+        extensions: Extensions = None,
+    ) -> None:
 
         self.tag: str = tag
         self.version: str = version
@@ -67,9 +68,9 @@ class Gpx(GpxElement):
             self.trk: List[Track] = trk
         self.extensions: Extensions = extensions
 
-###############################################################################
-#### Schemas ##################################################################
-###############################################################################
+    ###############################################################################
+    #### Schemas ##################################################################
+    ###############################################################################
 
     def check_xml_schema(self, file_path: str) -> bool:
         """
@@ -91,19 +92,21 @@ class Gpx(GpxElement):
         if file_path.endswith(".gpx"):
             if self.version == "1.1":
                 schema = xmlschema.XMLSchema(
-                    files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd"))
+                    files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd")
+                )
             elif self.version == "1.0":
                 schema = xmlschema.XMLSchema(
-                    files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd"))
+                    files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd")
+                )
             else:
-                logging.error(
-                    "Unable to check XML schema (unsupported GPX version)")
+                logging.error("Unable to check XML schema (unsupported GPX version)")
                 return False
 
         # KML
         elif file_path.endswith(".kml"):
             schema = xmlschema.XMLSchema(
-                files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd"))
+                files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd")
+            )
 
         # KMZ
         elif file_path.endswith(".kmz"):
@@ -111,21 +114,18 @@ class Gpx(GpxElement):
 
         # FIT
         elif file_path.endswith(".fit"):
-            logging.error(
-                "Unable to check XML schema (fit files are not XML files)")
+            logging.error("Unable to check XML schema (fit files are not XML files)")
             return False
 
         # NOT SUPPORTED
         else:
-            logging.error(
-                "Unable to check XML schema (unable to identify file type)")
+            logging.error("Unable to check XML schema (unable to identify file type)")
             return False
 
         if schema is not None:
             return schema.is_valid(file_path)
         else:
-            logging.error(
-                "Unable to check XML schema (unable to load XML schema)")
+            logging.error("Unable to check XML schema (unable to load XML schema)")
             return False
 
     def check_xml_extensions_schemas(self, file_path: str) -> bool:
@@ -142,8 +142,7 @@ class Gpx(GpxElement):
         bool
             True if GPX file follows XML extensions schemas.
         """
-        gpx_schemas = [
-            s for s in self.xsi_schema_location if s.endswith(".xsd")]
+        gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
         gpx_schemas.remove("http://www.topografix.com/GPX/1/1/gpx.xsd")
         for gpx_schema in gpx_schemas:
             logging.debug("schema = %s", gpx_schema)
@@ -152,9 +151,9 @@ class Gpx(GpxElement):
                 logging.error("File does not follow %s", gpx_schema)
                 return False
 
-###############################################################################
-#### Name #####################################################################
-###############################################################################
+    ###############################################################################
+    #### Name #####################################################################
+    ###############################################################################
 
     def name(self) -> str:
         """
@@ -178,9 +177,9 @@ class Gpx(GpxElement):
         """
         self.trk[0].name = new_name
 
-###############################################################################
-#### Points ###################################################################
-###############################################################################
+    ###############################################################################
+    #### Points ###################################################################
+    ###############################################################################
 
     def nb_points(self) -> int:
         """
@@ -287,9 +286,9 @@ class Gpx(GpxElement):
                         max_lon_point = track_point
         return min_lat_point, min_lon_point, max_lat_point, max_lon_point
 
-###############################################################################
-#### Distance and Elevation ###################################################
-###############################################################################
+    ###############################################################################
+    #### Distance and Elevation ###################################################
+    ###############################################################################
 
     def distance(self) -> float:
         """
@@ -452,9 +451,9 @@ class Gpx(GpxElement):
 
         return max_ascent_rate
 
-###############################################################################
-#### Time #####################################################################
-###############################################################################
+    ###############################################################################
+    #### Time #####################################################################
+    ###############################################################################
 
     def utc_start_time(self) -> datetime:
         """
@@ -489,8 +488,13 @@ class Gpx(GpxElement):
         """
         start_time = None
         try:
-            start_time = self.trk[0].trkseg[0].trkpt[0].time.replace(
-                tzinfo=timezone.utc).astimezone(tz=None)
+            start_time = (
+                self.trk[0]
+                .trkseg[0]
+                .trkpt[0]
+                .time.replace(tzinfo=timezone.utc)
+                .astimezone(tz=None)
+            )
         except:
             logging.error("Unable to find activity start time")
         return start_time
@@ -506,8 +510,13 @@ class Gpx(GpxElement):
         """
         stop_time = None
         try:
-            stop_time = self.trk[-1].trkseg[-1].trkpt[-1].time.replace(
-                tzinfo=timezone.utc).astimezone(tz=None)
+            stop_time = (
+                self.trk[-1]
+                .trkseg[-1]
+                .trkpt[-1]
+                .time.replace(tzinfo=timezone.utc)
+                .astimezone(tz=None)
+            )
         except:
             logging.error("Unable to find activity stop time")
         return stop_time
@@ -567,9 +576,9 @@ class Gpx(GpxElement):
         """
         return self.total_elapsed_time() - self.stopped_time()
 
-###############################################################################
-#### Speed and Pace ###########################################################
-###############################################################################
+    ###############################################################################
+    #### Speed and Pace ###########################################################
+    ###############################################################################
 
     def avg_speed(self) -> float:
         """
@@ -587,7 +596,7 @@ class Gpx(GpxElement):
         # Compute and convert distance
         distance = self.distance() / 1000
 
-        return distance/total_elapsed_time
+        return distance / total_elapsed_time
 
     def avg_moving_speed(self) -> float:
         """
@@ -616,11 +625,13 @@ class Gpx(GpxElement):
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    distance = haversine_distance(
-                        previous_point, track_point) / 1000  # Convert to kilometers
+                    distance = (
+                        haversine_distance(previous_point, track_point) / 1000
+                    )  # Convert to kilometers
                     # Convert to hours
-                    time = (track_point.time -
-                            previous_point.time).total_seconds() / 3600
+                    time = (
+                        track_point.time - previous_point.time
+                    ).total_seconds() / 3600
                     try:
                         track_point.speed = distance / time
                     except ZeroDivisionError:
@@ -753,11 +764,13 @@ class Gpx(GpxElement):
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    ascent = (track_point.ele - previous_point.ele) / \
-                        1000  # Convert to kilometers
+                    ascent = (
+                        track_point.ele - previous_point.ele
+                    ) / 1000  # Convert to kilometers
                     # Convert to hours
-                    time = (track_point.time -
-                            previous_point.time).total_seconds() / 3600
+                    time = (
+                        track_point.time - previous_point.time
+                    ).total_seconds() / 3600
                     try:
                         track_point.ascent_speed = ascent / time
                     except ZeroDivisionError:
@@ -804,9 +817,9 @@ class Gpx(GpxElement):
 
         return max_ascent_speed
 
-###############################################################################
-#### Data Removal #############################################################
-###############################################################################
+    ###############################################################################
+    #### Data Removal #############################################################
+    ###############################################################################
 
     def remove_metadata(self):
         """
@@ -866,9 +879,9 @@ class Gpx(GpxElement):
                                 # Remove extensions from track points
                                 track_point.extensions = None
 
-###############################################################################
-#### Error Correction #########################################################
-###############################################################################
+    ###############################################################################
+    #### Error Correction #########################################################
+    ###############################################################################
 
     def remove_points(self, remove_factor: int = 2):
         count = 0
@@ -906,7 +919,8 @@ class Gpx(GpxElement):
                     dst = haversine_distance(previous_point, track_point)
                     if previous_point is not None and dst > error_distance:
                         logging.warning(
-                            "Point %s has been removed (GPS error)", track_point)
+                            "Point %s has been removed (GPS error)", track_point
+                        )
                         gps_errors.append(track_point)
                     # No GPS error
                     else:
@@ -943,9 +957,10 @@ class Gpx(GpxElement):
                     elif point_2 is None:
                         point_2 = point
                     else:
-                        if ((haversine_distance(point_1, point_2) < min_dist
-                             or haversine_distance(point_2, point) < min_dist)
-                                and haversine_distance(point_1, point) < max_dist):
+                        if (
+                            haversine_distance(point_1, point_2) < min_dist
+                            or haversine_distance(point_2, point) < min_dist
+                        ) and haversine_distance(point_1, point) < max_dist:
                             point_2 = point
                         else:
                             new_trkpt.append(point_2)
@@ -954,9 +969,9 @@ class Gpx(GpxElement):
 
                 segment.trkpt = new_trkpt
 
-###############################################################################
-#### Simplification ###########################################################
-###############################################################################
+    ###############################################################################
+    #### Simplification ###########################################################
+    ###############################################################################
 
     def simplify(self, epsilon):
         """
@@ -971,13 +986,17 @@ class Gpx(GpxElement):
             for segment in track.trkseg:
                 segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)
 
-###############################################################################
-#### Exports ##################################################################
-###############################################################################
+    ###############################################################################
+    #### Exports ##################################################################
+    ###############################################################################
 
     def to_dict(
-            self, values: List[str] = None, orient: str = "dict",
-            into: Type[dict] = dict, index: bool = True) -> Dict:
+        self,
+        values: List[str] = None,
+        orient: str = "dict",
+        into: Type[dict] = dict,
+        index: bool = True,
+    ) -> Dict:
         """
         Convert GPX object to dictionary.
         Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
@@ -1035,24 +1054,26 @@ class Gpx(GpxElement):
             self.compute_points_ascent_rate()
         if "ascent_speed" in values and test_point.ascent_speed is None:
             self.compute_points_ascent_speed()
-        if ("distance_from_start" in values and
-                test_point.distance_from_start is None):
+        if "distance_from_start" in values and test_point.distance_from_start is None:
             self.compute_points_distance_from_start()
 
         # Create dataframe
         gpx_data = {}
         for v in values:
             if v == "time":
-                gpx_data[v] = [str(trkpt.time.replace(
-                                   tzinfo=timezone.utc).astimezone(tz=None))
-                               for trk in self.trk
-                               for trkseg in trk.trkseg
-                               for trkpt in trkseg.trkpt]
+                gpx_data[v] = [
+                    str(trkpt.time.replace(tzinfo=timezone.utc).astimezone(tz=None))
+                    for trk in self.trk
+                    for trkseg in trk.trkseg
+                    for trkpt in trkseg.trkpt
+                ]
             else:
-                gpx_data[v] = [getattr(trkpt, v)
-                               for trk in self.trk
-                               for trkseg in trk.trkseg
-                               for trkpt in trkseg.trkpt]
+                gpx_data[v] = [
+                    getattr(trkpt, v)
+                    for trk in self.trk
+                    for trkseg in trk.trkseg
+                    for trkpt in trkseg.trkpt
+                ]
         return gpx_data
 
     def to_pandas(self, values: List[str] = None) -> pd.DataFrame:
@@ -1096,12 +1117,13 @@ class Gpx(GpxElement):
         return pl.DataFrame(self._to_dict_df(values))
 
     def to_csv(
-            self,
-            path: str = None,
-            values: List[str] = None,
-            sep: str = ",",
-            header: bool = True,
-            index: bool = False) -> Union[str, None]:
+        self,
+        path: str = None,
+        values: List[str] = None,
+        sep: str = ",",
+        header: bool = True,
+        index: bool = False,
+    ) -> Union[str, None]:
         """
         Write the GPX object track coordinates to a .csv file.
 
@@ -1129,4 +1151,6 @@ class Gpx(GpxElement):
             values = ["lat", "lon"]
 
         # Argument columns is required for KML writer (keep values order)
-        return self.to_pandas(values).to_csv(path, sep=sep, columns=values, header=header, index=index)
+        return self.to_pandas(values).to_csv(
+            path, sep=sep, columns=values, header=header, index=index
+        )

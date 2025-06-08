@@ -1,7 +1,8 @@
-import os
 import logging
-from typing import Optional, Tuple
+import os
 from math import isclose
+from typing import Optional, Tuple
+
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
@@ -9,31 +10,39 @@ from mpl_toolkits.basemap import Basemap
 # from ..gpx import GPX
 from .plotter import Plotter
 
+
 class MatplotlibPlotter(Plotter):
 
     # def __init__(self, gpx: GPX) -> None:
     #     super().__init__(gpx)
 
     def plot(
-            self,
-            figsize: Tuple[int, int] = (16, 9),
-            size: float = 10,
-            color: str = "#101010",
-            cmap: Optional[matplotlib.colors.Colormap] = None,
-            colorbar: bool = False,
-            start_point_color: Optional[str] = None,
-            stop_point_color: Optional[str] = None,
-            way_points_color: Optional[str] = None,
-            background: Optional[str] = None,
-            offset_percentage: float = 0.04,
-            dpi: int = 96,
-            title: Optional[str] = None,
-            title_fontsize: int = 20,
-            watermark: bool = False,
-            file_path: str = None):
+        self,
+        figsize: Tuple[int, int] = (16, 9),
+        size: float = 10,
+        color: str = "#101010",
+        cmap: Optional[matplotlib.colors.Colormap] = None,
+        colorbar: bool = False,
+        start_point_color: Optional[str] = None,
+        stop_point_color: Optional[str] = None,
+        way_points_color: Optional[str] = None,
+        background: Optional[str] = None,
+        offset_percentage: float = 0.04,
+        dpi: int = 96,
+        title: Optional[str] = None,
+        title_fontsize: int = 20,
+        watermark: bool = False,
+        file_path: str = None,
+    ):
 
-        dynamic_colors = ["ele", "speed", "pace",
-                          "vertical_drop", "ascent_rate", "ascent_speed"]
+        dynamic_colors = [
+            "ele",
+            "speed",
+            "pace",
+            "vertical_drop",
+            "ascent_rate",
+            "ascent_speed",
+        ]
 
         # Create dataframe containing data from the GPX file
         values = ["lat", "lon"]
@@ -85,11 +94,13 @@ class MatplotlibPlotter(Plotter):
             r = delta_lon / delta_lat
 
         # Create map
-        map_ = Basemap(projection="cyl",
-                       llcrnrlon=min_lon,
-                       llcrnrlat=min_lat,
-                       urcrnrlon=max_lon,
-                       urcrnrlat=max_lat)
+        map_ = Basemap(
+            projection="cyl",
+            llcrnrlon=min_lon,
+            llcrnrlat=min_lat,
+            urcrnrlon=max_lon,
+            urcrnrlat=max_lat,
+        )
 
         # Add background
         if background is None:
@@ -103,36 +114,51 @@ class MatplotlibPlotter(Plotter):
         elif background == "wms":
             wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
             wms_server = "http://wms.geosignal.fr/metropole?"
-            map_.wmsimage(wms_server,
-                          layers=["Communes", "Nationales", "Regions"],
-                          verbose=True)
+            map_.wmsimage(
+                wms_server, layers=["Communes", "Nationales", "Regions"], verbose=True
+            )
         else:
             map_.arcgisimage(service=background, dpi=dpi, verbose=True)
 
         # Scatter track points
         if color in dynamic_colors:
-            im = map_.scatter(self._dataframe["lon"], self._dataframe["lat"],
-                              s=size, c=self._dataframe[color], cmap=cmap)
+            im = map_.scatter(
+                self._dataframe["lon"],
+                self._dataframe["lat"],
+                s=size,
+                c=self._dataframe[color],
+                cmap=cmap,
+            )
         else:
-            im = map_.scatter(self._dataframe["lon"], self._dataframe["lat"],
-                              s=size, color=color)
+            im = map_.scatter(
+                self._dataframe["lon"], self._dataframe["lat"], s=size, color=color
+            )
 
         # Scatter start point with different color
         if start_point_color:
-            map_.scatter(self._dataframe["lon"][0], self._dataframe["lat"][0],
-                         marker="^", color=start_point_color)
+            map_.scatter(
+                self._dataframe["lon"][0],
+                self._dataframe["lat"][0],
+                marker="^",
+                color=start_point_color,
+            )
 
         # Scatter stop point with different color
         if stop_point_color:
-            map_.scatter(self._dataframe["lon"].iloc[-1],
-                         self._dataframe["lat"].iloc[-1],
-                         marker="h", color=stop_point_color)
+            map_.scatter(
+                self._dataframe["lon"].iloc[-1],
+                self._dataframe["lat"].iloc[-1],
+                marker="h",
+                color=stop_point_color,
+            )
 
         # Scatter way points with different color
         if way_points_color:
             for way_point in self._gpx.wpt:
                 x, y = map_(way_point.lon, way_point.lat)  # Project way point
-                map_.scatter(x, y, marker="D", color=way_points_color)  # Scatter way point
+                map_.scatter(
+                    x, y, marker="D", color=way_points_color
+                )  # Scatter way point
 
         # Colorbar
         if colorbar:
@@ -141,8 +167,7 @@ class MatplotlibPlotter(Plotter):
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(
-                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 

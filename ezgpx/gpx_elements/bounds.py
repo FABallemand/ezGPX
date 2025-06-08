@@ -5,16 +5,18 @@ class Bounds(GpxElement):
     """
     boundsType element in GPX file.
     """
+
     fields = ["minlat", "minlon", "maxlat", "maxlon"]
     mandatory_fields = ["minlat", "minlon", "maxlat", "maxlon"]
 
     def __init__(
-            self,
-            tag: str = "bounds",
-            minlat: float = None,
-            minlon: float = None,
-            maxlat: float = None,
-            maxlon: float = None) -> None:
+        self,
+        tag: str = "bounds",
+        minlat: float = None,
+        minlon: float = None,
+        maxlat: float = None,
+        maxlon: float = None,
+    ) -> None:
         """
         Initialize Bounds instance.
 

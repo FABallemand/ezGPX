@@ -1,17 +1,32 @@
 from __future__ import annotations
-import os
+
 import errno
-import warnings
 import logging
-from math import degrees
+import os
+import warnings
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union, Type
+from math import degrees
+from typing import Dict, List, Optional, Tuple, Type, Union
 from zipfile import ZipFile
+
 import pandas as pd
 
-from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
-                            Metadata, Person, Point, PointSegment, Route,
-                            Track, TrackSegment, WayPoint)
+from ..gpx_elements import (
+    Bounds,
+    Copyright,
+    Email,
+    Extensions,
+    Gpx,
+    Link,
+    Metadata,
+    Person,
+    Point,
+    PointSegment,
+    Route,
+    Track,
+    TrackSegment,
+    WayPoint,
+)
 from ..parsers.fit_parser import FitParser
 from ..parsers.gpx_parser import GPXParser
 from ..parsers.kml_parser import KMLParser
@@ -22,18 +37,20 @@ from ..writers.kml_writer import KMLWriter
 # GPX = NewType("GPX", object)  # GPX forward declaration for type hint
 
 
-class GPX():
+class GPX:
     """
     High level GPX object.
     """
+
     TIME_RELATED_VALUES = ["time", "speed", "pace", "ascent_speed"]
     ELEVATION_RELATED_VALUES = ["ele", "ascent_rate", "ascent_speed"]
 
     def __init__(
-            self,
-            file_path: Optional[str] = None,
-            xml_schema: bool = True,
-            xml_extensions_schemas: bool = False) -> None:
+        self,
+        file_path: Optional[str] = None,
+        xml_schema: bool = True,
+        xml_extensions_schemas: bool = False,
+    ) -> None:
         """
         Initialise GPX instance.
 
@@ -72,8 +89,9 @@ class GPX():
         # Empty GPX instance
         # For advanced use only
         if file_path is None:
-            warnings.warn("No file path provided, creating an empty GPX instance.",
-                          UserWarning)
+            warnings.warn(
+                "No file path provided, creating an empty GPX instance.", UserWarning
+            )
             self.gpx = Gpx()
             # Writers
             self._gpx_writer = GPXWriter(self.gpx)
@@ -86,7 +104,8 @@ class GPX():
             # GPX
             if file_path.endswith(".gpx"):
                 self._gpx_parser = GPXParser(
-                    file_path, xml_schema, xml_extensions_schemas)
+                    file_path, xml_schema, xml_extensions_schemas
+                )
                 self.gpx = self._gpx_parser.gpx
                 self._ele_data = self._gpx_parser.ele_data
                 self._time_data = self._gpx_parser.time_data
@@ -96,23 +115,30 @@ class GPX():
             # KML
             elif file_path.endswith(".kml"):
                 self._kml_parser = KMLParser(
-                    file_path, xml_schema, xml_extensions_schemas)
+                    file_path, xml_schema, xml_extensions_schemas
+                )
                 self.gpx = self._kml_parser.gpx
                 self._precisions = self._kml_parser.precisions
                 self._time_format = self._kml_parser.time_format
 
             # KMZ
             elif file_path.endswith(".kmz"):
-                kmz = ZipFile(file_path, 'r')
-                kmls = [info.filename for info in kmz.infolist(
-                ) if info.filename.endswith(".kml")]
+                kmz = ZipFile(file_path, "r")
+                kmls = [
+                    info.filename
+                    for info in kmz.infolist()
+                    if info.filename.endswith(".kml")
+                ]
                 if "doc.kml" not in kmls:
-                    raise FileNotFoundError(f"Unable to parse file: {file_path}"
-                        "Expected to find doc.kml inside KMZ file.")
-                kml = kmz.open("doc.kml", 'r').read()
+                    raise FileNotFoundError(
+                        f"Unable to parse file: {file_path}"
+                        "Expected to find doc.kml inside KMZ file."
+                    )
+                kml = kmz.open("doc.kml", "r").read()
                 self._write_tmp_kml("tmp.kml", kml)
                 self._kml_parser = KMLParser(
-                    "tmp.kml", xml_schema, xml_extensions_schemas)
+                    "tmp.kml", xml_schema, xml_extensions_schemas
+                )
                 self.gpx = self._kml_parser.gpx
                 self._precisions = self._kml_parser.precisions
                 self._time_format = self._kml_parser.time_format
@@ -127,24 +153,22 @@ class GPX():
 
             # Invalid file or file path
             else:
-                raise ValueError(f"Unable to parse this type of file: {file_path}"
-                                 "Consider renaming your file with the proper file extension.")
+                raise ValueError(
+                    f"Unable to parse this type of file: {file_path}"
+                    "Consider renaming your file with the proper file extension."
+                )
 
             # Writers
-            self._gpx_writer = GPXWriter(self.gpx, self._precisions,
-                                         self._time_format)
-            self._kml_writer = KMLWriter(self.gpx, precisions=self._precisions,
-                                         time_format=self._time_format)
+            self._gpx_writer = GPXWriter(self.gpx, self._precisions, self._time_format)
+            self._kml_writer = KMLWriter(
+                self.gpx, precisions=self._precisions, time_format=self._time_format
+            )
 
         # Invalid file path
         else:
-            raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
 
-    def _write_tmp_kml(
-            self,
-            path: str = "tmp.kml",
-            kml_string: Optional[bytes] = None):
+    def _write_tmp_kml(self, path: str = "tmp.kml", kml_string: Optional[bytes] = None):
         """
         Write temproray .KML file in order to parse KMZ file.
         """
@@ -165,9 +189,9 @@ class GPX():
     def __repr__(self):
         return f"file_path = {self.file_path}\ngpx = {self.gpx}"
 
-###############################################################################
-#### Schemas ##################################################################
-###############################################################################
+    ###############################################################################
+    #### Schemas ##################################################################
+    ###############################################################################
 
     def check_xml_schema(self) -> bool:
         """
@@ -191,9 +215,9 @@ class GPX():
         """
         return self.gpx.check_xml_extensions_schemas(self.file_path)
 
-###############################################################################
-#### Name #####################################################################
-###############################################################################
+    ###############################################################################
+    #### Name #####################################################################
+    ###############################################################################
 
     def name(self) -> str:
         """
@@ -217,9 +241,9 @@ class GPX():
         """
         self.gpx.set_name(new_name)
 
-###############################################################################
-#### Points ###################################################################
-###############################################################################
+    ###############################################################################
+    #### Points ###################################################################
+    ###############################################################################
 
     def nb_points(self) -> int:
         """
@@ -287,9 +311,9 @@ class GPX():
         """
         return self.gpx.extreme_points()
 
-###############################################################################
-#### Distance and Elevation ###################################################
-###############################################################################
+    ###############################################################################
+    #### Distance and Elevation ###################################################
+    ###############################################################################
 
     def distance(self) -> float:
         """
@@ -374,9 +398,9 @@ class GPX():
         """
         return self.gpx.max_ascent_rate()
 
-###############################################################################
-#### Time #####################################################################
-###############################################################################
+    ###############################################################################
+    #### Time #####################################################################
+    ###############################################################################
 
     def start_time(self) -> datetime:
         """
@@ -433,9 +457,9 @@ class GPX():
         """
         return self.gpx.moving_time()
 
-###############################################################################
-#### Speed and Pace ###########################################################
-###############################################################################
+    ###############################################################################
+    #### Speed and Pace ###########################################################
+    ###############################################################################
 
     def avg_speed(self) -> float:
         """
@@ -565,9 +589,9 @@ class GPX():
         """
         return self.gpx.max_ascent_speed()
 
-###############################################################################
-#### Data Removal #############################################################
-###############################################################################
+    ###############################################################################
+    #### Data Removal #############################################################
+    ###############################################################################
 
     def remove_metadata(self):
         """
@@ -593,9 +617,9 @@ class GPX():
         """
         self.gpx.remove_extensions()
 
-###############################################################################
-#### Error Correction #########################################################
-###############################################################################
+    ###############################################################################
+    #### Error Correction #########################################################
+    ###############################################################################
 
     def remove_gps_errors(self):
         """
@@ -616,9 +640,9 @@ class GPX():
         """
         self.gpx.remove_close_points(min_dist, max_dist)
 
-###############################################################################
-#### Simplification ###########################################################
-###############################################################################
+    ###############################################################################
+    #### Simplification ###########################################################
+    ###############################################################################
 
     def simplify(self, tolerance: float = 2):
         """
@@ -630,12 +654,12 @@ class GPX():
             Tolerance (meters). Corresponds to the minimum distance between the
             point and the track before the point is removed, by default 2
         """
-        epsilon = degrees(tolerance/EARTH_RADIUS)
+        epsilon = degrees(tolerance / EARTH_RADIUS)
         self.gpx.simplify(epsilon)
 
-###############################################################################
-#### Merge ####################################################################
-###############################################################################
+    ###############################################################################
+    #### Merge ####################################################################
+    ###############################################################################
 
     @staticmethod
     def merge(gpx_1: GPX, gpx_2: GPX) -> GPX:
@@ -654,7 +678,10 @@ class GPX():
         GPX
             Merged GPX (new instance)
         """
-        topo = ["http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+        topo = [
+            "http://www.topografix.com/GPX/1/1",
+            "http://www.topografix.com/GPX/1/1/gpx.xsd",
+        ]
 
         # Create new GPX instance
         merged_gpx = GPX()
@@ -663,29 +690,34 @@ class GPX():
         merged_gpx.gpx.tag = "gpx"
         merged_gpx.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
         merged_gpx.gpx.xsi_schema_location = list(
-            set(topo + gpx_1.gpx.xsi_schema_location
-                + gpx_2.gpx.xsi_schema_location))
+            set(topo + gpx_1.gpx.xsi_schema_location + gpx_2.gpx.xsi_schema_location)
+        )
         merged_gpx.gpx.version = "1.1"
         merged_gpx.gpx.creator = "ezGPX"
-        merged_gpx.gpx.metadata = (gpx_2.gpx.metadata
-                                   if gpx_1.gpx.metadata is None
-                                   else gpx_1.gpx.metadata)
+        merged_gpx.gpx.metadata = (
+            gpx_2.gpx.metadata if gpx_1.gpx.metadata is None else gpx_1.gpx.metadata
+        )
         merged_gpx.gpx.wpt = gpx_1.gpx.wpt + gpx_2.gpx.wpt
         merged_gpx.gpx.rte = gpx_1.gpx.rte + gpx_2.gpx.rte
         merged_gpx.gpx.trk = gpx_1.gpx.trk + gpx_2.gpx.trk
         merged_gpx.gpx.extensions = Extensions(
-            "extensions", gpx_1.gpx.metadata | gpx_2.gpx.metadata)
+            "extensions", gpx_1.gpx.metadata | gpx_2.gpx.metadata
+        )
 
         # Return new GPX instance
         return merged_gpx
 
-###############################################################################
-#### Exports ##################################################################
-###############################################################################
+    ###############################################################################
+    #### Exports ##################################################################
+    ###############################################################################
 
     def to_dict(
-            self, values: List[str] = None, orient: str = "dict",
-            into: Type[dict] = dict, index: bool = True) -> Dict:
+        self,
+        values: List[str] = None,
+        orient: str = "dict",
+        into: Type[dict] = dict,
+        index: bool = True,
+    ) -> Dict:
         """
         Convert GPX object to dictionary.
         Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
@@ -732,9 +764,11 @@ class GPX():
         # Disable time related values if no time data available
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
-                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
-                              "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
-                              UserWarning)
+                warnings.warn(
+                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
+                    "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                    UserWarning,
+                )
             for v in GPX.TIME_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
@@ -742,9 +776,11 @@ class GPX():
         # Disable elevation related values if no elevation data available
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
-                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
-                              "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
-                              UserWarning)
+                warnings.warn(
+                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
+                    "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                    UserWarning,
+                )
             for v in GPX.ELEVATION_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
@@ -771,9 +807,11 @@ class GPX():
         # Disable time related values if no time data available
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
-                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
-                              "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
-                              UserWarning)
+                warnings.warn(
+                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
+                    "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                    UserWarning,
+                )
             for v in GPX.TIME_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
@@ -781,9 +819,11 @@ class GPX():
         # Disable elevation related values if no elevation data available
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
-                warnings.warn(f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
-                              "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
-                              UserWarning)
+                warnings.warn(
+                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
+                    "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                    UserWarning,
+                )
             for v in GPX.ELEVATION_RELATED_VALUES:
                 if v in values:
                     values.remove(v)
@@ -791,12 +831,13 @@ class GPX():
         return self.gpx.to_polars(values)
 
     def to_csv(
-            self,
-            path: str = None,
-            values: List[str] = None,
-            sep: str = ",",
-            header: bool = True,
-            index: bool = False) -> Union[str, None]: # TODO select pandas vs polars
+        self,
+        path: str = None,
+        values: List[str] = None,
+        sep: str = ",",
+        header: bool = True,
+        index: bool = False,
+    ) -> Union[str, None]:  # TODO select pandas vs polars
         """
         Write the GPX object track coordinates to a .csv file.
 
@@ -823,27 +864,28 @@ class GPX():
         return self.gpx.to_csv(path, values, sep, header, index)
 
     def to_gpx(
-            self,
-            path: str,
-            properties: bool = True,
-            bounds_fields: Optional[List[str]] = None,
-            copyright_fields: Optional[List[str]] = None,
-            email_fields: Optional[List[str]] = None,
-            extensions_fields: Optional[Dict] = None,
-            gpx_fields: Optional[List[str]] = None,
-            link_fields: Optional[List[str]] = None,
-            metadata_fields: Optional[List[str]] = None,
-            person_fields: Optional[List[str]] = None,
-            point_segment_fields: Optional[List[str]] = None,
-            point_fields: Optional[List[str]] = None,
-            route_fields: Optional[List[str]] = None,
-            track_segment_fields: Optional[List[str]] = None,
-            track_fields: Optional[List[str]] = None,
-            way_point_fields: Optional[List[str]] = None,
-            track_point_fields: Optional[List[str]] = None,
-            mandatory_fields: bool = True,
-            xml_schema: bool = True,
-            xml_extensions_schemas: bool = False) -> bool:
+        self,
+        path: str,
+        properties: bool = True,
+        bounds_fields: Optional[List[str]] = None,
+        copyright_fields: Optional[List[str]] = None,
+        email_fields: Optional[List[str]] = None,
+        extensions_fields: Optional[Dict] = None,
+        gpx_fields: Optional[List[str]] = None,
+        link_fields: Optional[List[str]] = None,
+        metadata_fields: Optional[List[str]] = None,
+        person_fields: Optional[List[str]] = None,
+        point_segment_fields: Optional[List[str]] = None,
+        point_fields: Optional[List[str]] = None,
+        route_fields: Optional[List[str]] = None,
+        track_segment_fields: Optional[List[str]] = None,
+        track_fields: Optional[List[str]] = None,
+        way_point_fields: Optional[List[str]] = None,
+        track_point_fields: Optional[List[str]] = None,
+        mandatory_fields: bool = True,
+        xml_schema: bool = True,
+        xml_extensions_schemas: bool = False,
+    ) -> bool:
         """
         Write the GPX object to a .gpx file.
 
@@ -861,80 +903,73 @@ class GPX():
         bool
             Return False if written file does not follow checked schemas. Return True otherwise.
         """
-        bounds_fields = (bounds_fields
-                         if bounds_fields is not None
-                         else Bounds.fields)
-        copyright_fields = (copyright_fields
-                            if copyright_fields is not None
-                            else Copyright.fields)
-        email_fields = (email_fields
-                        if email_fields is not None
-                        else Email.fields)
-        default_extensions_fields = (self._gpx_parser.extensions_fields
-                                     if self._gpx_parser is not None
-                                     else {})
-        extensions_fields = (extensions_fields
-                             if extensions_fields is not None
-                             else default_extensions_fields)
-        gpx_fields = (gpx_fields
-                      if gpx_fields is not None
-                      else Gpx.fields)
-        link_fields = (link_fields
-                       if link_fields is not None
-                       else Link.fields)
-        metadata_fields = (metadata_fields
-                           if metadata_fields is not None
-                           else Metadata.fields)
-        person_fields = (person_fields
-                         if person_fields is not None
-                         else Person.fields)
-        point_segment_fields = (point_segment_fields
-                                if point_segment_fields is not None
-                                else PointSegment.fields)
-        point_fields = (point_fields
-                        if point_fields is not None
-                        else Point.fields)
-        route_fields = (route_fields
-                        if route_fields is not None
-                        else Route.fields)
-        track_segment_fields = (track_segment_fields
-                                if track_segment_fields is not None
-                                else TrackSegment.fields)
-        track_fields = (track_fields
-                        if track_fields is not None
-                        else Track.fields)
-        way_point_fields = (way_point_fields
-                            if way_point_fields is not None
-                            else WayPoint.fields)
-        track_point_fields = (track_point_fields
-                              if track_point_fields is not None
-                              else WayPoint.fields)
-        return self._gpx_writer.write(file_path=path,
-                                      properties=properties,
-                                      bounds_fields=bounds_fields,
-                                      copyright_fields=copyright_fields,
-                                      email_fields=email_fields,
-                                      extensions_fields=extensions_fields,
-                                      gpx_fields=gpx_fields,
-                                      link_fields=link_fields,
-                                      metadata_fields=metadata_fields,
-                                      person_fields=person_fields,
-                                      point_segment_fields=point_segment_fields,
-                                      point_fields=point_fields,
-                                      route_fields=route_fields,
-                                      track_segment_fields=track_segment_fields,
-                                      track_fields=track_fields,
-                                      way_point_fields=way_point_fields,
-                                      track_point_fields=track_point_fields,
-                                      mandatory_fields=mandatory_fields,
-                                      xml_schema=xml_schema,
-                                      xml_extensions_schemas=xml_extensions_schemas)
+        bounds_fields = bounds_fields if bounds_fields is not None else Bounds.fields
+        copyright_fields = (
+            copyright_fields if copyright_fields is not None else Copyright.fields
+        )
+        email_fields = email_fields if email_fields is not None else Email.fields
+        default_extensions_fields = (
+            self._gpx_parser.extensions_fields if self._gpx_parser is not None else {}
+        )
+        extensions_fields = (
+            extensions_fields
+            if extensions_fields is not None
+            else default_extensions_fields
+        )
+        gpx_fields = gpx_fields if gpx_fields is not None else Gpx.fields
+        link_fields = link_fields if link_fields is not None else Link.fields
+        metadata_fields = (
+            metadata_fields if metadata_fields is not None else Metadata.fields
+        )
+        person_fields = person_fields if person_fields is not None else Person.fields
+        point_segment_fields = (
+            point_segment_fields
+            if point_segment_fields is not None
+            else PointSegment.fields
+        )
+        point_fields = point_fields if point_fields is not None else Point.fields
+        route_fields = route_fields if route_fields is not None else Route.fields
+        track_segment_fields = (
+            track_segment_fields
+            if track_segment_fields is not None
+            else TrackSegment.fields
+        )
+        track_fields = track_fields if track_fields is not None else Track.fields
+        way_point_fields = (
+            way_point_fields if way_point_fields is not None else WayPoint.fields
+        )
+        track_point_fields = (
+            track_point_fields if track_point_fields is not None else WayPoint.fields
+        )
+        return self._gpx_writer.write(
+            file_path=path,
+            properties=properties,
+            bounds_fields=bounds_fields,
+            copyright_fields=copyright_fields,
+            email_fields=email_fields,
+            extensions_fields=extensions_fields,
+            gpx_fields=gpx_fields,
+            link_fields=link_fields,
+            metadata_fields=metadata_fields,
+            person_fields=person_fields,
+            point_segment_fields=point_segment_fields,
+            point_fields=point_fields,
+            route_fields=route_fields,
+            track_segment_fields=track_segment_fields,
+            track_fields=track_fields,
+            way_point_fields=way_point_fields,
+            track_point_fields=track_point_fields,
+            mandatory_fields=mandatory_fields,
+            xml_schema=xml_schema,
+            xml_extensions_schemas=xml_extensions_schemas,
+        )
 
     def to_kml(
-            self,
-            path: str,
-            styles: Optional[List[Tuple[str, Dict]]] = None,
-            xml_schema: bool = True) -> bool:
+        self,
+        path: str,
+        styles: Optional[List[Tuple[str, Dict]]] = None,
+        xml_schema: bool = True,
+    ) -> bool:
         """
         Write the GPX object to a .kml file.
 

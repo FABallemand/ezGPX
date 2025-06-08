@@ -1,5 +1,5 @@
-from typing import Dict, Optional, Union
 import logging
+from typing import Dict, Optional, Union
 
 from ..gpx_elements import Gpx
 
@@ -11,23 +11,20 @@ DEFAULT_PRECISION_DICT = {
     "duration": DEFAULT_PRECISION,
     "speed": DEFAULT_PRECISION,
     "rate": DEFAULT_PRECISION,
-    "default": DEFAULT_PRECISION
+    "default": DEFAULT_PRECISION,
 }
-POSSIBLE_TIME_FORMATS = [
-    "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"
-]
+POSSIBLE_TIME_FORMATS = ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"]
 DEFAULT_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
-class Parser():
+class Parser:
     """
     File parser.
     """
 
     def __init__(
-            self,
-            file_path: Optional[str] = None,
-            name_spaces: Dict = None) -> None:
+        self, file_path: Optional[str] = None, name_spaces: Dict = None
+    ) -> None:
         """
         Initialize Parser instance.
 
@@ -45,7 +42,7 @@ class Parser():
             "duration": DEFAULT_PRECISION,
             "speed": DEFAULT_PRECISION,
             "rate": DEFAULT_PRECISION,
-            "default": DEFAULT_PRECISION
+            "default": DEFAULT_PRECISION,
         }
         self.time_format: str = DEFAULT_TIME_FORMAT
 
@@ -78,12 +75,16 @@ class Parser():
             except OSError as err:
                 logging.exception("OS error: %s", err)
             except ValueError:
-                logging.exception("Could not convert data (%s) to a floating"
-                                  "point value.", number)
+                logging.exception(
+                    "Could not convert data (%s) to a floating" "point value.", number
+                )
             except Exception as err:
-                logging.exception("Unexpected %s, %s."
-                                  "Unable to find precision of number: %s",
-                                  err, type(err), number)
+                logging.exception(
+                    "Unexpected %s, %s." "Unable to find precision of number: %s",
+                    err,
+                    type(err),
+                    number,
+                )
                 raise
 
         if "." in number:

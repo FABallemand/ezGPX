@@ -1,12 +1,12 @@
-import os
-from typing import Optional, List
 import logging
+import os
 from datetime import datetime
+from typing import List, Optional
 
 from fitparse import FitFile
 
-from .parser import Parser, DEFAULT_PRECISION
-from ..gpx_elements import Gpx, TrackSegment, Track, WayPoint
+from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
+from .parser import DEFAULT_PRECISION, Parser
 
 
 class FitParser(Parser):
@@ -32,7 +32,7 @@ class FitParser(Parser):
 
     def _set_time_format(self, time):
         """
-        Set the time format used in FIT file. 
+        Set the time format used in FIT file.
         """
         if time is None:
             logging.warning("No time element in FIT file.")
@@ -79,7 +79,8 @@ class FitParser(Parser):
                         units["lat"] = record_data.units
                         # Temporary (may change if units["lat"] == "semicircles")
                         self.precisions["lat_lon"] = self.find_precision(
-                            record_data.value)
+                            record_data.value
+                        )
                 if record_data.name == "position_long":
                     lon_data.append(record_data.value)
                     if units["lon"] == "":
@@ -89,7 +90,8 @@ class FitParser(Parser):
                     if units["alt"] == "":
                         units["alt"] = record_data.units
                         self.precisions["elevation"] = self.find_precision(
-                            record_data.value)
+                            record_data.value
+                        )
                 if record_data.name == "timestamp":
                     time_data.append(record_data.value)
                     self._set_time_format(record_data.value)
@@ -115,7 +117,9 @@ class FitParser(Parser):
         self.gpx.version = "1.1"
         self.gpx.xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
         self.gpx.xsi_schema_location = [
-            "http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+            "http://www.topografix.com/GPX/1/1",
+            "http://www.topografix.com/GPX/1/1/gpx.xsd",
+        ]
 
     def parse(self) -> Gpx:
         """
@@ -128,8 +132,9 @@ class FitParser(Parser):
         try:
             self._parse()
         except Exception as err:
-            logging.exception("Unexpected %s, %s.\n"
-                              "Unable to parse FIT file.", err, type(err))
+            logging.exception(
+                "Unexpected %s, %s.\n" "Unable to parse FIT file.", err, type(err)
+            )
             raise
 
         # Add properties

@@ -13,6 +13,9 @@ namespaces = true
 "ezgpx.schemas.gpx_1_1" = ["*.xsd"]
 "ezgpx.schemas.kml_2_2" = ["*.xsd"]
 
+[tool.isort]
+profile = "black"
+
 [project]
 name = "ezgpx"
 version = "0.2.1"

@@ -1,15 +1,15 @@
-import sys
-import os
 import filecmp
+import os
+import sys
 from shutil import rmtree
 
-import pytest
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import pytest
 
 file_folder = os.path.dirname(__file__)
-parent_folder = os.path.realpath(os.path.dirname(file_folder)) # ie: ezGPX
+parent_folder = os.path.realpath(os.path.dirname(file_folder))  # ie: ezGPX
 
 os.chdir(file_folder)
 sys.path.append(parent_folder + "/ezgpx")
@@ -19,37 +19,50 @@ from ezgpx import GPX
 FILES_DIRECTORY = "test_files/files/"
 REFERENCE_FILES_DIRECTORY = "test_files/reference_files/"
 
-class TestGPX():
 
-    #==== Init ===============================================================#
+class TestGPX:
+
+    # ==== Init ===============================================================#
 
     def test_init(self):
         # Create temporary folder
         rmtree("tmp", True)
         os.makedirs(os.path.dirname(__file__) + "/tmp")
 
-    #==== Parsing/Writing ====================================================#
+    # ==== Parsing/Writing ====================================================#
 
     def test_parse(self):
         # Parse GPX files
-        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"),
-                  xml_schema=True, xml_extensions_schemas=False)
-        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"),
-                          xml_schema=False, xml_extensions_schemas=False)
+        gpx = GPX(
+            os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"),
+            xml_schema=True,
+            xml_extensions_schemas=False,
+        )
+        invalid_gpx = GPX(
+            os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"),
+            xml_schema=False,
+            xml_extensions_schemas=False,
+        )
 
-    #==== Check Schemas ======================================================#
+    # ==== Check Schemas ======================================================#
 
     def test_check_schemas(self):
         # Parse GPX Files
-        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"),
-                  xml_schema=False, xml_extensions_schemas=False)
-        invalid_gpx = GPX(os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"),
-                          xml_schema=False, xml_extensions_schemas=False)
+        gpx = GPX(
+            os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"),
+            xml_schema=False,
+            xml_extensions_schemas=False,
+        )
+        invalid_gpx = GPX(
+            os.path.join(FILES_DIRECTORY, "invalid_schema.gpx"),
+            xml_schema=False,
+            xml_extensions_schemas=False,
+        )
         # Tests
         assert gpx.check_xml_schema() is True
         assert invalid_gpx.check_xml_schema() is False
 
-    #==== Properties =========================================================#
+    # ==== Properties =========================================================#
 
     def test_file_name(self):
         # Parse GPX Files
@@ -206,7 +219,7 @@ class TestGPX():
     @pytest.mark.skip(reason="nothing to test")
     def test_compute_points_pace(self):
         pass
-    
+
     def test_min_pace(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
@@ -235,16 +248,17 @@ class TestGPX():
         # Test
         assert gpx.max_ascent_speed() == 2.1599999999999797
 
-    #==== Modifications ======================================================#
+    # ==== Modifications ======================================================#
 
-    #==== Conversion and Saving ==============================================#
+    # ==== Conversion and Saving ==============================================#
 
     def test_to_pandas(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
         df = gpx.to_pandas(values=["lat", "lon", "ele", "time"])
         reference_df = pd.read_csv(
-            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"))
+            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv")
+        )
         # Test
         assert reference_df.equals(df)
 
@@ -255,8 +269,10 @@ class TestGPX():
         # Test
         assert filecmp.cmp(
             "tmp/strava_run_1_test.gpx",
-            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.gpx"), False)
-        
+            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.gpx"),
+            False,
+        )
+
     def test_to_kml(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
@@ -264,7 +280,9 @@ class TestGPX():
         # Test
         assert filecmp.cmp(
             "tmp/strava_run_1_test.kml",
-            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.kml"), False)
+            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.kml"),
+            False,
+        )
 
     def test_to_csv(self):
         # Parse GPX Files
@@ -273,9 +291,11 @@ class TestGPX():
         # Test
         assert filecmp.cmp(
             "tmp/strava_run_1_test.csv",
-            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"), False)
+            os.path.join(REFERENCE_FILES_DIRECTORY, "strava_run_1.csv"),
+            False,
+        )
 
-    #==== Plots ==============================================================#
+    # ==== Plots ==============================================================#
 
     # def _test_matplotlib_plot_1(self):
     #     # Plot
@@ -376,18 +396,20 @@ class TestGPX():
     #     # self._test_folium_plot_3()
     #     # self._test_folium_plot_4()
 
-    #==== Destroy ============================================================#
+    # ==== Destroy ============================================================#
 
     def test_destroy(self, remove_tmp: bool = True):
         # Remove temporary folder
         if remove_tmp:
             rmtree("tmp", True)
 
-    #==== Test ===============================================================#
+    # ==== Test ===============================================================#
 
-    @pytest.mark.skip(reason="test") # https://docs.pytest.org/en/7.3.x/how-to/skipping.html
+    @pytest.mark.skip(
+        reason="test"
+    )  # https://docs.pytest.org/en/7.3.x/how-to/skipping.html
     def test_test(self, remove_tmp: bool = True):
-         # Create temporary folder
+        # Create temporary folder
         rmtree("tmp", True)
         os.makedirs(os.path.dirname(__file__) + "/tmp")
         # Parse GPX file

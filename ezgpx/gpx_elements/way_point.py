@@ -9,35 +9,57 @@ class WayPoint(GpxElement):
     """
     wptType element in GPX file.
     """
-    fields = ["lat", "lon", "ele", "time", "mag_var", "geo_id_height", "name",
-              "cmt", "desc", "src", "link", "sym", "type", "fix", "sat",
-              "hdop", "vdop", "pdop", "age_of_gps_data", "dgpsid", "extensions"]
+
+    fields = [
+        "lat",
+        "lon",
+        "ele",
+        "time",
+        "mag_var",
+        "geo_id_height",
+        "name",
+        "cmt",
+        "desc",
+        "src",
+        "link",
+        "sym",
+        "type",
+        "fix",
+        "sat",
+        "hdop",
+        "vdop",
+        "pdop",
+        "age_of_gps_data",
+        "dgpsid",
+        "extensions",
+    ]
     mandatory_fields = ["lat", "lon"]
 
     def __init__(
-            self,
-            tag: str = "wpt",
-            lat: float = None,
-            lon: float = None,
-            ele: float = None,
-            time: datetime = None,
-            mag_var: float = None,  # 0 <= value < 360
-            geo_id_height: float = None,
-            name: str = None,
-            cmt: str = None,
-            desc: str = None,
-            src: str = None,
-            link: Link = None,
-            sym: str = None,
-            type_: str = None,
-            fix: str = None,  # none, 2d, 3d, dgps, pps
-            sat: int = None,  # non negative integer
-            hdop: float = None,
-            vdop: float = None,
-            pdop: float = None,
-            age_of_gps_data: float = None,
-            dgpsid: int = None,  # 0 <= value <= 1023
-            extensions: Extensions = None) -> None:
+        self,
+        tag: str = "wpt",
+        lat: float = None,
+        lon: float = None,
+        ele: float = None,
+        time: datetime = None,
+        mag_var: float = None,  # 0 <= value < 360
+        geo_id_height: float = None,
+        name: str = None,
+        cmt: str = None,
+        desc: str = None,
+        src: str = None,
+        link: Link = None,
+        sym: str = None,
+        type_: str = None,
+        fix: str = None,  # none, 2d, 3d, dgps, pps
+        sat: int = None,  # non negative integer
+        hdop: float = None,
+        vdop: float = None,
+        pdop: float = None,
+        age_of_gps_data: float = None,
+        dgpsid: int = None,  # 0 <= value <= 1023
+        extensions: Extensions = None,
+    ) -> None:
         """
         Initialize WayPoint instance.
 

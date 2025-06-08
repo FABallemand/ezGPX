@@ -10,22 +10,23 @@ class Track(GpxElement):
     """
     trkType element in GPX file.
     """
-    fields = ["name", "cmt", "desc", "link", "number", "type",
-              "extensions", "trkseg"]
+
+    fields = ["name", "cmt", "desc", "link", "number", "type", "extensions", "trkseg"]
     mandatory_fields = []
 
     def __init__(
-            self,
-            tag: str = "trk",
-            name: str = None,
-            cmt: str = None,
-            desc: str = None,
-            src: str = None,
-            link: Link = None,
-            number: int = None,
-            type_: str = None,
-            extensions: Extensions = None,
-            trkseg: List[TrackSegment] = None):
+        self,
+        tag: str = "trk",
+        name: str = None,
+        cmt: str = None,
+        desc: str = None,
+        src: str = None,
+        link: Link = None,
+        number: int = None,
+        type_: str = None,
+        extensions: Extensions = None,
+        trkseg: List[TrackSegment] = None,
+    ):
         """
         Initialize Track instance.
 

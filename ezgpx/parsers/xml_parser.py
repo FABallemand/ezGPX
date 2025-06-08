@@ -1,8 +1,9 @@
-from typing import Dict, Optional, Union
 import logging
-from datetime import datetime
-from dateutil import parser
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import Dict, Optional, Union
+
+from dateutil import parser
 
 from .parser import Parser
 
@@ -13,10 +14,11 @@ class XMLParser(Parser):
     """
 
     def __init__(
-            self,
-            file_path: Optional[str] = None,
-            xml_schema: bool = True,
-            xml_extensions_schemas: bool = False) -> None:
+        self,
+        file_path: Optional[str] = None,
+        xml_schema: bool = True,
+        xml_extensions_schemas: bool = False,
+    ) -> None:
         """
         Initialize XML Parser instance.
 
@@ -32,7 +34,8 @@ class XMLParser(Parser):
             by default False
         """
         self.name_spaces: dict = dict(
-            [node for _, node in ET.iterparse(file_path, events=["start-ns"])])
+            [node for _, node in ET.iterparse(file_path, events=["start-ns"])]
+        )
         self.extensions_fields: Dict = {}
 
         super().__init__(file_path, self.name_spaces)
@@ -94,7 +97,7 @@ class XMLParser(Parser):
         else:
             float_ = float(float_)
         return float_
-    
+
     def find_sub_element(self, element, sub_element: str) -> Union[ET.Element, None]:
         """
         Find sub-element.
@@ -170,8 +173,7 @@ class XMLParser(Parser):
             Union[datetime, None]: Floating point value from sub-element.
         """
         sub_element_ = self.find_sub_element(element, sub_element)
-        return (None if sub_element_ is None
-                else parser.parse(sub_element_.text))
+        return None if sub_element_ is None else parser.parse(sub_element_.text)
 
     def check_xml_schemas(self):
         """
@@ -185,4 +187,6 @@ class XMLParser(Parser):
         # Check XML extension schemas
         if self.xml_extensions_schemas:
             if not self.gpx.check_xml_extensions_schemas(self.file_path):
-                raise ValueError("Invalid GPX file (does not follow XML extensions schemas).")
+                raise ValueError(
+                    "Invalid GPX file (does not follow XML extensions schemas)."
+                )

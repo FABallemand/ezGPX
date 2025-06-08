@@ -10,7 +10,7 @@ jobs:
       !contains(github.event.head_commit.message, 'ci skip')
     steps:
     - run: echo ready
-  
+
   tests:
     needs: activate
     runs-on: self-ubuntu-22.04

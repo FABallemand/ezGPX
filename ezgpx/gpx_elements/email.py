@@ -5,14 +5,11 @@ class Email(GpxElement):
     """
     emailType element in GPX file.
     """
+
     fields = ["id", "domain"]
     mandatory_fields = ["id", "domain"]
 
-    def __init__(
-            self,
-            tag: str = "email",
-            id: str = None,
-            domain: str = None) -> None:
+    def __init__(self, tag: str = "email", id: str = None, domain: str = None) -> None:
         """
         Initialize Email instance.
 

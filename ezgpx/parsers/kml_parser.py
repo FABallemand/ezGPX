@@ -1,10 +1,10 @@
-import os
-from typing import Optional, Union, List, Dict
 import logging
+import os
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Union
 
+from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
 from .xml_parser import XMLParser
-from ..gpx_elements import Gpx, TrackSegment, Track, WayPoint
 
 
 class KMLParser(XMLParser):
@@ -13,10 +13,11 @@ class KMLParser(XMLParser):
     """
 
     def __init__(
-            self,
-            file_path: Optional[str] = None,
-            check_xml_schemas: bool = True,
-            xml_extensions_schemas: bool = False) -> None:
+        self,
+        file_path: Optional[str] = None,
+        check_xml_schemas: bool = True,
+        xml_extensions_schemas: bool = False,
+    ) -> None:
         """
         Initialize KMLParser instance.
 
@@ -44,10 +45,8 @@ class KMLParser(XMLParser):
         """
         # Point
         documents = self.xml_root.findall("opengis:Document", self.name_spaces)
-        placemarks = documents[0].findall(
-            "opengis:Placemark", self.name_spaces)
-        linestrings = placemarks[0].findall(
-            "opengis:LineString", self.name_spaces)
+        placemarks = documents[0].findall("opengis:Placemark", self.name_spaces)
+        linestrings = placemarks[0].findall("opengis:LineString", self.name_spaces)
         coordinates = self.find_text(linestrings[0], "opengis:coordinates")
 
         coordinates = coordinates.replace("\n", "").replace("\t", "")
@@ -103,7 +102,8 @@ class KMLParser(XMLParser):
         linestrings = placemark.findall("opengis:LineString", self.name_spaces)
         for linestring in linestrings:
             placemark_data["linestrings_data"].append(
-                self.find_text(linestring, "opengis:coordinates"))
+                self.find_text(linestring, "opengis:coordinates")
+            )
 
         return placemark_data
 
@@ -143,18 +143,21 @@ class KMLParser(XMLParser):
                 linestrings_data = placemark_data["linestrings_data"]
                 trkseg = []
                 for coordinates in linestrings_data:
-                    coordinates = coordinates.replace(
-                        "\n", "").replace("\t", "")
+                    coordinates = coordinates.replace("\n", "").replace("\t", "")
                     if coordinates[-1] == " ":
                         coordinates = coordinates[:-1]
                     coordinates = coordinates.split(" ")
                     trkpt = []
                     for point_coord in coordinates:
                         point_coord = point_coord.split(",")
-                        trkpt.append(WayPoint(tag="trkpt",
-                                              lat=float(point_coord[1]),
-                                              lon=float(point_coord[0]),
-                                              ele=float(point_coord[2])))
+                        trkpt.append(
+                            WayPoint(
+                                tag="trkpt",
+                                lat=float(point_coord[1]),
+                                lon=float(point_coord[0]),
+                                ele=float(point_coord[2]),
+                            )
+                        )
                     trkseg.append(TrackSegment(trkpt=trkpt))
 
                 tracks = [Track(name=placemark_data["name"], trkseg=trkseg)]
@@ -172,7 +175,9 @@ class KMLParser(XMLParser):
         self.gpx.version = "1.1"
         self.gpx.xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance"
         self.gpx.xsi_schema_location = [
-            "http://www.topografix.com/GPX/1/1", "http://www.topografix.com/GPX/1/1/gpx.xsd"]
+            "http://www.topografix.com/GPX/1/1",
+            "http://www.topografix.com/GPX/1/1/gpx.xsd",
+        ]
 
     def parse(self) -> Gpx:
         """
@@ -186,8 +191,9 @@ class KMLParser(XMLParser):
             self.xml_tree = ET.parse(self.file_path)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
-            logging.exception("Unexpected %s, %s.\n"
-                              "Unable to parse KML file.", err, type(err))
+            logging.exception(
+                "Unexpected %s, %s.\n" "Unable to parse KML file.", err, type(err)
+            )
             raise
 
         # Add properties

@@ -9,14 +9,16 @@ class TrackSegment(GpxElement):
     """
     trksegType in GPX file.
     """
+
     fields = ["trkpt", "extensions"]
     mandatory_fields = []
 
     def __init__(
-            self,
-            tag: str = "trkseg",
-            trkpt: List[WayPoint] = None,
-            extensions: Extensions = None) -> None:
+        self,
+        tag: str = "trkseg",
+        trkpt: List[WayPoint] = None,
+        extensions: Extensions = None,
+    ) -> None:
         """
         Initialize TrackSegment instance.
 

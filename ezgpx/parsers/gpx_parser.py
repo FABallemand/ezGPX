@@ -1,14 +1,27 @@
-import os
-from typing import Optional, Union
 import logging
-from datetime import datetime
+import os
 import xml.etree.ElementTree as ET
+from datetime import datetime
+from typing import Optional, Union
 
+from ..gpx_elements import (
+    Bounds,
+    Copyright,
+    Email,
+    Extensions,
+    Gpx,
+    Link,
+    Metadata,
+    Person,
+    Point,
+    PointSegment,
+    Route,
+    Track,
+    TrackSegment,
+    WayPoint,
+)
 from .parser import POSSIBLE_TIME_FORMATS
 from .xml_parser import XMLParser
-from ..gpx_elements import (Bounds, Copyright, Email, Extensions, Gpx, Link,
-                            Metadata, Person, Point, PointSegment, Route,
-                            TrackSegment, Track, WayPoint)
 
 
 class GPXParser(XMLParser):
@@ -17,10 +30,11 @@ class GPXParser(XMLParser):
     """
 
     def __init__(
-            self,
-            file_path: Optional[str] = None,
-            xml_schemas: bool = True,
-            xml_extensions_schemas: bool = False) -> None:
+        self,
+        file_path: Optional[str] = None,
+        xml_schemas: bool = True,
+        xml_extensions_schemas: bool = False,
+    ) -> None:
         """
         Initialize GPXParser instance.
 
@@ -38,9 +52,7 @@ class GPXParser(XMLParser):
         if not file_path.endswith(".gpx"):
             return
 
-        super().__init__(file_path,
-                         xml_schemas,
-                         xml_extensions_schemas)
+        super().__init__(file_path, xml_schemas, xml_extensions_schemas)
 
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
@@ -81,7 +93,9 @@ class GPXParser(XMLParser):
                 return time_str
 
         # Use time from track point
-        track = self.xml_root.findall("trk", self.name_spaces)[0]  # Optimise, load only once??
+        track = self.xml_root.findall("trk", self.name_spaces)[
+            0
+        ]  # Optimise, load only once??
         segment = track.findall("trkseg", self.name_spaces)[0]
         point = segment.findall("trkpt", self.name_spaces)[0]
         time_str = point.findtext("time", namespaces=self.name_spaces)
@@ -111,8 +125,10 @@ class GPXParser(XMLParser):
             except ValueError:
                 pass
         else:
-            logging.info("Unknown time format. "
-                         "Default time format will be used uppon writting.")
+            logging.info(
+                "Unknown time format. "
+                "Default time format will be used uppon writting."
+            )
 
     def _parse_bounds(self, bounds, tag: str = "bounds") -> Union[Bounds, None]:
         """
@@ -135,7 +151,9 @@ class GPXParser(XMLParser):
 
         return Bounds(tag, minlat, minlon, maxlat, maxlon)
 
-    def _parse_copyright(self, copyright_, tag: str = "copyright") -> Union[Copyright, None]:
+    def _parse_copyright(
+        self, copyright_, tag: str = "copyright"
+    ) -> Union[Copyright, None]:
         """
         Parse copyrightType element from GPX file.
 
@@ -175,8 +193,8 @@ class GPXParser(XMLParser):
         return Email(tag, id_, domain)
 
     def _parse_extensions(
-            self, extensions, element_type: str,
-            tag: str = "extensions") -> Union[Extensions, None]:
+        self, extensions, element_type: str, tag: str = "extensions"
+    ) -> Union[Extensions, None]:
         """
         Parse extensionsType element from GPX file.
 
@@ -193,14 +211,12 @@ class GPXParser(XMLParser):
         def construct_dict(e0):
             e1s = [e1 for e1 in e0.iter()][1:]
             if len(e1s) > 0:
-                d = {"attrib": dict(e0.items()),
-                     "elmts": {}}
+                d = {"attrib": dict(e0.items()), "elmts": {}}
                 for e1 in e1s:
                     d["elmts"][e1.tag] = construct_dict(e1)
                 return d
             else:
-                return {"attrib": {},
-                        "elmts": e0.text}
+                return {"attrib": {}, "elmts": e0.text}
 
         ext = [e for e in extensions.iter()][1]
         values = {ext.tag: {}}
@@ -249,17 +265,27 @@ class GPXParser(XMLParser):
         name = metadata.findtext("name", namespaces=self.name_spaces)
         desc = metadata.findtext("desc", namespaces=self.name_spaces)
         author = self._parse_person(metadata.find("author", self.name_spaces))
-        copyright_ = self._parse_copyright(
-            metadata.find("copyright", self.name_spaces))
+        copyright_ = self._parse_copyright(metadata.find("copyright", self.name_spaces))
         link = self._parse_link(metadata.find("link", self.name_spaces))
         time = self.find_time(metadata, "time")
         keywords = metadata.findtext("keywords", namespaces=self.name_spaces)
         bounds = self._parse_bounds(metadata.find("bounds", self.name_spaces))
         extensions = self._parse_extensions(
-            metadata.find("extensions", self.name_spaces), tag)
+            metadata.find("extensions", self.name_spaces), tag
+        )
 
-        return Metadata(tag, name, desc, author, copyright_, link, time,
-                        keywords, bounds, extensions)
+        return Metadata(
+            tag,
+            name,
+            desc,
+            author,
+            copyright_,
+            link,
+            time,
+            keywords,
+            bounds,
+            extensions,
+        )
 
     def _parse_person(self, person, tag: str = "person") -> Union[Person, None]:
         """
@@ -281,7 +307,9 @@ class GPXParser(XMLParser):
 
         return Person(tag, name, email, link)
 
-    def _parse_point_segment(self, point_segment, tag: str = "ptseg") -> Union[PointSegment, None]:
+    def _parse_point_segment(
+        self, point_segment, tag: str = "ptseg"
+    ) -> Union[PointSegment, None]:
         """
         Parse ptsegType element from GPX file.
 
@@ -347,13 +375,18 @@ class GPXParser(XMLParser):
         number = self.find_int(route, "number")
         type_ = route.findtext("type", namespaces=self.name_spaces)
         extensions = self._parse_extensions(
-            route.find("extensions", self.name_spaces), tag)
-        rtept = [self._parse_way_point(way_point) for way_point in route.findall(
-            "rtept", self.name_spaces)]
+            route.find("extensions", self.name_spaces), tag
+        )
+        rtept = [
+            self._parse_way_point(way_point)
+            for way_point in route.findall("rtept", self.name_spaces)
+        ]
 
         return Route(tag, name, cmt, desc, src, link, number, type_, extensions, rtept)
 
-    def _parse_track_segment(self, track_segment, tag: str = "trkseg") -> Union[TrackSegment, None]:
+    def _parse_track_segment(
+        self, track_segment, tag: str = "trkseg"
+    ) -> Union[TrackSegment, None]:
         """
         Parse trksegType element from GPX file.
 
@@ -367,10 +400,13 @@ class GPXParser(XMLParser):
         if track_segment is None:
             return None
 
-        trkpt = [self._parse_way_point(track_point, "trkpt")
-                 for track_point in track_segment.findall("trkpt", self.name_spaces)]
+        trkpt = [
+            self._parse_way_point(track_point, "trkpt")
+            for track_point in track_segment.findall("trkpt", self.name_spaces)
+        ]
         extensions = self._parse_extensions(
-            track_segment.find("extensions", self.name_spaces), tag)
+            track_segment.find("extensions", self.name_spaces), tag
+        )
 
         return TrackSegment(tag, trkpt, extensions)
 
@@ -396,9 +432,12 @@ class GPXParser(XMLParser):
         number = self.find_int(track, "number")
         type_ = track.findtext("type", namespaces=self.name_spaces)
         extensions = self._parse_extensions(
-            track.find("extensions", self.name_spaces), tag)
-        trkseg = [self._parse_track_segment(
-            segment) for segment in track.findall("trkseg", self.name_spaces)]
+            track.find("extensions", self.name_spaces), tag
+        )
+        trkseg = [
+            self._parse_track_segment(segment)
+            for segment in track.findall("trkseg", self.name_spaces)
+        ]
 
         return Track(tag, name, cmt, desc, src, link, number, type_, extensions, trkseg)
 
@@ -438,11 +477,33 @@ class GPXParser(XMLParser):
         age_of_gps_data = self.find_float(way_point, "ageofgpsdata")
         dgpsid = self.find_float(way_point, "dgpsid")
         extensions = self._parse_extensions(
-            way_point.find("extensions", self.name_spaces), tag)
+            way_point.find("extensions", self.name_spaces), tag
+        )
 
-        return WayPoint(tag, lat, lon, ele, time, mag_var, geo_id_height, name,
-                        cmt, desc, src, link, sym, type_, fix, sat, hdop, vdop,
-                        pdop, age_of_gps_data, dgpsid, extensions)
+        return WayPoint(
+            tag,
+            lat,
+            lon,
+            ele,
+            time,
+            mag_var,
+            geo_id_height,
+            name,
+            cmt,
+            desc,
+            src,
+            link,
+            sym,
+            type_,
+            fix,
+            sat,
+            hdop,
+            vdop,
+            pdop,
+            age_of_gps_data,
+            dgpsid,
+            extensions,
+        )
 
     def _parse_root_properties(self):
         """
@@ -451,7 +512,8 @@ class GPXParser(XMLParser):
         self.gpx.creator = self.xml_root.attrib["creator"]
         self.gpx.version = self.xml_root.attrib["version"]
         schema_location = self.xml_root.get(
-            "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")
+            "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+        ).split(" ")
         self.gpx.xsi_schema_location = [x for x in schema_location if x != ""]
 
     def _parse_root_metadata(self):
@@ -459,7 +521,8 @@ class GPXParser(XMLParser):
         Parse metadataType elements from GPX file.
         """
         self.gpx.metadata = self._parse_metadata(
-            self.xml_root.find("metadata", self.name_spaces))
+            self.xml_root.find("metadata", self.name_spaces)
+        )
 
     def _parse_root_way_points(self):
         """
@@ -504,8 +567,9 @@ class GPXParser(XMLParser):
             self.xml_tree = ET.parse(self.file_path)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
-            logging.exception("Unexpected %s, %s.\n"
-                              "Unable to parse GPX file.", err, type(err))
+            logging.exception(
+                "Unexpected %s, %s.\n" "Unable to parse GPX file.", err, type(err)
+            )
             raise
 
         # Parse properties

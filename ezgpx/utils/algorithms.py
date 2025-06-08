@@ -1,10 +1,10 @@
-from typing import List
 from math import degrees
+from typing import List
 
 from .distance import EARTH_RADIUS, perpendicular_distance
 
 
-def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)):
+def ramer_douglas_peucker(points: List, epsilon: float = degrees(2 / EARTH_RADIUS)):
     """
     Simplify a curve using the Ramer-Douglas-Peucker algorithm.
     Source: https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
@@ -29,9 +29,9 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)
     i_max = 0
 
     start_point = points[0]
-    end_point = points[len(points)-1]
+    end_point = points[len(points) - 1]
 
-    for i in range(1, len(points)-1):
+    for i in range(1, len(points) - 1):
         d = perpendicular_distance(start_point, end_point, points[i])
         if d > d_max:
             d_max = d
@@ -44,8 +44,8 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2/EARTH_RADIUS)
     # If max distance is greater than epsilon, recursively simplify
     if d_max > epsilon:
         # Recursive call
-        result_1 = ramer_douglas_peucker(points[0:i_max+1], epsilon)
-        result_2 = ramer_douglas_peucker(points[i_max:len(points)], epsilon)
+        result_1 = ramer_douglas_peucker(points[0 : i_max + 1], epsilon)
+        result_2 = ramer_douglas_peucker(points[i_max : len(points)], epsilon)
 
         # Build result list
         result = result_1 + result_2[1:]

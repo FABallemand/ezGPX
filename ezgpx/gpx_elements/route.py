@@ -1,4 +1,5 @@
 from typing import List
+
 from .extensions import Extensions
 from .gpx_element import GpxElement
 from .link import Link
@@ -9,22 +10,33 @@ class Route(GpxElement):
     """
     rteType element in GPX file.
     """
-    fields = ["name", "cmt", "desc", "src", "link", "number", "type",
-              "extensions", "rtept"]
+
+    fields = [
+        "name",
+        "cmt",
+        "desc",
+        "src",
+        "link",
+        "number",
+        "type",
+        "extensions",
+        "rtept",
+    ]
     mandatory_fields = []
 
     def __init__(
-            self,
-            tag: str = "rte",
-            name: str = None,
-            cmt: str = None,
-            desc: str = None,
-            src: str = None,
-            link: Link = None,
-            number: int = None,  # non negative integer
-            type_: str = None,
-            extensions: Extensions = None,
-            rtept: List[WayPoint] = None) -> None:
+        self,
+        tag: str = "rte",
+        name: str = None,
+        cmt: str = None,
+        desc: str = None,
+        src: str = None,
+        link: Link = None,
+        number: int = None,  # non negative integer
+        type_: str = None,
+        extensions: Extensions = None,
+        rtept: List[WayPoint] = None,
+    ) -> None:
         """
         Initialize Route instance.
 

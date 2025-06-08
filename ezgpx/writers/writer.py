@@ -1,23 +1,20 @@
-from typing import Union, Tuple, Dict
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from typing import Dict, Tuple, Union
 
 from ..gpx_elements import Gpx
-from ..parsers import (
-    DEFAULT_PRECISION, DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT)
+from ..parsers import DEFAULT_PRECISION, DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
 
 
-class Writer():
+class Writer:
     """
     File writer.
     """
 
     def __init__(
-            self,
-            gpx: Gpx = None,
-            precisions: Dict = None,
-            time_format: str = None) -> None:
+        self, gpx: Gpx = None, precisions: Dict = None, time_format: str = None
+    ) -> None:
         """
         Initialize Writer instance.
 
@@ -28,12 +25,12 @@ class Writer():
         """
         self.gpx: Gpx = gpx
 
-        self.precisions: Dict = (precisions
-                                 if precisions is not None
-                                 else DEFAULT_PRECISION_DICT)
-        self.time_format: str = (time_format
-                                 if time_format is not None
-                                 else DEFAULT_TIME_FORMAT)
+        self.precisions: Dict = (
+            precisions if precisions is not None else DEFAULT_PRECISION_DICT
+        )
+        self.time_format: str = (
+            time_format if time_format is not None else DEFAULT_TIME_FORMAT
+        )
 
         self.file_path: str = None
 
@@ -54,8 +51,8 @@ class Writer():
             element.set(field, value)
 
     def add_subelement(
-            self, element: ET.Element, sub_element: str,
-            text: str) -> Tuple[ET.Element, Union[ET.Element, None]]:
+        self, element: ET.Element, sub_element: str, text: str
+    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -75,9 +72,12 @@ class Writer():
         return element, sub_element_
 
     def add_subelement_number(
-            self, element: ET.Element, sub_element: str,
-            number: Union[int, float],
-            precision: int = DEFAULT_PRECISION) -> Tuple[ET.Element, Union[ET.Element, None]]:
+        self,
+        element: ET.Element,
+        sub_element: str,
+        number: Union[int, float],
+        precision: int = DEFAULT_PRECISION,
+    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -103,8 +103,12 @@ class Writer():
         return element, sub_element_
 
     def add_subelement_time(
-            self, element: ET.Element, sub_element: str, time: datetime,
-            format_: str = DEFAULT_TIME_FORMAT) -> Tuple[ET.Element, Union[ET.Element, None]]:
+        self,
+        element: ET.Element,
+        sub_element: str,
+        time: datetime,
+        format_: str = DEFAULT_TIME_FORMAT,
+    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
         """
         Add sub-element to GPX element.
 
@@ -121,14 +125,13 @@ class Writer():
         sub_element_ = None
         if time is not None:
             sub_element_ = ET.SubElement(element, sub_element)
-            time_utc = time.astimezone(timezone.utc) # Convert to UTC
+            time_utc = time.astimezone(timezone.utc)  # Convert to UTC
             sub_element_.text = time_utc.strftime(format_)
         return element, sub_element_
 
     def check_xml_schemas(
-            self,
-            xml_schema: bool = False,
-            xml_extensions_schemas: bool = False) -> bool:
+        self, xml_schema: bool = False, xml_extensions_schemas: bool = False
+    ) -> bool:
         """
         Check XML schemas after writting.
 
@@ -155,7 +158,8 @@ class Writer():
         if xml_extensions_schemas:
             if not self.gpx.check_xml_extensions_schemas(self.file_path):
                 logging.error(
-                    "Invalid GPX file (does not follow XML extensions schemas).")
+                    "Invalid GPX file (does not follow XML extensions schemas)."
+                )
                 return False
 
         return True

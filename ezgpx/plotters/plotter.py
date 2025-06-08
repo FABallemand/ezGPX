@@ -2,7 +2,8 @@ import pandas as pd
 
 from ..gpx import GPX
 
-class Plotter():
+
+class Plotter:
     """
     GPX plotter (parent class).
     """

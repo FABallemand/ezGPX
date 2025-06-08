@@ -8,13 +8,11 @@ class PointSegment(GpxElement):
     """
     ptsegType element in GPX file.
     """
+
     fields = ["pt"]
     mandatory_fields = []
 
-    def __init__(
-            self,
-            tag: str = "ptseg",
-            pt: List[Point] = None) -> None:
+    def __init__(self, tag: str = "ptseg", pt: List[Point] = None) -> None:
         """
         Initialize PointSegment instance.
 

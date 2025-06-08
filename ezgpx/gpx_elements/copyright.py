@@ -5,15 +5,17 @@ class Copyright(GpxElement):
     """
     copyrightType element in GPX file.
     """
+
     fields = ["author", "year", "licence"]
     mandatory_fields = ["author"]
 
     def __init__(
-            self,
-            tag: str = "copyright",
-            author: str = None,
-            year: int = None,
-            licence: str = None) -> None:
+        self,
+        tag: str = "copyright",
+        author: str = None,
+        year: int = None,
+        licence: str = None,
+    ) -> None:
         """
         Initialize Copyright instance.
 
@@ -32,4 +34,3 @@ class Copyright(GpxElement):
         self.author: str = author
         self.year: int = year
         self.licence: str = licence
-        

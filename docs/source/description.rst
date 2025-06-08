@@ -7,10 +7,16 @@ Description
 
 .. image:: https://img.shields.io/github/last-commit/FABallemand/ezGPX/main
 
+.. image:: https://img.shields.io/pypi/dm/ezGPX
+
 .. image:: https://img.shields.io/badge/linting-pylint-yellowgreen
     :target: https://github.com/pylint-dev/pylint
 
-.. image:: https://img.shields.io/pypi/dm/ezGPX
+.. image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
+    :target: https://pycqa.github.io/isort/
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
 
 .. note:: TLDR: Easy to use Python library for GPX files.
 

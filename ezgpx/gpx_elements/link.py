@@ -5,15 +5,13 @@ class Link(GpxElement):
     """
     linkType element in GPX file.
     """
+
     fields = ["href", "text", "type"]
     mandatory_fields = ["href"]
 
     def __init__(
-            self,
-            tag: str = "link",
-            href: str = None,
-            text: str = None,
-            type_: str = None) -> None:
+        self, tag: str = "link", href: str = None, text: str = None, type_: str = None
+    ) -> None:
         """
         Initialize Link instance.
 

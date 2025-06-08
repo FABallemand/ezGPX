@@ -62,8 +62,8 @@
 - Add meridian plot with basemap
 - Add support for all emojis in plots
 - Handle errors properly and remove logging
-- Add descent rate ?
-- Improve time computation for pauses ?
-- Add descent speed ?
+- Add descent rate?
+- Improve time computation for pauses?
+- Add descent speed?
 - Update README
 - Add polars to dict methods ??? (https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dict.html, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rows_by_key.html#polars.DataFrame.rows_by_key, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dicts.html#polars.DataFrame.to_dicts)

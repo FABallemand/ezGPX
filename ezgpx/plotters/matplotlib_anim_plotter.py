@@ -1,15 +1,17 @@
-import os
 import logging
-from typing import Optional, Tuple
+import os
 from math import isclose
-import numpy as np
+from typing import Optional, Tuple
+
 import matplotlib
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.basemap import Basemap
 
 # from ..gpx import GPX
 from .plotter import Plotter
+
 
 class MatplotlibAnimPlotter(Plotter):
 
@@ -17,26 +19,27 @@ class MatplotlibAnimPlotter(Plotter):
     #     super().__init__(gpx)
 
     def plot(
-            self,
-            figsize: Tuple[int, int] = (16, 9),
-            size: float = 10,
-            color: str = "#101010",
-            cmap: Optional[matplotlib.colors.Colormap] = None,
-            colorbar: bool = False,
-            start_point_color: Optional[str] = None,
-            stop_point_color: Optional[str] = None,
-            way_points_color: Optional[str] = None,
-            background: Optional[str] = None,
-            offset_percentage: float = 0.04,
-            dpi: int = 96,
-            interval: float = 20,
-            fps: int = 24,
-            bitrate: int = 1800,
-            repeat: bool = True,
-            title: Optional[str] = None,
-            title_fontsize: int = 20,
-            watermark: bool = False,
-            file_path: str = None):
+        self,
+        figsize: Tuple[int, int] = (16, 9),
+        size: float = 10,
+        color: str = "#101010",
+        cmap: Optional[matplotlib.colors.Colormap] = None,
+        colorbar: bool = False,
+        start_point_color: Optional[str] = None,
+        stop_point_color: Optional[str] = None,
+        way_points_color: Optional[str] = None,
+        background: Optional[str] = None,
+        offset_percentage: float = 0.04,
+        dpi: int = 96,
+        interval: float = 20,
+        fps: int = 24,
+        bitrate: int = 1800,
+        repeat: bool = True,
+        title: Optional[str] = None,
+        title_fontsize: int = 20,
+        watermark: bool = False,
+        file_path: str = None,
+    ):
         """
         Crashes may be due to parametres exceeding system capabilities.
         Try reducing fps and/or bitrate.
@@ -58,8 +61,7 @@ class MatplotlibAnimPlotter(Plotter):
         delta_max = max(max_lat - min_lat, max_lon - min_lon)
         offset = delta_max * offset_percentage
         min_lat, min_lon = max(0, min_lat - offset), max(0, min_lon - offset)
-        max_lat, max_lon = min(
-            max_lat + offset, 90),  min(max_lon + offset, 180)
+        max_lat, max_lon = min(max_lat + offset, 90), min(max_lon + offset, 180)
 
         # Some sort of magic to achieve the correct map aspect ratio
         # CREATE FUNCTION (also used in anmation??)
@@ -87,8 +89,13 @@ class MatplotlibAnimPlotter(Plotter):
             r = delta_lon / delta_lat
 
         # Create map
-        map = Basemap(projection="cyl", llcrnrlon=min_lon, llcrnrlat=min_lat,
-                      urcrnrlon=max_lon, urcrnrlat=max_lat)
+        map = Basemap(
+            projection="cyl",
+            llcrnrlon=min_lon,
+            llcrnrlat=min_lat,
+            urcrnrlon=max_lon,
+            urcrnrlat=max_lat,
+        )
 
         # Add background
         if background is None:
@@ -102,15 +109,15 @@ class MatplotlibAnimPlotter(Plotter):
         elif background == "wms":
             wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
             wms_server = "http://wms.geosignal.fr/metropole?"
-            map.wmsimage(wms_server,
-                         layers=["Communes", "Nationales", "Regions"],
-                         verbose=True)
+            map.wmsimage(
+                wms_server, layers=["Communes", "Nationales", "Regions"], verbose=True
+            )
         else:
             map.arcgisimage(service=background, dpi=dpi, verbose=True)
 
         # Create empty line
         # Add marker, marker style...
-        line, = fig.gca().plot([], [], color=color, linewidth=size)
+        (line,) = fig.gca().plot([], [], color=color, linewidth=size)
 
         # Animation function
         def animate(i):
@@ -120,19 +127,21 @@ class MatplotlibAnimPlotter(Plotter):
                 line.set_ydata([])
 
             try:
-                line.set_xdata(np.concatenate(
-                    (line.get_xdata(), np.array([lon[i]]))))
-                line.set_ydata(np.concatenate(
-                    (line.get_ydata(), np.array([lat[i]]))))
+                line.set_xdata(np.concatenate((line.get_xdata(), np.array([lon[i]]))))
+                line.set_ydata(np.concatenate((line.get_ydata(), np.array([lat[i]]))))
             except:
                 print("No more data point, you need to stop!!")
 
-            return line,
+            return (line,)
 
         # Create animation
-        ani = animation.FuncAnimation(fig=fig, func=animate, frames=len(lat),
-                                      interval=interval,  # Delay between frames in ms
-                                      repeat=repeat if file_path is None else False)  # ?
+        ani = animation.FuncAnimation(
+            fig=fig,
+            func=animate,
+            frames=len(lat),
+            interval=interval,  # Delay between frames in ms
+            repeat=repeat if file_path is None else False,
+        )  # ?
 
         # Colorbar
         # if colorbar:
@@ -141,8 +150,7 @@ class MatplotlibAnimPlotter(Plotter):
         # Add title
         if title is not None:
             if watermark:
-                fig.suptitle(
-                    title + "\n[made with ezGPX]", fontsize=title_fontsize)
+                fig.suptitle(title + "\n[made with ezGPX]", fontsize=title_fontsize)
             else:
                 fig.suptitle(title, fontsize=title_fontsize)
 
@@ -159,13 +167,13 @@ class MatplotlibAnimPlotter(Plotter):
             # ani.save(file_path, fps=fps, dpi=dpi)
             writer = None
             if file_path.endswith(".mp4"):
-                writer = animation.FFMpegWriter(fps=fps,
-                                                metadata=dict(artist="ezGPX"),
-                                                bitrate=bitrate)
+                writer = animation.FFMpegWriter(
+                    fps=fps, metadata=dict(artist="ezGPX"), bitrate=bitrate
+                )
             elif file_path.endswith(".gif"):
-                writer = animation.PillowWriter(fps=fps,
-                                                metadata=dict(artist="ezGPX"),
-                                                bitrate=bitrate)
+                writer = animation.PillowWriter(
+                    fps=fps, metadata=dict(artist="ezGPX"), bitrate=bitrate
+                )
             ani.save(file_path, writer=writer)
         else:
             # ani.show()

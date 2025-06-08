@@ -7,16 +7,18 @@ class Point(GpxElement):
     """
     ptType element in GPX file.
     """
+
     fields = ["lat", "lon", "ele", "time"]
     mandatory_fields = ["lat", "lon"]
 
     def __init__(
-            self,
-            tag: str = "pt",
-            lat: float = None,
-            lon: float = None,
-            ele: float = None,
-            time: datetime = None) -> None:
+        self,
+        tag: str = "pt",
+        lat: float = None,
+        lon: float = None,
+        ele: float = None,
+        time: datetime = None,
+    ) -> None:
         """
         Initialize Point instance.
 
