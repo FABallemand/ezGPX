@@ -9,15 +9,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.basemap import Basemap
 
-# from ..gpx import GPX
 from .plotter import Plotter
 
 
 class MatplotlibAnimPlotter(Plotter):
-
-    # def __init__(self, gpx: GPX) -> None:
-    #     super().__init__(gpx)
-
     def plot(
         self,
         figsize: Tuple[int, int] = (16, 9),

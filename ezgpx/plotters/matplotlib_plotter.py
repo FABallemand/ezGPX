@@ -7,15 +7,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
-# from ..gpx import GPX
 from .plotter import Plotter
 
 
 class MatplotlibPlotter(Plotter):
-
-    # def __init__(self, gpx: GPX) -> None:
-    #     super().__init__(gpx)
-
     def plot(
         self,
         figsize: Tuple[int, int] = (16, 9),

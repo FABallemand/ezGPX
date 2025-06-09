@@ -5,15 +5,10 @@ import folium
 from folium.features import DivIcon
 from folium.plugins import MiniMap
 
-# from ..gpx import GPX
 from .plotter import Plotter
 
 
 class FoliumPlotter(Plotter):
-
-    # def __init__(self, gpx: GPX) -> None:
-    #     super().__init__(gpx)
-
     def plot(
         self,
         tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"

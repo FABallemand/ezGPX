@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 
 import gmplot
 
-# from ..gpx import GPX
 from .plotter import Plotter
 
 
@@ -11,9 +10,6 @@ class GmapPlotter(Plotter):
     """
     GPX object plotter (using gmap).
     """
-
-    # def __init__(self, gpx: GPX) -> None:
-    #     super().__init__(gpx)
 
     def plot(
         self,

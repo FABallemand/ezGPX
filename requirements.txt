@@ -6,7 +6,8 @@ pandas
 polars
 matplotlib
 basemap
+plotly
 gmplot
 folium
-pytest
 fitparse
+pytest
