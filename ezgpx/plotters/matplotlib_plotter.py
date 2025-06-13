@@ -169,7 +169,7 @@ class MatplotlibPlotter(Plotter):
         # Set figure layout
         fig.tight_layout()
 
-        # Save or display plot
+        # Save plot
         if file_path is not None:
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
@@ -177,7 +177,5 @@ class MatplotlibPlotter(Plotter):
                 logging.error("Provided path does not exist")
                 return
             fig.savefig(file_path)
-        else:
-            fig.show()
 
         return fig

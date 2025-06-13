@@ -74,7 +74,7 @@ class PlotlyPlotter(Plotter):
             title={"text": title},
         )
 
-        # Save or display plot
+        # Save plot
         if file_path is not None:
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
@@ -85,7 +85,5 @@ class PlotlyPlotter(Plotter):
                 fig.write_html(file_path)
             else:
                 fig.write_image(file_path)
-        else:
-            fig.show()
 
         return fig

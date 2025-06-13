@@ -152,7 +152,7 @@ class MatplotlibAnimPlotter(Plotter):
         # Set figure layout
         fig.tight_layout()
 
-        # Save or display plot
+        # Save plot
         if file_path is not None:
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
@@ -163,15 +163,12 @@ class MatplotlibAnimPlotter(Plotter):
             writer = None
             if file_path.endswith(".mp4"):
                 writer = animation.FFMpegWriter(
-                    fps=fps, metadata=dict(artist="ezGPX"), bitrate=bitrate
+                    fps=fps, metadata={"artist": "ezGPX"}, bitrate=bitrate
                 )
             elif file_path.endswith(".gif"):
                 writer = animation.PillowWriter(
-                    fps=fps, metadata=dict(artist="ezGPX"), bitrate=bitrate
+                    fps=fps, metadata={"artist": "ezGPX"}, bitrate=bitrate
                 )
             ani.save(file_path, writer=writer)
-        else:
-            # ani.show()
-            pass
 
         return fig
