@@ -1,5 +1,5 @@
-import logging
 import os
+import warnings
 from math import isclose
 from typing import Optional, Tuple
 
@@ -14,8 +14,8 @@ class MatplotlibPlotter(Plotter):
     def plot(
         self,
         figsize: Tuple[int, int] = (16, 9),
-        size: float = 10,
-        color: str = "#101010",
+        size: float = 5,
+        color: str = "#FFA800",
         cmap: Optional[matplotlib.colors.Colormap] = None,
         colorbar: bool = False,
         start_point_color: Optional[str] = None,
@@ -63,20 +63,14 @@ class MatplotlibPlotter(Plotter):
         min_lon = max(-180, min_lon - offset)
         max_lon = min(max_lon + offset, 180)
 
-        # Some sort of magic to achieve the correct map aspect ratio
-        # CREATE FUNCTION (also used in animation??)
+        # Update min/max lat/lon to achieve correct aspect ratio
         lat_offset = 1e-5
         lon_offset = 1e-5
         delta_lat = abs(max_lat - min_lat)
         delta_lon = abs(max_lon - min_lon)
         r = delta_lon / delta_lat  # Current map aspect ratio
-        # Target map aspect ratio, Adapt in function of the shape of the subplot...
-        r_ref = figsize[0] / figsize[1]
-
+        r_ref = figsize[0] / figsize[1]  # Target map aspect ratio
         tolerance = 1e-3
-        # while (not isclose(r, r_ref, abs_tol=tolerance) or
-        #        not isclose(delta_lon % pos.width, 0.0, abs_tol=tolerance) or
-        #        not isclose(delta_lat % pos.height, 0.0, abs_tol=tolerance)):
         while not isclose(r, r_ref, abs_tol=tolerance):
             if r > r_ref:
                 min_lat = max(-90, min_lat - lat_offset)
@@ -106,6 +100,8 @@ class MatplotlibPlotter(Plotter):
             map_.shadedrelief()
         elif background == "etopo":
             map_.etopo()
+        elif background == "World_Imagery":
+            map_.arcgisimage(service=background, dpi=dpi)
         elif background == "wms":
             wms_server = "http://www.ga.gov.au/gis/services/topography/Australian_Topography/MapServer/WMSServer"
             wms_server = "http://wms.geosignal.fr/metropole?"
@@ -174,8 +170,7 @@ class MatplotlibPlotter(Plotter):
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
             if not os.path.exists(directory_path):
-                logging.error("Provided path does not exist")
-                return
+                raise FileNotFoundError("Provided path does not exist")
             fig.savefig(file_path)
 
         return fig
