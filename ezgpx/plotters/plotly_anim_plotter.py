@@ -1,9 +1,10 @@
-import logging
+import io
 import os
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
+import PIL
 import plotly.express as px
 
 from .plotter import Plotter
@@ -18,7 +19,7 @@ class PlotlyAnimPlotter(Plotter):
         zoom: float = 12.0,
         file_path: Optional[str] = None,
     ):
-        self._dataframe = self._gpx.to_pandas()
+        self._dataframe = self._gpx.to_pandas(["lat", "lon", "ele"])
         center_lat, center_lon = self._gpx.center()
         start = 0
         n_points = len(self._dataframe)
@@ -31,7 +32,9 @@ class PlotlyAnimPlotter(Plotter):
             df = pd.concat([df, dfa])
 
         # plotly figure
-        fig = px.line_map(df, lat="lat", lon="lon", animation_frame="frame")
+        fig = px.line_map(
+            df, lat="lat", lon="lon", color=color, animation_frame="frame"
+        )
 
         # attribute adjusments
         fig.layout.updatemenus[0].buttons[0]["args"][1]["frame"]["redraw"] = True
@@ -54,11 +57,29 @@ class PlotlyAnimPlotter(Plotter):
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
             if not os.path.exists(directory_path):
-                logging.error("Provided path does not exist")
-                return
+                raise FileNotFoundError("Provided path does not exist")
             if file_path.endswith(".html"):
                 fig.write_html(file_path)
-            else:
-                fig.write_image(file_path)
+            elif file_path.endswith(".gif"):
+                # Generate image for each step in animation
+                frames = []
+                for s, fr in enumerate(fig.frames):
+                    # Set main traces to appropriate traces within plotly frame
+                    fig.update(data=fr.data)
+                    # Move slider to correct place
+                    fig.layout.sliders[0].update(active=s)
+                    # Generate image of current state
+                    frames.append(
+                        PIL.Image.open(io.BytesIO(fig.to_image(format="png")))
+                    )
+                # Create animated GIF
+                frames[0].save(
+                    "test.gif",
+                    save_all=True,
+                    append_images=frames[1:],
+                    optimize=True,
+                    duration=500,
+                    loop=0,
+                )
 
         return fig

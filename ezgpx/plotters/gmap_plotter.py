@@ -63,15 +63,15 @@ class GmapPlotter(Plotter):
         # Scatter start and stop points with different color
         if start_stop_colors:
             map_.scatter(
-                [self._gpx.trk[0].trkseg[0].trkpt[0].lat],
-                [self._gpx.trk[0].trkseg[0].trkpt[0].lon],
+                [self._gpx.gpx.trk[0].trkseg[0].trkpt[0].lat],
+                [self._gpx.gpx.trk[0].trkseg[0].trkpt[0].lon],
                 start_stop_colors[0],
                 size=5,
                 marker=True,
             )
             map_.scatter(
-                [self._gpx.trk[-1].trkseg[-1].trkpt[-1].lat],
-                [self._gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
+                [self._gpx.gpx.trk[-1].trkseg[-1].trkpt[-1].lat],
+                [self._gpx.gpx.trk[-1].trkseg[-1].trkpt[-1].lon],
                 start_stop_colors[1],
                 size=5,
                 marker=True,
@@ -79,7 +79,7 @@ class GmapPlotter(Plotter):
 
         # Scatter way points with different color
         if way_points_color:
-            for way_point in self._gpx.wpt:
+            for way_point in self._gpx.gpx.wpt:
                 map_.scatter(
                     [way_point.lat],
                     [way_point.lon],

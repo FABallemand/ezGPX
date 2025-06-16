@@ -18,10 +18,6 @@ class MatplotlibAnimPlotter(Plotter):
         figsize: Tuple[int, int] = (16, 9),
         size: float = 5,
         color: str = "#FFA800",
-        cmap: Optional[matplotlib.colors.Colormap] = None,
-        colorbar: bool = False,
-        start_point_color: Optional[str] = None,
-        stop_point_color: Optional[str] = None,
         background: Optional[str] = None,
         offset_percentage: float = 0.04,
         dpi: int = 96,
@@ -140,10 +136,6 @@ class MatplotlibAnimPlotter(Plotter):
             repeat=repeat if file_path is None else False,
         )
 
-        # Colorbar
-        # if colorbar:
-        #     fig.colorbar(im)
-
         # Add title
         if title is not None:
             if watermark:
@@ -160,7 +152,6 @@ class MatplotlibAnimPlotter(Plotter):
             directory_path = os.path.dirname(os.path.realpath(file_path))
             if not os.path.exists(directory_path):
                 raise FileNotFoundError("Provided path does not exist")
-            # ani.save(file_path, fps=fps, dpi=dpi)
             writer = None
             if file_path.endswith(".mp4"):
                 writer = animation.FFMpegWriter(

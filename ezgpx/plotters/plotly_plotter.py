@@ -53,7 +53,7 @@ class PlotlyPlotter(Plotter):
 
         # Scatter way points with different color
         if way_points_color:
-            for way_point in self._gpx.wpt:
+            for way_point in self._gpx.gpx.wpt:
                 fig.add_trace(
                     go.Scattermap(
                         mode="markers",

@@ -62,8 +62,8 @@ class FoliumPlotter(Plotter):
         if start_stop_colors:
             folium.Marker(
                 [
-                    self._gpx.trk[0].trkseg[0].trkpt[0].lat,
-                    self._gpx.trk[0].trkseg[0].trkpt[0].lon,
+                    self._gpx.gpx.trk[0].trkseg[0].trkpt[0].lat,
+                    self._gpx.gpx.trk[0].trkseg[0].trkpt[0].lon,
                 ],
                 popup="<b>Start</b>",
                 tooltip="Start",
@@ -71,8 +71,8 @@ class FoliumPlotter(Plotter):
             ).add_to(m)
             folium.Marker(
                 [
-                    self._gpx.trk[-1].trkseg[-1].trkpt[-1].lat,
-                    self._gpx.trk[-1].trkseg[-1].trkpt[-1].lon,
+                    self._gpx.gpx.trk[-1].trkseg[-1].trkpt[-1].lat,
+                    self._gpx.gpx.trk[-1].trkseg[-1].trkpt[-1].lon,
                 ],
                 popup="<b>Stop</b>",
                 tooltip="Stop",
@@ -81,7 +81,7 @@ class FoliumPlotter(Plotter):
 
         # Scatter way points with different color
         if way_points_color:
-            for way_point in self._gpx.wpt:
+            for way_point in self._gpx.gpx.wpt:
                 folium.Marker(
                     [way_point.lat, way_point.lon],
                     popup="<i>Way point</i>",
