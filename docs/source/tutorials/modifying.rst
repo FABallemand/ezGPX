@@ -73,7 +73,7 @@ In the following example, a 42 km run downloaded from Strava went from 3263 trac
     # Save GPX
     gpx.to_gpx("file_simplified.gpx")
 
-.. image:: ../../../img/simplify_1.png
+.. image:: ../../../img/simplify.png
   :width: 500
   :alt: Track plot followed by the simplified track plot
 

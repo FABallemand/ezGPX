@@ -60,7 +60,7 @@ plotter.plot(
 )
 
 # Plot with gmplot (Google Maps)
-plotter = ezgpx.GmapPlotter(gpx)
+plotter = ezgpx.GmplotPlotter(gpx)
 plotter.plot(
     color="#FFA800",
     start_stop_colors=("green", "red"),

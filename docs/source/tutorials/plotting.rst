@@ -8,7 +8,7 @@ ezGPX currently provides many different ways to plot a :py:class:`~ezgpx.gpx.GPX
 Matplotlib
 ^^^^^^^^^^
 
-This method relies on the well known Matplotlib Python library to create simple yet useable plots of GPX files.
+Relying on the well known Matplotlib library, you can create static or animated plots of GPX files.
 
 .. warning:: Requires :py:mod:`~basemap`.
 
@@ -21,25 +21,89 @@ This method relies on the well known Matplotlib Python library to create simple 
     gpx = ezgpx.GPX("file.gpx")
 
     # Plot with Matplotlib
-    gpx.matplotlib_plot(figsize=(16,9),
-                        size=5,
-                        color="ele",
-                        cmap=mpl.cm.get_cmap("viridis", 12),
-                        colorbar=False,
-                        start_point_color="green",
-                        stop_point_color="red",
-                        way_points_color=None,
-                        background="World_Imagery",
-                        offset_percentage=0.04,
-                        dpi=100,
-                        title=gpx.name(),
-                        title_fontsize=20,
-                        watermark=True,
-                        file_path="img.png")
+    plotter = ezgpx.MatplotlibPlotter(gpx)
+    plotter.plot(
+        figsize=(16, 9),
+        size=50,
+        color="ele",
+        cmap=mpl.cm.get_cmap("viridis", 12),
+        colorbar=True,
+        start_point_color="green",
+        stop_point_color="red",
+        way_points_color="blue",
+        background="World_Imagery",
+        title=gpx.name(),
+        title_fontsize=30,
+        file_path="matplotlib.png"
+    )
 
-.. image:: ../../../img/matplotlib_plot_1.jpg
+    # Animated plot with Matplotlib
+    plotter = ezgpx.MatplotlibAnimPlotter(gpx)
+    plotter.plot(
+        figsize=(9, 16),
+        size=10,
+        color="#FFA800",
+        background="World_Imagery",
+        dpi=50,
+        fps=34,
+        repeat=True,
+        title="Trail Running",
+        title_fontsize=30,
+        file_path="matplotlib.gif",
+    )
+
+.. image:: ../../../img/matplotlib.png
   :width: 500
   :alt: Matplotlib plot
+
+.. image:: ../../../img/matplotlib.gif
+  :width: 500
+  :alt: Matplotlib animated plot
+
+Plotly
+^^^^^^
+
+Relying on the well known Plotly library, you can create static, interactive or animated plots of GPX files.
+
+.. warning:: Requires :py:mod:`~basemap`.
+
+.. code-block:: python
+
+    import ezgpx
+
+    # Parse GPX file
+    gpx = ezgpx.GPX("file.gpx")
+
+    # Plot with Plotly
+    plotter = ezgpx.PlotlyPlotter(gpx)
+    plotter.plot(
+        tiles="open-street-map",
+        mode="lines+markers",
+        color="#FFA800",
+        start_stop_colors=("green", "red"),
+        way_points_color="blue",
+        title=gpx.name(),
+        zoom=12,
+        file_path="plotly.png",
+    )
+
+    # Animated plot with Plotly
+    plotter = ezgpx.PlotlyAnimPlotter(gpx)
+    plotter.plot(
+        tiles="open-street-map",
+        color="#FFA800",
+        title=gpx.name(),
+        zoom=12,
+        file_path="plotly.gif",
+    )
+
+.. image:: ../../../img/plotly.png
+  :width: 500
+  :alt: Plotly plot
+
+.. .. image:: ../../../img/plotlyt.gif
+..   :width: 500
+..   :alt: Plotly animated plot
 
 gmplot
 ^^^^^^
@@ -56,15 +120,19 @@ This method uses the Google map engine to display the content of the GPX file in
     gpx = ezgpx.GPX("file.gpx")
 
     # Plot with gmplot (Google Maps)
-    gpx.gmplot_plot(color="yellow",
-                start_stop_colors=("green", "red"),
-                way_points_color="blue",
-                zoom=13,
-                title=gpx.name(),
-                file_path="map.html",
-                open=False)
+    plotter = ezgpx.GmapPlotter(gpx)
+    plotter.plot(
+        color="#FFA800",
+        start_stop_colors=("green", "red"),
+        way_points_color="blue",
+        scatter=True,
+        plot=False,
+        zoom=15,
+        file_path="gmplot.html",
+        browser=True,
+    )
 
-.. image:: ../../../img/gmap_plot_1.png
+.. image:: ../../../img/gmplot.png
   :width: 500
   :alt: gmplot plot
 
@@ -83,143 +151,98 @@ The interactive HTML page resulting from this method allows you to visualize the
     gpx = ezgpx.GPX("file.gpx")
 
     # Plot with Folium
-    gpx.folium_plot(tiles="OpenStreetMap",
-                    color="orange",
-                    start_stop_colors=("green", "red"),
-                    way_points_color="blue",
-                    minimap=True,
-                    coord_popup=False,
-                    title="Very nice track!",
-                    zoom=8,
-                    file_path="map.html",
-                    open=True)
+    plotter = ezgpx.FoliumPlotter(gpx)
+    plotter.plot(
+        tiles="OpenStreetMap",
+        color="#FFA800",
+        start_stop_colors=("green", "red"),
+        way_points_color="blue",
+        minimap=True,
+        coord_popup=True,
+        zoom=15,
+        file_path="folium.html",
+        browser=True,
+    )
 
-.. image:: ../../../img/folium_plot_1.png
+.. image:: ../../../img/folium.png
   :width: 500
   :alt: Folium plot
 
-PaperMap
-^^^^^^^^
+Map Plotting
+^^^^^^^^^^^^
+
+Contextily
+==========
+
+.. warning:: Requires :py:mod:`~contextily`.
+
+For more information consults contextily documentation.
+
+.. code-block:: python
+
+    import ezgpx
+    import contextily as cx
+    import matplotlib.pyplot as plt
+
+    # Parse GPX file
+    gpx = ezgpx.GPX("file.gpx")
+
+    # Plot map with Contextily
+    min_lat, min_lon, max_lat, max_lon = gpx.bounds()
+    im, bbox = cx.bounds2img(
+        min_lon,
+        min_lat,
+        max_lon,
+        max_lat,
+        ll=True,
+        source=cx.providers.OpenStreetMap.Mapnik,
+    )
+    plt.imshow(im)
+    plt.savefig("contextily.png")
+
+Papermap
+========
 
 .. warning:: Requires :py:mod:`~papermap`.
 
+For more information consults papermap documentation.
+
 .. code-block:: python
 
     import ezgpx
+    from papermap import PaperMap
 
-    # Parse GPX file
+    # Parse map GPX file
+    gpx = ezgpx.GPX("file.gpx")
+
+    # Plot map with Papermap
+    center_lat, center_lon = gpx.center()
+    pm = PaperMap(
+        lat=center_lat,
+        lon=center_lon,
+        size="a4",
+        use_landscape=True,
+        scale=50_000,
+        add_grid=True,
+    )
+    pm.render()
+    pm.save("papermap.pdf")
+
+Prettymaps
+==========
+
+.. warning:: Requires :py:mod:`~prettymaps`.
+
+For more information consults prettymaps documentation.
+
+.. code-block:: python
+
+    import ezgpx
+    import prettymaps
+
+    # Parse map GPX file
     gpx = ezgpx.GPX("file.gpx")
 
     # Plot with Papermap
-    gpx.papermap_plot(tile_server="OpenStreetMap",
-                      size = "a4",
-                      use_landscape = True,
-                      scale = 25000,
-                      dpi = 300,
-                      add_grid = True,
-                      grid_size = 1000,
-                      file_path = "map.pdf")
-
-.. image:: ../../../img/papermap_plot_1.png
-  :width: 500
-  :alt: PaperMap plot
-
-Matplotlib Animation
-^^^^^^^^^^^^^^^^^^^^
-
-This method creates animations of the activity contained in a GPX file.
-
-.. warning:: Requires :py:mod:`~basemap`.
-
-.. code-block:: python
-
-    import ezgpx
-
-    # Parse GPX file
-    gpx = ezgpx.GPX("file.gpx")
-
-    # Create animation with Matplotlib
-    gpx.matplotlib_animation(figsize=(16,9),
-                             size=4,
-                             color="red",
-                             cmap=None,
-                             colorbar=False,
-                             start_point_color=None,
-                             stop_point_color=None,
-                             way_points_color=None,
-                             background="World_Imagery",
-                             offset_percentage=0.04,
-                             dpi=200,
-                             interval=10,
-                             fps=24,
-                             repeat=False,
-                             title=gpx.name(),
-                             title_fontsize=15,
-                             watermark=True,
-                             file_path="video_1.mp4")
-
-.. image:: ../../../img/matplotlib_animation_1.gif
-  :width: 500
-  :alt: Matplotlib animation
-
-Expert Plot
-^^^^^^^^^^^
-
-This is the most advanced plotting method built into ezGPX. It allows to plot the path with or without a background map, the elevation profile, the pace profile and other relevant data related to the GPX file as tables or graphs.
-
-.. warning:: Requires :py:mod:`~basemap`.
-
-.. code-block:: python
-
-    import ezgpx
-
-    # Parse GPX file
-    gpx = ezgpx.GPX("file.gpx")
-
-    # Expert plot
-    gpx.expert_plot(figsize=(16,9),
-                    subplots=(3,2),
-                    map_position=(0,0),
-                    map_size=10,
-                    map_color="ele",
-                    map_cmap=matplotlib.cm.get_cmap("viridis", 12),
-                    map_colorbar=True,
-                    start_point_color=None,
-                    stop_point_color=None,
-                    way_points_color=None,
-                    background="World_Imagery",
-                    offset_percentage=0.04,
-                    xpixels=1000,
-                    ypixels=None,
-                    dpi=100,
-                    elevation_profile_position=(1,0),
-                    elevation_profile_size=10,
-                    elevation_profile_color="ele",
-                    elevation_profile_cmap=matplotlib.cm.get_cmap("viridis", 12),
-                    elevation_profile_colorbar=False,
-                    elevation_profile_grid=True,
-                    elevation_profile_fill_color="lightgray",
-                    elevation_profile_fill_alpha=0.5,
-                    pace_graph_position=(2,0),
-                    pace_graph_size=10,
-                    pace_graph_color="ele",
-                    pace_graph_cmap=None,
-                    pace_graph_colorbar=False,
-                    pace_graph_grid=True,
-                    pace_graph_fill_color="lightgray",
-                    pace_graph_fill_alpha=0.5,
-                    pace_graph_threshold=15,
-                    ascent_rate_graph_position=(1,1),
-                    made_with_ezgpx_position=(0,1),
-                    shared_color="ele",
-                    shared_cmap=None,
-                    shared_colorbar=True,
-                    data_table_position=(2,1),
-                    title=test_gpx.name(),
-                    title_fontsize=20,
-                    watermark=False,
-                    file_path="img.png")
-
-.. image:: ../../../img/expert_plot_1.jpg
-  :width: 500
-  :alt: Matplotlib "expert" plot
+    center = gpx.center()
+    plot = prettymaps.plot(center)

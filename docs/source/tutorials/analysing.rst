@@ -21,8 +21,8 @@ The name of the activity is easily accessible and editable using the :py:meth:`~
     # Change name
     gpx.set_name("New name")
 
-Points
-^^^^^^
+Points and Coordinates
+^^^^^^^^^^^^^^^^^^^^^^
 
 ezGPX provides access to information related to points and their coordinates such as:
 
@@ -111,10 +111,10 @@ If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-s
     elapsed_time = gpx.total_elapsed_time()
 
     # Compute the total amount of time stopped
-    elapsed_time = gpx.stopped_time()
+    stopped = gpx.stopped_time()
 
     # Compute the total amount of time spent moving
-    elapsed_time = gpx.moving_time()
+    moving_time = gpx.moving_time()
 
 Speed and Pace
 ^^^^^^^^^^^^^^
@@ -134,7 +134,7 @@ If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-s
     avg_speed = gpx.avg_speed()
 
     # Compute average speed while moving
-    avg_speed = gpx.avg_moving_speed()
+    avg_mv_speed = gpx.avg_moving_speed()
 
     # Compute speed at each point
     # Note: this function is executed by all methods that require
@@ -149,7 +149,7 @@ If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-s
     avg_pace = gpx.avg_pace()
 
     # Compute average pace while moving
-    avg_pace = gpx.avg_moving_pace()
+    avg_mv_pace = gpx.avg_moving_pace()
 
     # Compute pace at each point
     # Note: this function is executed by all methods that require
