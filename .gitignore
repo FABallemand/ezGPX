@@ -1,4 +1,5 @@
 tests/dev_tests/*
+tests/tmp/*
 *_test.gpx
 *.old
 *.private
