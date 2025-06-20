@@ -40,7 +40,7 @@ Relying on the well known Matplotlib library, you can create static or animated 
     # Animated plot with Matplotlib
     plotter = ezgpx.MatplotlibAnimPlotter(gpx)
     plotter.plot(
-        figsize=(9, 16),
+        figsize=(16, 9),
         size=10,
         color="#FFA800",
         background="World_Imagery",
