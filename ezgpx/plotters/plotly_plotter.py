@@ -109,6 +109,8 @@ class PlotlyPlotter(Plotter):
                 return
             if file_path.endswith(".html"):
                 fig.write_html(file_path)
+            elif file_path.endswith(".json"):
+                fig.write_json(file_path)
             else:
                 fig.write_image(file_path)
 

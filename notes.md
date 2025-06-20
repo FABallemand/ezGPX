@@ -52,7 +52,8 @@
 - [gpxcsv](https://github.com/astrowonk/gpxcsv)
 
 # 📝 TO DO LIST !!
-- Save plotly plots as json
+- Fix issues with extensions when writting file
+- Create GPX from bytes, csv, dataframe etc.
 - Add str and repr methods to all class
 - Merge method
 - Compute length properly (improve haversine distance precision, 2D, 3D)
