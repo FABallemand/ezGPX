@@ -9,6 +9,12 @@ class Plotter:
     """
 
     def __init__(self, gpx: GPX) -> None:
+        """
+        Initialise base class plotter instance.
+
+        Args:
+            gpx (GPX): GPX object to plot.
+        """
         self._gpx: GPX = gpx
 
         # self._background: str = None
@@ -21,4 +27,7 @@ class Plotter:
 
         self._dataframe: pd.DataFrame = None
 
-    def plot(self): ...
+    def plot(self):
+        """
+        Plot GPX.
+        """

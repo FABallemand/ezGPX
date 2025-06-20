@@ -9,6 +9,10 @@ from .plotter import Plotter
 
 
 class FoliumPlotter(Plotter):
+    """
+    GPX plotter based on folium.
+    """
+
     def plot(
         self,
         tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"
@@ -25,27 +29,24 @@ class FoliumPlotter(Plotter):
         """
         Plot GPX using folium.
 
-        Parameters
-        ----------
-        tiles : str, optional
-            Map tiles. Supported tiles: "OpenStreetMap", "Stamen Terrain",
-            "Stamen Toner", by default "OpenStreetMap"
-        start_stop_colors : Optional[Tuple[str, str]], optional
-            Start and stop points colors, by default None
-        way_points_color : Optional[str], optional
-            Way points color, by default None
-        minimap : bool, optional
-            Add minimap, by default False
-        coord_popup : bool, optional
-            Add coordinates pop-up when clicking on the map, by default False
-        title : Optional[str], optional
-            Title, by default None
-        zoom : float, optional
-            Zoom, by default 12.0
-        file_path : str, optional
-            Path to save plot, by default None
-        browser : bool, optional
-            Open the plot in the default web browser, by default True
+        Args:
+            tiles (str, optional): Map tiles. Supported tiles:
+                "OpenStreetMap", "Stamen Terrain", "Stamen Toner".
+                Defaults to "OpenStreetMap".
+            start_stop_colors (Optional[Tuple[str, str]], optional):
+                Start and stop points colors. Defaults to None.
+            way_points_color (Optional[str], optional): Way points
+                color. Defaults to None.
+            minimap (bool, optional): Add minimap. Defaults to False.
+            coord_popup (bool, optional): Add coordinates pop-up when
+                clicking on the map. Defaults to False.
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            zoom (float, optional): Zoom. Defaults to 12.0.
+            file_path (Optional[str], optional): Path to save plot.
+                Defaults to None.
+            browser (bool, optional): Open the plot in the default web
+                browser. Defaults to True.
         """
         # Create map
         center_lat, center_lon = self._gpx.center()

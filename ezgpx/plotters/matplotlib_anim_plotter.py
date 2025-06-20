@@ -13,6 +13,10 @@ from .plotter import Plotter
 
 
 class MatplotlibAnimPlotter(Plotter):
+    """
+    GPX animated plotter based on Matplotlib.
+    """
+
     def plot(
         self,
         figsize: Tuple[int, int] = (16, 9),
@@ -31,8 +35,47 @@ class MatplotlibAnimPlotter(Plotter):
         file_path: str = None,
     ):
         """
+        Plot (animation) GPX using Matplotlib.
+
         Crashes may be due to parametres exceeding system capabilities.
         Try reducing fps and/or bitrate.
+
+        Args:
+            figsize (Tuple[int, int], optional): Width and height of
+                the plot. Defaults to (16, 9).
+            size (float, optional): Size of the track. Defaults to 5.
+            color (str, optional): Color of the track. Defaults to
+                "#FFA800".
+            background (Optional[str], optional): Map tiles to use.
+                Possible choice are: None, "bluemarble",
+                "shadedrelief", "etopo", "World_Imagery", "wms" or any
+                server supported by
+                `mpl_toolkits.basemap.Basemap.arcgisimage`. Defaults to
+                None.
+            offset_percentage (float, optional): Offset percentage to
+                apply to the track bounding box. Defaults to 0.04.
+            dpi (int, optional): Resolution of the animation. Defaults
+                to 96.
+            interval (float, optional): Interval between frames of the
+                animation. Defaults to 20.
+            fps (int, optional): FPS of the animation. Defaults to 24.
+            bitrate (int, optional): Bit-rate of the animation.
+                Defaults to 1800.
+            repeat (bool, optional): Repeat the animation when viewed.
+                Defaults to True.
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            title_fontsize (int, optional): Font size of the title of
+                the plot. Defaults to 20.
+            watermark (bool, optional): Watermark. Defaults to False.
+            file_path (str, optional): Path to save the plot. Defaults
+                to None.
+
+        Raises:
+            FileNotFoundError: Provided path does not exist.
+
+        Returns:
+            matplotlib.Figure: Animated plot of the GPX.
         """
         # Create dataframe containing data from the GPX file
         self._dataframe = self._gpx.to_pandas()

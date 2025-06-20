@@ -8,7 +8,7 @@ from .plotter import Plotter
 
 class GmplotPlotter(Plotter):
     """
-    GPX object plotter (using gmap).
+    GPX plotter based on gmplot.
     """
 
     def plot(
@@ -26,26 +26,22 @@ class GmplotPlotter(Plotter):
         """
         Plot GPX using gmplot.
 
-        Parameters
-        ----------
-        color : str, optional
-            Track color, by default "#110000"
-        start_stop_colors : Optional[Tuple[str, str]], optional
-            Start and stop points colors, by default None
-        way_points_color : Optional[str], optional
-            Way points color, by default None
-        scatter : bool, optional
-            Scatter track points, by default False
-        plot : bool, optional
-            Plot track points, by default True
-        zoom : float, optional
-            Zoom, by default 10.0
-        title : Optional[str], optional
-            Title, by default None
-        file_path : str, optional
-            Path to save plot, by default None
-        browser : bool, optional
-            Open the plot in the default web browser, by default True
+        Args:
+            color (str, optional): Track color. Defaults to "#FFA800".
+            start_stop_colors (Optional[Tuple[str, str]], optional):
+                Start and stop points colors. Defaults to None.
+            way_points_color (Optional[str], optional): Way points
+                color. Defaults to None.
+            scatter (bool, optional): Scatter track points. Defaults
+                to False.
+            plot (bool, optional): Plot track points. Defaults to True.
+            zoom (float, optional): Zoom. Defaults to 10.0.
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            file_path (Optional[str], optional): Path to save plot.
+                Defaults to None.
+            browser (bool, optional): Open the plot in the default
+                web browser. Defaults to True.
         """
         # Create plotter
         c_lat, c_lon = self._gpx.center()

@@ -11,6 +11,10 @@ from .plotter import Plotter
 
 
 class MatplotlibPlotter(Plotter):
+    """
+    GPX plotter based on Matplotlib.
+    """
+
     def plot(
         self,
         figsize: Tuple[int, int] = (16, 9),
@@ -29,8 +33,60 @@ class MatplotlibPlotter(Plotter):
         watermark: bool = False,
         file_path: str = None,
     ):
+        """
+        Plot GPX using Matplotlib.
 
+        Args:
+            figsize (Tuple[int, int], optional): Width and height of
+                the plot. Defaults to (16, 9).
+            size (float, optional): Size of the track. Defaults to 5.
+            color (str, optional): Color of the track. Possible choice
+                are: "lat", "lon", "ele", "speed", "pace",
+                "vertical_drop", "ascent_rate", "ascent_speed" or any
+                valid color string. Defaults to "#FFA800".
+            cmap (Optional[matplotlib.colors.Colormap], optional):
+                Colormap to use when color is not a fixed color value.
+                Defaults to None.
+            colorbar (bool, optional): Add colorbar. Defaults to False.
+            start_point_color (Optional[str], optional): Color of the
+                first point. Defaults to None.
+            stop_point_color (Optional[str], optional): Color of the
+                last point. Defaults to None.
+            way_points_color (Optional[str], optional): Color of the
+                way points. Defaults to None.
+            background (Optional[str], optional): Map tiles to use.
+                Possible choice are: None, "bluemarble",
+                "shadedrelief", "etopo", "World_Imagery", "wms" or any
+                server supported by
+                `mpl_toolkits.basemap.Basemap.arcgisimage`. Defaults to
+                None.
+            offset_percentage (float, optional): Offset percentage to
+                apply to the track bounding box. Defaults to 0.04.
+            dpi (int, optional): Resolution of the animation. Defaults
+                to 96.
+            interval (float, optional): Interval between frames of the
+                animation. Defaults to 20.
+            bitrate (int, optional): Bit-rate of the animation.
+                Defaults to 1800.
+            repeat (bool, optional): Repeat the animation when viewed.
+                Defaults to True.
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            title_fontsize (int, optional): Font size of the title of
+                the plot. Defaults to 20.
+            watermark (bool, optional): Watermark. Defaults to False.
+            file_path (str, optional): Path to save the plot. Defaults
+                to None.
+
+        Raises:
+            FileNotFoundError: Provided path does not exist.
+
+        Returns:
+            matplotlib.Figure: Plot of the GPX.
+        """
         dynamic_colors = [
+            "lat",
+            "lon",
             "ele",
             "speed",
             "pace",

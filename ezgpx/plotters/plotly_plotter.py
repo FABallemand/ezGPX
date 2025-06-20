@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional, Tuple
+from typing import Optional
 
 import plotly.graph_objects as go
 
@@ -8,17 +8,42 @@ from .plotter import Plotter
 
 
 class PlotlyPlotter(Plotter):
+    """
+    GPX plotter based on Plotly.
+    """
+
     def plot(
         self,
         tiles: str = "open-street-map",  # "open-street-map"
         mode: str = "lines",  # "lines", "markers+lines"
         color: str = "#FFA800",
-        start_stop_colors: Optional[Tuple[str, str]] = None,
+        start_point_color: Optional[str] = None,
+        stop_point_color: Optional[str] = None,
         way_points_color: Optional[str] = None,
         title: Optional[str] = None,
         zoom: float = 12.0,
         file_path: Optional[str] = None,
     ):
+        """
+        Plot (animation) GPX using Plotly.
+
+        Args:
+            tiles (str, optional): Map tiles to use. Defaults to
+                "open-street-map".
+            start_point_color (Optional[str], optional): Color of the
+                first point. Defaults to None.
+            stop_point_color (Optional[str], optional): Color of the
+                last point. Defaults to None.
+            way_points_color (Optional[str], optional): Color of the
+                way points. Defaults to None.
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            zoom (float, optional): Zoom. Defaults to 12.0.
+            file_path (Optional[str], optional): Path to save the plot. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
         self._dataframe = self._gpx.to_pandas()
         center_lat, center_lon = self._gpx.center()
 
@@ -33,21 +58,22 @@ class PlotlyPlotter(Plotter):
         )
 
         # Scatter start and stop points with different color
-        if start_stop_colors:
+        if start_point_color:
             fig.add_trace(
                 go.Scattermap(
                     mode="markers",
                     lon=[self._dataframe["lon"].iloc[0]],
                     lat=[self._dataframe["lat"].iloc[0]],
-                    marker={"size": 5, "color": start_stop_colors[0]},
+                    marker={"size": 5, "color": start_point_color},
                 )
             )
+        if stop_point_color:
             fig.add_trace(
                 go.Scattermap(
                     mode="markers",
                     lon=[self._dataframe["lon"].iloc[-1]],
                     lat=[self._dataframe["lat"].iloc[-1]],
-                    marker={"size": 5, "color": start_stop_colors[1]},
+                    marker={"size": 5, "color": stop_point_color},
                 )
             )
 

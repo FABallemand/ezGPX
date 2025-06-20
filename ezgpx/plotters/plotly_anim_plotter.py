@@ -11,6 +11,10 @@ from .plotter import Plotter
 
 
 class PlotlyAnimPlotter(Plotter):
+    """
+    GPX animated plotter based on Plotly.
+    """
+
     def plot(
         self,
         tiles: str = "open-street-map",  # "open-street-map"
@@ -19,6 +23,23 @@ class PlotlyAnimPlotter(Plotter):
         zoom: float = 12.0,
         file_path: Optional[str] = None,
     ):
+        """
+        Plot (animation) GPX using Plotly.
+
+        Args:
+            tiles (str, optional): Map tiles to use. Defaults to
+                "open-street-map".
+            title (Optional[str], optional): Title of the plot.
+                Defaults to None.
+            zoom (float, optional): Zoom. Defaults to 12.0.
+            file_path (Optional[str], optional): Path to save the plot. Defaults to None.
+
+        Raises:
+            FileNotFoundError: Provided path does not exist.
+
+        Returns:
+            plotly.Figure: Animated plot of the GPX.
+        """
         self._dataframe = self._gpx.to_pandas(["lat", "lon", "ele"])
         center_lat, center_lon = self._gpx.center()
         start = 0
