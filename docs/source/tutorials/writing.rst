@@ -4,7 +4,7 @@ Converting and Saving
 Converting to Pandas Dataframe
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:meth:`~to_dataframe` method allows to convert a :py:class:`~ezgpx.gpx.GPX` object to a `Pandas Dataframe <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
+The :py:meth:`~to_pandas` method allows to convert a :py:class:`~ezgpx.gpx.GPX` object to a `Pandas Dataframe <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
 
 .. code-block:: python
 
@@ -16,7 +16,9 @@ The :py:meth:`~to_dataframe` method allows to convert a :py:class:`~ezgpx.gpx.GP
     # Do stuff with GPX object
 
     # Convert to Pandas Dataframe
-    df = gpx.to_dataframe()
+    df = gpx.to_pandas()
+
+You can also use :py:meth:`~ezgpx.gpx.GPX.to_polars` to convert to a Polars DataFrame.
 
 Saving as GPX File
 ^^^^^^^^^^^^^^^^^^
