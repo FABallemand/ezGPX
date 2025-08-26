@@ -1,5 +1,5 @@
-import logging
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional, Tuple
 
@@ -125,8 +125,8 @@ class KMLWriter(Writer):
             polystyle_, _ = self.add_subelement_number(
                 polystyle_, "fill", style["fill"]
             )
-        except:
-            logging.warning("No fill attribute in style")
+        except KeyError:
+            warnings.warn("No fill attribute in style")
             polystyle_, _ = self.add_subelement_number(polystyle_, "fill", 0)
         return element
 
@@ -149,15 +149,15 @@ class KMLWriter(Writer):
         linestyle_ = ET.SubElement(element, "LineStyle")
         try:
             linestyle_, _ = self.add_subelement(linestyle_, "color", style["color"])
-        except:
-            logging.warning("No color attribute in style")
+        except KeyError:
+            warnings.warn("No color attribute in style")
             linestyle_, _ = self.add_subelement(linestyle_, "color", "ff0000ff")
         try:
             linestyle_, _ = self.add_subelement_number(
                 linestyle_, "width", style["width"]
             )
-        except:
-            logging.warning("No width attribute in style")
+        except KeyError:
+            warnings.warn("No width attribute in style")
             linestyle_, _ = self.add_subelement_number(linestyle_, "width", 2)
         return element
 
@@ -260,16 +260,12 @@ class KMLWriter(Writer):
         """
         Add Document element to the KML root element.
         """
-        logging.info("Preparing Document...")
-
         self.kml_root = self.add_document(self.kml_root)
 
     def add_root_properties(self) -> None:
         """
         Add properties to the GPX root element.
         """
-        logging.info("Preparing properties...")
-
         # According to .kml file from Google Earth Pro
         self.kml_root.set("xmlns", "http://www.opengis.net/kml/2.2")
         self.kml_root.set("xmlns:gx", "http://www.google.com/kml/ext/2.2")
@@ -284,7 +280,6 @@ class KMLWriter(Writer):
             str: String corresponding to the Gpx instance.
         """
         if self.gpx is not None:
-            logging.info("Start convertion from GPX to string")
             # Reset string
             self.kml_string = ""
 
@@ -299,11 +294,8 @@ class KMLWriter(Writer):
             self.add_root_document()
 
             # Convert data to string
-            logging.info("Converting GPX to string...")
             self.gpx_string = ET.tostring(self.kml_root, encoding="unicode")
             # self.gpx_string = ET.tostring(kml_root, encoding="utf-8")
-
-            logging.info("GPX successfully converted to string:\n%s", self.gpx_string)
 
             return self.gpx_string
 
@@ -315,7 +307,7 @@ class KMLWriter(Writer):
         try:
             f = open(self.file_path, "w", encoding="utf-8")
         except OSError:
-            logging.exception("Could not open/read file: %s", self.file_path)
+            warnings.warn("Could not open/read file: %s", self.file_path)
             raise
         # Write KML file
         with f:
@@ -349,7 +341,7 @@ class KMLWriter(Writer):
         # Handle path
         directory_path = os.path.dirname(os.path.realpath(file_path))
         if not os.path.exists(directory_path):
-            logging.error("Provided path does not exist")
+            warnings.warn("Provided path does not exist")
             return False
         self.file_path = file_path
         self.file_name = os.path.basename(self.file_path)

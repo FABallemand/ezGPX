@@ -1,5 +1,5 @@
-import logging
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional, Union
 
@@ -37,7 +37,7 @@ class KMLParser(XMLParser):
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
         else:
-            logging.warning("File path does not exist")
+            warnings.warn("File path does not exist")
 
     def find_precisions(self):
         """
@@ -163,7 +163,7 @@ class KMLParser(XMLParser):
                 tracks = [Track(name=placemark_data["name"], trkseg=trkseg)]
                 self.gpx.trk = tracks
             else:
-                logging.error("Oops, not yet implemented...")
+                warnings.warn("Oops, not yet implemented...")
 
     def add_properties(self):
         """
@@ -191,8 +191,8 @@ class KMLParser(XMLParser):
             self.xml_tree = ET.parse(self.file_path)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
-            logging.exception(
-                "Unexpected %s, %s.\n" "Unable to parse KML file.", err, type(err)
+            warnings.warn(
+                "Unexpected %s, %s.\nUnable to parse KML file.", err, type(err)
             )
             raise
 
@@ -209,8 +209,7 @@ class KMLParser(XMLParser):
         try:
             self.parse_root_document()
         except:
-            logging.error("Unable to parse tracks in GPX file.")
+            warnings.warn("Unable to parse tracks in GPX file.")
             raise
 
-        logging.debug("Parsing complete!!")
         return self.gpx

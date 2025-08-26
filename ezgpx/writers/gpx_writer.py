@@ -1,5 +1,4 @@
 import errno
-import logging
 import os
 import warnings
 import xml.etree.ElementTree as ET
@@ -447,11 +446,8 @@ class GPXWriter(Writer):
                 self.add_root_extensions()
 
             # Convert data to string
-            logging.info("Converting GPX to string...")
             self.gpx_string = ET.tostring(self.gpx_root, encoding="unicode")
             # self.gpx_string = ET.tostring(gpx_root, encoding="utf-8")
-
-            logging.info("GPX successfully converted to string:\n%s", self.gpx_string)
 
             return self.gpx_string
 
@@ -463,7 +459,7 @@ class GPXWriter(Writer):
         try:
             f = open(self.file_path, "w", encoding="utf-8")
         except OSError:
-            logging.exception("Could not open/read file: %s", self.file_path)
+            warnings.warn("Could not open/read file: %s", self.file_path)
             raise
         # Write GPX file
         with f:

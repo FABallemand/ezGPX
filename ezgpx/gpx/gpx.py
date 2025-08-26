@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import errno
-import logging
 import os
 import warnings
 from datetime import datetime
@@ -175,9 +174,10 @@ class GPX:
         # Open/create KML file
         try:
             f = open(path, "wb")
-        except OSError:
-            logging.exception("Could not open/read file: %s", path)
-            raise
+        except OSError as e:
+            raise FileNotFoundError(
+                errno.ENOENT, os.strerror(errno.ENOENT), path
+            ) from e
         # Write KML file
         with f:
             if kml_string is not None:
@@ -765,8 +765,10 @@ class GPX:
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
-                    "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                    f"""Trying to create dataframe from GPX file {self.file_path}
+                        which does not contain time data. Time related values
+                        (time, speed, pace, ascent speed) will not be present in
+                        the dataframe.""",
                     UserWarning,
                 )
             for v in GPX.TIME_RELATED_VALUES:
@@ -777,8 +779,10 @@ class GPX:
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
-                    "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                    f"""Trying to create dataframe from GPX file {self.file_path}
+                        which does not contain elevation data. Time related
+                        values (elevation, ascent rate, ascent speed) will not
+                        be present in the dataframe.""",
                     UserWarning,
                 )
             for v in GPX.ELEVATION_RELATED_VALUES:
@@ -808,8 +812,10 @@ class GPX:
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain time data"
-                    "Time related values (time, speed, pace, ascent speed) will not be present in the dataframe.",
+                    f"""Trying to create dataframe from GPX file {self.file_path}
+                        which does not contain time data. Time related values
+                        (time, speed, pace, ascent speed) will not be present in
+                        the dataframe.""",
                     UserWarning,
                 )
             for v in GPX.TIME_RELATED_VALUES:
@@ -820,8 +826,10 @@ class GPX:
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"Trying to create dataframe from GPX file {self.file_path} which does not contain elevation data"
-                    "Time related values (elevation, ascent rate, ascent speed) will not be present in the dataframe.",
+                    f"""Trying to create dataframe from GPX file {self.file_path}
+                        which does not contain elevation data. Time related
+                        values (elevation, ascent rate, ascent speed) will not
+                        be present in the dataframe.""",
                     UserWarning,
                 )
             for v in GPX.ELEVATION_RELATED_VALUES:

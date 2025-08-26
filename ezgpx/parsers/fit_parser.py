@@ -1,12 +1,17 @@
-import logging
+import errno
 import os
+import warnings
 from datetime import datetime
 from typing import List, Optional
 
 from fitparse import FitFile
 
 from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
-from .parser import DEFAULT_PRECISION, Parser
+from .parser import (
+    DEFAULT_PRECISION,
+    POSSIBLE_TIME_FORMATS,
+    Parser,
+)
 
 
 class FitParser(Parser):
@@ -28,35 +33,44 @@ class FitParser(Parser):
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
         else:
-            logging.warning("File path does not exist")
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
 
-    def _set_time_format(self, time):
+    def _find_time_format(self, time_str):
         """
-        Set the time format used in FIT file.
+        Find the time format used in GPX file.
+        Also find if the GPX file contains time data.
         """
-        if time is None:
-            logging.warning("No time element in FIT file.")
+        if time_str is None:
+            self.time_data = False
+            warnings.warn("No time element in FIT file.")
             return
 
-        try:
-            datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%fZ")
-            self.time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        except:
-            self.time_format = "%Y-%m-%dT%H:%M:%SZ"  # default time format
+        self.time_data = True
+        for tf in POSSIBLE_TIME_FORMATS:
+            try:
+                datetime.strptime(time_str, tf)
+                self.time_format = tf
+                break
+            except ValueError:
+                pass
+        else:
+            warnings.warn(
+                """Unknown time format. Default time format will be used uppon
+                writting."""
+            )
 
-    def _semicircles_to_deg(self, l: List) -> List:
+    def _semicircles_to_deg(self, list_: List) -> List:
         """
         Convert semicircle data from FIT file to dms data.
 
         Args:
-            l (list): List of semicircle values.
+            list_ (list): List of semicircle values.
 
         Returns:
             list: List of dms values.
         """
         const = 180 / 2**31
-        l = map(lambda x: const * x, l)
-        return l
+        return [const * x for x in list_]
 
     def _parse(self):
         """
@@ -94,7 +108,7 @@ class FitParser(Parser):
                         )
                 if record_data.name == "timestamp":
                     time_data.append(record_data.value)
-                    self._set_time_format(record_data.value)
+                    self._find_time_format(record_data.value)
 
         # Convert semicircles data to radians ??
         if units["lat"] == "semicircles":
@@ -132,13 +146,10 @@ class FitParser(Parser):
         try:
             self._parse()
         except Exception as err:
-            logging.exception(
-                "Unexpected %s, %s.\n" "Unable to parse FIT file.", err, type(err)
-            )
+            warnings.warn(f"Unexpected {err}, {type(err)}. Unable to parse FIT file.")
             raise
 
         # Add properties
         self._add_properties()
 
-        logging.debug("Parsing complete!!")
         return self.gpx

@@ -3,7 +3,7 @@ try:
 except ImportError:
     from importlib_resources import files
 
-import logging
+import warnings
 from datetime import datetime, timezone
 from typing import Dict, List, Tuple, Type, Union
 
@@ -41,7 +41,6 @@ class Gpx(GpxElement):
         trk: List[Track] = None,
         extensions: Extensions = None,
     ) -> None:
-
         self.tag: str = tag
         self.version: str = version
         self.creator: str = creator
@@ -99,7 +98,7 @@ class Gpx(GpxElement):
                     files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd")
                 )
             else:
-                logging.error("Unable to check XML schema (unsupported GPX version)")
+                warnings.warn("Unable to check XML schema (unsupported GPX version)")
                 return False
 
         # KML
@@ -114,18 +113,18 @@ class Gpx(GpxElement):
 
         # FIT
         elif file_path.endswith(".fit"):
-            logging.error("Unable to check XML schema (fit files are not XML files)")
+            warnings.warn("Unable to check XML schema (fit files are not XML files)")
             return False
 
         # NOT SUPPORTED
         else:
-            logging.error("Unable to check XML schema (unable to identify file type)")
+            warnings.warn("Unable to check XML schema (unable to identify file type)")
             return False
 
         if schema is not None:
             return schema.is_valid(file_path)
         else:
-            logging.error("Unable to check XML schema (unable to load XML schema)")
+            warnings.warn("Unable to check XML schema (unable to load XML schema)")
             return False
 
     def check_xml_extensions_schemas(self, file_path: str) -> bool:
@@ -145,10 +144,9 @@ class Gpx(GpxElement):
         gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
         gpx_schemas.remove("http://www.topografix.com/GPX/1/1/gpx.xsd")
         for gpx_schema in gpx_schemas:
-            logging.debug("schema = %s", gpx_schema)
             schema = xmlschema.XMLSchema(gpx_schema)
             if not schema.is_valid(file_path):
-                logging.error("File does not follow %s", gpx_schema)
+                warnings.warn(f"File does not follow {gpx_schema}")
                 return False
 
     ###############################################################################
@@ -495,8 +493,8 @@ class Gpx(GpxElement):
                 .time.replace(tzinfo=timezone.utc)
                 .astimezone(tz=None)
             )
-        except:
-            logging.error("Unable to find activity start time")
+        except AttributeError:
+            warnings.warn("Unable to find activity start time")
         return start_time
 
     def stop_time(self) -> datetime:
@@ -517,8 +515,8 @@ class Gpx(GpxElement):
                 .time.replace(tzinfo=timezone.utc)
                 .astimezone(tz=None)
             )
-        except:
-            logging.error("Unable to find activity stop time")
+        except AttributeError:
+            warnings.warn("Unable to find activity stop time")
         return stop_time
 
     def total_elapsed_time(self) -> datetime:
@@ -533,8 +531,8 @@ class Gpx(GpxElement):
         total_elapsed_time = None
         try:
             total_elapsed_time = self.stop_time() - self.start_time()
-        except:
-            logging.error("Unable to compute activity total elapsed time")
+        except TypeError:
+            warnings.warn("Unable to compute activity total elapsed time")
         return total_elapsed_time
 
     def stopped_time(self, tolerance: float = 2.45) -> datetime:
@@ -911,15 +909,14 @@ class Gpx(GpxElement):
 
         for track in self.trk:
             for track_segment in track.trkseg:
-
                 new_trkpt = []
 
                 for track_point in track_segment.trkpt:
                     # GPS error
                     dst = haversine_distance(previous_point, track_point)
                     if previous_point is not None and dst > error_distance:
-                        logging.warning(
-                            "Point %s has been removed (GPS error)", track_point
+                        warnings.warn(
+                            f"Point {track_point} has been removed (GPS error)"
                         )
                         gps_errors.append(track_point)
                     # No GPS error
@@ -947,7 +944,6 @@ class Gpx(GpxElement):
 
         for track in self.trk:
             for segment in track.trkseg:
-
                 new_trkpt = []
 
                 for point in segment.trkpt:

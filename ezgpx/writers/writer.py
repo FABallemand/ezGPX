@@ -1,4 +1,4 @@
-import logging
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Dict, Tuple, Union
@@ -99,7 +99,7 @@ class Writer:
             elif isinstance(number, float):
                 sub_element_.text = f"{number:.{precision}f}"
             else:
-                logging.error("Invalid number type.")
+                warnings.warn("Invalid number type.")
         return element, sub_element_
 
     def add_subelement_time(
@@ -151,13 +151,13 @@ class Writer:
         # Check XML schema
         if xml_schema:
             if not self.gpx.check_xml_schema(self.file_path):
-                logging.error("Invalid GPX file (does not follow XML schema).")
+                warnings.warn("Invalid GPX file (does not follow XML schema).")
                 return False
 
         # Check XML extension schemas
         if xml_extensions_schemas:
             if not self.gpx.check_xml_extensions_schemas(self.file_path):
-                logging.error(
+                warnings.warn(
                     "Invalid GPX file (does not follow XML extensions schemas)."
                 )
                 return False

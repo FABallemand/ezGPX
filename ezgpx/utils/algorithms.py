@@ -37,8 +37,6 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2 / EARTH_RADIU
             d_max = d
             i_max = i
 
-    # logging.info(f"i_max = {i_max} | d_max = {d_max}")
-
     result = []
 
     # If max distance is greater than epsilon, recursively simplify

@@ -1,5 +1,5 @@
-import logging
 import os
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Optional, Union
@@ -57,7 +57,7 @@ class GPXParser(XMLParser):
         if self.file_path is not None and os.path.exists(self.file_path):
             self.parse()
         else:
-            logging.warning("File path does not exist")
+            warnings.warn("File path does not exist")
 
     def _find_precisions(self):
         """
@@ -113,7 +113,7 @@ class GPXParser(XMLParser):
         time_str = self._find_time_element()
         if time_str is None:
             self.time_data = False
-            logging.warning("No time element in GPX file.")
+            warnings.warn("No time element in GPX file.")
             return
 
         self.time_data = True
@@ -125,9 +125,9 @@ class GPXParser(XMLParser):
             except ValueError:
                 pass
         else:
-            logging.info(
-                "Unknown time format. "
-                "Default time format will be used uppon writting."
+            warnings.warn(
+                """Unknown time format. Default time format will be used uppon
+                writting."""
             )
 
     def _parse_bounds(self, bounds, tag: str = "bounds") -> Union[Bounds, None]:
@@ -567,16 +567,14 @@ class GPXParser(XMLParser):
             self.xml_tree = ET.parse(self.file_path)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
-            logging.exception(
-                "Unexpected %s, %s.\n" "Unable to parse GPX file.", err, type(err)
-            )
+            warnings.warn(f"Unexpected {err}, {type(err)}.\nUnable to parse GPX file.")
             raise
 
         # Parse properties
         try:
             self._parse_root_properties()
         except:
-            logging.error("Unable to parse properties in GPX file.")
+            warnings.warn("Unable to parse properties in GPX file.")
             raise
 
         # Check XML schemas
@@ -592,36 +590,35 @@ class GPXParser(XMLParser):
         try:
             self._parse_root_metadata()
         except:
-            logging.error("Unable to parse metadata in GPX file.")
+            warnings.warn("Unable to parse metadata in GPX file.")
             raise
 
         # Parse way points
         try:
             self._parse_root_way_points()
         except:
-            logging.error("Unable to parse way_points in GPX file.")
+            warnings.warn("Unable to parse way_points in GPX file.")
             raise
 
         # Parse routes
         try:
             self._parse_root_routes()
         except:
-            logging.error("Unable to parse routes in GPX file.")
+            warnings.warn("Unable to parse routes in GPX file.")
             raise
 
         # Parse tracks
         try:
             self._parse_root_tracks()
         except:
-            logging.error("Unable to parse tracks in GPX file.")
+            warnings.warn("Unable to parse tracks in GPX file.")
             raise
 
         # Parse extensions
         try:
             self._parse_root_extensions()
         except:
-            logging.error("Unable to parse extensions in GPX file.")
+            warnings.warn("Unable to parse extensions in GPX file.")
             raise
 
-        logging.debug("Parsing complete!!")
         return self.gpx

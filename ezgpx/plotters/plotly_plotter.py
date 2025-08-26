@@ -1,5 +1,5 @@
-import logging
 import os
+import warnings
 from typing import Optional
 
 import plotly.graph_objects as go
@@ -105,7 +105,7 @@ class PlotlyPlotter(Plotter):
             # Check if provided path exists
             directory_path = os.path.dirname(os.path.realpath(file_path))
             if not os.path.exists(directory_path):
-                logging.error("Provided path does not exist")
+                warnings.warn("Provided path does not exist")
                 return
             if file_path.endswith(".html"):
                 fig.write_html(file_path)

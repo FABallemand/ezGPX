@@ -43,10 +43,8 @@ extensions = [
 autodoc_mock_imports = [
     "os",
     "typing",
-    "logging",
     "webbrowser",
     "math",
-    "logging",
     "xml",
     "xmlschema",
     "pandas",

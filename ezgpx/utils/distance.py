@@ -1,5 +1,5 @@
-import logging
 import math as m
+import warnings
 
 # latitude/longitude in GPX files is always in WGS84 datum
 # WGS84 defined the Earth semi-major axis with 6378.137 km
@@ -103,11 +103,11 @@ def perpendicular_distance(start_point, end_point, point) -> float:
             a = delta_y / delta_x
             b = -1
             c = point_1.lat - a * point_1.lon
-        except:
+        except ZeroDivisionError:
             a = 1
             b = 0
             c = point_1.lon
-            logging.debug("Vertical line")
+            warnings.warn("Vertical line")
 
         return a, b, c
 

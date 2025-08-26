@@ -1,4 +1,4 @@
-import logging
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Dict, Optional, Union
@@ -59,7 +59,7 @@ class XMLParser(Parser):
         """
         text_ = element.get(sub_element)
         if text_ is None:
-            logging.debug("%s has no attribute %s.", element, sub_element)
+            warnings.warn("%s has no attribute %s.", element, sub_element)
         return text_
 
     def get_int(self, element, sub_element: str) -> Union[int, None]:
@@ -75,7 +75,7 @@ class XMLParser(Parser):
         """
         int_ = element.get(sub_element)
         if int_ is None:
-            logging.debug("%s has no attribute %s.", element, sub_element)
+            warnings.warn("%s has no attribute %s.", element, sub_element)
         else:
             int_ = int(int_)
         return int_
@@ -93,7 +93,7 @@ class XMLParser(Parser):
         """
         float_ = element.get(sub_element)
         if float_ is None:
-            logging.debug("%s has no attribute %s.", element, sub_element)
+            warnings.warn("%s has no attribute %s.", element, sub_element)
         else:
             float_ = float(float_)
         return float_
@@ -116,7 +116,7 @@ class XMLParser(Parser):
         """
         sub_element_ = element.find(sub_element, self.name_spaces)
         if sub_element_ is None:
-            logging.debug("%s has no attribute %s.", element, sub_element)
+            warnings.warn(f"{element} has no attribute {sub_element}.")
         return sub_element_
 
     def find_text(self, element, sub_element: str) -> Union[str, None]:

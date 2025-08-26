@@ -1,4 +1,4 @@
-import logging
+import warnings
 from typing import Dict, Optional, Union
 
 from ..gpx_elements import Gpx
@@ -73,14 +73,14 @@ class Parser:
             try:
                 float(number)
             except OSError as err:
-                logging.exception("OS error: %s", err)
+                warnings.warn("OS error: %s", err)
             except ValueError:
-                logging.exception(
-                    "Could not convert data (%s) to a floating" "point value.", number
+                warnings.warn(
+                    "Could not convert data (%s) to a floatingpoint value.", number
                 )
             except Exception as err:
-                logging.exception(
-                    "Unexpected %s, %s." "Unable to find precision of number: %s",
+                warnings.warn(
+                    "Unexpected %s, %s.Unable to find precision of number: %s",
                     err,
                     type(err),
                     number,
