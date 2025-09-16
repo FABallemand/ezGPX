@@ -53,10 +53,14 @@ class FoliumPlotter(Plotter):
         m = folium.Map(location=[center_lat, center_lon], zoom_start=zoom, tiles=tiles)
 
         # Plot track points
-        gpx_df = self._gpx.to_pandas()
-        gpx_df["coordinates"] = list(zip(gpx_df.lat, gpx_df.lon))
+        gpx_df = self._gpx.to_polars()
+        gpx_df["coordinates"] = list(
+            zip(gpx_df.get_column("lat").to_list(), gpx_df.get_column("lon").to_list())
+        )
         folium.PolyLine(
-            gpx_df["coordinates"], tooltip=self._gpx.name(), color=color
+            gpx_df.get_column("coordinates").to_list(),
+            tooltip=self._gpx.name(),
+            color=color,
         ).add_to(m)
 
         # Scatter start and stop points with different color

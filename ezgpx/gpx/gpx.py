@@ -761,6 +761,10 @@ class GPX:
         pd.DataFrame
             Dataframe containing data from GPX.
         """
+        # Set default parameter
+        if values is None:
+            values = ["lat", "lon"]
+
         # Disable time related values if no time data available
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
@@ -808,6 +812,10 @@ class GPX:
         pd.DataFrame
             Dataframe containing data from GPX.
         """
+        # Set default parameter
+        if values is None:
+            values = ["lat", "lon"]
+
         # Disable time related values if no time data available
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
