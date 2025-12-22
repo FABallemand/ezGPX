@@ -38,7 +38,7 @@ class Route(GpxElement):
         rtept: List[WayPoint] = None,
     ) -> None:
         """
-        Initialize Route instance.
+        Initialise Route instance.
 
         Parameters
         ----------

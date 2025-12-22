@@ -53,7 +53,6 @@
 
 # 📝 TO DO LIST !!
 - Fix issues with extensions when writting file
-- Create GPX from bytes, csv, dataframe etc.
 - Add str and repr methods to all class
 - Merge method
 - Compute length properly (improve haversine distance precision, 2D, 3D)
@@ -64,7 +63,5 @@
 - Add meridian plot with basemap
 - Add support for all emojis in plots
 - Handle errors properly and remove logging
-- Add descent rate?
+- Add descent rate and descent speed?
 - Improve time computation for pauses?
-- Add descent speed?
-- Add polars to dict methods ??? (https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dict.html, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rows_by_key.html#polars.DataFrame.rows_by_key, https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dicts.html#polars.DataFrame.to_dicts)

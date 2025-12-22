@@ -33,7 +33,7 @@ class GPXWriter(Writer):
         self, gpx: Gpx = None, precisions: Dict = None, time_format: str = None
     ) -> None:
         """
-        Initialize GPXWriter instance.
+        Initialise GPXWriter instance.
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
@@ -103,7 +103,6 @@ class GPXWriter(Writer):
             Parent element containing subelement
         """
         print(element, subelement)
-        return None
 
     def add_bounds(self, element: ET.Element, bounds: Bounds) -> ET.Element:
         """
@@ -157,7 +156,7 @@ class GPXWriter(Writer):
                         # Set attributes
                         for k1, v1 in v0["attrib"].items():
                             if k1 in extensions_fields[k0]["attrib"].keys():
-                                self.setIfNotNone(extensions_, k1, v1)
+                                self.set_not_none(extensions_, k1, v1)
 
                         # Add (n+1)-th level extensions
                         sub_extensions_ = self._add_extensions_rec(
@@ -172,7 +171,7 @@ class GPXWriter(Writer):
                         # Set attributes
                         for k1, v1 in v0["attrib"].items():
                             if k1 in extensions_fields[k0]["attrib"].keys():
-                                self.setIfNotNone(sub_extensions_, k1, v1)
+                                self.set_not_none(sub_extensions_, k1, v1)
 
         return extensions_
 
@@ -362,14 +361,14 @@ class GPXWriter(Writer):
         """
         Add properties to the GPX root element.
         """
-        self.setIfNotNone(self.gpx_root, "version", self.gpx.version)
-        self.setIfNotNone(self.gpx_root, "creator", "ezGPX")
+        self.set_not_none(self.gpx_root, "version", self.gpx.version)
+        self.set_not_none(self.gpx_root, "creator", "ezGPX")
         for k, v in self.gpx.xmlns.items():
-            self.setIfNotNone(self.gpx_root, "xmlns:" + k if k != "" else "xmlns", v)
+            self.set_not_none(self.gpx_root, "xmlns:" + k if k != "" else "xmlns", v)
         schema_location_string = self._create_schema_loc_str(
             self.gpx.xsi_schema_location
         )
-        self.setIfNotNone(self.gpx_root, "xsi:schemaLocation", schema_location_string)
+        self.set_not_none(self.gpx_root, "xsi:schemaLocation", schema_location_string)
 
     def add_root_metadata(self) -> None:
         """
@@ -469,6 +468,7 @@ class GPXWriter(Writer):
     def write(
         self,
         file_path: str,
+        *,
         properties: bool = True,
         bounds_fields: Optional[List[str]] = None,
         copyright_fields: Optional[List[str]] = None,
@@ -502,7 +502,7 @@ class GPXWriter(Writer):
             extensions (bool, optional): Toggle extensions writting. Defaults to True.
             ele (bool, optional): Toggle elevation writting. Defaults to True.
             time (bool, optional): Toggle time writting. Defaults to True.
-            check_xml_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
+            xml_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
             extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
 
         Returns:
@@ -645,6 +645,6 @@ class GPXWriter(Writer):
         # Check XML schemas
         res = True
         if xml_schema or xml_extensions_schemas:
-            res = self.check_xml_schemas(xml_schema, xml_extensions_schemas)
+            res = self.xml_schemas(xml_schema, xml_extensions_schemas)
 
         return res

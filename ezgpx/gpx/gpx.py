@@ -1,15 +1,22 @@
+"""
+This file contains the high level GPX object.
+"""
+
 from __future__ import annotations
 
-import errno
-import os
+import io
 import warnings
 from datetime import datetime
 from math import degrees
-from typing import Dict, List, Optional, Tuple, Type, Union
+from pathlib import Path
+from typing import IO, Dict, List, Optional, Tuple, Type, Union
 from zipfile import ZipFile
 
 import pandas as pd
+import polars as pl
+from narwhals.typing import IntoFrameT
 
+from ..constants.precisions import DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
 from ..gpx_elements import (
     Bounds,
     Copyright,
@@ -29,11 +36,9 @@ from ..gpx_elements import (
 from ..parsers.fit_parser import FitParser
 from ..parsers.gpx_parser import GPXParser
 from ..parsers.kml_parser import KMLParser
-from ..utils import EARTH_RADIUS
+from ..utils import EARTH_RADIUS, check_xml_extensions_schemas, check_xml_schema
 from ..writers.gpx_writer import GPXWriter
 from ..writers.kml_writer import KMLWriter
-
-# GPX = NewType("GPX", object)  # GPX forward declaration for type hint
 
 
 class GPX:
@@ -46,114 +51,70 @@ class GPX:
 
     def __init__(
         self,
-        file_path: Optional[str] = None,
+        source: Optional[str | Path | IO[str] | IO[bytes] | bytes | IntoFrameT] = None,
         xml_schema: bool = True,
         xml_extensions_schemas: bool = False,
     ) -> None:
         """
-        Initialise GPX instance.
+        _summary_
 
-        Parameters
-        ----------
-        file_path : Optional[str], optional
-            Path to the file to parse, by default None
-        xml_schema : bool, optional
-            Toggle schema verification during parsing, by default True
-        extensions_schemas : bool, optional
-            Toggle extensions schema verificaton during parsing, by default False
+        Args:
+            source (str | Path | IO[str] | IO[bytes] | bytes | IntoFrameT, optional):
+                Path to a file or a file-like object to parse. Defaults to None.
+            xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet connection
+                connection and is not guaranted to work. Defaults to False.
+        Raises:
+            FileNotFoundError: _description_
+            ValueError: _description_
+            FileNotFoundError: _description_
         """
         # GPX file description
-        self.file_path: str = None
-        self.file_name: str = None
+        self.source: str | Path | IO[str] | IO[bytes] | bytes | IntoFrameT = None
 
         # GPX file content
         self.gpx: Gpx = None
         self._ele_data: bool = False
         self._time_data: bool = False
-        self._precisions: Dict = None
-        self._time_format: str = None
+        self._precisions: Dict = DEFAULT_PRECISION_DICT
+        self._time_format: str = DEFAULT_TIME_FORMAT
 
         # Parsers
-        self._gpx_parser: GPXParser = None
-        self._kml_parser: KMLParser = None
-        self._fit_parser: FitParser = None
+        self._gpx_parser: GPXParser = None  # TODO remove?
 
         # Writers
         self._gpx_writer: GPXWriter = None
         self._kml_writer: KMLWriter = None
 
-        # Utility attributes
-        self._dataframe: pd.DataFrame = None
-
-        # Empty GPX instance
-        # For advanced use only
-        if file_path is None:
-            warnings.warn(
-                "No file path provided, creating an empty GPX instance.", UserWarning
-            )
-            self.gpx = Gpx()
-            # Writers
-            self._gpx_writer = GPXWriter(self.gpx)
-            self._kml_writer = KMLWriter(self.gpx)
+        # Empty source - Create empty GPX instance for advanced use only
+        if source is None:
+            self._init_from_none()
         # Valid file
-        elif isinstance(file_path, str) and os.path.isfile(file_path):
-            self.file_path = file_path
-            self.file_name = os.path.basename(file_path)
+        elif isinstance(source, (str, Path)):
+            self.source = Path(source)
 
             # GPX
-            if file_path.endswith(".gpx"):
-                self._gpx_parser = GPXParser(
-                    file_path, xml_schema, xml_extensions_schemas
-                )
-                self.gpx = self._gpx_parser.gpx
-                self._ele_data = self._gpx_parser.ele_data
-                self._time_data = self._gpx_parser.time_data
-                self._precisions = self._gpx_parser.precisions
-                self._time_format = self._gpx_parser.time_format
+            if self.source.suffix == ".gpx":
+                self._init_from_gpx(xml_schema, xml_extensions_schemas)
 
             # KML
-            elif file_path.endswith(".kml"):
-                self._kml_parser = KMLParser(
-                    file_path, xml_schema, xml_extensions_schemas
-                )
-                self.gpx = self._kml_parser.gpx
-                self._precisions = self._kml_parser.precisions
-                self._time_format = self._kml_parser.time_format
+            elif self.source.suffix == ".kml":
+                self._init_from_kml()
 
             # KMZ
-            elif file_path.endswith(".kmz"):
-                kmz = ZipFile(file_path, "r")
-                kmls = [
-                    info.filename
-                    for info in kmz.infolist()
-                    if info.filename.endswith(".kml")
-                ]
-                if "doc.kml" not in kmls:
-                    raise FileNotFoundError(
-                        f"Unable to parse file: {file_path}"
-                        "Expected to find doc.kml inside KMZ file."
-                    )
-                kml = kmz.open("doc.kml", "r").read()
-                self._write_tmp_kml("tmp.kml", kml)
-                self._kml_parser = KMLParser(
-                    "tmp.kml", xml_schema, xml_extensions_schemas
-                )
-                self.gpx = self._kml_parser.gpx
-                self._precisions = self._kml_parser.precisions
-                self._time_format = self._kml_parser.time_format
-                os.remove("tmp.kml")
+            elif self.source.suffix == ".kmz":
+                self._init_from_kmz(xml_schema, xml_extensions_schemas)
 
             # FIT
-            elif file_path.endswith(".fit"):
-                self._fit_parser = FitParser(file_path)
-                self.gpx = self._fit_parser.gpx
-                self._precisions = self._fit_parser.precisions
-                self._time_format = self._fit_parser.time_format
+            elif self.source.suffix == ".fit":
+                self._init_from_fit()
 
             # Invalid file or file path
             else:
                 raise ValueError(
-                    f"Unable to parse this type of file: {file_path}"
+                    f"Unable to parse this type of file: {source}"
                     "Consider renaming your file with the proper file extension."
                 )
 
@@ -163,31 +124,118 @@ class GPX:
                 self.gpx, precisions=self._precisions, time_format=self._time_format
             )
 
-        # Invalid file path
+        # Dataframe
+        elif isinstance(
+            source, (pd.DataFrame, pl.DataFrame)
+        ):  # TODO other dataframe types
+            self._init_from_dataframe(source)
         else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+            raise TypeError(
+                f"Invalid source type: {type(source)}. "
+                "Expected str, Path, IO[str], IO[bytes], bytes, pd.DataFrame or pl.DataFrame."
+            )
 
-    def _write_tmp_kml(self, path: str = "tmp.kml", kml_string: Optional[bytes] = None):
+    def _init_from_none(self):
         """
-        Write temproray .KML file in order to parse KMZ file.
+        Initialise empty GPX instance.
         """
-        # Open/create KML file
-        try:
-            f = open(path, "wb")
-        except OSError as e:
-            raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), path
-            ) from e
-        # Write KML file
-        with f:
-            if kml_string is not None:
-                f.write(kml_string)
+        warnings.warn(
+            "No file path provided, creating an empty GPX instance.", UserWarning
+        )
+        self.gpx = Gpx()
+
+        # Writers
+        self._gpx_writer = GPXWriter(self.gpx)
+        self._kml_writer = KMLWriter(self.gpx)
+
+    def _init_from_gpx(
+        self, xml_schema: bool = True, xml_extensions_schemas: bool = False
+    ):
+        """
+        Initialise GPX instance from GPX file.
+
+        Args:
+            xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet connection
+                connection and is not guaranted to work. Defaults to False.
+        """
+        self._gpx_parser = GPXParser(self.source, xml_schema, xml_extensions_schemas)
+        self.gpx = self._gpx_parser.gpx
+        self._ele_data = self._gpx_parser.ele_data
+        self._time_data = self._gpx_parser.time_data
+        self._precisions = self._gpx_parser.precisions
+        self._time_format = self._gpx_parser.time_format
+
+    def _init_from_kml(
+        self, xml_schema: bool = True, xml_extensions_schemas: bool = False
+    ):
+        """
+        Initialise GPX instance from KML file.
+
+        Args:
+            xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet connection
+                connection and is not guaranted to work. Defaults to False.
+        """
+        kml_parser = KMLParser(self.source, xml_schema, xml_extensions_schemas)
+        self.gpx = kml_parser.gpx
+        self._precisions = kml_parser.precisions
+        self._time_format = kml_parser.time_format
+
+    def _init_from_kmz(
+        self, xml_schema: bool = True, xml_extensions_schemas: bool = False
+    ):
+        """
+        Initialise GPX instance from KMZ file.
+
+        Args:
+            xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet connection
+                connection and is not guaranted to work. Defaults to False.
+        """
+        with ZipFile(self.source, "r") as kmz:
+            kmls = [
+                info.filename
+                for info in kmz.infolist()
+                if info.filename.endswith(".kml")
+            ]
+            if "doc.kml" not in kmls:
+                raise FileNotFoundError(
+                    f"Unable to parse file: {self.source}"
+                    "Expected to find doc.kml inside KMZ file."
+                )
+            kml = io.BytesIO(kmz.open("doc.kml", "r").read())
+        kml_parser = KMLParser(kml, xml_schema, xml_extensions_schemas)
+        self.gpx = kml_parser.gpx
+        self._precisions = kml_parser.precisions
+        self._time_format = kml_parser.time_format
+
+    def _init_from_fit(self):
+        """
+        Initialise GPX instance from FIT file.
+        """
+        fit_parser = FitParser(self.source)
+        self.gpx = fit_parser.gpx
+        self._precisions = fit_parser.precisions
+        self._time_format = fit_parser.time_format
+
+    def _init_from_dataframe(self, source: IntoFrameT):
+        """
+        Initialise GPX instance from Dataframe.
+        """
+        self.gpx = Gpx.from_dataframe(source)
 
     def __str__(self) -> str:
         return self._gpx_writer.gpx_to_string()
 
     def __repr__(self):
-        return f"file_path = {self.file_path}\ngpx = {self.gpx}"
+        return f"source = {self.source}\ngpx = {self.gpx}"
 
     ###############################################################################
     #### Schemas ##################################################################
@@ -202,7 +250,7 @@ class GPX:
         bool
             True if the file follows XML schemas.
         """
-        return self.gpx.check_xml_schema(self.file_path)
+        return check_xml_schema(self.source, self.gpx.version)
 
     def check_xml_extensions_schemas(self) -> bool:
         """
@@ -213,7 +261,7 @@ class GPX:
         bool
             True if the file follows XML schemas.
         """
-        return self.gpx.check_xml_extensions_schemas(self.file_path)
+        return check_xml_extensions_schemas(self.source)
 
     ###############################################################################
     #### Name #####################################################################
@@ -769,7 +817,7 @@ class GPX:
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"""Trying to create dataframe from GPX file {self.file_path}
+                    f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain time data. Time related values
                         (time, speed, pace, ascent speed) will not be present in
                         the dataframe.""",
@@ -783,7 +831,7 @@ class GPX:
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"""Trying to create dataframe from GPX file {self.file_path}
+                    f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain elevation data. Time related
                         values (elevation, ascent rate, ascent speed) will not
                         be present in the dataframe.""",
@@ -820,7 +868,7 @@ class GPX:
         if not self._time_data:
             if any(v in GPX.TIME_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"""Trying to create dataframe from GPX file {self.file_path}
+                    f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain time data. Time related values
                         (time, speed, pace, ascent speed) will not be present in
                         the dataframe.""",
@@ -834,7 +882,7 @@ class GPX:
         if not self._ele_data:
             if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
                 warnings.warn(
-                    f"""Trying to create dataframe from GPX file {self.file_path}
+                    f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain elevation data. Time related
                         values (elevation, ascent rate, ascent speed) will not
                         be present in the dataframe.""",
@@ -850,10 +898,8 @@ class GPX:
         self,
         path: str = None,
         values: List[str] = None,
-        sep: str = ",",
-        header: bool = True,
-        index: bool = False,
-    ) -> Union[str, None]:  # TODO select pandas vs polars
+        **kwargs,
+    ) -> Union[str, None]:
         """
         Write the GPX object track coordinates to a .csv file.
 
@@ -865,19 +911,13 @@ class GPX:
             List of values to write, by default None
             Supported values: "lat", "lon", "ele", "time", "speed", "pace",
             "ascent_rate", "ascent_speed", "distance_from_start"
-        sep : str, optional
-            Separator, by default ","
-        header : bool, optional
-            Toggle header, by default True
-        index : bool, optional
-             Toggle index, by default False
 
         Returns
         -------
         str
             CSV like string if path is set to None.
         """
-        return self.gpx.to_csv(path, values, sep, header, index)
+        return self.gpx.to_csv(path, values, **kwargs)
 
     def to_gpx(
         self,

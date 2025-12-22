@@ -40,15 +40,15 @@ class PlotlyAnimPlotter(Plotter):
         Returns:
             plotly.Figure: Animated plot of the GPX.
         """
-        self._dataframe = self._gpx.to_pandas(["lat", "lon", "ele"])
+        self._df = self._gpx.to_polars(["lat", "lon", "ele"])
         center_lat, center_lon = self._gpx.center()
         start = 0
-        n_points = len(self._dataframe)
+        n_points = len(self._df)
 
         # Create dataframe for animation
         df = pd.DataFrame()
         for i in np.arange(start, n_points):
-            dfa = self._dataframe.head(i).copy()
+            dfa = self._df.head(i).copy()
             dfa["frame"] = i
             df = pd.concat([df, dfa])
 

@@ -3,7 +3,6 @@ import warnings
 from math import isclose
 from typing import Optional, Tuple
 
-import matplotlib
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -78,11 +77,11 @@ class MatplotlibAnimPlotter(Plotter):
             matplotlib.Figure: Animated plot of the GPX.
         """
         # Create dataframe containing data from the GPX file
-        self._dataframe = self._gpx.to_pandas()
+        self._df = self._gpx.to_pandas()
 
         # Retrieve useful data
-        lat = self._dataframe["lat"].values
-        lon = self._dataframe["lon"].values
+        lat = self._df["lat"].values
+        lon = self._df["lon"].values
 
         # Create figure
         fig = plt.figure(figsize=figsize)

@@ -20,7 +20,7 @@ class TrackSegment(GpxElement):
         extensions: Extensions = None,
     ) -> None:
         """
-        Initialize TrackSegment instance.
+        Initialise TrackSegment instance.
 
         Parameters
         ----------

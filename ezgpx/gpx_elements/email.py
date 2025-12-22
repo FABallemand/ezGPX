@@ -11,7 +11,7 @@ class Email(GpxElement):
 
     def __init__(self, tag: str = "email", id: str = None, domain: str = None) -> None:
         """
-        Initialize Email instance.
+        Initialise Email instance.
 
         Parameters
         ----------

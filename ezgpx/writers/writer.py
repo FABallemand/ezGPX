@@ -3,8 +3,12 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Dict, Tuple, Union
 
+from ..constants.precisions import (
+    DEFAULT_PRECISION,
+    DEFAULT_PRECISION_DICT,
+    DEFAULT_TIME_FORMAT,
+)
 from ..gpx_elements import Gpx
-from ..parsers import DEFAULT_PRECISION, DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
 
 
 class Writer:
@@ -16,7 +20,7 @@ class Writer:
         self, gpx: Gpx = None, precisions: Dict = None, time_format: str = None
     ) -> None:
         """
-        Initialize Writer instance.
+        Initialise Writer instance.
 
         Parameters
         ----------
@@ -34,7 +38,7 @@ class Writer:
 
         self.file_path: str = None
 
-    def setIfNotNone(self, element: ET.Element, field: str, value):
+    def set_not_none(self, element: ET.Element, field: str, value):
         """
         _summary_
 
@@ -129,7 +133,7 @@ class Writer:
             sub_element_.text = time_utc.strftime(format_)
         return element, sub_element_
 
-    def check_xml_schemas(
+    def xml_schemas(
         self, xml_schema: bool = False, xml_extensions_schemas: bool = False
     ) -> bool:
         """

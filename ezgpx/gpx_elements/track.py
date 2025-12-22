@@ -28,7 +28,7 @@ class Track(GpxElement):
         trkseg: List[TrackSegment] = None,
     ):
         """
-        Initialize Track instance.
+        Initialise Track instance.
 
         Parameters
         ----------

@@ -18,7 +18,7 @@ class Bounds(GpxElement):
         maxlon: float = None,
     ) -> None:
         """
-        Initialize Bounds instance.
+        Initialise Bounds instance.
 
         Parameters
         ----------

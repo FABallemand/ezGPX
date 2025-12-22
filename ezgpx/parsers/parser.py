@@ -1,20 +1,13 @@
+"""
+This module contains the Parser class.
+"""
+
 import warnings
-from typing import Dict, Optional, Union
+from pathlib import Path
+from typing import IO, Dict, Union
 
+from ..constants.precisions import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 from ..gpx_elements import Gpx
-
-DEFAULT_PRECISION = 10
-DEFAULT_PRECISION_DICT = {
-    "lat_lon": DEFAULT_PRECISION,
-    "elevation": DEFAULT_PRECISION,
-    "distance": DEFAULT_PRECISION,
-    "duration": DEFAULT_PRECISION,
-    "speed": DEFAULT_PRECISION,
-    "rate": DEFAULT_PRECISION,
-    "default": DEFAULT_PRECISION,
-}
-POSSIBLE_TIME_FORMATS = ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ"]
-DEFAULT_TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class Parser:
@@ -23,15 +16,16 @@ class Parser:
     """
 
     def __init__(
-        self, file_path: Optional[str] = None, name_spaces: Dict = None
+        self, source: str | Path | IO[str] | IO[bytes] | bytes, name_spaces: Dict = None
     ) -> None:
         """
-        Initialize Parser instance.
+        Initialise Parser instance.
 
         Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
+            source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
+                file or a file-like object to parse.
         """
-        self.file_path: str = file_path
+        self.source: str = source
 
         self.ele_data: bool = False
         self.time_data: bool = False
@@ -90,5 +84,4 @@ class Parser:
         if "." in number:
             _, decimal = number.split(sep=".")
             return len(decimal)
-        else:
-            return 0
+        return 0

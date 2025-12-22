@@ -20,7 +20,7 @@ class Point(GpxElement):
         time: datetime = None,
     ) -> None:
         """
-        Initialize Point instance.
+        Initialise Point instance.
 
         Parameters
         ----------

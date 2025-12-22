@@ -1,15 +1,17 @@
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
+"""
+This module contains the Gpx class.
+"""
+
+from __future__ import annotations
 
 import warnings
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple, Type, Union
+from typing import Any, Dict, List, Tuple
 
+import narwhals as nw
 import pandas as pd
 import polars as pl
-import xmlschema
+from narwhals.typing import IntoFrameT
 
 from ..utils import haversine_distance, ramer_douglas_peucker
 from .extensions import Extensions
@@ -17,6 +19,7 @@ from .gpx_element import GpxElement
 from .metadata import Metadata
 from .route import Route
 from .track import Track
+from .track_segment import TrackSegment
 from .way_point import WayPoint
 
 
@@ -30,6 +33,7 @@ class Gpx(GpxElement):
 
     def __init__(
         self,
+        *,
         tag: str = "gpx",
         version: str = None,
         creator: str = None,
@@ -44,110 +48,40 @@ class Gpx(GpxElement):
         self.tag: str = tag
         self.version: str = version
         self.creator: str = creator
-        if xsi_schema_location is None:
-            self.xsi_schema_location: List[str] = []
-        else:
-            self.xsi_schema_location: List[str] = xsi_schema_location
-        if xmlns is None:
-            self.xmlns: Dict = {}
-        else:
-            self.xmlns: Dict = xmlns
+        self.xsi_schema_location: List[str] = (
+            [] if xsi_schema_location is None else xsi_schema_location
+        )
+        self.xmlns: Dict = {} if xmlns is None else xmlns
         self.metadata: Metadata = metadata
-        if wpt is None:
-            self.wpt: List[WayPoint] = []
-        else:
-            self.wpt: List[WayPoint] = wpt
-        if rte is None:
-            self.rte: List[Route] = []
-        else:
-            self.rte: List[Route] = rte
-        if trk is None:
-            self.trk: List[Track] = []
-        else:
-            self.trk: List[Track] = trk
+        self.wpt: List[WayPoint] = [] if wpt is None else wpt
+        self.rte: List[Route] = [] if rte is None else rte
+        self.trk: List[Track] = [] if trk is None else trk
         self.extensions: Extensions = extensions
 
-    ###############################################################################
-    #### Schemas ##################################################################
-    ###############################################################################
-
-    def check_xml_schema(self, file_path: str) -> bool:
+    @staticmethod
+    def from_dataframe(df: IntoFrameT) -> Gpx:
         """
-        Check XML schema.
+        Initialize Gpx from dataframe.
 
-        Parameters
-        ----------
-        file_path : str
-            File path
-
-        Returns
-        -------
-        bool
-            True if the file follows XML schemas
+        Args:
+            df (IntoFrameT): Dataframe with "lat", "lon" columns. Also
+                supports "ele", "time" columns.
         """
-        schema = None
+        df = nw.from_native(df)
 
-        # GPX
-        if file_path.endswith(".gpx"):
-            if self.version == "1.1":
-                schema = xmlschema.XMLSchema(
-                    files("ezgpx.schemas").joinpath("gpx_1_1/gpx.xsd")
-                )
-            elif self.version == "1.0":
-                schema = xmlschema.XMLSchema(
-                    files("ezgpx.schemas").joinpath("gpx_1_0/gpx.xsd")
-                )
-            else:
-                warnings.warn("Unable to check XML schema (unsupported GPX version)")
-                return False
-
-        # KML
-        elif file_path.endswith(".kml"):
-            schema = xmlschema.XMLSchema(
-                files("ezgpx.schemas").joinpath("kml_2_2/ogckml22.xsd")
+        trkpt = [
+            WayPoint(
+                tag="trkpt",
+                lat=row["lat"],
+                lon=row["lon"],
+                ele=row.get("ele"),
+                time=row.get("time"),
             )
-
-        # KMZ
-        elif file_path.endswith(".kmz"):
-            return False
-
-        # FIT
-        elif file_path.endswith(".fit"):
-            warnings.warn("Unable to check XML schema (fit files are not XML files)")
-            return False
-
-        # NOT SUPPORTED
-        else:
-            warnings.warn("Unable to check XML schema (unable to identify file type)")
-            return False
-
-        if schema is not None:
-            return schema.is_valid(file_path)
-        else:
-            warnings.warn("Unable to check XML schema (unable to load XML schema)")
-            return False
-
-    def check_xml_extensions_schemas(self, file_path: str) -> bool:
-        """
-        Check XML extensions schemas.
-
-        Parameters
-        ----------
-        file_path : str
-            Path to GPX file.
-
-        Returns
-        -------
-        bool
-            True if GPX file follows XML extensions schemas.
-        """
-        gpx_schemas = [s for s in self.xsi_schema_location if s.endswith(".xsd")]
-        gpx_schemas.remove("http://www.topografix.com/GPX/1/1/gpx.xsd")
-        for gpx_schema in gpx_schemas:
-            schema = xmlschema.XMLSchema(gpx_schema)
-            if not schema.is_valid(file_path):
-                warnings.warn(f"File does not follow {gpx_schema}")
-                return False
+            for row in df.iter_rows(named=True)
+        ]
+        trkseg = TrackSegment(trkpt=trkpt)
+        trk = Track(trkseg=[trkseg])
+        return Gpx(trk=[trk])
 
     ###############################################################################
     #### Name #####################################################################
@@ -211,14 +145,10 @@ class Gpx(GpxElement):
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
-                    if track_point.lat < min_lat:
-                        min_lat = track_point.lat
-                    if track_point.lon < min_lon:
-                        min_lon = track_point.lon
-                    if track_point.lat > max_lat:
-                        max_lat = track_point.lat
-                    if track_point.lon > max_lon:
-                        max_lon = track_point.lon
+                    min_lat = min(min_lat, track_point.lat)
+                    min_lon = min(min_lon, track_point.lon)
+                    max_lat = max(max_lat, track_point.lat)
+                    max_lon = max(max_lon, track_point.lon)
         return min_lat, min_lon, max_lat, max_lon
 
     def center(self) -> Tuple[float, float]:
@@ -989,13 +919,11 @@ class Gpx(GpxElement):
     def to_dict(
         self,
         values: List[str] = None,
-        orient: str = "dict",
-        into: Type[dict] = dict,
-        index: bool = True,
+        as_series: bool = False,
     ) -> Dict:
         """
         Convert GPX object to dictionary.
-        Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
+        See: https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dict.html
 
         Parameters
         ----------
@@ -1004,21 +932,38 @@ class Gpx(GpxElement):
             List of values to write, by default None
             Supported values: "lat", "lon", "ele", "time", "speed", "pace",
             "ascent_rate", "ascent_speed", "distance_from_start"
-        orient : str, optional
-            Same as in Pandas.DataFrame.to_dict, by default "dict"
-        into : Type[dict], optional
-            Same as in Pandas.DataFrame.to_dict, by default dict
-        index : bool, optional
-            Same as in Pandas.DataFrame.to_dict, by default True
+        as_series : bool
+            True -> Values are Series False -> Values are List[Any]
 
         Returns
         -------
         Dict
-            Return a dictionary representing the GPX. The resulting
-            transformation depends on the `orient` parameter.
+            Return a dictionary representing the GPX.
         """
-        df = self.to_pandas(values)
-        return df.to_dict(orient, into, index)
+        return self.to_polars(values).to_dict(as_series=as_series)
+
+    def to_dicts(
+        self,
+        values: List[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Convert GPX object to dictionary.
+        See: https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.to_dicts.html
+
+        Parameters
+        ----------
+        values : List[str], optional
+            values : List[str], optional
+            List of values to write, by default None
+            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
+            "ascent_rate", "ascent_speed", "distance_from_start"
+
+        Returns
+        -------
+        Dict
+            Return a list of dictionaries representing the GPX.
+        """
+        return self.to_polars(values).to_dicts()
 
     def _to_dict_df(self, values: List[str] = None) -> Dict:
         """
@@ -1112,41 +1057,19 @@ class Gpx(GpxElement):
         """
         return pl.DataFrame(self._to_dict_df(values))
 
-    def to_csv(
-        self,
-        path: str = None,
-        values: List[str] = None,
-        sep: str = ",",
-        header: bool = True,
-        index: bool = False,
-    ) -> Union[str, None]:
+    def to_csv(self, path: str = None, values: List[str] = None, **kwargs) -> str:
         """
-        Write the GPX object track coordinates to a .csv file.
+        Write the GPX object track coordinates to a CSV file.
 
-        Parameters
-        ----------
-        path : str, optional
-            Path to the .csv file, by default None
-        values : List[str], optional
-            List of values to write, by default None
-            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
-            "ascent_rate", "ascent_speed", "distance_from_start"
-        sep : str, optional
-            Separator, by default ","
-        header : bool, optional
-            Toggle header, by default True
-        index : bool, optional
-             Toggle index, by default False
+        Args:
+            path (str, optional): Path to the output CSV file. Defaults to None.
+            values (List[str], optional): List of metrics to write. Defaults to None.
 
-        Returns
-        -------
-        str
-            CSV like string if path is set to None.
+        Returns:
+            str: CSV like string if path is set to None.
         """
         if values is None:
             values = ["lat", "lon"]
 
         # Argument columns is required for KML writer (keep values order)
-        return self.to_pandas(values).to_csv(
-            path, sep=sep, columns=values, header=header, index=index
-        )
+        return self.to_polars(values).select(values).write_csv(path, **kwargs)

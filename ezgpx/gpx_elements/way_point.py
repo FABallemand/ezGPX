@@ -61,7 +61,7 @@ class WayPoint(GpxElement):
         extensions: Extensions = None,
     ) -> None:
         """
-        Initialize WayPoint instance.
+        Initialise WayPoint instance.
 
         Parameters
         ----------

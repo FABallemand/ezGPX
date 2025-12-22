@@ -19,7 +19,7 @@ class Person(GpxElement):
         link: Link = None,
     ) -> None:
         """
-        Initialize Person instance.
+        Initialise Person instance.
 
         Parameters
         ----------

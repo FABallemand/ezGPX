@@ -1,5 +1,4 @@
 import os
-import warnings
 from math import isclose
 from typing import Optional, Tuple
 
@@ -99,7 +98,7 @@ class MatplotlibPlotter(Plotter):
         values = ["lat", "lon"]
         if color in dynamic_colors:
             values.append(color)
-        self._dataframe = self._gpx.to_pandas(values)
+        self._df = self._gpx.to_pandas(values)
 
         # Create figure
         fig = plt.figure(figsize=figsize)
@@ -170,22 +169,20 @@ class MatplotlibPlotter(Plotter):
         # Scatter track points
         if color in dynamic_colors:
             im = map_.scatter(
-                self._dataframe["lon"],
-                self._dataframe["lat"],
+                self._df["lon"],
+                self._df["lat"],
                 s=size,
-                c=self._dataframe[color],
+                c=self._df[color],
                 cmap=cmap,
             )
         else:
-            im = map_.scatter(
-                self._dataframe["lon"], self._dataframe["lat"], s=size, color=color
-            )
+            im = map_.scatter(self._df["lon"], self._df["lat"], s=size, color=color)
 
         # Scatter start point with different color
         if start_point_color:
             map_.scatter(
-                self._dataframe["lon"][0],
-                self._dataframe["lat"][0],
+                self._df["lon"][0],
+                self._df["lat"][0],
                 marker="^",
                 color=start_point_color,
             )
@@ -193,8 +190,8 @@ class MatplotlibPlotter(Plotter):
         # Scatter stop point with different color
         if stop_point_color:
             map_.scatter(
-                self._dataframe["lon"].iloc[-1],
-                self._dataframe["lat"].iloc[-1],
+                self._df["lon"].iloc[-1],
+                self._df["lat"].iloc[-1],
                 marker="h",
                 color=stop_point_color,
             )

@@ -13,7 +13,7 @@ class Link(GpxElement):
         self, tag: str = "link", href: str = None, text: str = None, type_: str = None
     ) -> None:
         """
-        Initialize Link instance.
+        Initialise Link instance.
 
         Parameters
         ----------

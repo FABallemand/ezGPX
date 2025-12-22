@@ -1,9 +1,15 @@
-import os
+"""
+This module contains the GPXParser class.
+"""
+
+import io
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional, Union
+from pathlib import Path
+from typing import IO, Union
 
+from ..constants.precisions import POSSIBLE_TIME_FORMATS
 from ..gpx_elements import (
     Bounds,
     Copyright,
@@ -20,7 +26,6 @@ from ..gpx_elements import (
     TrackSegment,
     WayPoint,
 )
-from .parser import POSSIBLE_TIME_FORMATS
 from .xml_parser import XMLParser
 
 
@@ -31,33 +36,29 @@ class GPXParser(XMLParser):
 
     def __init__(
         self,
-        file_path: Optional[str] = None,
+        source: str | Path | IO[str] | IO[bytes] | bytes,
         xml_schemas: bool = True,
         xml_extensions_schemas: bool = False,
     ) -> None:
         """
-        Initialize GPXParser instance.
+        Initialise GPXParser instance.
 
-        Parameters
-        ----------
-        file_path : Optional[str], optional
-            Path to the file to parse, by default None
-        xml_schemas : bool, optional
-            Toggle schema verification during parsing, by default True
-        xml_extensions_schemas : bool, optional
-            Toggle extensions schema verificaton durign parsing.
-            Requires internet connection and is not guaranted
-            to work., by default False
+        Args:
+            source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
+                file or a file-like object to parse.
+            xml_schemas (bool, optional): Toggle schema
+                verification during parsing. Defaults to True.
+            xml_extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton durign parsing. Requires internet connection
+                connection and is not guaranted to work. Defaults to False.
         """
-        if not file_path.endswith(".gpx"):
-            return
+        # Bytes object
+        if isinstance(source, bytes):
+            source = io.BytesIO(source)
 
-        super().__init__(file_path, xml_schemas, xml_extensions_schemas)
-
-        if self.file_path is not None and os.path.exists(self.file_path):
-            self.parse()
-        else:
-            warnings.warn("File path does not exist")
+        # Initialise XMLParser and parse GPX file
+        super().__init__(source, xml_schemas, xml_extensions_schemas)
+        self.parse()
 
     def _find_precisions(self):
         """
@@ -564,7 +565,7 @@ class GPXParser(XMLParser):
         """
         # Parse GPX file
         try:
-            self.xml_tree = ET.parse(self.file_path)
+            self.xml_tree = ET.parse(self.source)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
             warnings.warn(f"Unexpected {err}, {type(err)}.\nUnable to parse GPX file.")
@@ -578,7 +579,7 @@ class GPXParser(XMLParser):
             raise
 
         # Check XML schemas
-        self.check_xml_schemas()
+        self.xml_schemas()
 
         # Find precisions
         self._find_precisions()

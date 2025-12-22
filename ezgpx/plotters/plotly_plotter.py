@@ -2,6 +2,7 @@ import os
 import warnings
 from typing import Optional
 
+import numpy as np
 import plotly.graph_objects as go
 
 from .plotter import Plotter
@@ -21,7 +22,7 @@ class PlotlyPlotter(Plotter):
         stop_point_color: Optional[str] = None,
         way_points_color: Optional[str] = None,
         title: Optional[str] = None,
-        zoom: float = 12.0,
+        zoom: Optional[float] = None,
         file_path: Optional[str] = None,
     ):
         """
@@ -44,15 +45,23 @@ class PlotlyPlotter(Plotter):
         Returns:
             _type_: _description_
         """
-        self._dataframe = self._gpx.to_pandas()
+        self._df = self._gpx.to_polars()
         center_lat, center_lon = self._gpx.center()
+        min_lat, min_lon, max_lat, max_lon = self._gpx.bounds()
+
+        if zoom is None:
+            # Determine zoom level based on bounds
+            lat_range = max_lat - min_lat
+            lon_range = max_lon - min_lon
+            max_range = max(lat_range, lon_range)
+            zoom = 8 - np.log2(max_range + 1e-6)
 
         # Create map and scatter
         fig = go.Figure(
             go.Scattermap(
                 mode=mode,
-                lon=self._dataframe["lon"],
-                lat=self._dataframe["lat"],
+                lon=self._df["lon"],
+                lat=self._df["lat"],
                 marker={"size": 5, "color": color},
             )
         )
@@ -62,8 +71,8 @@ class PlotlyPlotter(Plotter):
             fig.add_trace(
                 go.Scattermap(
                     mode="markers",
-                    lon=[self._dataframe["lon"].iloc[0]],
-                    lat=[self._dataframe["lat"].iloc[0]],
+                    lon=[self._df["lon"].iloc[0]],
+                    lat=[self._df["lat"].iloc[0]],
                     marker={"size": 5, "color": start_point_color},
                 )
             )
@@ -71,8 +80,8 @@ class PlotlyPlotter(Plotter):
             fig.add_trace(
                 go.Scattermap(
                     mode="markers",
-                    lon=[self._dataframe["lon"].iloc[-1]],
-                    lat=[self._dataframe["lat"].iloc[-1]],
+                    lon=[self._df["lon"].iloc[-1]],
+                    lat=[self._df["lat"].iloc[-1]],
                     marker={"size": 5, "color": stop_point_color},
                 )
             )

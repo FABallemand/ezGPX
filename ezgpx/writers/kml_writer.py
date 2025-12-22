@@ -24,6 +24,7 @@ class KMLWriter(Writer):
     def __init__(
         self,
         gpx: Gpx = None,
+        *,
         properties: bool = True,
         metadata: bool = True,  # unused
         way_points: bool = True,
@@ -36,7 +37,7 @@ class KMLWriter(Writer):
         styles: List[Tuple[str, Dict]] = None,
     ) -> None:
         """
-        Initialize GPXWriter instance.
+        Initialise GPXWriter instance.
         """
         super().__init__(gpx, precisions, time_format)
         self.file_name: str = ""
@@ -97,7 +98,7 @@ class KMLWriter(Writer):
             KML element.
         """
         stylemap_ = ET.SubElement(element, "StyleMap")
-        self.setIfNotNone(stylemap_, "id", id_)
+        self.set_not_none(stylemap_, "id", id_)
         style_id = 1
         for style_key, _ in self.styles:  # _ used to be called style
             stylemap_ = self.add_pair(stylemap_, style_key, "#style" + str(style_id))
@@ -180,7 +181,7 @@ class KMLWriter(Writer):
             KML element.
         """
         style_ = ET.SubElement(element, "Style")
-        self.setIfNotNone(style_, "id", id_)
+        self.set_not_none(style_, "id", id_)
         style_ = self.add_linestyle(style_, style)
         style_ = self.add_polystyle(style_, style)
         return element
@@ -330,7 +331,7 @@ class KMLWriter(Writer):
             Path to write the KML file.
         styles : Optional[List[Tuple[str, Dict]]], optional
             List of (style_id, style) tuples, by default None
-        check_xml_schemas : bool, optional
+        xml_schemas : bool, optional
             Toggle schema verification after writting, by default False
 
         Returns
@@ -357,6 +358,6 @@ class KMLWriter(Writer):
         # Check XML schemas
         res = True
         if xml_schema or xml_extensions_schemas:
-            res = self.check_xml_schemas(xml_schema, xml_extensions_schemas)
+            res = self.xml_schemas(xml_schema, xml_extensions_schemas)
 
         return res

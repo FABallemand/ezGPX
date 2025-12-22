@@ -25,7 +25,7 @@ class Plotter:
         # self._title: str = None
         # self._file_path: str = None
 
-        self._dataframe: pd.DataFrame = None
+        self._df: pd.DataFrame = None
 
     def plot(self):
         """

@@ -1,17 +1,17 @@
-import errno
-import os
+"""
+This module contains the FitParser class.
+"""
+
 import warnings
 from datetime import datetime
-from typing import List, Optional
+from pathlib import Path
+from typing import IO, List
 
 from fitparse import FitFile
 
+from ..constants.precisions import DEFAULT_PRECISION, POSSIBLE_TIME_FORMATS
 from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
-from .parser import (
-    DEFAULT_PRECISION,
-    POSSIBLE_TIME_FORMATS,
-    Parser,
-)
+from .parser import Parser
 
 
 class FitParser(Parser):
@@ -19,21 +19,19 @@ class FitParser(Parser):
     Fit file parser.
     """
 
-    def __init__(self, file_path: Optional[str] = None) -> None:
+    _semicircles_to_deg_const = 180 / 2**31
+
+    def __init__(self, source: str | Path | IO[str] | IO[bytes] | bytes) -> None:
         """
-        Initialize FitParser instance.
+        Initialise FitParser instance.
 
         Args:
-            file_path (str, optional): Path to the file to parse. Defaults to None.
+            source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
+                file or a file-like object to parse.
         """
-        if not (file_path.endswith(".fit") or file_path.endswith(".FIT")):
-            return
-        super().__init__(file_path)
-
-        if self.file_path is not None and os.path.exists(self.file_path):
-            self.parse()
-        else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file_path)
+        # Initialise Parser and parse FIT file
+        super().__init__(source)
+        self.parse()
 
     def _find_time_format(self, time_str):
         """
@@ -69,8 +67,7 @@ class FitParser(Parser):
         Returns:
             list: List of dms values.
         """
-        const = 180 / 2**31
-        return [const * x for x in list_]
+        return [FitParser._semicircles_to_deg_const * x for x in list_]
 
     def _parse(self):
         """
@@ -83,7 +80,7 @@ class FitParser(Parser):
 
         units = {"alt": "", "lat": "", "lon": ""}
 
-        fit_file = FitFile(self.file_path)
+        fit_file = FitFile(self.source)
 
         for record in fit_file.get_messages("record"):
             for record_data in record:
@@ -118,9 +115,10 @@ class FitParser(Parser):
             lon_data = self._semicircles_to_deg(lon_data)
 
         # Store FIT data in Gpx element
-        trkpt = []
-        for lat, lon, alt, time in list(zip(lat_data, lon_data, alt_data, time_data)):
-            trkpt.append(WayPoint("trkpt", lat, lon, alt, time))
+        trkpt = [
+            WayPoint("trkpt", lat, lon, alt, time)
+            for lat, lon, alt, time in zip(lat_data, lon_data, alt_data, time_data)
+        ]
         trkseg = TrackSegment(trkpt=trkpt)
         trk = Track(trkseg=[trkseg])
         self.gpx.trk = [trk]
@@ -143,11 +141,7 @@ class FitParser(Parser):
             Gpx: Gpx instance.
         """
         # Parse FIT file
-        try:
-            self._parse()
-        except Exception as err:
-            warnings.warn(f"Unexpected {err}, {type(err)}. Unable to parse FIT file.")
-            raise
+        self._parse()
 
         # Add properties
         self._add_properties()

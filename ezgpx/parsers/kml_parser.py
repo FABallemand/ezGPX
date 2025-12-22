@@ -1,7 +1,12 @@
-import os
+"""
+This module contains the KMLParser class.
+"""
+
+import io
 import warnings
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Union
+from pathlib import Path
+from typing import IO, Dict, List, Union
 
 from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
 from .xml_parser import XMLParser
@@ -14,30 +19,32 @@ class KMLParser(XMLParser):
 
     def __init__(
         self,
-        file_path: Optional[str] = None,
-        check_xml_schemas: bool = True,
+        source: str | Path | IO[str] | IO[bytes] | bytes,
+        xml_schemas: bool = True,
         xml_extensions_schemas: bool = False,
     ) -> None:
         """
-        Initialize KMLParser instance.
+        KML file parser.
 
         Args:
-            file_path (str, optional): Path to the file to parse.
-                Defaults to None.
-            check_xml_schemas (bool, optional): Toggle schema
+            source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
+                file or a file-like object to parse.
+            xml_schemas (bool, optional): Toggle schema
                 verification during parsing. Defaults to True.
             xml_extensions_schemas (bool, optional): Toggle extensions
-                schema verificaton durign parsing. Requires internet
+                schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
-        """
-        if not file_path.endswith(".kml"):
-            return
-        super().__init__(file_path, check_xml_schemas, xml_extensions_schemas)
 
-        if self.file_path is not None and os.path.exists(self.file_path):
-            self.parse()
-        else:
-            warnings.warn("File path does not exist")
+        Raises:
+            ValueError: Source is not valid.
+        """
+        # Bytes object
+        if isinstance(source, bytes):
+            source = io.BytesIO(source)
+
+        # Initialise XMLParser and parse KML file
+        super().__init__(source, xml_schemas, xml_extensions_schemas)
+        self.parse()
 
     def find_precisions(self):
         """
@@ -188,7 +195,7 @@ class KMLParser(XMLParser):
         """
         # Parse KML file
         try:
-            self.xml_tree = ET.parse(self.file_path)
+            self.xml_tree = ET.parse(self.source)
             self.xml_root = self.xml_tree.getroot()
         except Exception as err:
             warnings.warn(
@@ -203,7 +210,7 @@ class KMLParser(XMLParser):
         self.find_precisions()
 
         # Check XML schemas
-        self.check_xml_schemas()
+        self.xml_schemas()
 
         # Parse Document
         try:

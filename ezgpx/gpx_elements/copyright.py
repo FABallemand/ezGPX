@@ -17,7 +17,7 @@ class Copyright(GpxElement):
         licence: str = None,
     ) -> None:
         """
-        Initialize Copyright instance.
+        Initialise Copyright instance.
 
         Parameters
         ----------

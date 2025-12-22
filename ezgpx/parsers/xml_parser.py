@@ -1,31 +1,37 @@
+"""
+This module contains the XMLParser class.
+"""
+
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Dict, Optional, Union
+from pathlib import Path
+from typing import IO, Dict, Union
 
 from dateutil import parser
 
+from ..utils import check_xml_extensions_schemas, check_xml_schema
 from .parser import Parser
 
 
 class XMLParser(Parser):
     """
-    XML File parser.
+    XML file parser.
     """
 
     def __init__(
         self,
-        file_path: Optional[str] = None,
+        source: str | Path | IO[str] | IO[bytes] | bytes,
         xml_schema: bool = True,
         xml_extensions_schemas: bool = False,
     ) -> None:
         """
-        Initialize XML Parser instance.
+        Initialise XML Parser instance.
 
         Parameters
         ----------
-        file_path : Optional[str], optional
-            Path to the file to parse, by default None
+        source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
+                file or a file-like object to parse.
         xml_schema : bool, optional
             Toggle  schema verification during parsing, by default True
         xml_extensions_schemas : bool, optional
@@ -33,12 +39,12 @@ class XMLParser(Parser):
             Requires internet connection and is not guaranted to work,
             by default False
         """
-        self.name_spaces: dict = dict(
-            [node for _, node in ET.iterparse(file_path, events=["start-ns"])]
-        )
+        self.name_spaces: Dict = {
+            node[0]: node[1] for _, node in ET.iterparse(source, events=["start-ns"])
+        }
         self.extensions_fields: Dict = {}
 
-        super().__init__(file_path, self.name_spaces)
+        super().__init__(source, self.name_spaces)
 
         self.xml_schema: bool = xml_schema
         self.xml_extensions_schemas: bool = xml_extensions_schemas
@@ -175,18 +181,18 @@ class XMLParser(Parser):
         sub_element_ = self.find_sub_element(element, sub_element)
         return None if sub_element_ is None else parser.parse(sub_element_.text)
 
-    def check_xml_schemas(self):
+    def xml_schemas(self):
         """
         Check XML schemas during parsing.
         """
         # Check XML schema
         if self.xml_schema:
-            if not self.gpx.check_xml_schema(self.file_path):
+            if not check_xml_schema(self.source, self.gpx.version):
                 raise ValueError("Invalid GPX file (does not follow XML schema).")
 
         # Check XML extension schemas
         if self.xml_extensions_schemas:
-            if not self.gpx.check_xml_extensions_schemas(self.file_path):
+            if not check_xml_extensions_schemas(self.source):
                 raise ValueError(
                     "Invalid GPX file (does not follow XML extensions schemas)."
                 )

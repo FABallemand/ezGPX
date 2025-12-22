@@ -3,8 +3,6 @@ import os
 import sys
 from shutil import rmtree
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -21,7 +19,6 @@ REFERENCE_FILES_DIRECTORY = "test_files/reference_files/"
 
 
 class TestGPX:
-
     # ==== Init ===============================================================#
 
     def test_init(self):
@@ -63,12 +60,6 @@ class TestGPX:
         assert invalid_gpx.check_xml_schema() is False
 
     # ==== Properties =========================================================#
-
-    def test_file_name(self):
-        # Parse GPX Files
-        gpx = GPX(os.path.join(FILES_DIRECTORY, "strava_run_1.gpx"))
-        # Test
-        assert gpx.file_name == "strava_run_1.gpx"
 
     def test_name(self):
         # Parse GPX Files

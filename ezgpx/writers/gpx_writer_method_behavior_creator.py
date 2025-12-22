@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from types import FunctionType
 from typing import List
 
@@ -33,7 +32,7 @@ class GPXWriterMethodBehaviorCreator:
             "\n\t\tcopyright_ = ET.SubElement(element, copyright.tag)"
         )
         if "author" in copyright_fields:
-            code += '\n\t\twriter.setIfNotNone(copyright_, "author", copyright.author)'
+            code += '\n\t\twriter.set_not_none(copyright_, "author", copyright.author)'
         if "year" in copyright_fields:
             code += '\n\t\tcopyright_, _ = writer.add_subelement(copyright_, "year", str(copyright.year))'
         if "licence" in copyright_fields:
@@ -50,9 +49,9 @@ class GPXWriterMethodBehaviorCreator:
             "\n\t\temail_ = ET.SubElement(element, email.tag)"
         )
         if "id" in email_fields:
-            code += '\n\t\twriter.setIfNotNone(email_, "id", email.id)'
+            code += '\n\t\twriter.set_not_none(email_, "id", email.id)'
         if "domain" in email_fields:
-            code += '\n\t\twriter.setIfNotNone(email_, "domain", email.domain)'
+            code += '\n\t\twriter.set_not_none(email_, "domain", email.domain)'
         code += "\n\treturn element"
         compiled_code = compile(code, "<_add_email>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_email")
@@ -79,7 +78,7 @@ class GPXWriterMethodBehaviorCreator:
         if "href" in link_fields:
             code += (
                 "\n\t\tif link.href is not None:"
-                '\n\t\t\twriter.setIfNotNone(link_, "href", link.href)'
+                '\n\t\t\twriter.set_not_none(link_, "href", link.href)'
             )
         if "text" in link_fields:
             code += '\n\t\tlink_, _ = writer.add_subelement(link_, "text", link.text)'
@@ -164,9 +163,9 @@ class GPXWriterMethodBehaviorCreator:
             "\n\t\tpoint_ = ET.SubElement(element, point.tag)"
         )
         if "lat" in point_fields:
-            code += '\n\t\twriter.setIfNotNone(point_, "lat", "{:.{}f}".format(point.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(point_, "lat", "{:.{}f}".format(point.lat, writer.precisions["lat_lon"]))'
         if "lon" in point_fields:
-            code += '\n\t\twriter.setIfNotNone(point_, "lon", "{:.{}f}".format(point.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(point_, "lon", "{:.{}f}".format(point.lon, writer.precisions["lat_lon"]))'
         if "ele" in point_fields:
             code += '\n\t\tpoint_ = writer.add_subelement_number(point_, "ele", point.ele, writer.precisions["elevation"])'
         if "time" in point_fields:
@@ -280,9 +279,9 @@ class GPXWriterMethodBehaviorCreator:
             "\n\t\tway_point_ = ET.SubElement(element, way_point.tag)"
         )
         if "lat" in way_point_fields:
-            code += '\n\t\twriter.setIfNotNone(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
         if "lon" in way_point_fields:
-            code += '\n\t\twriter.setIfNotNone(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
         if "ele" in way_point_fields:
             code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ele", way_point.ele, writer.precisions["elevation"])'
         if "time" in way_point_fields:
@@ -334,9 +333,9 @@ class GPXWriterMethodBehaviorCreator:
             "\n\t\tway_point_ = ET.SubElement(element, way_point.tag)"
         )
         if "lat" in way_point_fields:
-            code += '\n\t\twriter.setIfNotNone(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
         if "lon" in way_point_fields:
-            code += '\n\t\twriter.setIfNotNone(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
         if "ele" in way_point_fields:
             code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ele", way_point.ele, writer.precisions["elevation"])'
         if "time" in way_point_fields:

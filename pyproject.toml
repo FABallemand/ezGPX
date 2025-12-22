@@ -1,3 +1,85 @@
+[project]
+name = "ezgpx"
+version = "0.3.0"
+authors = [
+    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
+]
+maintainers = [
+    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
+]
+description = "Easy to use Python GPX library"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = [
+    "gpx",
+    "gpx-files",
+    "gpx-parser",
+    "gpx-reader",
+    "gpx-writer",
+    "gpx-converter",
+    "gpx-data",
+    "kml",
+    "kmz",
+    "fit"
+]
+license = {text = "GNU GPLv3"}
+classifiers=[
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "lxml",
+    "xmlschema",
+    "importlib_resources",
+    "python-dateutil",
+    "pandas>=2.3.3",
+    "polars>=1.36.1",
+    "narwhals>=2.14.0",
+    "matplotlib",
+    "basemap",
+    "plotly>=6.5.0",
+    "gmplot",
+    "folium",
+    "fitparse",
+]
+
+[dependency-groups]
+dev = [
+  { include-group = "lint" },
+  { include-group = "utils" },
+  { include-group = "tests" },
+  { include-group = "doc" },
+]
+lint = [
+  "bandit>=1.8.5",
+  "isort>=6.0.1",
+  "mypy>=1.17.1",
+  "pre_commit>=4.2.0",
+  "pylint>=3.3.7",
+  "pyrefly>=0.22.1",
+  "ruff>=0.12.7",
+]
+utils = [
+  "ipykernel>=6.30.1",
+  "nbformat>=4.2.0",
+  "scipy>=1.16.3",
+]
+tests = ["pytest>=8.4.2"]
+doc = [
+  "Sphinx>=9.0.4",
+]
+
+[project.urls]
+Documentation = "https://ezgpx.readthedocs.io/en/latest/"
+Repository = "https://github.com/FABallemand/ezGPX"
+Issues = "https://github.com/FABallemand/ezGPX/issues"
+PyPi = "https://pypi.org/project/ezgpx/"
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
@@ -16,59 +98,9 @@ namespaces = true
 [tool.isort]
 profile = "black"
 
-[project]
-name = "ezgpx"
-version = "0.3.0"
-authors = [
-    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
-]
-maintainers = [
-    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
-]
-description = "Easy to use Python GPX library"
-readme = "README.md"
-requires-python = ">=3.9"
-keywords = [
-    "gpx",
-    "gpx-files",
-    "gpx-parser",
-    "gpx-reader",
-    "gpx-writer",
-    "gpx-converter",
-    "gpx-data",
-    "kml",
-    "kmz",
-    "fit"
-]
-license = {text = "GNU GPLv3"}
-classifiers=[
-    "Intended Audience :: Developers",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent"
-]
-dependencies = [
-    "lxml",
-    "xmlschema",
-    "importlib_resources",
-    "python-dateutil",
-    "pandas",
-    "polars",
-    "matplotlib",
-    "basemap",
-    "plotly",
-    "gmplot",
-    "folium",
-    "fitparse",
-    "pytest",
-]
+[tool.ruff]
+fix = true
+exclude = [".venv", "tests", "examples"]
 
-[project.urls]
-Documentation = "https://ezgpx.readthedocs.io/en/latest/"
-Repository = "https://github.com/FABallemand/ezGPX"
-Issues = "https://github.com/FABallemand/ezGPX/issues"
-PyPi = "https://pypi.org/project/ezgpx/"
+[tool.ruff.lint]
+ignore = ["F403"]  # TODO do something about that

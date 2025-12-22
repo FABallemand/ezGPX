@@ -38,7 +38,7 @@ class Metadata(GpxElement):
         extensions: Extensions = None,
     ) -> None:
         """
-        Initialize Metadata instance.
+        Initialise Metadata instance.
 
         Parameters
         ----------

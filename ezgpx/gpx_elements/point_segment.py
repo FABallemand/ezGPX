@@ -14,7 +14,7 @@ class PointSegment(GpxElement):
 
     def __init__(self, tag: str = "ptseg", pt: List[Point] = None) -> None:
         """
-        Initialize PointSegment instance.
+        Initialise PointSegment instance.
 
         Parameters
         ----------
