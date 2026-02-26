@@ -121,7 +121,7 @@ Speed and Pace
 
 If a :py:class:`~ezgpx.gpx.GPX` object contains time related data (mainly time-stamp at each point), it is possible to gain speed and pace insights. Furthermore, if elevation data are also available, ascent speeds can be computed!
 
-.. note:: Speeds are expressed in kilometres per hour (km/h) and paces in minutes per kilometre (min/km).
+.. note:: Speeds are expressed in kilometers per hour (km/h) and paces in minutes per kilometre (min/km).
 
 .. code-block:: python
 

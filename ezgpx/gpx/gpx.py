@@ -9,7 +9,7 @@ import warnings
 from datetime import datetime
 from math import degrees
 from pathlib import Path
-from typing import IO, Dict, List, Optional, Tuple, Type, Union
+from typing import IO, Dict, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import pandas as pd
@@ -56,7 +56,7 @@ class GPX:
         xml_extensions_schemas: bool = False,
     ) -> None:
         """
-        _summary_
+        Initialise high level GPX object.
 
         Args:
             source (str | Path | IO[str] | IO[bytes] | bytes | IntoFrameT, optional):
@@ -245,10 +245,8 @@ class GPX:
         """
         Check XML schema.
 
-        Returns
-        -------
-        bool
-            True if the file follows XML schemas.
+        Returns:
+            bool: True if the file follows XML schemas.
         """
         return check_xml_schema(self.source, self.gpx.version)
 
@@ -256,10 +254,8 @@ class GPX:
         """
         Check XML extension schemas.
 
-        Returns
-        -------
-        bool
-            True if the file follows XML schemas.
+        Returns:
+            bool: True if the file follows XML schemas.
         """
         return check_xml_extensions_schemas(self.source)
 
@@ -270,22 +266,15 @@ class GPX:
     def name(self) -> str:
         """
         Return activity name.
-
-        Returns
-        -------
-        str
-            Activity name.
         """
         return self.gpx.name()
 
     def set_name(self, new_name: str) -> None:
         """
-        Set name.
+        Set activity name.
 
-        Parameters
-        ----------
-        new_name : str
-            New name.
+        Args:
+            new_name (str): New activity name.
         """
         self.gpx.set_name(new_name)
 
@@ -296,66 +285,52 @@ class GPX:
     def nb_points(self) -> int:
         """
         Return the number of points in the GPX.
-
-        Returns
-        -------
-        int
-            Number of points in the GPX.
         """
         return self.gpx.nb_points()
 
     def bounds(self) -> Tuple[float, float, float, float]:
         """
-        Find minimum and maximum latitude and longitude.
+        Find the bounding coordinates of the activity.
 
-        Returns
-        -------
-        Tuple[float, float, float, float]
-            Min latitude, min longitude, max latitude, max longitude.
+        Returns:
+            Tuple[float, float, float, float]: Min latitude, min
+                longitude, max latitude, max longitude.
         """
         return self.gpx.bounds()
 
     def center(self) -> Tuple[float, float]:
         """
-        Return the coordinates of the center point.
+        Find the center coordinates of the activity.
 
-        Returns
-        -------
-        Tuple[float, float]
-            Latitude and longitude of the center point.
+        Returns:
+            Tuple[float, float]: Latitude and longitude of the center
+                point.
         """
         return self.gpx.center()
 
-    def first_point(self) -> WayPoint:
+    def first_point(self) -> WayPoint:  # TODO remove?
         """
-        Return GPX first point.
-
-        Returns
-        -------
-        WayPoint
-            First point.
+        Return the first point of the activity.
         """
         return self.gpx.first_point()
 
-    def last_point(self) -> WayPoint:
+    def last_point(self) -> WayPoint:  # TODO remove?
         """
-        Return GPX last point.
-
-        Returns
-        -------
-        WayPoint
-            Last point.
+        Return the last point of the activity.
         """
         return self.gpx.last_point()
 
-    def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
+    def extreme_points(
+        self,
+    ) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:  # TODO remove?
         """
-        Find extreme points in track, i.e.: points with lowest and highest latitude and longitude.
+        Find extreme points in track, i.e.: points with lowest and
+        highest latitude and longitude.
 
-        Returns
-        -------
-        Tuple[WayPoint, WayPoint, WayPoint, WayPoint]
-            Min latitude point, min longitude point, max latitude point, max longitude point
+        Returns:
+            Tuple[WayPoint, WayPoint, WayPoint, WayPoint]: Min latitude
+                point, min longitude point, max latitude point, max
+                longitude points.
         """
         return self.gpx.extreme_points()
 
@@ -365,84 +340,49 @@ class GPX:
 
     def distance(self) -> float:
         """
-        Returns the distance (meters) of tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Distance (meters).
+        Returns the distance (in meters) of the activity.
         """
         return self.gpx.distance()
 
     def ascent(self) -> float:
         """
-        Returns the ascent (meters) of tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Ascent (meters).
+        Returns the ascent (in meters) of the activity.
         """
         return self.gpx.ascent()
 
     def descent(self) -> float:
         """
-        Returns the descent (meters) of tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Descent (meters).
+        Returns the descent (in meters) of the activity.
         """
         return self.gpx.descent()
 
     def min_elevation(self) -> float:
         """
-        Returns the minimum elevation (meters) in tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Minimum elevation (meters).
+        Returns the minimum elevation (in meters) of the activity.
         """
         return self.gpx.min_elevation()
 
     def max_elevation(self) -> float:
         """
-        Returns the maximum elevation (meters) in tracks contained in the GPX.
-
-        Returns
-        -------
-        float
-            Maximum elevation (meters).
+        Returns the maximum elevation (in meters) of the activity.
         """
         return self.gpx.max_elevation()
 
-    def compute_points_ascent_rate(self) -> None:
+    def compute_points_ascent_rate(self) -> None:  # TODO Do automatically in Gpx?
         """
         Compute ascent rate at each point.
         """
         self.gpx.compute_points_ascent_rate()
 
-    def min_ascent_rate(self) -> float:
+    def min_ascent_rate(self) -> float:  # TODO rename to max_descent_rate?
         """
-        Return activity minimum ascent rate.
-
-        Returns
-        -------
-        float
-            Minimum ascent rate.
+        Return the minimum ascent rate of the activity.
         """
         return self.gpx.min_ascent_rate()
 
     def max_ascent_rate(self) -> float:
         """
-        Return activity maximum ascent rate.
-
-        Returns
-        -------
-        float
-            Maximum ascent rate.
+        Return the maximum ascent rate of the activity.
         """
         return self.gpx.max_ascent_rate()
 
@@ -452,56 +392,31 @@ class GPX:
 
     def start_time(self) -> datetime:
         """
-        Return the activity start time.
-
-        Returns
-        -------
-        datetime
-            Start time.
+        Return the start time of the activity.
         """
         return self.gpx.start_time()
 
     def stop_time(self) -> datetime:
         """
-        Return the activity stop time.
-
-        Returns
-        -------
-        datetime
-            Stop time.
+        Return the stop time of the activity.
         """
         return self.gpx.stop_time()
 
     def total_elapsed_time(self) -> datetime:
         """
         Return the total elapsed time during the activity.
-
-        Returns
-        -------
-        datetime
-            Total elapsed time.
         """
         return self.gpx.total_elapsed_time()
 
     def stopped_time(self) -> datetime:
         """
         Return the stopped time during the activity.
-
-        Returns
-        -------
-        datetime
-            Stopped time.
         """
         return self.gpx.stopped_time()
 
     def moving_time(self) -> datetime:
         """
         Return the moving time during the activity.
-
-        Returns
-        -------
-        datetime
-            Moving time.
         """
         return self.gpx.moving_time()
 
@@ -511,77 +426,47 @@ class GPX:
 
     def avg_speed(self) -> float:
         """
-        Return average speed (kilometres per hour) during the activity.
-
-        Returns
-        -------
-        float
-            Average speed (kilometres per hour).
+        Return average speed (in kilometers per hour) of the activity.
         """
         return self.gpx.avg_speed()
 
     def avg_moving_speed(self) -> float:
         """
-        Return average moving speed (kilometres per hour) during the activity.
-
-        Returns
-        -------
-        float
-            Average moving speed (kilometres per hour).
+        Return average moving speed (in kilometers per hour) during the activity.
         """
         return self.gpx.avg_moving_speed()
 
-    def compute_points_speed(self) -> None:
+    def compute_points_speed(self) -> None:  # TODO remove?
         """
-        Compute speed (kilometres per hour) at each track point.
+        Compute speed (in kilometers per hour) at each track point.
         """
         self.gpx.compute_points_speed()
 
     def min_speed(self) -> float:
         """
-        Return the minimum speed during the activity.
-
-        Returns
-        -------
-        float
-            Minimum speed.
+        Return the minimum speed (in kilometers per hour)during the activity.
         """
         return self.gpx.min_speed()
 
     def max_speed(self) -> float:
         """
-        Return the maximum speed during the activity.
-
-        Returns
-        -------
-        float
-            Maximum speed.
+        Return the maximum speed (in kilometers per hour) during the activity.
         """
         return self.gpx.max_speed()
 
     def avg_pace(self) -> float:
         """
-        Return average pace (minutes per kilometer) during the activity.
-
-        Returns
-        -------
-        float
-            Average pace (minutes per kilometer).
+        Return average pace (in minutes per kilometer) during the activity.
         """
         return self.gpx.avg_pace()
 
     def avg_moving_pace(self) -> float:
         """
-        Return average moving pace (minutes per kilometer) during the activity.
-
-        Returns
-        -------
-        float
-            Average moving pace (minutes per kilometer).
+        Return average moving pace (in minutes per kilometer) during the activity.
         """
         return self.gpx.avg_moving_pace()
 
-    def compute_points_pace(self) -> None:
+    def compute_points_pace(self) -> None:  # TODO remove?
         """
         Compute pace at each track point.
         """
@@ -589,51 +474,31 @@ class GPX:
 
     def min_pace(self) -> float:
         """
-        Return the minimum pace during the activity.
-
-        Returns
-        -------
-        float
-            Minimum pace.
+        Return the minimum pace (in minutes per kilometer) during the activity.
         """
         return self.gpx.min_pace()
 
     def max_pace(self) -> float:
         """
-        Return the maximum pace during the activity.
-
-        Returns
-        -------
-        float
-            Maximum pace.
+        Return the maximum pace (in minutes per kilometer) during the activity.
         """
         return self.gpx.max_pace()
 
-    def compute_points_ascent_speed(self) -> None:
+    def compute_points_ascent_speed(self) -> None:  # TODO remove?
         """
-        Compute ascent speed (kilometres per hour) at each track point.
+        Compute ascent speed (in kilometers per hour) at each track point.
         """
         self.gpx.compute_points_ascent_speed()
 
     def min_ascent_speed(self) -> float:
         """
-        Return the minimum ascent speed (kilometres per hour) during the activity.
-
-        Returns
-        -------
-        float
-            Minimum ascent speed.
+        Return the minimum ascent speed (in kilometers per hour) during the activity.
         """
         return self.gpx.min_ascent_speed()
 
     def max_ascent_speed(self) -> float:
         """
-        Return the maximum ascent speed (kilometres per hour) during the activity.
-
-        Returns
-        -------
-        float
-            Maximum ascent speed.
+        Return the maximum ascent speed (in kilometers per hour) during the activity.
         """
         return self.gpx.max_ascent_speed()
 
@@ -675,16 +540,17 @@ class GPX:
         """
         self.gpx.remove_gps_errors()
 
-    def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):
+    def remove_close_points(
+        self, min_dist: float = 1, max_dist: float = 10
+    ):  # TODO remove?
         """
         Remove points that are to close together.
 
-        Parameters
-        ----------
-        min_dist : float, optional
-            Minimal distance between two points, by default 1
-        max_dist : float, optional
-            Maximal distance between two points, by default 10
+        Args:
+            min_dist (float, optional): Minimal distance between two
+                points. Defaults to 1.
+            max_dist (float, optional): Maximal distance between two
+                points. Defaults to 10.
         """
         self.gpx.remove_close_points(min_dist, max_dist)
 
@@ -696,11 +562,10 @@ class GPX:
         """
         Simplify tracks using Ramer-Douglas-Peucker algorithm.
 
-        Parameters
-        ----------
-        tolerance : float, optional
-            Tolerance (meters). Corresponds to the minimum distance between the
-            point and the track before the point is removed, by default 2
+        Args:
+            tolerance (float, optional): Minimum distance (in meters)
+            between the point and the track before the point is
+            removed. Defaults to 2.
         """
         epsilon = degrees(tolerance / EARTH_RADIUS)
         self.gpx.simplify(epsilon)
@@ -712,19 +577,14 @@ class GPX:
     @staticmethod
     def merge(gpx_1: GPX, gpx_2: GPX) -> GPX:
         """
-        Merge GPX objects in a new instance.
+        Merge GPX objects into a new instance.
 
-        Parameters
-        ----------
-        gpx_1 : GPX
-            First GPX object
-        gpx_2 : GPX
-            Second GPX object
+        Args:
+            gpx_1 (GPX): First GPX object.
+            gpx_2 (GPX): Second GPX object.
 
-        Returns
-        -------
-        GPX
-            Merged GPX (new instance)
+        Returns:
+            GPX: Merged GPX (new instance).
         """
         topo = [
             "http://www.topografix.com/GPX/1/1",
@@ -762,52 +622,36 @@ class GPX:
     def to_dict(
         self,
         values: List[str] = None,
-        orient: str = "dict",
-        into: Type[dict] = dict,
-        index: bool = True,
+        as_series: bool = False,
     ) -> Dict:
         """
         Convert GPX object to dictionary.
-        Pandas.DataFrame.to_dict documentation: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_dict.html
 
-        Parameters
-        ----------
-        values : List[str], optional
-            values : List[str], optional
-            List of values to write, by default None
-            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
-            "ascent_rate", "ascent_speed", "distance_from_start"
-        orient : str, optional
-            Same as in Pandas.DataFrame.to_dict, by default "dict"
-        into : Type[dict], optional
-            Same as in Pandas.DataFrame.to_dict, by default dict
-        index : bool, optional
-            Same as in Pandas.DataFrame.to_dict, by default True
+        Args:
+            values (List[str], optional): List of values to write.
+                Supported values: "lat", "lon", "ele", "time", "speed",
+                "pace", "ascent_rate", "ascent_speed",
+                "distance_from_start". Defaults to None.
+            as_series (bool, optional): True -> Values are Series False
+                -> Values are List[Any]. Defaults to False.
 
-        Returns
-        -------
-        Dict
-            Return a dictionary representing the GPX. The resulting
-            transformation depends on the `orient` parameter.
+        Returns:
+            Dict: Return a dictionary representing the GPX.
         """
-        return self.gpx.to_dict(values, orient, into, index)
+        return self.gpx.to_dict(values, as_series)
 
     def to_pandas(self, values: List[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
-        Missing values are filled with default values (0 for elevation, empty string for time).
 
-        Parameters
-        ----------
-        values : List[str], optional
-            List of values to write, by default None
-            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
-            "ascent_rate", "ascent_speed", "distance_from_start"
+        Args:
+            values (List[str], optional): List of values to write.
+                Supported values: "lat", "lon", "ele", "time", "speed",
+                "pace", "ascent_rate", "ascent_speed",
+                "distance_from_start". Defaults to None.
 
-        Returns
-        -------
-        pd.DataFrame
-            Dataframe containing data from GPX.
+        Returns:
+            pd.DataFrame: Return a dictionary representing the GPX.
         """
         # Set default parameter
         if values is None:
@@ -843,22 +687,18 @@ class GPX:
 
         return self.gpx.to_pandas(values)
 
-    def to_polars(self, values: List[str] = None) -> pd.DataFrame:
+    def to_polars(self, values: List[str] = None) -> pl.DataFrame:
         """
         Convert GPX object to Polars Dataframe.
-        Missing values are filled with default values (0 for elevation, empty string for time).
 
-        Parameters
-        ----------
-        values : List[str], optional
-            List of values to write, by default None
-            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
-            "ascent_rate", "ascent_speed", "distance_from_start"
+        Args:
+            values (List[str], optional): List of values to write.
+                Supported values: "lat", "lon", "ele", "time", "speed",
+                "pace", "ascent_rate", "ascent_speed",
+                "distance_from_start". Defaults to None.
 
-        Returns
-        -------
-        pd.DataFrame
-            Dataframe containing data from GPX.
+        Returns:
+            pl.DataFrame: Return a dictionary representing the GPX.
         """
         # Set default parameter
         if values is None:
@@ -896,32 +736,31 @@ class GPX:
 
     def to_csv(
         self,
-        path: str = None,
+        dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
         values: List[str] = None,
         **kwargs,
     ) -> Union[str, None]:
         """
-        Write the GPX object track coordinates to a .csv file.
+        Write the GPX object track coordinates to a CSV file.
 
-        Parameters
-        ----------
-        path : str, optional
-            Path to the .csv file, by default None
-        values : List[str], optional
-            List of values to write, by default None
-            Supported values: "lat", "lon", "ele", "time", "speed", "pace",
-            "ascent_rate", "ascent_speed", "distance_from_start"
+        Args:
+            dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
+                Path to a file or a file-like object to write in.
+                Defaults to None.
+            values (List[str], optional): List of values to write.
+                Supported values: "lat", "lon", "ele", "time", "speed",
+                "pace", "ascent_rate", "ascent_speed",
+                "distance_from_start". Defaults to None.
 
-        Returns
-        -------
-        str
-            CSV like string if path is set to None.
+        Returns:
+            Union[str, None]: CSV like string if path is set to None.
         """
-        return self.gpx.to_csv(path, values, **kwargs)
+        return self.gpx.to_csv(dest, values, **kwargs)
 
     def to_gpx(
         self,
-        path: str,
+        dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
+        *,
         properties: bool = True,
         bounds_fields: Optional[List[str]] = None,
         copyright_fields: Optional[List[str]] = None,
@@ -939,25 +778,34 @@ class GPX:
         way_point_fields: Optional[List[str]] = None,
         track_point_fields: Optional[List[str]] = None,
         mandatory_fields: bool = True,
-        xml_schema: bool = True,
-        xml_extensions_schemas: bool = False,
-    ) -> bool:
+    ) -> Union[str, None]:
         """
-        Write the GPX object to a .gpx file.
+        Write the GPX object to a GPX file.
 
-        Parameters
-        ----------
-        path : str
-            Path to the new .gpx file.
-        xml_schema : bool, optional
-            Toggle schema verification after writting, by default True
-        xml_extensions_schemas : bool, optional
-            Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work, by default False
+        Args:
+            dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
+                Path to a file or a file-like object to write in.
+                Defaults to None.
+            properties (bool, optional): _description_. Defaults to True.
+            bounds_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            copyright_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            email_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            extensions_fields (Optional[Dict], optional): _description_. Defaults to None.
+            gpx_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            link_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            metadata_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            person_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            point_segment_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            point_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            route_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            track_segment_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            track_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            way_point_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            track_point_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            mandatory_fields (bool, optional): _description_. Defaults to True.
 
-        Returns
-        -------
-        bool
-            Return False if written file does not follow checked schemas. Return True otherwise.
+        Returns:
+            Union[str, None]: GPX like string if path is set to None.
         """
         bounds_fields = bounds_fields if bounds_fields is not None else Bounds.fields
         copyright_fields = (
@@ -998,7 +846,7 @@ class GPX:
             track_point_fields if track_point_fields is not None else WayPoint.fields
         )
         return self._gpx_writer.write(
-            file_path=path,
+            file_path=dest,
             properties=properties,
             bounds_fields=bounds_fields,
             copyright_fields=copyright_fields,
@@ -1016,31 +864,25 @@ class GPX:
             way_point_fields=way_point_fields,
             track_point_fields=track_point_fields,
             mandatory_fields=mandatory_fields,
-            xml_schema=xml_schema,
-            xml_extensions_schemas=xml_extensions_schemas,
         )
 
     def to_kml(
         self,
-        path: str,
+        dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
+        *,
         styles: Optional[List[Tuple[str, Dict]]] = None,
-        xml_schema: bool = True,
-    ) -> bool:
+    ) -> Union[str, None]:
         """
-        Write the GPX object to a .kml file.
+        Write the GPX object to a KML file.
 
-        Parameters
-        ----------
-        path : str
-            Path to the .gpx file.
-        styles : List[Tuple[str, Dict]], optional
-            List of (style_id, style) tuples, by default None
-        xml_schema : bool, optional
-            Toggle schema verification after writting, by default True
+        Args:
+            dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
+                Path to a file or a file-like object to write in.
+                Defaults to None.
+            styles (Optional[List[Tuple[str, Dict]]], optional): KML
+                styles. Defaults to None.
 
-        Returns
-        -------
-        bool
-            Return False if written file does not follow checked schemas. Return True otherwise.
+        Returns:
+            Union[str, None]: KML like string if path is set to None.
         """
-        return self._kml_writer.write(path, styles, xml_schema)
+        return self._kml_writer.write(dest, styles)

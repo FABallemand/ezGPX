@@ -1,28 +1,31 @@
 import math as m
 import warnings
+from typing import Protocol, Tuple
 
 # latitude/longitude in GPX files is always in WGS84 datum
 # WGS84 defined the Earth semi-major axis with 6378.137 km
 # https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84
-EARTH_RADIUS = 6378.137 * 1000
+EARTH_RADIUS = 6_378_137
 
 
-def haversine_distance(point_1, point_2) -> float:
+class HasLatLon(Protocol):
+    """Protocol for objects that have latitude and longitude."""
+
+    lat: float
+    lon: float
+
+
+def haversine_distance(point_1: HasLatLon, point_2: HasLatLon) -> float:
     """
     Compute Haversine distance (meters) between to points.
     Source: https://en.wikipedia.org/wiki/Haversine_formula
 
-    Parameters
-    ----------
-    point_1 :
-        First point.
-    point_2 : _type_
-        Second point.
+    Args:
+        point_1 (HasLatLon): First point.
+        point_2 (HasLatLon): Second point.
 
-    Returns
-    -------
-    float
-        Haversine distance between the points.
+    Returns:
+        float: Haversine distance between the points.
     """
     # Delta and conversion to radians
     delta_lat = m.radians(point_1.lat - point_2.lat)
@@ -39,62 +42,33 @@ def haversine_distance(point_1, point_2) -> float:
     return d
 
 
-def distance(point_1, point_2) -> float:
+def perpendicular_distance(
+    start_point: HasLatLon, end_point: HasLatLon, point: HasLatLon
+) -> float:
     """
-    Euclidian distance between two points.
+    Compute perpendicular distance between a point and a line.
 
-    Parameters
-    ----------
-    point_1 :
-        First point.
-    point_2 :
-        Second point.
+    Args:
+        start_point (HasLatLon): A point on the line.
+        end_point (HasLatLon): A point on the line.
+        point (HasLatLon): A point to measure the distance from.
 
-    Returns
-    -------
-    float
-        Distance between the points.
-    """
-    delta_lat = point_1.lat - point_2.lat
-    delta_long = point_1.lon - point_2.lon
-    return m.sqrt(delta_lat * delta_lat + delta_long * delta_long)
-
-
-def perpendicular_distance(start_point, end_point, point) -> float:
-    """
-    Distance between a point and a line.
-
-    Parameters
-    ----------
-    start_point :
-        A point on the line.
-    end_point :
-        A point on the line.
-    point :
-        A point to measure the distance from.
-
-    Returns
-    -------
-    float
-        Perpendicular distance between the point *point* and the line defined
-        by *start_point* and *end_point*.
+    Returns:
+        float: Perpendicular distance between the point *point* and the
+            line defined by *start_point* and *end_point*.
     """
 
-    def line_coefficients(point_1, point_2):
+    def line_coefficients(
+        point_1: HasLatLon, point_2: HasLatLon
+    ) -> Tuple[float, float, float]:
         """
         Compute the coefficients of a line equation of the form: ax+by+c=0.
 
-        Parameters
-        ----------
-        point_1 :
-            A point on the line.
-        point_2 :
-            A point on the line.
-
-        Returns
-        -------
-        Tuple
-            Coefficients of the line equation.
+        Args:
+            point_1 (HasLatLon): A point on the line.
+            point_2 (HasLatLon): A point on the line.
+        Returns:
+            Tuple[float, float, float]: Coefficients of the line equation.
         """
         delta_x = point_1.lon - point_2.lon
         delta_y = point_1.lat - point_2.lat

@@ -4,9 +4,11 @@ This module contains the Gpx class.
 
 from __future__ import annotations
 
+import io
 import warnings
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Tuple
+from pathlib import Path
+from typing import IO, Any, Dict, List, Optional, Tuple, Union
 
 import narwhals as nw
 import pandas as pd
@@ -510,12 +512,12 @@ class Gpx(GpxElement):
 
     def avg_speed(self) -> float:
         """
-        Compute the average speed (kilometres per hour) during the activity.
+        Compute the average speed (kilometers per hour) during the activity.
 
         Returns
         -------
         float
-            Average speed (kilometres per hour).
+            Average speed (kilometers per hour).
         """
         # Compute and convert total elapsed time
         total_elapsed_time = self.total_elapsed_time()
@@ -528,12 +530,12 @@ class Gpx(GpxElement):
 
     def avg_moving_speed(self) -> float:
         """
-        Compute the average moving speed (kilometres per hour) during the activity.
+        Compute the average moving speed (kilometers per hour) during the activity.
 
         Returns
         -------
         float
-            Average moving speed (kilometres per hour).
+            Average moving speed (kilometers per hour).
         """
         # Compute and convert moving time
         moving_time = self.moving_time()
@@ -546,7 +548,7 @@ class Gpx(GpxElement):
 
     def compute_points_speed(self) -> None:
         """
-        Compute speed (kilometres per hour) at each track point.
+        Compute speed (kilometers per hour) at each track point.
         """
         previous_point = self.first_point()
 
@@ -685,7 +687,7 @@ class Gpx(GpxElement):
 
     def compute_points_ascent_speed(self) -> None:
         """
-        Compute ascent speed (kilometres per hour) at each track point.
+        Compute ascent speed (kilometers per hour) at each track point.
         """
         previous_point = self.first_point()
 
@@ -707,7 +709,7 @@ class Gpx(GpxElement):
 
     def min_ascent_speed(self) -> float:
         """
-        Return the minimum ascent speed (kilometres per hour) during the activity.
+        Return the minimum ascent speed (kilometers per hour) during the activity.
 
         Returns
         -------
@@ -727,7 +729,7 @@ class Gpx(GpxElement):
 
     def max_ascent_speed(self) -> float:
         """
-        Return the maximum ascent speed (kilometres per hour) during the activity.
+        Return the maximum ascent speed (kilometers per hour) during the activity.
 
         Returns
         -------
@@ -1057,19 +1059,32 @@ class Gpx(GpxElement):
         """
         return pl.DataFrame(self._to_dict_df(values))
 
-    def to_csv(self, path: str = None, values: List[str] = None, **kwargs) -> str:
+    def to_csv(
+        self,
+        dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
+        values: List[str] = None,
+        **kwargs,
+    ) -> Union[str, None]:
         """
         Write the GPX object track coordinates to a CSV file.
 
         Args:
-            path (str, optional): Path to the output CSV file. Defaults to None.
-            values (List[str], optional): List of metrics to write. Defaults to None.
+            dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
+                Path to a file or a file-like object to write in.
+                Defaults to None.
+            values (List[str], optional): List of values to write.
+                Supported values: "lat", "lon", "ele", "time", "speed",
+                "pace", "ascent_rate", "ascent_speed",
+                "distance_from_start". Defaults to None.
 
         Returns:
-            str: CSV like string if path is set to None.
+            Union[str, None]: CSV like string if path is set to None.
         """
         if values is None:
             values = ["lat", "lon"]
 
+        if isinstance(dest, bytes):
+            dest = io.BytesIO(dest)
+
         # Argument columns is required for KML writer (keep values order)
-        return self.to_polars(values).select(values).write_csv(path, **kwargs)
+        return self.to_polars(values).select(values).write_csv(dest, **kwargs)
