@@ -1,3 +1,8 @@
+"""
+This module contains the GpxElement class.
+"""
+
+
 class GpxElement:
     """
     Base class for element in GPX file.

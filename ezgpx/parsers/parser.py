@@ -4,7 +4,7 @@ This module contains the Parser class.
 
 import warnings
 from pathlib import Path
-from typing import IO, Dict, Union
+from typing import IO, Dict
 
 from ..constants.precisions import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
 from ..gpx_elements import Gpx
@@ -42,19 +42,15 @@ class Parser:
 
         self.gpx: Gpx = Gpx(xmlns=name_spaces)
 
-    def find_precision(self, number: Union[int, float, str]) -> int:
+    def find_precision(self, number: int | float | str) -> int:
         """
         Find decimal precision of a given number.
 
-        Parameters
-        ----------
-        number : Union[int, float, str]
-            Number.
+        Args:
+            number (int | float | str): Number.
 
-        Returns
-        -------
-        int
-            Decimal precision.
+        Returns:
+            int: Decimal precision.
         """
         if number is None:
             return DEFAULT_PRECISION

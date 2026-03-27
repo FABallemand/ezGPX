@@ -6,7 +6,7 @@ import io
 import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import IO, Dict, List, Union
+from typing import IO
 
 from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
 from .xml_parser import XMLParser
@@ -65,15 +65,15 @@ class KMLParser(XMLParser):
         self.precisions["lat_lon"] = self.find_precision(coordinates[0])
         self.precisions["elevation"] = self.find_precision(coordinates[2])
 
-    # def parse_linestring(self, linestring) -> List[str]:
+    # def parse_linestring(self, linestring) -> list[str]:
     #     """
     #     Parse LineString element from KML file.
 
     #     Args:
-    #         placemark (xml.etree.ElementTree.Element): Parsed LineString element.
+    #         placemark (ET.Element): Parsed LineString element.
 
     #     Returns:
-    #         List[str]: Informations contained in the LineString element (strings of coordinates).
+    #         list[str]: Informations contained in the LineString element (strings of coordinates).
     #     """
     #     if linestring is None:
     #         return None
@@ -85,18 +85,18 @@ class KMLParser(XMLParser):
 
     #     return linestrings_data
 
-    def parse_placemark(self, placemark) -> Union[Dict, None]:
+    def parse_placemark(self, placemark) -> dict | None:
         """
         Parse Placemark element from KML file.
 
         Args:
-            placemark (xml.etree.ElementTree.Element): Parsed Placemark
+            placemark (ET.Element): Parsed Placemark
                 element.
 
         Returns:
-            Union[List[Dict], None]: Informations contained in the
-                Placemark element (the name of the Placemark (str)
-                and the contents of the LineString (List[str])).
+            dict | None: Informations contained in the Placemark
+                element (the name of the Placemark (str) and the
+                contents of the LineString (list[str])).
         """
         if placemark is None:
             return None
@@ -114,16 +114,16 @@ class KMLParser(XMLParser):
 
         return placemark_data
 
-    def parse_document(self, document) -> Union[List[Dict], None]:
+    def parse_document(self, document) -> list[dict] | None:
         """
         Parse Document element from KML file.
 
         Args:
-            document (xml.etree.ElementTree.Element): Parsed Document element.
+            document (ET.Element): Parsed Document element.
 
         Returns:
-            Union[List[Dict], None]: Informations related to Placemark elements contained in
-            the Document element.
+            list[dict] | None: Informations related to Placemark
+                elements contained in the Document element.
         """
         if document is None:
             return None

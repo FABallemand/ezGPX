@@ -1,7 +1,11 @@
+"""
+This module contains the Writer class.
+"""
+
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple
 
 from ..constants.precisions import (
     DEFAULT_PRECISION,
@@ -56,7 +60,7 @@ class Writer:
 
     def add_subelement(
         self, element: ET.Element, sub_element: str, text: str
-    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
+    ) -> Tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
@@ -66,7 +70,7 @@ class Writer:
             text (str): GPX sub-element text.
 
         Returns:
-            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+            Tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None
@@ -79,20 +83,20 @@ class Writer:
         self,
         element: ET.Element,
         sub_element: str,
-        number: Union[int, float],
+        number: int | float,
         precision: int = DEFAULT_PRECISION,
-    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
+    ) -> Tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
             sub_element (str): GPX sub-element.
-            number (Union[int, float], optional): GPX sub-element value.
+            number (int | float, optional): GPX sub-element value.
             precision (int, optional): Precision. Defaults to DEFAULT_PRECISION.
 
         Returns:
-            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+            Tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None
@@ -112,7 +116,7 @@ class Writer:
         sub_element: str,
         time: datetime,
         format_: str = DEFAULT_TIME_FORMAT,
-    ) -> Tuple[ET.Element, Union[ET.Element, None]]:
+    ) -> Tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
@@ -123,7 +127,7 @@ class Writer:
             format (str, optional): Format. Defaults to DEFAULT_TIME_FORMAT.
 
         Returns:
-            Tuple[ET.Element, Union[ET.Element, None]]: GPX element and
+            Tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None
@@ -139,17 +143,14 @@ class Writer:
         """
         Check XML schemas after writting.
 
-        Parameters
-        ----------
-        xml_schema : bool, optional
-            Toggle XML schema verification, by default False.
-        xml_extensions_schemas : bool, optional
-            Toggle XML extensions schemas verification, by default False.
+        Args:
+            xml_schema (bool, optional): Toggle XML schema verification.
+                Defaults to False.
+            xml_extensions_schemas (bool, optional): Toggle XML
+                extensions schemas verification. Defaults to False.
 
-        Returns
-        -------
-        bool
-            True if the written file follows all verified schemas.
+        Returns:
+            bool: True if the written file follows all verified schemas.
         """
         # TODO Check for file_path
         # Check XML schema

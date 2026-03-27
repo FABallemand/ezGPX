@@ -18,7 +18,7 @@ class FoliumPlotter(Plotter):
         tiles: str = "OpenStreetMap",  # "OpenStreetMap", "Stamen Terrain", "Stamen Toner"
         color: str = "#FFA800",
         start_stop_colors: Optional[Tuple[str, str]] = None,
-        way_points_color: Optional[str] = None,
+        waypoints_color: Optional[str] = None,
         minimap: bool = False,
         coord_popup: bool = False,
         title: Optional[str] = None,
@@ -35,7 +35,7 @@ class FoliumPlotter(Plotter):
                 Defaults to "OpenStreetMap".
             start_stop_colors (Optional[Tuple[str, str]], optional):
                 Start and stop points colors. Defaults to None.
-            way_points_color (Optional[str], optional): Way points
+            waypoints_color (Optional[str], optional): Way points
                 color. Defaults to None.
             minimap (bool, optional): Add minimap. Defaults to False.
             coord_popup (bool, optional): Add coordinates pop-up when
@@ -85,13 +85,13 @@ class FoliumPlotter(Plotter):
             ).add_to(m)
 
         # Scatter way points with different color
-        if way_points_color:
-            for way_point in self._gpx.gpx.wpt:
+        if waypoints_color:
+            for waypoint in self._gpx.gpx.wpt:
                 folium.Marker(
-                    [way_point.lat, way_point.lon],
+                    [waypoint.lat, waypoint.lon],
                     popup="<i>Way point</i>",
                     tooltip="Way point",
-                    icon=folium.Icon(icon="info-sign", color=way_points_color),
+                    icon=folium.Icon(icon="info-sign", color=waypoints_color),
                 ).add_to(m)
 
         # Add minimap

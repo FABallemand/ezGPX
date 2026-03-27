@@ -1,10 +1,14 @@
+"""
+This module contains the GPXWriterMethodCreator class.
+"""
+
 from types import FunctionType
-from typing import List
 
 
-class GPXWriterMethodBehaviorCreator:
-    def __init__(self):
-        pass
+class GPXWriterMethodCreator:
+    """
+    GPXWriter method creator.
+    """
 
     def add_bounds_creator(self, bounds_fields):
         code = (
@@ -89,7 +93,7 @@ class GPXWriterMethodBehaviorCreator:
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_link")
         return func
 
-    def add_metadata_creator(self, metadata_fields: List[str]):
+    def add_metadata_creator(self, metadata_fields: list[str]):
         code = (
             "def _add_metadata(writer, element, metadata):"
             "\n\tif metadata is not None:"
@@ -206,8 +210,8 @@ class GPXWriterMethodBehaviorCreator:
             code += '\n\t\troute_ = writer.add_extensions(route_, route.extensions, writer.extensions_fields.get("rte"))'
         if "rtept" in route_fields:
             code += (
-                "\n\t\tfor way_point in route.rtept:"
-                "\n\t\t\troute_ = writer.add_way_point(route_, way_point)"
+                "\n\t\tfor waypoint in route.rtept:"
+                "\n\t\t\troute_ = writer.add_waypoint(route_, waypoint)"
             )
         code += "\n\treturn element"
         compiled_code = compile(code, "<_add_route>", "exec")
@@ -272,109 +276,109 @@ class GPXWriterMethodBehaviorCreator:
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_track")
         return func
 
-    def add_way_point_creator(self, way_point_fields):
+    def add_waypoint_creator(self, waypoint_fields):
         code = (
-            "def _add_way_point(writer, element, way_point):"
-            "\n\tif way_point is not None:"
-            "\n\t\tway_point_ = ET.SubElement(element, way_point.tag)"
+            "def _add_waypoint(writer, element, waypoint):"
+            "\n\tif waypoint is not None:"
+            "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
         )
-        if "lat" in way_point_fields:
-            code += '\n\t\twriter.set_not_none(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
-        if "lon" in way_point_fields:
-            code += '\n\t\twriter.set_not_none(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
-        if "ele" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ele", way_point.ele, writer.precisions["elevation"])'
-        if "time" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_time(way_point_, "time", way_point.time, writer.time_format)'
-        if "magvar" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "magvar", way_point.mag_var, writer.precisions["default"])'
-        if "geoidheight" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "geoidheight", way_point.geo_id_height, writer.precisions["default"])'
-        if "name" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "name", way_point.name)'
-        if "cmt" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "cmt", way_point.cmt)'
-        if "desc" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "desc", way_point.desc)'
-        if "src" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "src", way_point.src)'
-        if "link" in way_point_fields:
-            code += "\n\t\tway_point_ = writer.add_link(way_point_, way_point.link)"
-        if "sym" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "sym", way_point.sym)'
-        if "type" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "type", way_point.type)'
-        if "fix" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "fix", way_point.fix)'
-        if "sat" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "sat", way_point.sat, 0)'
-        if "hdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "hdop", way_point.hdop, writer.precisions["default"])'
-        if "vdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "vdop", way_point.vdop, writer.precisions["default"])'
-        if "pdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "pdop", way_point.pdop, writer.precisions["default"])'
-        if "ageofgpsdata" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ageofgpsdata", way_point.age_of_gps_data, writer.precisions["default"])'
-        if "dgpsid" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)'
-        if "extensions" in way_point_fields:
-            # code += '\n\t\tway_point_ = writer.add_wpt_extensions(way_point_, way_point.extensions)'
-            code += '\n\t\tway_point_ = writer.add_extensions(way_point_, way_point.extensions, writer.extensions_fields.get("wpt"))'
+        if "lat" in waypoint_fields:
+            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat, writer.precisions["lat_lon"]))'
+        if "lon" in waypoint_fields:
+            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon, writer.precisions["lat_lon"]))'
+        if "ele" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
+        if "time" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
+        if "magvar" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
+        if "geoidheight" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geo_id_height, writer.precisions["default"])'
+        if "name" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
+        if "cmt" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "cmt", waypoint.cmt)'
+        if "desc" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "desc", waypoint.desc)'
+        if "src" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
+        if "link" in waypoint_fields:
+            code += "\n\t\twaypoint_ = writer.add_link(waypoint_, waypoint.link)"
+        if "sym" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
+        if "type" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
+        if "fix" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix)'
+        if "sat" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
+        if "hdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "hdop", waypoint.hdop, writer.precisions["default"])'
+        if "vdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
+        if "pdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
+        if "ageofgpsdata" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.age_of_gps_data, writer.precisions["default"])'
+        if "dgpsid" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
+        if "extensions" in waypoint_fields:
+            # code += '\n\t\twaypoint_ = writer.add_wpt_extensions(waypoint_, waypoint.extensions)'
+            code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("wpt"))'
         code += "\n\treturn element"
-        compiled_code = compile(code, "<_add_way_point>", "exec")
-        func = FunctionType(compiled_code.co_consts[0], globals(), "_add_way_point")
+        compiled_code = compile(code, "<_add_waypoint>", "exec")
+        func = FunctionType(compiled_code.co_consts[0], globals(), "_add_waypoint")
         return func
 
-    def add_track_point_creator(self, way_point_fields):
+    def add_track_point_creator(self, waypoint_fields):
         code = (
-            "def _add_track_point(writer, element, way_point):"
-            "\n\tif way_point is not None:"
-            "\n\t\tway_point_ = ET.SubElement(element, way_point.tag)"
+            "def _add_track_point(writer, element, waypoint):"
+            "\n\tif waypoint is not None:"
+            "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
         )
-        if "lat" in way_point_fields:
-            code += '\n\t\twriter.set_not_none(way_point_, "lat", "{:.{}f}".format(way_point.lat, writer.precisions["lat_lon"]))'
-        if "lon" in way_point_fields:
-            code += '\n\t\twriter.set_not_none(way_point_, "lon", "{:.{}f}".format(way_point.lon, writer.precisions["lat_lon"]))'
-        if "ele" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ele", way_point.ele, writer.precisions["elevation"])'
-        if "time" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_time(way_point_, "time", way_point.time, writer.time_format)'
-        if "magvar" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "magvar", way_point.mag_var, writer.precisions["default"])'
-        if "geoidheight" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "geoidheight", way_point.geo_id_height, writer.precisions["default"])'
-        if "name" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "name", way_point.name)'
-        if "cmt" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "cmt", way_point.cmt)'
-        if "desc" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "desc", way_point.desc)'
-        if "src" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "src", way_point.src)'
-        if "link" in way_point_fields:
-            code += "\n\t\tway_point_ = writer.add_link(way_point_, way_point.link)"
-        if "sym" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "sym", way_point.sym)'
-        if "type" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "type", way_point.type)'
-        if "fix" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement(way_point_, "fix", way_point.fix)'
-        if "sat" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "sat", way_point.sat, 0)'
-        if "hdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "hdop", way_point.hdop, writer.precisions["default"])'
-        if "vdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "vdop", way_point.vdop, writer.precisions["default"])'
-        if "pdop" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "pdop", way_point.pdop, writer.precisions["default"])'
-        if "ageofgpsdata" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "ageofgpsdata", way_point.age_of_gps_data, writer.precisions["default"])'
-        if "dgpsid" in way_point_fields:
-            code += '\n\t\tway_point_, _ = writer.add_subelement_number(way_point_, "dgpsid", way_point.dgpsid, 0)'
-        if "extensions" in way_point_fields:
-            # code += '\n\t\tway_point_ = writer.add_trkpt_extensions(way_point_, way_point.extensions)'
-            code += '\n\t\tway_point_ = writer.add_extensions(way_point_, way_point.extensions, writer.extensions_fields.get("trkpt"))'
+        if "lat" in waypoint_fields:
+            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat, writer.precisions["lat_lon"]))'
+        if "lon" in waypoint_fields:
+            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon, writer.precisions["lat_lon"]))'
+        if "ele" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
+        if "time" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
+        if "magvar" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
+        if "geoidheight" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geo_id_height, writer.precisions["default"])'
+        if "name" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
+        if "cmt" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "cmt", waypoint.cmt)'
+        if "desc" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "desc", waypoint.desc)'
+        if "src" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
+        if "link" in waypoint_fields:
+            code += "\n\t\twaypoint_ = writer.add_link(waypoint_, waypoint.link)"
+        if "sym" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
+        if "type" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
+        if "fix" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix)'
+        if "sat" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
+        if "hdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "hdop", waypoint.hdop, writer.precisions["default"])'
+        if "vdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
+        if "pdop" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
+        if "ageofgpsdata" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.age_of_gps_data, writer.precisions["default"])'
+        if "dgpsid" in waypoint_fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
+        if "extensions" in waypoint_fields:
+            # code += '\n\t\twaypoint_ = writer.add_trkpt_extensions(waypoint_, waypoint.extensions)'
+            code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("trkpt"))'
         code += "\n\treturn element"
         compiled_code = compile(code, "<_add_track_point>", "exec")
         func = FunctionType(compiled_code.co_consts[0], globals(), "_add_track_point")

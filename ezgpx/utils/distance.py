@@ -17,7 +17,7 @@ class HasLatLon(Protocol):
 
 def haversine_distance(point_1: HasLatLon, point_2: HasLatLon) -> float:
     """
-    Compute Haversine distance (meters) between to points.
+    Compute Haversine distance (in meters) between to points.
     Source: https://en.wikipedia.org/wiki/Haversine_formula
 
     Args:

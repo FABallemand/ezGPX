@@ -1,9 +1,11 @@
-from typing import List
+"""
+This module contains the Route class.
+"""
 
 from .extensions import Extensions
 from .gpx_element import GpxElement
 from .link import Link
-from .way_point import WayPoint
+from .waypoint import WayPoint
 
 
 class Route(GpxElement):
@@ -33,33 +35,25 @@ class Route(GpxElement):
         src: str = None,
         link: Link = None,
         number: int = None,  # non negative integer
-        type_: str = None,
+        type: str = None,  # pylint: disable=redefined-builtin
         extensions: Extensions = None,
-        rtept: List[WayPoint] = None,
+        rtept: list[WayPoint] = None,
     ) -> None:
         """
         Initialise Route instance.
 
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "rte"
-        name : str, optional
-            Name, by default None
-        cmt : str, optional
-            Comment, by default None
-        desc : str, optional
-            Description, by default None
-        src : str, optional
-            Source, by default None
-        link : Link, optional
-            Link, by default None
-        number : int, optional
-            Number, by default None
-        extensions : Extensions, optional
-            Extensions, by default None
-        rtept : List[WayPoint], optional
-            Route points, by default None
+        Args:
+            tag (str, optional): XML tag. Defaults to "rte".
+            name (str, optional): Name. Defaults to None.
+            cmt (str, optional): Comment. Defaults to None.
+            desc (str, optional): Description. Defaults to None.
+            src (str, optional): Source. Defaults to None.
+            link (Link, optional): Link. Defaults to None.
+            number (int, optional): Number. Defaults to None.
+            type (str, optional): Type. Defaults to None.
+            extensions (Extensions, optional): Extensions. Defaults to None.
+            rtept (list[WayPoint], optional): List of route points.
+                Defaults to None.
         """
         self.tag: str = tag
         self.name: str = name
@@ -68,6 +62,6 @@ class Route(GpxElement):
         self.src: str = src
         self.link: Link = link
         self.number: int = number
-        self.type: str = type_
+        self.type: str = type
         self.extensions: Extensions = extensions
-        self.rtept: List[WayPoint] = [] if rtept is None else rtept
+        self.rtept: list[WayPoint] = [] if rtept is None else rtept

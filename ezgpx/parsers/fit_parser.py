@@ -5,7 +5,7 @@ This module contains the FitParser class.
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import IO, List
+from typing import IO
 
 from fitparse import FitFile
 
@@ -57,15 +57,15 @@ class FitParser(Parser):
                 writting."""
             )
 
-    def _semicircles_to_deg(self, list_: List) -> List:
+    def _semicircles_to_deg(self, list_: list) -> list:
         """
         Convert semicircle data from FIT file to dms data.
 
         Args:
-            list_ (list): List of semicircle values.
+            list_ (list): list of semicircle values.
 
         Returns:
-            list: List of dms values.
+            list: list of dms values.
         """
         return [FitParser._semicircles_to_deg_const * x for x in list_]
 

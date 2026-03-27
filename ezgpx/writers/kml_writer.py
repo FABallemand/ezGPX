@@ -1,7 +1,11 @@
+"""
+This module contains the KMLWriter class.
+"""
+
 import os
 import warnings
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from ..gpx_elements import Gpx
 from .writer import Writer
@@ -27,14 +31,14 @@ class KMLWriter(Writer):
         *,
         properties: bool = True,
         metadata: bool = True,  # unused
-        way_points: bool = True,
+        waypoints: bool = True,
         routes: bool = True,
         extensions: bool = True,
         ele: bool = True,
         time: bool = True,
-        precisions: Dict = None,
+        precisions: dict = None,
         time_format: str = None,
-        styles: List[Tuple[str, Dict]] = None,
+        styles: list[tuple[str, dict]] = None,
     ) -> None:
         """
         Initialise GPXWriter instance.
@@ -46,7 +50,7 @@ class KMLWriter(Writer):
         # Parameters
         self.properties: bool = properties
         self.metadata: bool = metadata
-        self.way_points: bool = way_points
+        self.waypoints: bool = waypoints
         self.routes: bool = routes
         self.extensions: bool = extensions
         self.ele: bool = ele
@@ -62,19 +66,13 @@ class KMLWriter(Writer):
         """
         Add StyleMap to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
-        key : str
-            Key.
-        style_url : str
-            Style URL.
+        Args:
+            element (ET.Element): KML element.
+            key (str): Key.
+            style_url (str): Style URL.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         pair_ = ET.SubElement(element, "Pair")
         pair_, _ = self.add_subelement(pair_, "key", key)
@@ -85,17 +83,12 @@ class KMLWriter(Writer):
         """
         Add StyleMap to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
-        id_ : str
-            StyleMap element id.
+        Args:
+            element (ET.Element): KML element.
+            id_ (str): StyleMap element id.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         stylemap_ = ET.SubElement(element, "StyleMap")
         self.set_not_none(stylemap_, "id", id_)
@@ -105,21 +98,16 @@ class KMLWriter(Writer):
             style_id += 1
         return element
 
-    def add_polystyle(self, element: ET.Element, style: Dict) -> ET.Element:
+    def add_polystyle(self, element: ET.Element, style: dict) -> ET.Element:
         """
         Add PolyStyle to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
-        style : Dict
-            Style.
+        Args:
+            element (ET.Element): KML element.
+            style (dict): Style.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         polystyle_ = ET.SubElement(element, "PolyStyle")
         try:
@@ -131,21 +119,16 @@ class KMLWriter(Writer):
             polystyle_, _ = self.add_subelement_number(polystyle_, "fill", 0)
         return element
 
-    def add_linestyle(self, element: ET.Element, style: Dict) -> ET.Element:
+    def add_linestyle(self, element: ET.Element, style: dict) -> ET.Element:
         """
         Add LineStyle to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
-        style : Dict
-            Style.
+        Args:
+            element (ET.Element): KML element.
+            style (dict): Style.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         linestyle_ = ET.SubElement(element, "LineStyle")
         try:
@@ -162,26 +145,25 @@ class KMLWriter(Writer):
             linestyle_, _ = self.add_subelement_number(linestyle_, "width", 2)
         return element
 
-    def add_style(self, element: ET.Element, id_: str, style: Dict) -> ET.Element:
+    def add_style(
+        self,
+        element: ET.Element,
+        id: str,  # pylint: disable=redefined-builtin
+        style: dict,
+    ) -> ET.Element:
         """
         Add Style to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
-        id_ : str
-            Style element id.
-        style : Dict
-            Line style.
+        Args:
+            element (ET.Element): KML element.
+            id (str): Style element id.
+            style (dict): Line style.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         style_ = ET.SubElement(element, "Style")
-        self.set_not_none(style_, "id", id_)
+        self.set_not_none(style_, "id", id)
         style_ = self.add_linestyle(style_, style)
         style_ = self.add_polystyle(style_, style)
         return element
@@ -190,15 +172,11 @@ class KMLWriter(Writer):
         """
         Add LineString to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
+        Args:
+            element (ET.Element): KML element.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         linestring_ = ET.SubElement(element, "LineString")
         linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
@@ -217,15 +195,11 @@ class KMLWriter(Writer):
         """
         Add Placemark to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
+        Args:
+            element (ET.Element): KML element.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         placemark_ = ET.SubElement(element, "Placemark")
         placemark_, _ = self.add_subelement(placemark_, "name", self.gpx.name())
@@ -237,15 +211,11 @@ class KMLWriter(Writer):
         """
         Add Document to KML element.
 
-        Parameters
-        ----------
-        element : ET.Element
-            KML element.
+        Args:
+            element (ET.Element): KML element.
 
-        Returns
-        -------
-        ET.Element
-            KML element.
+        Returns:
+            ET.Element: KML element.
         """
         document_ = ET.SubElement(element, "Document")
         document_, _ = self.add_subelement(document_, "name", self.file_name)
@@ -318,26 +288,21 @@ class KMLWriter(Writer):
     def write(
         self,
         file_path: str,
-        styles: Optional[List[Tuple[str, Dict]]] = None,
+        styles: Optional[list[tuple[str, dict]]] = None,
         xml_schema: bool = False,
         xml_extensions_schemas: bool = False,
     ) -> bool:
         """
         Handle writing.
 
-        Parameters
-        ----------
-        file_path : str
-            Path to write the KML file.
-        styles : Optional[List[Tuple[str, Dict]]], optional
-            List of (style_id, style) tuples, by default None
-        xml_schemas : bool, optional
-            Toggle schema verification after writting, by default False
+        Args:
+            file_path (str): Path to write the KML file.
+            styles (Optional[list[tuple[str, dict]]], optional): List of (style_id, style) tuples. Defaults to None.
+            xml_schema (bool, optional): Toggle schema verification after writting. Defaults to False.
+            xml_extensions_schemas (bool, optional): TODO. Defaults to False.
 
-        Returns
-        -------
-        bool
-            bool: Return False if written file does not follow checked schemas. Return True otherwise.
+        Returns:
+            bool: Return True if written file follows checked schemas, False otherwise.
         """
         # Handle path
         directory_path = os.path.dirname(os.path.realpath(file_path))

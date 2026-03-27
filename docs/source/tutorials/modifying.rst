@@ -59,7 +59,7 @@ In the following example, a 42 km run downloaded from Strava went from 3263 trac
     print(f"nb_points = {gpx.nb_points()}")
 
     # Plot tracks
-    gpx.matplotlib_plot(start_stop_colors=("green", "red"), way_points_color="blue", elevation_color=True, title="Run", duration=(0,0), distance=(0.5,0), ascent=(1,0))
+    gpx.matplotlib_plot(start_stop_colors=("green", "red"), waypoints_color="blue", elevation_color=True, title="Run", duration=(0,0), distance=(0.5,0), ascent=(1,0))
 
     # Simplify tracks
     gpx.simplify()
@@ -68,7 +68,7 @@ In the following example, a 42 km run downloaded from Strava went from 3263 trac
     print(f"nb_points = {gpx.nb_points()}")
 
     # Plot tracks
-    gpx.matplotlib_plot(start_stop_colors=("green", "red"), way_points_color="blue", elevation_color=True, title="Run", duration=(0,0), distance=(0.5,0), ascent=(1,0))
+    gpx.matplotlib_plot(start_stop_colors=("green", "red"), waypoints_color="blue", elevation_color=True, title="Run", duration=(0,0), distance=(0.5,0), ascent=(1,0))
 
     # Save GPX
     gpx.to_gpx("file_simplified.gpx")

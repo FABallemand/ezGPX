@@ -15,7 +15,7 @@ class GmplotPlotter(Plotter):
         self,
         color: str = "#FFA800",
         start_stop_colors: Optional[Tuple[str, str]] = None,
-        way_points_color: Optional[str] = None,
+        waypoints_color: Optional[str] = None,
         scatter: bool = False,
         plot: bool = True,
         zoom: float = 10.0,
@@ -30,7 +30,7 @@ class GmplotPlotter(Plotter):
             color (str, optional): Track color. Defaults to "#FFA800".
             start_stop_colors (Optional[Tuple[str, str]], optional):
                 Start and stop points colors. Defaults to None.
-            way_points_color (Optional[str], optional): Way points
+            waypoints_color (Optional[str], optional): Way points
                 color. Defaults to None.
             scatter (bool, optional): Scatter track points. Defaults
                 to False.
@@ -74,12 +74,12 @@ class GmplotPlotter(Plotter):
             )
 
         # Scatter way points with different color
-        if way_points_color:
-            for way_point in self._gpx.gpx.wpt:
+        if waypoints_color:
+            for waypoint in self._gpx.gpx.wpt:
                 map_.scatter(
-                    [way_point.lat],
-                    [way_point.lon],
-                    way_points_color,
+                    [waypoint.lat],
+                    [waypoint.lon],
+                    waypoints_color,
                     size=5,
                     marker=True,
                 )

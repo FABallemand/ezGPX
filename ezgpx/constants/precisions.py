@@ -1,3 +1,7 @@
+"""
+This module contains constants related to precision.
+"""
+
 DEFAULT_PRECISION = 10
 DEFAULT_PRECISION_DICT = {
     "lat_lon": DEFAULT_PRECISION,

@@ -1,13 +1,15 @@
-from typing import List
+"""
+This module contains the TrackSegment class.
+"""
 
 from .extensions import Extensions
 from .gpx_element import GpxElement
-from .way_point import WayPoint
+from .waypoint import WayPoint
 
 
 class TrackSegment(GpxElement):
     """
-    trksegType in GPX file.
+    trksegType element in GPX file.
     """
 
     fields = ["trkpt", "extensions"]
@@ -16,21 +18,17 @@ class TrackSegment(GpxElement):
     def __init__(
         self,
         tag: str = "trkseg",
-        trkpt: List[WayPoint] = None,
+        trkpt: list[WayPoint] = None,
         extensions: Extensions = None,
     ) -> None:
         """
         Initialise TrackSegment instance.
 
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "trkseg"
-        trkpt : List[WayPoint], optional
-            List of track points, by default None
-        extensions : Extensions, optional
-            Extensions, by default None
+        Args:
+            tag (str, optional): XML tag. Defaults to "trkseg".
+            trkpt (list[WayPoint], optional): List of track points. Defaults to None.
+            extensions (Extensions, optional): Extensions. Defaults to None.
         """
         self.tag: str = tag
-        self.trkpt: List[WayPoint] = [] if trkpt is None else trkpt
+        self.trkpt: list[WayPoint] = [] if trkpt is None else trkpt
         self.extensions: Extensions = extensions

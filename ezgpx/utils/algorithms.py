@@ -1,18 +1,21 @@
+"""
+This module contains utility functions for distances.
+"""
+
 from math import degrees
-from typing import List
 
 from .distance import EARTH_RADIUS, perpendicular_distance
 
 
-def ramer_douglas_peucker(points: List, epsilon: float = degrees(2 / EARTH_RADIUS)):
+def ramer_douglas_peucker(points: list, epsilon: float = degrees(2 / EARTH_RADIUS)):
     """
     Simplify a curve using the Ramer-Douglas-Peucker algorithm.
     Source: https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
 
     Parameters
     ----------
-    points : List
-        List of points defining the track to simplify.
+    points : list
+        list of points defining the track to simplify.
     epsilon : float, optional
         Ramer-Douglas-Peucker threshold distance (higher value means
         more simplifications), by default degrees(2/EARTH_RADIUS)
@@ -21,8 +24,8 @@ def ramer_douglas_peucker(points: List, epsilon: float = degrees(2 / EARTH_RADIU
 
     Returns
     -------
-    List
-        List of points defining the simplified track.
+    list
+        list of points defining the simplified track.
     """
     # Find the point with the maximum distance
     d_max = 0

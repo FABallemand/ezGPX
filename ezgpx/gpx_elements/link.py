@@ -1,3 +1,7 @@
+"""
+This module contains the Link class.
+"""
+
 from .gpx_element import GpxElement
 
 
@@ -10,23 +14,22 @@ class Link(GpxElement):
     mandatory_fields = ["href"]
 
     def __init__(
-        self, tag: str = "link", href: str = None, text: str = None, type_: str = None
+        self,
+        tag: str = "link",
+        href: str = None,
+        text: str = None,
+        type: str = None,  # pylint: disable=redefined-builtin
     ) -> None:
         """
         Initialise Link instance.
 
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "link"
-        href : str, optional
-            Hyper reference, by default None
-        text : str, optional
-            Text, by default None
-        type : str, optional
-            Type, by default None
+        Args:
+            tag (str, optional): XML tag. Defaults to "link".
+            href (str, optional): Hyper reference. Defaults to None.
+            text (str, optional): Text. Defaults to None.
+            type (str, optional): Type. Defaults to None.
         """
         self.tag: str = tag
         self.href: str = href
         self.text: str = text
-        self.type: str = type_
+        self.type: str = type

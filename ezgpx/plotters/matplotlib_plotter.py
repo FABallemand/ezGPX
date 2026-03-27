@@ -23,7 +23,7 @@ class MatplotlibPlotter(Plotter):
         colorbar: bool = False,
         start_point_color: Optional[str] = None,
         stop_point_color: Optional[str] = None,
-        way_points_color: Optional[str] = None,
+        waypoints_color: Optional[str] = None,
         background: Optional[str] = None,
         offset_percentage: float = 0.04,
         dpi: int = 96,
@@ -51,7 +51,7 @@ class MatplotlibPlotter(Plotter):
                 first point. Defaults to None.
             stop_point_color (Optional[str], optional): Color of the
                 last point. Defaults to None.
-            way_points_color (Optional[str], optional): Color of the
+            waypoints_color (Optional[str], optional): Color of the
                 way points. Defaults to None.
             background (Optional[str], optional): Map tiles to use.
                 Possible choice are: None, "bluemarble",
@@ -197,11 +197,11 @@ class MatplotlibPlotter(Plotter):
             )
 
         # Scatter way points with different color
-        if way_points_color:
-            for way_point in self._gpx.wpt:
-                x, y = map_(way_point.lon, way_point.lat)  # Project way point
+        if waypoints_color:
+            for waypoint in self._gpx.wpt:
+                x, y = map_(waypoint.lon, waypoint.lat)  # Project way point
                 map_.scatter(
-                    x, y, marker="D", color=way_points_color
+                    x, y, marker="D", color=waypoints_color
                 )  # Scatter way point
 
         # Colorbar

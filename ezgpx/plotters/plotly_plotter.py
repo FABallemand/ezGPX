@@ -20,7 +20,7 @@ class PlotlyPlotter(Plotter):
         color: str = "#FFA800",
         start_point_color: Optional[str] = None,
         stop_point_color: Optional[str] = None,
-        way_points_color: Optional[str] = None,
+        waypoints_color: Optional[str] = None,
         title: Optional[str] = None,
         zoom: Optional[float] = None,
         file_path: Optional[str] = None,
@@ -35,7 +35,7 @@ class PlotlyPlotter(Plotter):
                 first point. Defaults to None.
             stop_point_color (Optional[str], optional): Color of the
                 last point. Defaults to None.
-            way_points_color (Optional[str], optional): Color of the
+            waypoints_color (Optional[str], optional): Color of the
                 way points. Defaults to None.
             title (Optional[str], optional): Title of the plot.
                 Defaults to None.
@@ -87,14 +87,14 @@ class PlotlyPlotter(Plotter):
             )
 
         # Scatter way points with different color
-        if way_points_color:
-            for way_point in self._gpx.gpx.wpt:
+        if waypoints_color:
+            for waypoint in self._gpx.gpx.wpt:
                 fig.add_trace(
                     go.Scattermap(
                         mode="markers",
-                        lon=way_point.lon,
-                        lat=way_point.lat,
-                        marker={"size": 5, "color": way_points_color},
+                        lon=waypoint.lon,
+                        lat=waypoint.lat,
+                        marker={"size": 5, "color": waypoints_color},
                     )
                 )
 

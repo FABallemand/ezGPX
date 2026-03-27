@@ -345,7 +345,7 @@ class TestGPX:
     #     self.gpx.folium_plot(tiles="openStreetMap",
     #                          color="#110000",
     #                          start_stop_colors=None,
-    #                          way_points_color=None,
+    #                          waypoints_color=None,
     #                          minimap=False,
     #                          coord_popup=False,
     #                          title=None,

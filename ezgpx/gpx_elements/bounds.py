@@ -1,3 +1,7 @@
+"""
+This module contains the Bounds class.
+"""
+
 from .gpx_element import GpxElement
 
 
@@ -20,18 +24,16 @@ class Bounds(GpxElement):
         """
         Initialise Bounds instance.
 
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "bounds"
-        minlat : float, optional
-            Minimal latitude, by default None
-        minlon : float, optional
-            Minimal longitude, by default None
-        maxlat : float, optional
-            Maximal latitude, by default None
-        maxlon : float, optional
-            Maximal longitude, by default None
+        Args:
+            tag (str, optional): XML tag. Defaults to "bounds".
+            minlat (float, optional): Minimal latitude (in degrees).
+                Defaults to None.
+            minlon (float, optional): Minimal longitude (in degrees).
+                Defaults to None.
+            maxlat (float, optional): Maximal latitude (in degrees).
+                Defaults to None.
+            maxlon (float, optional): Maximal longitude (in degrees).
+                Defaults to None.
         """
         self.tag: str = tag
         self.minlat: float = minlat

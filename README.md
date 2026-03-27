@@ -47,7 +47,7 @@ plotter.plot(
     colorbar=True,
     start_point_color="green",
     stop_point_color="red",
-    way_points_color="blue",
+    waypoints_color="blue",
     background="World_Imagery",
     title=gpx.name(),
     title_fontsize=30,

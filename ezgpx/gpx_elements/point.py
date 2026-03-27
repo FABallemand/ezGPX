@@ -1,3 +1,7 @@
+"""
+This module contains the Point class.
+"""
+
 import datetime
 
 from .gpx_element import GpxElement
@@ -22,18 +26,12 @@ class Point(GpxElement):
         """
         Initialise Point instance.
 
-        Parameters
-        ----------
-        tag : str, optional
-            XML tag, by default "pt"
-        lat : float, optional
-            Latitude, by default None
-        lon : float, optional
-            Longitude, by default None
-        ele : float, optional
-            Elevation, by default None
-        time : datetime, optional
-            Time, by default None
+        Args:
+            tag (str, optional): XML tag. Defaults to "pt".
+            lat (float, optional): Latitude (in degrees). Defaults to None.
+            lon (float, optional): Longitude (in degrees). Defaults to None.
+            ele (float, optional): Elevation (in meters). Defaults to None.
+            time (datetime, optional): Time. Defaults to None.
         """
         self.tag: str = tag
         self.lat: float = lat

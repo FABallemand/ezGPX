@@ -111,7 +111,7 @@ ezgpx.gpx\_elements.track\_segment module
 ezgpx.gpx\_elements.way\_point module
 -------------------------------------
 
-.. automodule:: ezgpx.gpx_elements.way_point
+.. automodule:: ezgpx.gpx_elements.waypoint
    :members:
    :undoc-members:
    :show-inheritance:

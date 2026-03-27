@@ -9,7 +9,7 @@ import warnings
 from datetime import datetime
 from math import degrees
 from pathlib import Path
-from typing import IO, Dict, List, Optional, Tuple, Union
+from typing import IO, Optional
 from zipfile import ZipFile
 
 import pandas as pd
@@ -78,7 +78,7 @@ class GPX:
         self.gpx: Gpx = None
         self._ele_data: bool = False
         self._time_data: bool = False
-        self._precisions: Dict = DEFAULT_PRECISION_DICT
+        self._precisions: dict = DEFAULT_PRECISION_DICT
         self._time_format: str = DEFAULT_TIME_FORMAT
 
         # Parsers
@@ -288,22 +288,22 @@ class GPX:
         """
         return self.gpx.nb_points()
 
-    def bounds(self) -> Tuple[float, float, float, float]:
+    def bounds(self) -> tuple[float, float, float, float]:
         """
         Find the bounding coordinates of the activity.
 
         Returns:
-            Tuple[float, float, float, float]: Min latitude, min
+            tuple[float, float, float, float]: Min latitude, min
                 longitude, max latitude, max longitude.
         """
         return self.gpx.bounds()
 
-    def center(self) -> Tuple[float, float]:
+    def center(self) -> tuple[float, float]:
         """
         Find the center coordinates of the activity.
 
         Returns:
-            Tuple[float, float]: Latitude and longitude of the center
+            tuple[float, float]: Latitude and longitude of the center
                 point.
         """
         return self.gpx.center()
@@ -322,13 +322,13 @@ class GPX:
 
     def extreme_points(
         self,
-    ) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:  # TODO remove?
+    ) -> tuple[WayPoint, WayPoint, WayPoint, WayPoint]:  # TODO remove?
         """
         Find extreme points in track, i.e.: points with lowest and
         highest latitude and longitude.
 
         Returns:
-            Tuple[WayPoint, WayPoint, WayPoint, WayPoint]: Min latitude
+            tuple[WayPoint, WayPoint, WayPoint, WayPoint]: Min latitude
                 point, min longitude point, max latitude point, max
                 longitude points.
         """
@@ -621,31 +621,31 @@ class GPX:
 
     def to_dict(
         self,
-        values: List[str] = None,
+        values: list[str] = None,
         as_series: bool = False,
-    ) -> Dict:
+    ) -> dict:
         """
         Convert GPX object to dictionary.
 
         Args:
-            values (List[str], optional): List of values to write.
+            values (list[str], optional): list of values to write.
                 Supported values: "lat", "lon", "ele", "time", "speed",
                 "pace", "ascent_rate", "ascent_speed",
                 "distance_from_start". Defaults to None.
             as_series (bool, optional): True -> Values are Series False
-                -> Values are List[Any]. Defaults to False.
+                -> Values are list[Any]. Defaults to False.
 
         Returns:
-            Dict: Return a dictionary representing the GPX.
+            dict: Return a dictionary representing the GPX.
         """
         return self.gpx.to_dict(values, as_series)
 
-    def to_pandas(self, values: List[str] = None) -> pd.DataFrame:
+    def to_pandas(self, values: list[str] = None) -> pd.DataFrame:
         """
         Convert GPX object to Pandas Dataframe.
 
         Args:
-            values (List[str], optional): List of values to write.
+            values (list[str], optional): list of values to write.
                 Supported values: "lat", "lon", "ele", "time", "speed",
                 "pace", "ascent_rate", "ascent_speed",
                 "distance_from_start". Defaults to None.
@@ -687,12 +687,12 @@ class GPX:
 
         return self.gpx.to_pandas(values)
 
-    def to_polars(self, values: List[str] = None) -> pl.DataFrame:
+    def to_polars(self, values: list[str] = None) -> pl.DataFrame:
         """
         Convert GPX object to Polars Dataframe.
 
         Args:
-            values (List[str], optional): List of values to write.
+            values (list[str], optional): list of values to write.
                 Supported values: "lat", "lon", "ele", "time", "speed",
                 "pace", "ascent_rate", "ascent_speed",
                 "distance_from_start". Defaults to None.
@@ -737,9 +737,9 @@ class GPX:
     def to_csv(
         self,
         dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
-        values: List[str] = None,
+        values: list[str] = None,
         **kwargs,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """
         Write the GPX object track coordinates to a CSV file.
 
@@ -747,13 +747,13 @@ class GPX:
             dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
                 Path to a file or a file-like object to write in.
                 Defaults to None.
-            values (List[str], optional): List of values to write.
+            values (list[str], optional): list of values to write.
                 Supported values: "lat", "lon", "ele", "time", "speed",
                 "pace", "ascent_rate", "ascent_speed",
                 "distance_from_start". Defaults to None.
 
         Returns:
-            Union[str, None]: CSV like string if path is set to None.
+            str | None: CSV like string if path is set to None.
         """
         return self.gpx.to_csv(dest, values, **kwargs)
 
@@ -762,23 +762,23 @@ class GPX:
         dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
         *,
         properties: bool = True,
-        bounds_fields: Optional[List[str]] = None,
-        copyright_fields: Optional[List[str]] = None,
-        email_fields: Optional[List[str]] = None,
-        extensions_fields: Optional[Dict] = None,
-        gpx_fields: Optional[List[str]] = None,
-        link_fields: Optional[List[str]] = None,
-        metadata_fields: Optional[List[str]] = None,
-        person_fields: Optional[List[str]] = None,
-        point_segment_fields: Optional[List[str]] = None,
-        point_fields: Optional[List[str]] = None,
-        route_fields: Optional[List[str]] = None,
-        track_segment_fields: Optional[List[str]] = None,
-        track_fields: Optional[List[str]] = None,
-        way_point_fields: Optional[List[str]] = None,
-        track_point_fields: Optional[List[str]] = None,
+        bounds_fields: Optional[list[str]] = None,
+        copyright_fields: Optional[list[str]] = None,
+        email_fields: Optional[list[str]] = None,
+        extensions_fields: Optional[dict] = None,
+        gpx_fields: Optional[list[str]] = None,
+        link_fields: Optional[list[str]] = None,
+        metadata_fields: Optional[list[str]] = None,
+        person_fields: Optional[list[str]] = None,
+        point_segment_fields: Optional[list[str]] = None,
+        point_fields: Optional[list[str]] = None,
+        route_fields: Optional[list[str]] = None,
+        track_segment_fields: Optional[list[str]] = None,
+        track_fields: Optional[list[str]] = None,
+        waypoint_fields: Optional[list[str]] = None,
+        track_point_fields: Optional[list[str]] = None,
         mandatory_fields: bool = True,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """
         Write the GPX object to a GPX file.
 
@@ -787,25 +787,25 @@ class GPX:
                 Path to a file or a file-like object to write in.
                 Defaults to None.
             properties (bool, optional): _description_. Defaults to True.
-            bounds_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            copyright_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            email_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            extensions_fields (Optional[Dict], optional): _description_. Defaults to None.
-            gpx_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            link_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            metadata_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            person_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            point_segment_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            point_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            route_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            track_segment_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            track_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            way_point_fields (Optional[List[str]], optional): _description_. Defaults to None.
-            track_point_fields (Optional[List[str]], optional): _description_. Defaults to None.
+            bounds_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            copyright_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            email_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            extensions_fields (Optional[dict], optional): _description_. Defaults to None.
+            gpx_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            link_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            metadata_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            person_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            point_segment_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            point_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            route_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            track_segment_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            track_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            waypoint_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            track_point_fields (Optional[list[str]], optional): _description_. Defaults to None.
             mandatory_fields (bool, optional): _description_. Defaults to True.
 
         Returns:
-            Union[str, None]: GPX like string if path is set to None.
+            str | None: GPX like string if path is set to None.
         """
         bounds_fields = bounds_fields if bounds_fields is not None else Bounds.fields
         copyright_fields = (
@@ -839,8 +839,8 @@ class GPX:
             else TrackSegment.fields
         )
         track_fields = track_fields if track_fields is not None else Track.fields
-        way_point_fields = (
-            way_point_fields if way_point_fields is not None else WayPoint.fields
+        waypoint_fields = (
+            waypoint_fields if waypoint_fields is not None else WayPoint.fields
         )
         track_point_fields = (
             track_point_fields if track_point_fields is not None else WayPoint.fields
@@ -861,7 +861,7 @@ class GPX:
             route_fields=route_fields,
             track_segment_fields=track_segment_fields,
             track_fields=track_fields,
-            way_point_fields=way_point_fields,
+            waypoint_fields=waypoint_fields,
             track_point_fields=track_point_fields,
             mandatory_fields=mandatory_fields,
         )
@@ -870,8 +870,8 @@ class GPX:
         self,
         dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
         *,
-        styles: Optional[List[Tuple[str, Dict]]] = None,
-    ) -> Union[str, None]:
+        styles: Optional[list[tuple[str, dict]]] = None,
+    ) -> str | None:
         """
         Write the GPX object to a KML file.
 
@@ -879,10 +879,10 @@ class GPX:
             dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
                 Path to a file or a file-like object to write in.
                 Defaults to None.
-            styles (Optional[List[Tuple[str, Dict]]], optional): KML
+            styles (Optional[list[tuple[str, dict]]], optional): KML
                 styles. Defaults to None.
 
         Returns:
-            Union[str, None]: KML like string if path is set to None.
+            str | None: KML like string if path is set to None.
         """
         return self._kml_writer.write(dest, styles)

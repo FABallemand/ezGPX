@@ -12,4 +12,4 @@ from .point_segment import *
 from .route import *
 from .track import *
 from .track_segment import *
-from .way_point import *
+from .waypoint import *

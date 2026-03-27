@@ -1,8 +1,12 @@
+"""
+This module contains the GPXWriter class.
+"""
+
 import errno
 import os
 import warnings
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional
+from typing import Optional
 
 from ..gpx_elements import (
     Bounds,
@@ -20,7 +24,7 @@ from ..gpx_elements import (
     TrackSegment,
     WayPoint,
 )
-from .gpx_writer_method_behavior_creator import GPXWriterMethodBehaviorCreator
+from .gpx_writer_method_creator import GPXWriterMethodCreator
 from .writer import Writer
 
 
@@ -30,7 +34,7 @@ class GPXWriter(Writer):
     """
 
     def __init__(
-        self, gpx: Gpx = None, precisions: Dict = None, time_format: str = None
+        self, gpx: Gpx = None, precisions: dict = None, time_format: str = None
     ) -> None:
         """
         Initialise GPXWriter instance.
@@ -38,7 +42,7 @@ class GPXWriter(Writer):
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
             precisions (dict, optional): Decimal precision for each type of value. Defaults to None.
-            time_format (dict, optional): Time format. Defaults to None.
+            time_format (str, optional): Time format. Defaults to None.
         """
         super().__init__(gpx, precisions, time_format)
 
@@ -48,9 +52,7 @@ class GPXWriter(Writer):
         self.gpx_root = None
 
         # Methods behavior creator
-        self.behavior_creator: GPXWriterMethodBehaviorCreator = (
-            GPXWriterMethodBehaviorCreator()
-        )
+        self.behavior_creator: GPXWriterMethodCreator = GPXWriterMethodCreator()
 
         # Methods behaviors
         self._add_bounds = self.placeholder_behavior
@@ -64,52 +66,39 @@ class GPXWriter(Writer):
         self._add_route = self.placeholder_behavior
         self._add_track_segment = self.placeholder_behavior
         self._add_track = self.placeholder_behavior
-        self._add_way_point = self.placeholder_behavior
+        self._add_waypoint = self.placeholder_behavior
         self._add_track_point = self.placeholder_behavior
 
         # Fields
         self.properties: bool = None
-        self.bounds_fields: List[str] = None
-        self.copyright_fields: List[str] = None
-        self.email_fields: List[str] = None
-        self.extensions_fields: Dict = None
-        self.gpx_fields: List[str] = None
-        self.link_fields: List[str] = None
-        self.metadata_fields: List[str] = None
-        self.person_fields: List[str] = None
-        self.point_segment_fields: List[str] = None
-        self.point_fields: List[str] = None
-        self.route_fields: List[str] = None
-        self.track_segment_fields: List[str] = None
-        self.track_fields: List[str] = None
-        self.way_point_fields: List[str] = None
-        self.track_point_fields: List[str] = None
+        self.bounds_fields: list[str] = None
+        self.copyright_fields: list[str] = None
+        self.email_fields: list[str] = None
+        self.extensions_fields: dict = None
+        self.gpx_fields: list[str] = None
+        self.link_fields: list[str] = None
+        self.metadata_fields: list[str] = None
+        self.person_fields: list[str] = None
+        self.point_segment_fields: list[str] = None
+        self.point_fields: list[str] = None
+        self.route_fields: list[str] = None
+        self.track_segment_fields: list[str] = None
+        self.track_fields: list[str] = None
+        self.waypoint_fields: list[str] = None
+        self.track_point_fields: list[str] = None
 
     def placeholder_behavior(self, element, subelement):
         """
         Placeholder function for adding subelement to element in XML
         tree.
-
-        Parameters
-        ----------
-        element : ET.Element
-            Parent element in XML tree
-        subelement : GpxElement
-            Subelement in XML tree
-
-        Returns
-        -------
-        ET.Element
-            Parent element containing subelement
         """
-        print(element, subelement)
 
     def add_bounds(self, element: ET.Element, bounds: Bounds) -> ET.Element:
         """
         Add Bounds instance to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             bounds (Bounds): Bounds instance to add.
 
         Returns:
@@ -122,7 +111,7 @@ class GPXWriter(Writer):
         Add Copyright instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             copyright (Copyright): Copyright instance to add.
 
         Returns:
@@ -135,7 +124,7 @@ class GPXWriter(Writer):
         Add Email instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             email (Email): Email instance to add.
 
         Returns:
@@ -172,28 +161,21 @@ class GPXWriter(Writer):
                         for k1, v1 in v0["attrib"].items():
                             if k1 in extensions_fields[k0]["attrib"].keys():
                                 self.set_not_none(sub_extensions_, k1, v1)
-
         return extensions_
 
     def add_extensions(
-        self, element: ET.Element, extensions: Extensions, extensions_fields: Dict
+        self, element: ET.Element, extensions: Extensions, extensions_fields: dict
     ) -> ET.Element:
         """
-        Add Extnsions instance element to GPX element.
+        Add Extensions instance element to GPX element.
 
-        Parameters
-        ----------
-        element : xml.etree.ElementTree.Element
-            GPX element
-        extensions : Extensions
-            Extensions instance to add
-        extensions_fields : Dict
-            Extensions fileds to add
+        Args:
+            element (ET.Element): GPX element.
+            extensions (Extensions): Extensions instance to add.
+            extensions_fields (dict): Extensions fields to add.
 
-        Returns
-        -------
-        xml.etree.ElementTree.Element
-            GPX element
+        Returns:
+            ET.Element: GPX element.
         """
         if extensions is not None:
             extensions_ = ET.SubElement(element, extensions.tag)
@@ -207,7 +189,7 @@ class GPXWriter(Writer):
         Add Link instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             link (Link): Link instance to add.
 
         Returns:
@@ -220,7 +202,7 @@ class GPXWriter(Writer):
         Add Metadata instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             metadata (Metadata): Metadata instance to add.
 
         Returns:
@@ -233,7 +215,7 @@ class GPXWriter(Writer):
         Add Person instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             person (Person): Person instance to add.
 
         Returns:
@@ -248,7 +230,7 @@ class GPXWriter(Writer):
         Add PointSegment instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             point_segment (PointSegment): PointSegment instance to add.
 
         Returns:
@@ -261,7 +243,7 @@ class GPXWriter(Writer):
         Add Point instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             point (Point): Point instance to add.
 
         Returns:
@@ -274,7 +256,7 @@ class GPXWriter(Writer):
         Add Route instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             route (Route): Route instance to add.
 
         Returns:
@@ -289,7 +271,7 @@ class GPXWriter(Writer):
         Add TrackSegment instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             track_segment (TrackSegment): TrackSegment instance to add.
 
         Returns:
@@ -302,7 +284,7 @@ class GPXWriter(Writer):
         Add Track instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
+            element (ET.Element): GPX element.
             track (Track): Track instance to add.
 
         Returns:
@@ -310,45 +292,41 @@ class GPXWriter(Writer):
         """
         return self._add_track(self, element, track)
 
-    def add_way_point(self, element: ET.Element, way_point: WayPoint) -> ET.Element:
+    def add_waypoint(self, element: ET.Element, waypoint: WayPoint) -> ET.Element:
         """
         Add WayPoint instance element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
-            way_point (WayPoint): WayPoint instance to add.
+            element (ET.Element): GPX element.
+            waypoint (WayPoint): WayPoint instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
-        return self._add_way_point(self, element, way_point)
+        return self._add_waypoint(self, element, waypoint)
 
-    def add_track_point(self, element: ET.Element, way_point: WayPoint) -> ET.Element:
+    def add_track_point(self, element: ET.Element, waypoint: WayPoint) -> ET.Element:
         """
         Add WayPoint instance (with trkpt tag) element to GPX element.
 
         Args:
-            element (xml.etree.ElementTree.Element): GPX element.
-            way_point (WayPoint): WayPoint instance to add.
+            element (ET.Element): GPX element.
+            waypoint (WayPoint): WayPoint instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
-        return self._add_track_point(self, element, way_point)
+        return self._add_track_point(self, element, waypoint)
 
     def _create_schema_loc_str(self, xsi_schema_location: list[str]) -> str:
         """
         Create schema location string to write in GPX file.
 
-        Parameters
-        ----------
-        xsi_schema_location : list[str]
-            List of schema locations.
+        Args:
+            xsi_schema_location (list[str]): List of schema locations.
 
-        Returns
-        -------
-        str
-            Schema location string to write in GPX file.
+        Returns:
+            str: Schema location string to write in GPX file.
         """
         schema_location_string = ""
         for loc in xsi_schema_location:
@@ -359,16 +337,21 @@ class GPXWriter(Writer):
 
     def add_root_properties(self) -> None:
         """
-        Add properties to the GPX root element.
+        Add properties to the GPX root element and register name spaces.
         """
         self.set_not_none(self.gpx_root, "version", self.gpx.version)
         self.set_not_none(self.gpx_root, "creator", "ezGPX")
         for k, v in self.gpx.xmlns.items():
-            self.set_not_none(self.gpx_root, "xmlns:" + k if k != "" else "xmlns", v)
-        schema_location_string = self._create_schema_loc_str(
-            self.gpx.xsi_schema_location
+            ET.register_namespace(k, v)  # prefix, URI
+            if k in ["", "xsi"]:
+                self.set_not_none(
+                    self.gpx_root, f"xmlns:{k}" if k != "" else "xmlns", v
+                )
+        self.set_not_none(
+            self.gpx_root,
+            "xsi:schemaLocation",
+            self._create_schema_loc_str(self.gpx.xsi_schema_location),
         )
-        self.set_not_none(self.gpx_root, "xsi:schemaLocation", schema_location_string)
 
     def add_root_metadata(self) -> None:
         """
@@ -376,12 +359,12 @@ class GPXWriter(Writer):
         """
         self.gpx_root = self.add_metadata(self.gpx_root, self.gpx.metadata)
 
-    def add_root_way_points(self) -> None:
+    def add_root_waypoints(self) -> None:
         """
         Add wpt elements to the GPX root element.
         """
-        for way_point in self.gpx.wpt:
-            self.gpx_root = self.add_way_point(self.gpx_root, way_point)
+        for waypoint in self.gpx.wpt:
+            self.gpx_root = self.add_waypoint(self.gpx_root, waypoint)
 
     def add_root_routes(self) -> None:
         """
@@ -413,78 +396,65 @@ class GPXWriter(Writer):
         Returns:
             str: String corresponding to the Gpx instance.
         """
-        if self.gpx is not None:
-            # Reset string
-            self.gpx_string = ""
+        if self.gpx is None:
+            return ""
 
-            # Root
-            self.gpx_root = ET.Element("gpx")
+        # Reset string
+        self.gpx_string = ""
 
-            # Properties
-            if self.properties:
-                self.add_root_properties()
+        # Root
+        self.gpx_root = ET.Element("gpx")
 
-            # Metadata
-            if self.metadata_fields:
-                self.add_root_metadata()
+        # Properties
+        if self.properties:
+            self.add_root_properties()
 
-            # Way points
-            if self.way_point_fields:
-                self.add_root_way_points()
+        # Metadata
+        if self.metadata_fields:
+            self.add_root_metadata()
 
-            # Routes
-            if self.route_fields:
-                self.add_root_routes()
+        # Way points
+        if self.waypoint_fields:
+            self.add_root_waypoints()
 
-            # Tracks
-            if self.track_fields:
-                self.add_root_tracks()
+        # Routes
+        if self.route_fields:
+            self.add_root_routes()
 
-            # Extensions
-            if self.extensions_fields.get("gpx"):
-                self.add_root_extensions()
+        # Tracks
+        if self.track_fields:
+            self.add_root_tracks()
 
-            # Convert data to string
-            self.gpx_string = ET.tostring(self.gpx_root, encoding="unicode")
-            # self.gpx_string = ET.tostring(gpx_root, encoding="utf-8")
+        # Extensions
+        if self.extensions_fields.get("gpx"):
+            self.add_root_extensions()
 
-            return self.gpx_string
+        # Convert data to string
+        self.gpx_string = ET.tostring(self.gpx_root, encoding="unicode")
+        # self.gpx_string = ET.tostring(gpx_root, encoding="utf-8")
 
-    def write_gpx(self):
-        """
-        Convert Gpx instance to string and write to file.
-        """
-        # Open/create GPX file
-        try:
-            f = open(self.file_path, "w", encoding="utf-8")
-        except OSError:
-            warnings.warn("Could not open/read file: %s", self.file_path)
-            raise
-        # Write GPX file
-        with f:
-            f.write('<?xml version="1.0" encoding="UTF-8"?>')
-            f.write(self.gpx_string)
+        return self.gpx_string
 
     def write(
         self,
         file_path: str,
         *,
         properties: bool = True,
-        bounds_fields: Optional[List[str]] = None,
-        copyright_fields: Optional[List[str]] = None,
-        email_fields: Optional[List[str]] = None,
-        extensions_fields: Optional[Dict] = None,
-        gpx_fields: Optional[List[str]] = None,
-        link_fields: Optional[List[str]] = None,
-        metadata_fields: Optional[List[str]] = None,
-        person_fields: Optional[List[str]] = None,
-        point_segment_fields: Optional[List[str]] = None,
-        point_fields: Optional[List[str]] = None,
-        route_fields: Optional[List[str]] = None,
-        track_segment_fields: Optional[List[str]] = None,
-        track_fields: Optional[List[str]] = None,
-        way_point_fields: Optional[List[str]] = None,
-        track_point_fields: Optional[List[str]] = None,
+        bounds_fields: Optional[list[str]] = None,
+        copyright_fields: Optional[list[str]] = None,
+        email_fields: Optional[list[str]] = None,
+        extensions_fields: Optional[dict] = None,
+        gpx_fields: Optional[list[str]] = None,
+        link_fields: Optional[list[str]] = None,
+        metadata_fields: Optional[list[str]] = None,
+        person_fields: Optional[list[str]] = None,
+        point_segment_fields: Optional[list[str]] = None,
+        point_fields: Optional[list[str]] = None,
+        route_fields: Optional[list[str]] = None,
+        track_segment_fields: Optional[list[str]] = None,
+        track_fields: Optional[list[str]] = None,
+        waypoint_fields: Optional[list[str]] = None,
+        track_point_fields: Optional[list[str]] = None,
         mandatory_fields: bool = True,
         xml_schema: bool = False,
         xml_extensions_schemas: bool = False,
@@ -497,16 +467,21 @@ class GPXWriter(Writer):
             path (str): Path to write the GPX file.
             properties (bool, optional): Toggle properties writting. Defaults to True.
             metadata (bool, optional): Toggle metadata writting. Defaults to True.
-            way_point (bool, optional): Toggle way points writting. Defaults to True.
+            waypoint (bool, optional): Toggle way points writting. Defaults to True.
             routes (bool, optional): Toggle routes writting. Defaults to True.
             extensions (bool, optional): Toggle extensions writting. Defaults to True.
             ele (bool, optional): Toggle elevation writting. Defaults to True.
             time (bool, optional): Toggle time writting. Defaults to True.
-            xml_schemas (bool, optional): Toggle schema verification after writting. Defaults to False.
-            extensions_schemas (bool, optional): Toggle extensions schema verificaton after writing. Requires internet connection and is not guaranted to work. Defaults to False.
+            xml_schemas (bool, optional): Toggle schema verification
+                after writting. Defaults to False.
+            extensions_schemas (bool, optional): Toggle extensions
+                schema verificaton after writing. Requires internet
+                connection and is not guaranted to work. Defaults to
+                False.
 
         Returns:
-            bool: Return False if written file does not follow checked schemas. Return True otherwise.
+            bool: Return False if written file does not follow checked
+                schemas. Return True otherwise.
         """
         directory_path = os.path.dirname(os.path.realpath(file_path))
         if not os.path.exists(directory_path):
@@ -549,8 +524,8 @@ class GPXWriter(Writer):
             else TrackSegment.fields
         )
         self.track_fields = track_fields if track_fields is not None else Track.fields
-        self.way_point_fields = (
-            way_point_fields if way_point_fields is not None else WayPoint.fields
+        self.waypoint_fields = (
+            waypoint_fields if waypoint_fields is not None else WayPoint.fields
         )
         self.track_point_fields = (
             track_point_fields if track_point_fields is not None else WayPoint.fields
@@ -565,7 +540,7 @@ class GPXWriter(Writer):
                         f"{element} element must have following fields: {mandatory_fields}"
                         "Missing mandatory fields will automatically be added."
                     )
-                    fields = list(set(fields + mandatory_fields))
+                    fields = set(fields + mandatory_fields)
                 return fields
 
             self.bounds_fields = check_mandatory_fields(
@@ -604,8 +579,8 @@ class GPXWriter(Writer):
             self.track_fields = check_mandatory_fields(
                 "Track", self.track_fields, Track.mandatory_fields
             )
-            self.way_point_fields = check_mandatory_fields(
-                "WayPoint", self.way_point_fields, WayPoint.mandatory_fields
+            self.waypoint_fields = check_mandatory_fields(
+                "WayPoint", self.waypoint_fields, WayPoint.mandatory_fields
             )
             self.track_point_fields = check_mandatory_fields(
                 "TrackPoint", self.track_point_fields, WayPoint.mandatory_fields
@@ -631,8 +606,8 @@ class GPXWriter(Writer):
             self.track_segment_fields
         )
         self._add_track = self.behavior_creator.add_track_creator(self.track_fields)
-        self._add_way_point = self.behavior_creator.add_way_point_creator(
-            self.way_point_fields
+        self._add_waypoint = self.behavior_creator.add_waypoint_creator(
+            self.waypoint_fields
         )
         self._add_track_point = self.behavior_creator.add_track_point_creator(
             self.track_point_fields
@@ -640,7 +615,8 @@ class GPXWriter(Writer):
 
         # Write .gpx file
         self.gpx_to_string()
-        self.write_gpx()
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            f.write('<?xml version="1.0" encoding="UTF-8"?>' + self.gpx_string)
 
         # Check XML schemas
         res = True
