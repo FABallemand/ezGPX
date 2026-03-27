@@ -16,6 +16,7 @@ from ezgpx import GPX
 
 TEST_FILES_DIR = "test_files/files/"
 REFERENCE_TEST_FILES_DIR = "test_files/reference_files/"
+TMP_DIR = os.path.join(FILE_DIR, "tmp")
 
 
 class TestGPX:
@@ -23,8 +24,8 @@ class TestGPX:
 
     def test_init(self):
         # Create temporary folder
-        rmtree("tmp", True)
-        os.makedirs(os.path.join(FILE_DIR, "/tmp"))
+        rmtree(TMP_DIR, True)
+        os.makedirs(TMP_DIR)
 
     # ==== Check Schemas ======================================================#
 
@@ -241,7 +242,7 @@ class TestGPX:
     def test_to_gpx(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        gpx.to_gpx("tmp/strava_run_1_test.gpx", xml_schema=False)
+        gpx.to_gpx("tmp/strava_run_1_test.gpx")
         # Test
         assert filecmp.cmp(
             "tmp/strava_run_1_test.gpx",
@@ -252,7 +253,7 @@ class TestGPX:
     def test_to_kml(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        gpx.to_kml("tmp/strava_run_1_test.kml", styles=None, xml_schema=False)
+        gpx.to_kml("tmp/strava_run_1_test.kml", styles=None)
         # Test
         assert filecmp.cmp(
             "tmp/strava_run_1_test.kml",
@@ -377,7 +378,7 @@ class TestGPX:
     def test_destroy(self, remove_tmp: bool = True):
         # Remove temporary folder
         if remove_tmp:
-            rmtree("tmp", True)
+            rmtree(TMP_DIR, True)
 
     # ==== Test ===============================================================#
 

@@ -53,15 +53,13 @@
 
 # 📝 TO DO LIST !!
 - Fix issues with extensions when writting file
-- Add str and repr methods to all class
-- Merge method
 - Compute length properly (improve haversine distance precision, 2D, 3D)
 - Tests
-- Update docstring (Google style + content [description from xsd])
 - Normalize class names and attributes with GPX names
 - Add units to docstrings
 - Add meridian plot with basemap
 - Add support for all emojis in plots
-- Handle errors properly and remove logging
+- Handle errors properl
 - Add descent rate and descent speed?
 - Improve time computation for pauses?
+- Remove warnings
