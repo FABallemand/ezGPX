@@ -1,7 +1,9 @@
+# ruff: noqa: F401
 """
 This module contains the GPXWriterMethodCreator class.
 """
 
+import xml.etree.ElementTree as ET  # pylint: disable=unused-import
 from types import FunctionType
 
 
