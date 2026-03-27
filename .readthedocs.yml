@@ -7,7 +7,7 @@ version: 2
 
 # Set the version of Python and other tools you might need
 build:
-  os: ubuntu-24.04
+  os: ubuntu-lts-latest
   tools:
     python: "3.10"
   jobs:
@@ -25,7 +25,7 @@ formats: all
 # to build the documentation automatically.
 python:
   install:
-    - requirements: requirements.txt
+    - requirements: docs/requirements.txt
     # Install our python package before building the docs
     - method: pip
       path: .
