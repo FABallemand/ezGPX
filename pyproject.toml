@@ -1,6 +1,6 @@
 [project]
 name = "ezgpx"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
     {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
 ]
@@ -27,7 +27,6 @@ classifiers=[
     "Intended Audience :: Developers",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent"
@@ -68,6 +67,8 @@ utils = [
   "ipykernel>=6.30.1",
   "nbformat>=4.2.0",
   "scipy>=1.16.3",
+  "setuptools>=82.0.1",
+  "build>=1.4.2",
 ]
 tests = ["pytest>=9.0.2"]
 doc = [
