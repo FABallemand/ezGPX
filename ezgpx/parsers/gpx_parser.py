@@ -5,11 +5,9 @@ This module contains the GPXParser class.
 import io
 import warnings
 import xml.etree.ElementTree as ET
-from datetime import datetime
 from pathlib import Path
 from typing import IO
 
-from ..constants.precisions import POSSIBLE_TIME_FORMATS
 from ..gpx_elements import (
     Bounds,
     Copyright,
@@ -76,8 +74,8 @@ class GPXParser(XMLParser):
         else:
             self.ele_data = False
 
-        self.precisions["lat_lon"] = self.find_precision(point.get("lat"))
-        self.precisions["elevation"] = self.find_precision(ele_text)
+        self.precisions["lat_lon"] = self._find_precision(point.get("lat"))
+        self.precisions["elevation"] = self._find_precision(ele_text)
 
     def _find_time_element(self) -> str | None:
         """
@@ -105,31 +103,6 @@ class GPXParser(XMLParser):
 
         # No time element at all...
         return None
-
-    def _find_time_format(self):
-        """
-        Find the time format used in GPX file.
-        Also find if the GPX file contains time data.
-        """
-        time_str = self._find_time_element()
-        if time_str is None:
-            self.time_data = False
-            warnings.warn("No time element in GPX file.")
-            return
-
-        self.time_data = True
-        for tf in POSSIBLE_TIME_FORMATS:
-            try:
-                datetime.strptime(time_str, tf)
-                self.time_format = tf
-                break
-            except ValueError:
-                pass
-        else:
-            warnings.warn(
-                """Unknown time format. Default time format will be used uppon
-                writting."""
-            )
 
     def _parse_bounds(self, bounds: ET.Element, tag: str = "bounds") -> Bounds | None:
         """
@@ -547,7 +520,7 @@ class GPXParser(XMLParser):
         self._find_precisions()
 
         # Find time format
-        self._find_time_format()
+        self._find_time_format(self._find_time_element())
 
         # Parse metadata
         try:

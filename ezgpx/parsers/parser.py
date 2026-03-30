@@ -3,10 +3,16 @@ This module contains the Parser class.
 """
 
 import warnings
+from datetime import datetime
 from pathlib import Path
 from typing import IO, Dict
 
-from ..constants.precisions import DEFAULT_PRECISION, DEFAULT_TIME_FORMAT
+from ..constants.precisions import (
+    DEFAULT_PRECISION,
+    DEFAULT_PRECISION_DICT,
+    DEFAULT_TIME_FORMAT,
+    POSSIBLE_TIME_FORMATS,
+)
 from ..gpx_elements import Gpx
 
 
@@ -29,55 +35,46 @@ class Parser:
 
         self.ele_data: bool = False
         self.time_data: bool = False
-        self.precisions: dict = {
-            "lat_lon": DEFAULT_PRECISION,
-            "elevation": DEFAULT_PRECISION,
-            "distance": DEFAULT_PRECISION,
-            "duration": DEFAULT_PRECISION,
-            "speed": DEFAULT_PRECISION,
-            "rate": DEFAULT_PRECISION,
-            "default": DEFAULT_PRECISION,
-        }
+        self.precisions: dict = DEFAULT_PRECISION_DICT
         self.time_format: str = DEFAULT_TIME_FORMAT
 
         self.gpx: Gpx = Gpx(xmlns=name_spaces)
 
-    def find_precision(self, number: int | float | str) -> int:
+    def _find_precision(self, number: str | None) -> int:
         """
         Find decimal precision of a given number.
 
         Args:
-            number (int | float | str): Number.
+            number (str | None): Number.
 
         Returns:
             int: Decimal precision.
         """
         if number is None:
             return DEFAULT_PRECISION
-
-        if isinstance(number, int):
-            return 0
-        elif isinstance(number, float):
-            number = str(number)
-        elif isinstance(number, str):
-            try:
-                float(number)
-            except OSError as err:
-                warnings.warn("OS error: %s", err)
-            except ValueError:
-                warnings.warn(
-                    "Could not convert data (%s) to a floatingpoint value.", number
-                )
-            except Exception as err:
-                warnings.warn(
-                    "Unexpected %s, %s.Unable to find precision of number: %s",
-                    err,
-                    type(err),
-                    number,
-                )
-                raise
-
         if "." in number:
             _, decimal = number.split(sep=".")
             return len(decimal)
         return 0
+
+    def _find_time_format(self, time: str | None):
+        """
+        Find time format used in the source file.
+
+        Args:
+            time (str | None): Time.
+        """
+        self.time_data = time is not None
+
+        for tf in POSSIBLE_TIME_FORMATS:
+            try:
+                datetime.strptime(time, tf)
+                self.time_format = tf
+                break
+            except ValueError:
+                pass
+        else:
+            warnings.warn(
+                """Unknown time format. Default time format will be used uppon
+                writting."""
+            )

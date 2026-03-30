@@ -1,9 +1,12 @@
-tests/dev_tests/*
-tests/tmp/*
-*_test.gpx
+*.out
 *.old
 *.private
 *.unused
+
+# Tests
+tests/dev_tests/*
+tests/tmp/*
+*_test.gpx
 
 # Documentation
 doc/_*

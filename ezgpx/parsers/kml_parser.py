@@ -51,10 +51,10 @@ class KMLParser(XMLParser):
         Find decimal precision of any type of value in a KML file (latitude, elevation...).
         """
         # Point
-        documents = self.xml_root.findall("opengis:Document", self.name_spaces)
-        placemarks = documents[0].findall("opengis:Placemark", self.name_spaces)
-        linestrings = placemarks[0].findall("opengis:LineString", self.name_spaces)
-        coordinates = self.find_text(linestrings[0], "opengis:coordinates")
+        documents = self.xml_root.findall("Document", self.name_spaces)
+        placemarks = documents[0].findall("Placemark", self.name_spaces)
+        linestrings = placemarks[0].findall("LineString", self.name_spaces)
+        coordinates = self.find_text(linestrings[0], "coordinates")
 
         coordinates = coordinates.replace("\n", "").replace("\t", "")
         if coordinates[-1] == " ":
@@ -62,8 +62,8 @@ class KMLParser(XMLParser):
         coordinates = coordinates.split(" ")
         coordinates = coordinates[0].split(",")
 
-        self.precisions["lat_lon"] = self.find_precision(coordinates[0])
-        self.precisions["elevation"] = self.find_precision(coordinates[2])
+        self.precisions["lat_lon"] = self._find_precision(coordinates[0])
+        self.precisions["elevation"] = self._find_precision(coordinates[2])
 
     # def parse_linestring(self, linestring) -> list[str]:
     #     """
@@ -103,13 +103,13 @@ class KMLParser(XMLParser):
 
         placemark_data = {}
 
-        placemark_data["name"] = self.find_text(placemark, "opengis:name")
+        placemark_data["name"] = self.find_text(placemark, "name")
 
         placemark_data["linestrings_data"] = []
-        linestrings = placemark.findall("opengis:LineString", self.name_spaces)
+        linestrings = placemark.findall("LineString", self.name_spaces)
         for linestring in linestrings:
             placemark_data["linestrings_data"].append(
-                self.find_text(linestring, "opengis:coordinates")
+                self.find_text(linestring, "coordinates")
             )
 
         return placemark_data
@@ -128,10 +128,10 @@ class KMLParser(XMLParser):
         if document is None:
             return None
 
-        # name = self.find_text(document, "opengis:name")
+        # name = self.find_text(document, "name")
 
         placemmarks_data = []
-        placemarks = document.findall("opengis:Placemark", self.name_spaces)
+        placemarks = document.findall("Placemark", self.name_spaces)
         for placemark in placemarks:
             placemmarks_data.append(self.parse_placemark(placemark))
 
@@ -141,7 +141,7 @@ class KMLParser(XMLParser):
         """
         Parse Document elements from KML file.
         """
-        documents = self.xml_root.findall("opengis:Document", self.name_spaces)
+        documents = self.xml_root.findall("Document", self.name_spaces)
         for document in documents:
             placemarks_data = self.parse_document(document)
 

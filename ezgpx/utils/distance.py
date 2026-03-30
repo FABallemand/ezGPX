@@ -1,3 +1,7 @@
+"""
+This module contains utility functions for distances.
+"""
+
 import math as m
 import warnings
 from typing import Protocol, Tuple

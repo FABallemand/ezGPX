@@ -98,6 +98,9 @@ namespaces = true
 [tool.isort]
 profile = "black"
 
+[tool.pylint.main]
+ignore-patterns = ["__init__\\.py"]  # Ignore all __init__ files
+
 [tool.ruff]
 fix = true
 exclude = [".venv", "tests", "examples"]

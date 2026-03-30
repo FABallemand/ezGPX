@@ -63,3 +63,4 @@
 - Add descent rate and descent speed?
 - Improve time computation for pauses?
 - Remove warnings
+- Use itertools

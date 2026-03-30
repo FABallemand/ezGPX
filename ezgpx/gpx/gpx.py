@@ -37,6 +37,7 @@ from ..parsers.fit_parser import FitParser
 from ..parsers.gpx_parser import GPXParser
 from ..parsers.kml_parser import KMLParser
 from ..utils import EARTH_RADIUS, check_xml_extensions_schemas, check_xml_schema
+from ..utils.dataframe import is_dataframe
 from ..writers.gpx_writer import GPXWriter
 from ..writers.kml_writer import KMLWriter
 
@@ -80,9 +81,7 @@ class GPX:
         self._time_data: bool = False
         self._precisions: dict = DEFAULT_PRECISION_DICT
         self._time_format: str = DEFAULT_TIME_FORMAT
-
-        # Parsers
-        self._gpx_parser: GPXParser = None  # TODO remove?
+        self._extensions_fields: dict = {}
 
         # Writers
         self._gpx_writer: GPXWriter = None
@@ -125,9 +124,7 @@ class GPX:
             )
 
         # Dataframe
-        elif isinstance(
-            source, (pd.DataFrame, pl.DataFrame)
-        ):  # TODO other dataframe types
+        elif is_dataframe(source):
             self._init_from_dataframe(source)
         else:
             raise TypeError(
@@ -161,12 +158,13 @@ class GPX:
                 schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
         """
-        self._gpx_parser = GPXParser(self.source, xml_schema, xml_extensions_schemas)
-        self.gpx = self._gpx_parser.gpx
-        self._ele_data = self._gpx_parser.ele_data
-        self._time_data = self._gpx_parser.time_data
-        self._precisions = self._gpx_parser.precisions
-        self._time_format = self._gpx_parser.time_format
+        parser = GPXParser(self.source, xml_schema, xml_extensions_schemas)
+        self.gpx = parser.gpx
+        self._ele_data = parser.ele_data
+        self._time_data = parser.time_data
+        self._precisions = parser.precisions
+        self._time_format = parser.time_format
+        self._extensions_fields = parser.extensions_fields
 
     def _init_from_kml(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -181,10 +179,10 @@ class GPX:
                 schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
         """
-        kml_parser = KMLParser(self.source, xml_schema, xml_extensions_schemas)
-        self.gpx = kml_parser.gpx
-        self._precisions = kml_parser.precisions
-        self._time_format = kml_parser.time_format
+        parser = KMLParser(self.source, xml_schema, xml_extensions_schemas)
+        self.gpx = parser.gpx
+        self._precisions = parser.precisions
+        self._time_format = parser.time_format
 
     def _init_from_kmz(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -210,20 +208,21 @@ class GPX:
                     f"Unable to parse file: {self.source}"
                     "Expected to find doc.kml inside KMZ file."
                 )
-            kml = io.BytesIO(kmz.open("doc.kml", "r").read())
-        kml_parser = KMLParser(kml, xml_schema, xml_extensions_schemas)
-        self.gpx = kml_parser.gpx
-        self._precisions = kml_parser.precisions
-        self._time_format = kml_parser.time_format
+            with kmz.open("doc.kml", "r") as kml_file:
+                kml = io.BytesIO(kml_file.read())
+        parser = KMLParser(kml, xml_schema, xml_extensions_schemas)
+        self.gpx = parser.gpx
+        self._precisions = parser.precisions
+        self._time_format = parser.time_format
 
     def _init_from_fit(self):
         """
         Initialise GPX instance from FIT file.
         """
-        fit_parser = FitParser(self.source)
-        self.gpx = fit_parser.gpx
-        self._precisions = fit_parser.precisions
-        self._time_format = fit_parser.time_format
+        parser = FitParser(self.source)
+        self.gpx = parser.gpx
+        self._precisions = parser.precisions
+        self._time_format = parser.time_format
 
     def _init_from_dataframe(self, source: IntoFrameT):
         """
@@ -368,17 +367,11 @@ class GPX:
         """
         return self.gpx.max_elevation()
 
-    def compute_points_ascent_rate(self) -> None:  # TODO Do automatically in Gpx?
-        """
-        Compute ascent rate at each point.
-        """
-        self.gpx.compute_points_ascent_rate()
-
-    def min_ascent_rate(self) -> float:  # TODO rename to max_descent_rate?
+    def max_descent_rate(self) -> float:
         """
         Return the minimum ascent rate of the activity.
         """
-        return self.gpx.min_ascent_rate()
+        return self.gpx.max_descent_rate()
 
     def max_ascent_rate(self) -> float:
         """
@@ -404,19 +397,19 @@ class GPX:
 
     def total_elapsed_time(self) -> datetime:
         """
-        Return the total elapsed time during the activity.
+        Return the total elapsed time.
         """
         return self.gpx.total_elapsed_time()
 
     def stopped_time(self) -> datetime:
         """
-        Return the stopped time during the activity.
+        Return the stopped time.
         """
         return self.gpx.stopped_time()
 
     def moving_time(self) -> datetime:
         """
-        Return the moving time during the activity.
+        Return the moving time.
         """
         return self.gpx.moving_time()
 
@@ -432,15 +425,9 @@ class GPX:
 
     def avg_moving_speed(self) -> float:
         """
-        Return average moving speed (in kilometers per hour) during the activity.
+        Return average moving speed (in kilometers per hour).
         """
         return self.gpx.avg_moving_speed()
-
-    def compute_points_speed(self) -> None:  # TODO remove?
-        """
-        Compute speed (in kilometers per hour) at each track point.
-        """
-        self.gpx.compute_points_speed()
 
     def min_speed(self) -> float:
         """
@@ -450,55 +437,43 @@ class GPX:
 
     def max_speed(self) -> float:
         """
-        Return the maximum speed (in kilometers per hour) during the activity.
+        Return the maximum speed (in kilometers per hour).
         """
         return self.gpx.max_speed()
 
     def avg_pace(self) -> float:
         """
-        Return average pace (in minutes per kilometer) during the activity.
+        Return average pace (in minutes per kilometer).
         """
         return self.gpx.avg_pace()
 
     def avg_moving_pace(self) -> float:
         """
-        Return average moving pace (in minutes per kilometer) during the activity.
+        Return average moving pace (in minutes per kilometer).
         """
         return self.gpx.avg_moving_pace()
 
-    def compute_points_pace(self) -> None:  # TODO remove?
-        """
-        Compute pace at each track point.
-        """
-        self.gpx.compute_points_pace()
-
     def min_pace(self) -> float:
         """
-        Return the minimum pace (in minutes per kilometer) during the activity.
+        Return the minimum pace (in minutes per kilometer).
         """
         return self.gpx.min_pace()
 
     def max_pace(self) -> float:
         """
-        Return the maximum pace (in minutes per kilometer) during the activity.
+        Return the maximum pace (in minutes per kilometer).
         """
         return self.gpx.max_pace()
 
-    def compute_points_ascent_speed(self) -> None:  # TODO remove?
-        """
-        Compute ascent speed (in kilometers per hour) at each track point.
-        """
-        self.gpx.compute_points_ascent_speed()
-
     def min_ascent_speed(self) -> float:
         """
-        Return the minimum ascent speed (in kilometers per hour) during the activity.
+        Return the minimum ascent speed (in meters per hour).
         """
         return self.gpx.min_ascent_speed()
 
     def max_ascent_speed(self) -> float:
         """
-        Return the maximum ascent speed (in kilometers per hour) during the activity.
+        Return the maximum ascent speed (in meters per hour).
         """
         return self.gpx.max_ascent_speed()
 
@@ -540,9 +515,7 @@ class GPX:
         """
         self.gpx.remove_gps_errors()
 
-    def remove_close_points(
-        self, min_dist: float = 1, max_dist: float = 10
-    ):  # TODO remove?
+    def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):
         """
         Remove points that are to close together.
 
@@ -812,13 +785,10 @@ class GPX:
             copyright_fields if copyright_fields is not None else Copyright.fields
         )
         email_fields = email_fields if email_fields is not None else Email.fields
-        default_extensions_fields = (
-            self._gpx_parser.extensions_fields if self._gpx_parser is not None else {}
-        )
         extensions_fields = (
             extensions_fields
             if extensions_fields is not None
-            else default_extensions_fields
+            else self._extensions_fields
         )
         gpx_fields = gpx_fields if gpx_fields is not None else Gpx.fields
         link_fields = link_fields if link_fields is not None else Link.fields

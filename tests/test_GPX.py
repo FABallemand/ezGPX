@@ -105,15 +105,11 @@ class TestGPX:
         # Test
         assert gpx.descent() == 224.79999999999987
 
-    @pytest.mark.skip(reason="nothing to test")
-    def test_compute_points_ascent_rate(self):
-        pass
-
     def test_min_ascent_rate(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
         # Test
-        assert gpx.min_ascent_rate() == -38.54138626353898
+        assert gpx.max_descent_rate() == -38.54138626353898
 
     def test_max_ascent_rate(self):
         # Parse GPX Files
@@ -165,10 +161,6 @@ class TestGPX:
         # Test
         assert gpx.avg_moving_speed() == 10.974613320139435
 
-    @pytest.mark.skip(reason="nothing to test")
-    def test_compute_points_speed(self):
-        pass
-
     def test_min_speed(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
@@ -193,10 +185,6 @@ class TestGPX:
         # Test
         assert gpx.avg_moving_pace() == 5.467163010645161
 
-    @pytest.mark.skip(reason="nothing to test")
-    def test_compute_points_pace(self):
-        pass
-
     def test_min_pace(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
@@ -209,21 +197,17 @@ class TestGPX:
         # Test
         assert gpx.max_pace() == 1041.2956304834424
 
-    @pytest.mark.skip(reason="nothing to test")
-    def test_compute_points_ascent_speed(self):
-        pass
-
     def test_min_ascent_speed(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
         # Test
-        assert gpx.min_ascent_speed() == -3.3599999999999794
+        assert gpx.min_ascent_speed() == -3359.9999999999794
 
     def test_max_ascent_speed(self):
         # Parse GPX Files
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
         # Test
-        assert gpx.max_ascent_speed() == 2.1599999999999797
+        assert gpx.max_ascent_speed() == 2159.9999999999797
 
     # ==== Modifications ======================================================#
 

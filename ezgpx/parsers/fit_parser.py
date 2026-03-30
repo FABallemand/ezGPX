@@ -2,14 +2,12 @@
 This module contains the FitParser class.
 """
 
-import warnings
-from datetime import datetime
 from pathlib import Path
 from typing import IO
 
 from fitparse import FitFile
 
-from ..constants.precisions import DEFAULT_PRECISION, POSSIBLE_TIME_FORMATS
+from ..constants.precisions import DEFAULT_PRECISION
 from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
 from .parser import Parser
 
@@ -33,41 +31,17 @@ class FitParser(Parser):
         super().__init__(source)
         self.parse()
 
-    def _find_time_format(self, time_str):
-        """
-        Find the time format used in GPX file.
-        Also find if the GPX file contains time data.
-        """
-        if time_str is None:
-            self.time_data = False
-            warnings.warn("No time element in FIT file.")
-            return
-
-        self.time_data = True
-        for tf in POSSIBLE_TIME_FORMATS:
-            try:
-                datetime.strptime(time_str, tf)
-                self.time_format = tf
-                break
-            except ValueError:
-                pass
-        else:
-            warnings.warn(
-                """Unknown time format. Default time format will be used uppon
-                writting."""
-            )
-
-    def _semicircles_to_deg(self, list_: list) -> list:
+    def _semicircles_to_deg(self, semicircle_coord: list) -> list:
         """
         Convert semicircle data from FIT file to dms data.
 
         Args:
-            list_ (list): list of semicircle values.
+            semicircle_coord (list): list of semicircle values.
 
         Returns:
             list: list of dms values.
         """
-        return [FitParser._semicircles_to_deg_const * x for x in list_]
+        return [FitParser._semicircles_to_deg_const * x for x in semicircle_coord]
 
     def _parse(self):
         """
@@ -89,7 +63,7 @@ class FitParser(Parser):
                     if units["lat"] == "":
                         units["lat"] = record_data.units
                         # Temporary (may change if units["lat"] == "semicircles")
-                        self.precisions["lat_lon"] = self.find_precision(
+                        self.precisions["lat_lon"] = self._find_precision(
                             record_data.value
                         )
                 if record_data.name == "position_long":
@@ -100,7 +74,7 @@ class FitParser(Parser):
                     alt_data.append(record_data.value)
                     if units["alt"] == "":
                         units["alt"] = record_data.units
-                        self.precisions["elevation"] = self.find_precision(
+                        self.precisions["elevation"] = self._find_precision(
                             record_data.value
                         )
                 if record_data.name == "timestamp":

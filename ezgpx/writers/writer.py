@@ -26,10 +26,10 @@ class Writer:
         """
         Initialise Writer instance.
 
-        Parameters
-        ----------
-        gpx : Gpx, optional
-            Gpx instance to write, by default None
+        Args:
+            gpx (Gpx, optional): Gpx instance to write. Defaults to None.
+            precisions (Dict, optional): _description_. Defaults to None.
+            time_format (str, optional): _description_. Defaults to None.
         """
         self.gpx: Gpx = gpx
 
@@ -44,16 +44,12 @@ class Writer:
 
     def set_not_none(self, element: ET.Element, field: str, value):
         """
-        _summary_
+        TODO
 
-        Parameters
-        ----------
-        element : ET.Element
-            _description_
-        field : str
-            _description_
-        value : _type_
-            _description_
+        Args:
+            element (ET.Element): _description_
+            field (str): _description_
+            value (_type_): _description_
         """
         if value is not None:
             element.set(field, value)

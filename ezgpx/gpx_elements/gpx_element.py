@@ -9,19 +9,22 @@ class GpxElement:
     Implements dunders functions.
     """
 
+    fields = []
+    mandatory_fields = []
+
     def __init__(self) -> None:
         pass
 
     def __str__(self) -> str:
-        s = "("
-        for a in self.mandatory_fields:
-            s += f"{getattr(self, a)}, "
-        s = s[:-2] + ")"
-        return s
+        return (
+            f"{self.__class__.__name__}[{self.tag}]("
+            + ", ".join(str(getattr(self, a)) for a in self.mandatory_fields)
+            + ")"
+        )
 
     def __repr__(self) -> str:
-        s = f"{self.__class__.__name__}[{self.tag}]("
-        for a in self.mandatory_fields:
-            s += f"{getattr(self, a)}, "
-        s = s[:-2] + ")"
-        return s
+        return (
+            f"{self.__class__.__name__}[{self.tag}]("
+            + ", ".join(repr(getattr(self, a)) for a in self.mandatory_fields)
+            + ")"
+        )

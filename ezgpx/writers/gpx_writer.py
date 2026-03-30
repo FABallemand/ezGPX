@@ -47,7 +47,6 @@ class GPXWriter(Writer):
         super().__init__(gpx, precisions, time_format)
 
         # Utility attributes
-        self.file_name: str = ""
         self.gpx_string: str = ""
         self.gpx_root = None
 
@@ -389,15 +388,15 @@ class GPXWriter(Writer):
                 self.gpx_root, self.gpx.extensions, self.extensions_fields.get("gpx")
             )
 
-    def gpx_to_string(self) -> str:
+    def gpx_to_string(self) -> str | None:
         """
         Convert Gpx instance to a string (the content of a .gpx file).
 
         Returns:
-            str: String corresponding to the Gpx instance.
+            str | None: String corresponding to the Gpx instance.
         """
         if self.gpx is None:
-            return ""
+            return None
 
         # Reset string
         self.gpx_string = ""
@@ -489,7 +488,6 @@ class GPXWriter(Writer):
                 errno.ENOENT, os.strerror(errno.ENOENT), directory_path
             )
         self.file_path = file_path
-        self.file_name = os.path.basename(self.file_path)
 
         # Set parameters
         self.properties = properties
