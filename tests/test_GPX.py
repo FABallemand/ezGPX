@@ -3,6 +3,7 @@
 This module contains tests for the GPX class.
 """
 
+import datetime
 import filecmp
 import os
 import sys
@@ -68,13 +69,18 @@ class TestGPX:
         result = benchmark(gpx.nb_points)
         assert result == 939
 
-    @pytest.mark.skip(reason="nothing to test")
-    def test_first_point(self):
-        pass
-
-    @pytest.mark.skip(reason="nothing to test")
-    def test_last_point(self):
-        pass
+    @pytest.mark.parametrize(
+        "trkpt_index,expected",
+        [
+            pytest.param(0, "WayPoint[trkpt](44.043332, 4.453089)", id="first_point"),
+            pytest.param(-1, "WayPoint[trkpt](44.043391, 4.453165)", id="last_point"),
+            pytest.param(42, "WayPoint[trkpt](44.046162, 4.449441)", id="random_point"),
+        ],
+    )
+    def test_get_trkpt(self, benchmark, trkpt_index, expected):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.get_trkpt, 0, 0, trkpt_index)
+        assert str(result) == expected
 
     def test_bounds(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
@@ -121,25 +127,46 @@ class TestGPX:
         result = benchmark(gpx.max_elevation)
         assert result == 235.6
 
-    @pytest.mark.skip(reason="time related test")
-    def test_start_time(self):
-        pass
+    def test_start_time(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.start_time)
+        assert result == datetime.datetime(
+            2023,
+            5,
+            22,
+            8,
+            4,
+            58,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        )
 
-    @pytest.mark.skip(reason="time related test")
-    def test_stop_time(self):
-        pass
+    def test_stop_time(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.stop_time)
+        assert result == datetime.datetime(
+            2023,
+            5,
+            22,
+            9,
+            6,
+            25,
+            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
+        )
 
-    @pytest.mark.skip(reason="time related test")
-    def test_total_elapsed_time(self):
-        pass
+    def test_total_elapsed_time(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.total_elapsed_time)
+        assert result == datetime.timedelta(seconds=3687)
 
-    @pytest.mark.skip(reason="time related test")
-    def test_stopped_time(self):
-        pass
+    def test_stopped_time(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.stopped_time)
+        assert result == datetime.timedelta(seconds=104)
 
-    @pytest.mark.skip(reason="time related test")
-    def test_moving_time(self):
-        pass
+    def test_moving_time(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        result = benchmark(gpx.moving_time)
+        assert result == gpx.moving_time()
 
     @pytest.mark.parametrize(
         "moving,expected",
