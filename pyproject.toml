@@ -1,50 +1,48 @@
 [project]
 name = "ezgpx"
 version = "0.3.1"
-authors = [
-    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
-]
+authors = [{ name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr" }]
 maintainers = [
-    {name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr"},
+  { name = "Fabien ALLEMAND", email = "allemand.fabien@orange.fr" },
 ]
 description = "Easy to use Python GPX library"
 readme = "README.md"
 requires-python = ">=3.11"
 keywords = [
-    "gpx",
-    "gpx-files",
-    "gpx-parser",
-    "gpx-reader",
-    "gpx-writer",
-    "gpx-converter",
-    "gpx-data",
-    "kml",
-    "kmz",
-    "fit"
+  "gpx",
+  "gpx-files",
+  "gpx-parser",
+  "gpx-reader",
+  "gpx-writer",
+  "gpx-converter",
+  "gpx-data",
+  "kml",
+  "kmz",
+  "fit",
 ]
-license = {text = "GNU GPLv3"}
-classifiers=[
-    "Intended Audience :: Developers",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent"
+license = { text = "GNU GPLv3" }
+classifiers = [
+  "Intended Audience :: Developers",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
 ]
 dependencies = [
-    "narwhals>=2.18.1",
-    "plotly>=6.6.0",
-    "lxml>=6.0.2",
-    "xmlschema>=4.2.0",
-    "importlib-resources>=6.5.2",
-    "python-dateutil>=2.9.0.post0",
-    "pandas>=3.0.2",
-    "polars>=1.39.3",
-    "matplotlib>=3.10.8",
-    "basemap>=2.0.0",
-    "gmplot>=1.4.1",
-    "folium>=0.20.0",
-    "fitparse>=1.2.0",
+  "narwhals>=2.18.1",
+  "plotly>=6.6.0",
+  "lxml>=6.0.2",
+  "xmlschema>=4.2.0",
+  "importlib-resources>=6.5.2",
+  "python-dateutil>=2.9.0.post0",
+  "pandas>=3.0.2",
+  "polars>=1.39.3",
+  "matplotlib>=3.10.8",
+  "basemap>=2.0.0",
+  "gmplot>=1.4.1",
+  "folium>=0.20.0",
+  "fitparse>=1.2.0",
 ]
 
 [dependency-groups]
@@ -70,10 +68,8 @@ utils = [
   "setuptools>=82.0.1",
   "build>=1.4.2",
 ]
-tests = ["pytest>=9.0.2"]
-doc = [
-  "Sphinx>=9.0.4",
-]
+tests = ["pytest>=9.0.2", "pytest-benchmark>=5.2.3"]
+doc = ["Sphinx>=9.0.4"]
 
 [project.urls]
 Documentation = "https://ezgpx.readthedocs.io/en/latest/"
@@ -100,11 +96,14 @@ namespaces = true
 profile = "black"
 
 [tool.pylint.main]
-ignore-patterns = ["__init__\\.py"]  # Ignore all __init__ files
+ignore-patterns = ["__init__\\.py"] # Ignore all __init__ files
 
 [tool.ruff]
 fix = true
 exclude = [".venv", "tests", "examples"]
 
 [tool.ruff.lint]
-ignore = ["F403"]  # TODO do something about that
+ignore = ["F403"] # TODO do something about that
+
+[tool.pytest]
+addopts = ["--benchmark-autosave"]

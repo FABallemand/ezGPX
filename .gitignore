@@ -7,6 +7,7 @@
 tests/dev_tests/*
 tests/tmp/*
 *_test.gpx
+.benchmarks/*
 
 # Documentation
 doc/_*

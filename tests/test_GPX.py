@@ -1,9 +1,15 @@
+# pylint: disable=missing-class-docstring, missing-function-docstring
+"""
+This module contains tests for the GPX class.
+"""
+
 import filecmp
 import os
 import sys
 from shutil import rmtree
 
 import pandas as pd
+import polars as pl
 import pytest
 
 FILE_DIR = os.path.dirname(__file__)
@@ -29,43 +35,38 @@ class TestGPX:
 
     # ==== Check Schemas ======================================================#
 
-    def test_check_schemas(self):
-        # Parse GPX Files
+    @pytest.mark.parametrize(
+        "file,expected",
+        [
+            pytest.param("strava_run_1.gpx", True),
+            pytest.param("invalid_schema.gpx", False),
+        ],
+    )
+    def test_check_schemas(self, benchmark, file, expected):
         gpx = GPX(
-            os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"),
+            os.path.join(TEST_FILES_DIR, file),
             xml_schema=False,
             xml_extensions_schemas=False,
         )
-        invalid_gpx = GPX(
-            os.path.join(TEST_FILES_DIR, "invalid_schema.gpx"),
-            xml_schema=False,
-            xml_extensions_schemas=False,
-        )
-        # Tests
-        assert gpx.check_xml_schema() is True
-        assert invalid_gpx.check_xml_schema() is False
+        result = benchmark(gpx.check_xml_schema)
+        assert result is expected
 
     # ==== Properties =========================================================#
 
-    def test_name(self):
-        # Parse GPX Files
+    def test_name(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.name() == "Dérouillage habituel 💥"
+        result = benchmark(gpx.name)
+        assert result == "Dérouillage habituel 💥"
 
-    def test_set_name(self):
-        # Parse GPX Files
+    def test_set_name(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        new_name = "test"
-        gpx.set_name(new_name)
-        assert gpx.name() == new_name
+        benchmark(gpx.set_name, "test")
+        assert gpx.name() == "test"
 
-    def test_nb_points(self):
-        # Parse GPX Files
+    def test_nb_points(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.nb_points() == 939
+        result = benchmark(gpx.nb_points)
+        assert result == 939
 
     @pytest.mark.skip(reason="nothing to test")
     def test_first_point(self):
@@ -75,59 +76,50 @@ class TestGPX:
     def test_last_point(self):
         pass
 
-    def test_bounds(self):
-        # Parse GPX Files
+    def test_bounds(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.bounds() == (44.032965, 4.444134, 44.047778, 4.486607)
+        result = benchmark(gpx.bounds)
+        assert result == (44.032965, 4.444134, 44.047778, 4.486607)
 
-    def test_center(self):
-        # Parse GPX Files
+    def test_center(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.center() == (44.0403715, 4.465370500000001)
+        result = benchmark(gpx.center)
+        assert result == (44.0403715, 4.465370500000001)
 
-    def test_distance(self):
-        # Parse GPX Files
+    def test_distance(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.distance() == 10922.788757238777
+        result = benchmark(gpx.distance)
+        assert result == 10922.788757238777
 
-    def test_ascent(self):
-        # Parse GPX Files
+    def test_ascent(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.ascent() == 225.29999999999995
+        result = benchmark(gpx.ascent)
+        assert result == 225.29999999999995
 
-    def test_descent(self):
-        # Parse GPX Files
+    def test_descent(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.descent() == 224.79999999999987
+        result = benchmark(gpx.descent)
+        assert result == 224.79999999999987
 
-    def test_min_ascent_rate(self):
-        # Parse GPX Files
+    def test_max_descent_rate(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_descent_rate() == -38.54138626353898
+        result = benchmark(gpx.max_descent_rate)
+        assert result == -38.54138626353898
 
-    def test_max_ascent_rate(self):
-        # Parse GPX Files
+    def test_max_ascent_rate(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_ascent_rate() == 51.2919872933083
+        result = benchmark(gpx.max_ascent_rate)
+        assert result == 51.2919872933083
 
-    def test_min_elevation(self):
-        # Parse GPX Files
+    def test_min_elevation(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.min_elevation() == 98.5
+        result = benchmark(gpx.min_elevation)
+        assert result == 98.5
 
-    def test_max_elevation(self):
-        # Parse GPX Files
+    def test_max_elevation(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_elevation() == 235.6
+        result = benchmark(gpx.max_elevation)
+        assert result == 235.6
 
     @pytest.mark.skip(reason="time related test")
     def test_start_time(self):
@@ -149,107 +141,101 @@ class TestGPX:
     def test_moving_time(self):
         pass
 
-    def test_avg_speed(self):
-        # Parse GPX Files
+    def test_avg_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.avg_speed() == 10.66505004775145
+        result = benchmark(gpx.avg_speed)
+        assert result == 10.66505004775145
 
-    def test_avg_moving_speed(self):
-        # Parse GPX Files
+    def test_avg_moving_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.avg_moving_speed() == 10.974613320139435
+        result = benchmark(gpx.avg_moving_speed)
+        assert result == 10.974613320139435
 
-    def test_min_speed(self):
-        # Parse GPX Files
+    def test_min_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.min_speed() == 0.0
+        result = benchmark(gpx.min_speed)
+        assert result == 0.0
 
-    def test_max_speed(self):
-        # Parse GPX Files
+    def test_max_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_speed() == 19.69510525631602
+        result = benchmark(gpx.max_speed)
+        assert result == 19.69510525631602
 
-    def test_avg_pace(self):
-        # Parse GPX Files
+    def test_avg_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.avg_pace() == 5.625852643105975
+        result = benchmark(gpx.avg_pace)
+        assert result == 5.625852643105975
 
-    def test_avg_moving_pace(self):
-        # Parse GPX Files
+    def test_avg_moving_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.avg_moving_pace() == 5.467163010645161
+        result = benchmark(gpx.avg_moving_pace)
+        assert result == 5.467163010645161
 
-    def test_min_pace(self):
-        # Parse GPX Files
+    def test_min_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.min_pace() == 3.046442210851278
+        result = benchmark(gpx.min_pace)
+        assert result == 3.046442210851278
 
-    def test_max_pace(self):
-        # Parse GPX Files
+    def test_max_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_pace() == 1041.2956304834424
+        result = benchmark(gpx.max_pace)
+        assert result == 1041.2956304834424
 
-    def test_min_ascent_speed(self):
-        # Parse GPX Files
+    def test_min_ascent_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.min_ascent_speed() == -3359.9999999999794
+        result = benchmark(gpx.min_ascent_speed)
+        assert result == -3359.9999999999794
 
-    def test_max_ascent_speed(self):
-        # Parse GPX Files
+    def test_max_ascent_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        # Test
-        assert gpx.max_ascent_speed() == 2159.9999999999797
+        result = benchmark(gpx.max_ascent_speed)
+        assert result == 2159.9999999999797
 
     # ==== Modifications ======================================================#
 
     # ==== Conversion and Saving ==============================================#
 
-    def test_to_pandas(self):
-        # Parse GPX Files
+    def test_to_pandas(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        df = gpx.to_pandas(values=["lat", "lon", "ele", "time"])
+        df = benchmark(gpx.to_pandas, values=["lat", "lon", "ele", "time"])
         reference_df = pd.read_csv(
             os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv")
         )
-        # Test
         assert reference_df.equals(df)
 
-    def test_to_gpx(self):
-        # Parse GPX Files
+    def test_to_polars(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        gpx.to_gpx("tmp/strava_run_1_test.gpx")
-        # Test
+        df = benchmark(gpx.to_polars, values=["lat", "lon", "ele", "time"])
+        reference_df = pl.read_csv(
+            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv")
+        )
+        assert reference_df.equals(df)
+
+    def test_to_gpx(self, benchmark):
+        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        benchmark(gpx.to_gpx, "tmp/strava_run_1_test.gpx")
         assert filecmp.cmp(
             "tmp/strava_run_1_test.gpx",
             os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.gpx"),
             False,
         )
 
-    def test_to_kml(self):
-        # Parse GPX Files
+    def test_to_kml(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        gpx.to_kml("tmp/strava_run_1_test.kml", styles=None)
-        # Test
+        benchmark(gpx.to_kml, "tmp/strava_run_1_test.kml", styles=None)
         assert filecmp.cmp(
             "tmp/strava_run_1_test.kml",
             os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.kml"),
             False,
         )
 
-    def test_to_csv(self):
-        # Parse GPX Files
+    def test_to_csv(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        gpx.to_csv("tmp/strava_run_1_test.csv", values=["lat", "lon", "ele", "time"])
-        # Test
+        benchmark(
+            gpx.to_csv,
+            "tmp/strava_run_1_test.csv",
+            values=["lat", "lon", "ele", "time"],
+        )
         assert filecmp.cmp(
             "tmp/strava_run_1_test.csv",
             os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv"),
