@@ -172,17 +172,22 @@ class Gpx(GpxElement):
         center_lon = min_lon + (max_lon - min_lon) / 2
         return center_lat, center_lon
 
-    def first_point(self) -> WayPoint:
+    def get_trkpt(
+        self, trk_index: int, trkseg_index: int, trkpt_index: int
+    ) -> WayPoint:
         """
-        Return GPX first point.
-        """
-        return self.trk[0].trkseg[0].trkpt[0]
+        Return track point based on track, track segment and track
+        point indexes.
 
-    def last_point(self) -> WayPoint:
+        Args:
+            trk_index (int): Track index.
+            trkseg_index (int): Track segment index.
+            trkpt_index (int): Track point index.
+
+        Returns:
+            WayPoint: Track point.
         """
-        Return GPX last point.
-        """
-        return self.trk[-1].trkseg[-1].trkpt[-1]
+        return self.trk[trk_index].trkseg[trkseg_index].trkpt[trkpt_index]
 
     def extreme_points(self) -> Tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
@@ -307,7 +312,7 @@ class Gpx(GpxElement):
         """
         if self.ascent_rate:
             return
-        previous_point = self.first_point()
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
@@ -439,23 +444,25 @@ class Gpx(GpxElement):
     #### Speed and Pace ###########################################################
     ###############################################################################
 
-    def avg_speed(self) -> float:
+    def avg_speed(self, moving: bool = False) -> float:
         """
         Return the average speed (in kilometers per hour).
-        """
-        total_elapsed_time = (
-            self.total_elapsed_time().total_seconds() / 3600
-        )  # Total elapsed time in hours
-        distance = self.distance() / 1000  # Distance in kilometers
-        return distance / total_elapsed_time
 
-    def avg_moving_speed(self) -> float:
+        Args:
+            moving (bool, optional): Moving flag. Defaults to False.
+
+        Returns:
+            float: Average moving speed if `moving` is True, average
+                speed otherwise.
         """
-        Return the average moving speed (in kilometers per hour).
-        """
-        moving_time = self.moving_time().total_seconds() / 3600  # Moving time in hours
         distance = self.distance() / 1000  # Distance in kilometers
-        return distance / moving_time
+        if moving:
+            time = self.moving_time().total_seconds() / 3600  # Moving time in hours
+        else:
+            time = (
+                self.total_elapsed_time().total_seconds() / 3600
+            )  # Total elapsed time in hours
+        return distance / time
 
     def _compute_speed(self) -> None:
         """
@@ -463,7 +470,7 @@ class Gpx(GpxElement):
         """
         if self._speed:
             return
-        previous_point = self.first_point()
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
@@ -504,17 +511,18 @@ class Gpx(GpxElement):
                     max_speed = max(max_speed, track_point.speed)
         return max_speed
 
-    def avg_pace(self) -> float:
+    def avg_pace(self, moving: bool = False) -> float:
         """
-        Return the average pace (in minute per kilometer).
-        """
-        return 60.0 / self.avg_speed()
+        Return the average pace (in minutes per kilometer).
 
-    def avg_moving_pace(self) -> float:
+        Args:
+            moving (bool, optional): Moving flag. Defaults to False.
+
+        Returns:
+            float: Average moving pace if `moving` is True, average
+                pace otherwise.
         """
-        Return the average moving pace (in minute per kilometer).
-        """
-        return 60.0 / self.avg_moving_speed()
+        return 60.0 / self.avg_speed(moving)
 
     def _compute_pace(self) -> None:
         """
@@ -529,8 +537,7 @@ class Gpx(GpxElement):
                     try:
                         point.pace = 60.0 / point.speed
                     except ZeroDivisionError:
-                        # Fill with average moving pace (first point)
-                        point.pace = self.avg_moving_pace()
+                        point.pace = 0.0
         self._pace = True
 
     def min_pace(self) -> float:
@@ -563,7 +570,7 @@ class Gpx(GpxElement):
         """
         if self._ascent_speed:
             return
-        previous_point = self.first_point()
+        previous_point = self.trk[0].trkseg[0].trkpt[0]
         for track in self.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
@@ -832,7 +839,7 @@ class Gpx(GpxElement):
             values = ["lat", "lon"]
 
         # Compute required values
-        test_point = self.first_point()
+        test_point = self.trk[0].trkseg[0].trkpt[0]
         if "speed" in values and test_point.speed is None:
             self._compute_speed()
         if "pace" in values and test_point.pace is None:

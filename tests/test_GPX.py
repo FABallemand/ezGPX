@@ -141,15 +141,17 @@ class TestGPX:
     def test_moving_time(self):
         pass
 
-    def test_avg_speed(self, benchmark):
+    @pytest.mark.parametrize(
+        "moving,expected",
+        [
+            pytest.param(False, 10.66505004775145),
+            pytest.param(True, 10.974613320139435),
+        ],
+    )
+    def test_avg_speed(self, benchmark, moving, expected):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.avg_speed)
-        assert result == 10.66505004775145
-
-    def test_avg_moving_speed(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.avg_moving_speed)
-        assert result == 10.974613320139435
+        result = benchmark(gpx.avg_speed, moving)
+        assert result == expected
 
     def test_min_speed(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
@@ -161,20 +163,22 @@ class TestGPX:
         result = benchmark(gpx.max_speed)
         assert result == 19.69510525631602
 
-    def test_avg_pace(self, benchmark):
+    @pytest.mark.parametrize(
+        "moving,expected",
+        [
+            pytest.param(False, 5.625852643105975),
+            pytest.param(True, 5.467163010645161),
+        ],
+    )
+    def test_avg_pace(self, benchmark, moving, expected):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.avg_pace)
-        assert result == 5.625852643105975
-
-    def test_avg_moving_pace(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.avg_moving_pace)
-        assert result == 5.467163010645161
+        result = benchmark(gpx.avg_pace, moving)
+        assert result == expected
 
     def test_min_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.min_pace)
-        assert result == 3.046442210851278
+        assert result == 0.0
 
     def test_max_pace(self, benchmark):
         gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))

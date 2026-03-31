@@ -289,7 +289,7 @@ class GPX:
 
     def bounds(self) -> tuple[float, float, float, float]:
         """
-        Find the bounding coordinates of the activity.
+        Find the bounding coordinates.
 
         Returns:
             tuple[float, float, float, float]: Min latitude, min
@@ -299,7 +299,7 @@ class GPX:
 
     def center(self) -> tuple[float, float]:
         """
-        Find the center coordinates of the activity.
+        Find the center coordinates.
 
         Returns:
             tuple[float, float]: Latitude and longitude of the center
@@ -307,21 +307,26 @@ class GPX:
         """
         return self.gpx.center()
 
-    def first_point(self) -> WayPoint:  # TODO remove?
+    def get_trkpt(
+        self, trk_index: int, trkseg_index: int, trkpt_index: int
+    ) -> WayPoint:
         """
-        Return the first point of the activity.
-        """
-        return self.gpx.first_point()
+        Return track point based on track, track segment and track
+        point indexes.
 
-    def last_point(self) -> WayPoint:  # TODO remove?
+        Args:
+            trk_index (int): Track index.
+            trkseg_index (int): Track segment index.
+            trkpt_index (int): Track point index.
+
+        Returns:
+            WayPoint: Track point.
         """
-        Return the last point of the activity.
-        """
-        return self.gpx.last_point()
+        return self.gpx.get_trkpt(trk_index, trkseg_index, trkpt_index)
 
     def extreme_points(
         self,
-    ) -> tuple[WayPoint, WayPoint, WayPoint, WayPoint]:  # TODO remove?
+    ) -> tuple[WayPoint, WayPoint, WayPoint, WayPoint]:
         """
         Find extreme points in track, i.e.: points with lowest and
         highest latitude and longitude.
@@ -339,43 +344,43 @@ class GPX:
 
     def distance(self) -> float:
         """
-        Returns the distance (in meters) of the activity.
+        Returns the distance (in meters).
         """
         return self.gpx.distance()
 
     def ascent(self) -> float:
         """
-        Returns the ascent (in meters) of the activity.
+        Returns the ascent (in meters).
         """
         return self.gpx.ascent()
 
     def descent(self) -> float:
         """
-        Returns the descent (in meters) of the activity.
+        Returns the descent (in meters).
         """
         return self.gpx.descent()
 
     def min_elevation(self) -> float:
         """
-        Returns the minimum elevation (in meters) of the activity.
+        Returns the minimum elevation (in meters).
         """
         return self.gpx.min_elevation()
 
     def max_elevation(self) -> float:
         """
-        Returns the maximum elevation (in meters) of the activity.
+        Returns the maximum elevation (in meters).
         """
         return self.gpx.max_elevation()
 
     def max_descent_rate(self) -> float:
         """
-        Return the minimum ascent rate of the activity.
+        Return the minimum ascent rate.
         """
         return self.gpx.max_descent_rate()
 
     def max_ascent_rate(self) -> float:
         """
-        Return the maximum ascent rate of the activity.
+        Return the maximum ascent rate.
         """
         return self.gpx.max_ascent_rate()
 
@@ -385,13 +390,13 @@ class GPX:
 
     def start_time(self) -> datetime:
         """
-        Return the start time of the activity.
+        Return the start time.
         """
         return self.gpx.start_time()
 
     def stop_time(self) -> datetime:
         """
-        Return the stop time of the activity.
+        Return the stop time.
         """
         return self.gpx.stop_time()
 
@@ -417,21 +422,22 @@ class GPX:
     #### Speed and Pace ###########################################################
     ###############################################################################
 
-    def avg_speed(self) -> float:
+    def avg_speed(self, moving: bool = False) -> float:
         """
-        Return average speed (in kilometers per hour) of the activity.
-        """
-        return self.gpx.avg_speed()
+        Return the average speed (in kilometers per hour).
 
-    def avg_moving_speed(self) -> float:
+        Args:
+            moving (bool, optional): Moving flag. Defaults to False.
+
+        Returns:
+            float: Average moving speed if `moving` is True, average
+                speed otherwise.
         """
-        Return average moving speed (in kilometers per hour).
-        """
-        return self.gpx.avg_moving_speed()
+        return self.gpx.avg_speed(moving)
 
     def min_speed(self) -> float:
         """
-        Return the minimum speed (in kilometers per hour)during the activity.
+        Return the minimum speed (in kilometers per hour).
         """
         return self.gpx.min_speed()
 
@@ -441,17 +447,18 @@ class GPX:
         """
         return self.gpx.max_speed()
 
-    def avg_pace(self) -> float:
+    def avg_pace(self, moving: bool = False) -> float:
         """
-        Return average pace (in minutes per kilometer).
-        """
-        return self.gpx.avg_pace()
+        Return the average pace (in minutes per kilometer).
 
-    def avg_moving_pace(self) -> float:
+        Args:
+            moving (bool, optional): Moving flag. Defaults to False.
+
+        Returns:
+            float: Average moving pace if `moving` is True, average
+                pace otherwise.
         """
-        Return average moving pace (in minutes per kilometer).
-        """
-        return self.gpx.avg_moving_pace()
+        return self.gpx.avg_pace(moving)
 
     def min_pace(self) -> float:
         """
