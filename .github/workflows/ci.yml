@@ -6,6 +6,7 @@ jobs:
     runs-on: self-ubuntu-24.04
     if: |
       github.repository == 'FABallemand/ezGPX' &&
+      github.ref == 'refs/heads/main' &&
       !startsWith(github.event.head_commit.message, 'Release ') &&
       !contains(github.event.head_commit.message, 'ci skip')
     steps:

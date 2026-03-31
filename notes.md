@@ -64,3 +64,4 @@
 - Improve time computation for pauses?
 - Remove warnings
 - Use itertools
+- python-dateutil dependency?
