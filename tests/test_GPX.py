@@ -40,17 +40,47 @@ class TestGPX:
     @pytest.mark.parametrize(
         "file",
         [
+            pytest.param("bounds.gpx", id="bounds"),
+            pytest.param("copyright.gpx", id="copyright"),
+            pytest.param("email.gpx", id="email"),
             pytest.param("gpx.gpx", id="gpx"),
+            pytest.param("link.gpx", id="link"),
             pytest.param("metadata.gpx", id="metadata"),
+            pytest.param("person.gpx", id="person"),
             pytest.param("rte.gpx", id="rte"),
             pytest.param("trk.gpx", id="trk"),
+            pytest.param("trkseg.gpx", id="trkseg"),
             pytest.param("wpt.gpx", id="wpt"),
         ],
     )
-    def test_parsing(self, benchmark, file):
-        gpx = benchmark(
+    def test_parsing_mandatory(self, benchmark, file):
+        benchmark(
             GPX,
-            os.path.join(SYNTHETIC_FILES_DIR, file),
+            os.path.join(SYNTHETIC_FILES_DIR, "mandatory", file),
+            xml_schema=False,
+            xml_extensions_schemas=False,
+        )
+
+    @pytest.mark.parametrize(
+        "file",
+        [
+            pytest.param("bounds.gpx", id="bounds"),
+            pytest.param("copyright.gpx", id="copyright"),
+            pytest.param("email.gpx", id="email"),
+            # pytest.param("gpx.gpx", id="gpx"),  # TODO
+            pytest.param("link.gpx", id="link"),
+            pytest.param("metadata.gpx", id="metadata"),
+            pytest.param("person.gpx", id="person"),
+            pytest.param("rte.gpx", id="rte"),
+            pytest.param("trk.gpx", id="trk"),
+            pytest.param("trkseg.gpx", id="trkseg"),
+            pytest.param("wpt.gpx", id="wpt"),
+        ],
+    )
+    def test_parsing_all(self, benchmark, file):
+        benchmark(
+            GPX,
+            os.path.join(SYNTHETIC_FILES_DIR, "all", file),
             xml_schema=False,
             xml_extensions_schemas=False,
         )
