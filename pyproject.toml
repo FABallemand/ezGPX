@@ -106,4 +106,5 @@ exclude = [".venv", "tests", "examples"]
 ignore = ["F403"] # TODO do something about that
 
 [tool.pytest]
-addopts = ["--benchmark-autosave"]
+addopts = ["--benchmark-disable"]
+# addopts = ["--benchmark-enable", "--benchmark-autosave"]

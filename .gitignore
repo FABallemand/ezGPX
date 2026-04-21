@@ -5,6 +5,7 @@
 
 # Tests
 tests/dev_tests/*
+tests/files/real/*
 tests/tmp/*
 *_test.gpx
 .benchmarks/*

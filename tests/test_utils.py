@@ -15,10 +15,11 @@ parent_folder = os.path.realpath(os.path.dirname(file_folder))  # ie: ezGPX
 os.chdir(file_folder)
 sys.path.append(parent_folder + "/ezgpx")
 
-from ezgpx import WayPoint, utils
+from ezgpx import WayPoint, utils  # pylint: disable=wrong-import-position
 
 
 class TestUtils:
+
     def test_haversine_distance(self, benchmark):
         result = benchmark(
             utils.haversine_distance,

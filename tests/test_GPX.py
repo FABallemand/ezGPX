@@ -19,10 +19,11 @@ PARENT_DIR = os.path.realpath(os.path.dirname(FILE_DIR))  # Main folder
 os.chdir(FILE_DIR)
 sys.path.append(PARENT_DIR + "/ezgpx")
 
-from ezgpx import GPX
+from ezgpx import GPX  # pylint: disable=wrong-import-position
 
-TEST_FILES_DIR = "test_files/files/"
-REFERENCE_TEST_FILES_DIR = "test_files/reference_files/"
+REAL_FILES_DIR = "files/real/"
+REFERENCE_FILES_DIR = "files/reference/"
+SYNTHETIC_FILES_DIR = "files/synthetic/"
 TMP_DIR = os.path.join(FILE_DIR, "tmp")
 
 
@@ -33,6 +34,26 @@ class TestGPX:
         # Create temporary folder
         rmtree(TMP_DIR, True)
         os.makedirs(TMP_DIR)
+
+    # ==== Parsing ============================================================#
+
+    @pytest.mark.parametrize(
+        "file",
+        [
+            pytest.param("gpx.gpx", id="gpx"),
+            pytest.param("metadata.gpx", id="metadata"),
+            pytest.param("rte.gpx", id="rte"),
+            pytest.param("trk.gpx", id="trk"),
+            pytest.param("wpt.gpx", id="wpt"),
+        ],
+    )
+    def test_parsing(self, benchmark, file):
+        gpx = benchmark(
+            GPX,
+            os.path.join(SYNTHETIC_FILES_DIR, file),
+            xml_schema=False,
+            xml_extensions_schemas=False,
+        )
 
     # ==== Check Schemas ======================================================#
 
@@ -45,7 +66,7 @@ class TestGPX:
     )
     def test_check_schemas(self, benchmark, file, expected):
         gpx = GPX(
-            os.path.join(TEST_FILES_DIR, file),
+            os.path.join(REAL_FILES_DIR, file),
             xml_schema=False,
             xml_extensions_schemas=False,
         )
@@ -55,17 +76,17 @@ class TestGPX:
     # ==== Properties =========================================================#
 
     def test_name(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.name)
         assert result == "Dérouillage habituel 💥"
 
     def test_set_name(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         benchmark(gpx.set_name, "test")
         assert gpx.name() == "test"
 
     def test_nb_points(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.nb_points)
         assert result == 939
 
@@ -78,57 +99,57 @@ class TestGPX:
         ],
     )
     def test_get_trkpt(self, benchmark, trkpt_index, expected):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.get_trkpt, 0, 0, trkpt_index)
         assert str(result) == expected
 
     def test_bounds(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.bounds)
         assert result == (44.032965, 4.444134, 44.047778, 4.486607)
 
     def test_center(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.center)
         assert result == (44.0403715, 4.465370500000001)
 
     def test_distance(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.distance)
         assert result == 10922.788757238777
 
     def test_ascent(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.ascent)
         assert result == 225.29999999999995
 
     def test_descent(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.descent)
         assert result == 224.79999999999987
 
     def test_max_descent_rate(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_descent_rate)
         assert result == -38.54138626353898
 
     def test_max_ascent_rate(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_ascent_rate)
         assert result == 51.2919872933083
 
     def test_min_elevation(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.min_elevation)
         assert result == 98.5
 
     def test_max_elevation(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_elevation)
         assert result == 235.6
 
     def test_start_time(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.start_time)
         assert result == datetime.datetime(
             2023,
@@ -141,7 +162,7 @@ class TestGPX:
         )
 
     def test_stop_time(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.stop_time)
         assert result == datetime.datetime(
             2023,
@@ -154,17 +175,17 @@ class TestGPX:
         )
 
     def test_total_elapsed_time(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.total_elapsed_time)
         assert result == datetime.timedelta(seconds=3687)
 
     def test_stopped_time(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.stopped_time)
         assert result == datetime.timedelta(seconds=104)
 
     def test_moving_time(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.moving_time)
         assert result == gpx.moving_time()
 
@@ -176,17 +197,17 @@ class TestGPX:
         ],
     )
     def test_avg_speed(self, benchmark, moving, expected):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.avg_speed, moving)
         assert result == expected
 
     def test_min_speed(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.min_speed)
         assert result == 0.0
 
     def test_max_speed(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_speed)
         assert result == 19.69510525631602
 
@@ -198,27 +219,27 @@ class TestGPX:
         ],
     )
     def test_avg_pace(self, benchmark, moving, expected):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.avg_pace, moving)
         assert result == expected
 
     def test_min_pace(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.min_pace)
         assert result == 0.0
 
     def test_max_pace(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_pace)
         assert result == 1041.2956304834424
 
     def test_min_ascent_speed(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.min_ascent_speed)
         assert result == -3359.9999999999794
 
     def test_max_ascent_speed(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_ascent_speed)
         assert result == 2159.9999999999797
 
@@ -227,41 +248,41 @@ class TestGPX:
     # ==== Conversion and Saving ==============================================#
 
     def test_to_pandas(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         df = benchmark(gpx.to_pandas, values=["lat", "lon", "ele", "time"])
         reference_df = pd.read_csv(
-            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv")
+            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv")
         )
         assert reference_df.equals(df)
 
     def test_to_polars(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         df = benchmark(gpx.to_polars, values=["lat", "lon", "ele", "time"])
         reference_df = pl.read_csv(
-            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv")
+            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv")
         )
         assert reference_df.equals(df)
 
     def test_to_gpx(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         benchmark(gpx.to_gpx, "tmp/strava_run_1_test.gpx")
         assert filecmp.cmp(
             "tmp/strava_run_1_test.gpx",
-            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.gpx"),
+            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.gpx"),
             False,
         )
 
     def test_to_kml(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         benchmark(gpx.to_kml, "tmp/strava_run_1_test.kml", styles=None)
         assert filecmp.cmp(
             "tmp/strava_run_1_test.kml",
-            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.kml"),
+            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.kml"),
             False,
         )
 
     def test_to_csv(self, benchmark):
-        gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         benchmark(
             gpx.to_csv,
             "tmp/strava_run_1_test.csv",
@@ -269,7 +290,7 @@ class TestGPX:
         )
         assert filecmp.cmp(
             "tmp/strava_run_1_test.csv",
-            os.path.join(REFERENCE_TEST_FILES_DIR, "strava_run_1.csv"),
+            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv"),
             False,
         )
 
@@ -283,7 +304,7 @@ class TestGPX:
     #     # Load images
     #     test_img = plt.imread("tmp/matplotlib_strava_run_1.png")
     #     ref_img = plt.imread(
-    #         os.path.join(REFERENCE_TEST_FILES_DIR,
+    #         os.path.join(REFERENCE_FILES_DIR,
     #                      "matplotlib_strava_run_1.png"))
     #     # Compare images
     #     return np.array_equal(test_img, ref_img)
@@ -296,7 +317,7 @@ class TestGPX:
     #     # Load images
     #     test_img = plt.imread("tmp/matplotlib_strava_run_1_start_stop.png")
     #     ref_img = plt.imread(
-    #         os.path.join(REFERENCE_TEST_FILES_DIR,
+    #         os.path.join(REFERENCE_FILES_DIR,
     #                      "matplotlib_strava_run_1_start_stop.png"))
 
     #     # Compare images
@@ -310,7 +331,7 @@ class TestGPX:
     #     # Load images
     #     test_img = plt.imread("tmp/matplotlib_strava_run_1_elevation.png")
     #     ref_img = plt.imread(
-    #         os.path.join(REFERENCE_TEST_FILES_DIR,
+    #         os.path.join(REFERENCE_FILES_DIR,
     #                      "matplotlib_strava_run_1_elevation.png"))
     #     # Compare images
     #     return np.array_equal(test_img, ref_img)
@@ -323,7 +344,7 @@ class TestGPX:
     #     # Load images
     #     test_img = plt.imread("tmp/matplotlib_strava_run_1_start_stop_elevation.png")
     #     ref_img = plt.imread(
-    #         os.path.join(REFERENCE_TEST_FILES_DIR,
+    #         os.path.join(REFERENCE_FILES_DIR,
     #                      "matplotlib_strava_run_1_start_stop_elevation.png"))
     #     # Compare images
     #     return np.array_equal(test_img, ref_img)
@@ -331,7 +352,7 @@ class TestGPX:
     # @pytest.mark.skip(reason="not ready")
     # def test_matplotlib_plot(self):
     #     # Parse GPX file
-    #     self.gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+    #     self.gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
     #     # Tests
     #     assert self._test_matplotlib_plot_1()
     #     assert self._test_matplotlib_plot_2()
@@ -356,14 +377,14 @@ class TestGPX:
     #                          open=False)
     #     # Compare files
     #     return filecmp.cmp("tmp/folium_strava_run_1.html",
-    #                        os.path.join(REFERENCE_TEST_FILES_DIR,
+    #                        os.path.join(REFERENCE_FILES_DIR,
     #                                     "folium_strava_run_1.html"), False)
 
     # @pytest.mark.skip(reason="not ready")
     # def test_folium_plot(self):
     #     self.test_init() # For developping purpose only (using: pytest test_GPX.py::TestGPX::test_folium_plot)
     #     # Parse GPX file
-    #     self.gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+    #     self.gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
     #     # Tests
     #     assert self._test_folium_plot_1()
     #     # assert self._test_folium_plot_2())
@@ -391,7 +412,7 @@ class TestGPX:
         rmtree("tmp", True)
         os.makedirs(os.path.dirname(__file__) + "/tmp")
         # Parse GPX file
-        self.gpx = GPX(os.path.join(TEST_FILES_DIR, "strava_run_1.gpx"))
+        self.gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         # Remove temporary folder
         if remove_tmp:
             rmtree("tmp")
