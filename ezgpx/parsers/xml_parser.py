@@ -2,6 +2,7 @@
 This module contains the XMLParser class.
 """
 
+import io
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -37,6 +38,9 @@ class XMLParser(Parser):
                 schema verificaton durign parsing. Requires internet
                 connection and is not guaranted to work. Defaults to False.
         """
+        # Bytes object
+        if isinstance(source, bytes):
+            source = io.BytesIO(source)
         self.name_spaces: dict = {
             node[0]: node[1] for _, node in ET.iterparse(source, events=["start-ns"])
         }

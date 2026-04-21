@@ -2,10 +2,11 @@
 This module contains the Parser class.
 """
 
+import io
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import IO, Dict
+from typing import IO
 
 from ..constants.precisions import (
     DEFAULT_PRECISION,
@@ -22,7 +23,7 @@ class Parser:
     """
 
     def __init__(
-        self, source: str | Path | IO[str] | IO[bytes] | bytes, name_spaces: Dict = None
+        self, source: str | Path | IO[str] | IO[bytes] | bytes, name_spaces: dict = None
     ) -> None:
         """
         Initialise Parser instance.
@@ -31,7 +32,10 @@ class Parser:
             source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
                 file or a file-like object to parse.
         """
-        self.source: str = source
+        # Bytes object
+        if isinstance(source, bytes):
+            source = io.BytesIO(source)
+        self.source: str | Path | IO[str] | IO[bytes] = source
 
         self.ele_data: bool = False
         self.time_data: bool = False
@@ -71,10 +75,7 @@ class Parser:
                 datetime.strptime(time, tf)
                 self.time_format = tf
                 break
-            except ValueError:
+            except (TypeError, ValueError):  # time is None, wrong time format
                 pass
         else:
-            warnings.warn(
-                """Unknown time format. Default time format will be used uppon
-                writting."""
-            )
+            warnings.warn("Unknown time format. Default time format will be used.")

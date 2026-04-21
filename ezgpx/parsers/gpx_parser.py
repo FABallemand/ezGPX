@@ -2,7 +2,6 @@
 This module contains the GPXParser class.
 """
 
-import io
 import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -50,10 +49,6 @@ class GPXParser(XMLParser):
                 schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
         """
-        # Bytes object
-        if isinstance(source, bytes):
-            source = io.BytesIO(source)
-
         # Initialise XMLParser and parse GPX file
         super().__init__(source, xml_schemas, xml_extensions_schemas)
         self.parse()
@@ -63,19 +58,17 @@ class GPXParser(XMLParser):
         Find decimal precision of any type of value in a GPX file (latitude, elevation...).
         Also find if the GPX file contains elevation data.
         """
+        # TODO use lat/lon from waypoints, points, track points?
+        # TODO store coordinates as string to avoid precision?
         # Point
-        track = self.xml_root.findall("trk", self.name_spaces)[0]
-        segment = track.findall("trkseg", self.name_spaces)[0]
-        point = segment.findall("trkpt", self.name_spaces)[0]
-
-        ele_text = point.findtext("ele", namespaces=self.name_spaces)
-        if ele_text is not None:
-            self.ele_data = True
-        else:
-            self.ele_data = False
-
-        self.precisions["lat_lon"] = self._find_precision(point.get("lat"))
-        self.precisions["elevation"] = self._find_precision(ele_text)
+        tracks = self.xml_root.findall("trk", self.name_spaces)
+        segments = tracks[0].findall("trkseg", self.name_spaces) if tracks else []
+        points = segments[0].findall("trkpt", self.name_spaces) if segments else []
+        if points:
+            ele_text = points[0].findtext("ele", namespaces=self.name_spaces)
+            self.ele_data = ele_text is not None
+            self.precisions["lat_lon"] = self._find_precision(points[0].get("lat"))
+            self.precisions["elevation"] = self._find_precision(ele_text)
 
     def _find_time_element(self) -> str | None:
         """
@@ -84,6 +77,8 @@ class GPXParser(XMLParser):
         Returns:
             str | None: Time element.
         """
+        # TODO use time from metadata, waypoints, points, track points, other?
+        # TODO store times as string to avoid formar?
         # Use time from metadata
         metadata = self.xml_root.find("metadata", self.name_spaces)
         if metadata is not None:
@@ -92,14 +87,13 @@ class GPXParser(XMLParser):
                 return time_str
 
         # Use time from track point
-        track = self.xml_root.findall("trk", self.name_spaces)[
-            0
-        ]  # Optimise, load only once??
-        segment = track.findall("trkseg", self.name_spaces)[0]
-        point = segment.findall("trkpt", self.name_spaces)[0]
-        time_str = point.findtext("time", namespaces=self.name_spaces)
-        if time_str is not None:
-            return time_str
+        tracks = self.xml_root.findall("trk", self.name_spaces)
+        segments = tracks[0].findall("trkseg", self.name_spaces) if tracks else []
+        points = segments[0].findall("trkpt", self.name_spaces) if segments else []
+        if points:
+            time_str = points[0].findtext("time", namespaces=self.name_spaces)
+            if time_str is not None:
+                return time_str
 
         # No time element at all...
         return None
