@@ -29,8 +29,8 @@ class TestDegrees:
     )
     def test_valid_values(self, value, expected):
         d = Degrees(value)
-        assert d.value == expected
         assert isinstance(d.value, float)
+        assert d.value == expected
 
     @pytest.mark.parametrize(
         "value",

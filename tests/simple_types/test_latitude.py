@@ -29,8 +29,8 @@ class TestLatitude:
     )
     def test_valid_values(self, value, expected):
         l = Latitude(value)
-        assert l.value == expected
         assert isinstance(l.value, float)
+        assert l.value == expected
 
     @pytest.mark.parametrize(
         "value",

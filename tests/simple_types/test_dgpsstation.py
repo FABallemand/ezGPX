@@ -28,8 +28,8 @@ class TestDgpsStation:
     )
     def test_constructor(self, value, expected):
         d = DgpsStation(value)
-        assert d.value == expected
         assert isinstance(d.value, int)
+        assert d.value == expected
 
     @pytest.mark.parametrize(
         "value",
