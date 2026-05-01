@@ -7,12 +7,12 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Dict, Tuple
 
+from ..complex_types import Gpx
 from ..constants.precisions import (
     DEFAULT_PRECISION,
     DEFAULT_PRECISION_DICT,
     DEFAULT_TIME_FORMAT,
 )
-from ..gpx_elements import Gpx
 
 
 class Writer:

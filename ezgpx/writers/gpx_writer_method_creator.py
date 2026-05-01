@@ -212,7 +212,7 @@ class GPXWriterMethodCreator:
         Create `add_point_segment` method.
 
         Args:
-            fields (list): `PointSegment` fields.
+            fields (list): `Ptseg` fields.
 
         Returns:
             FunctionType: `add_point_segment` method.
@@ -239,7 +239,7 @@ class GPXWriterMethodCreator:
         Create `add_point` method.
 
         Args:
-            fields (list): `Point` fields.
+            fields (list): `Pt` fields.
 
         Returns:
             FunctionType: `add_point` method.
@@ -267,7 +267,7 @@ class GPXWriterMethodCreator:
         Create `add_route` method.
 
         Args:
-            fields (list): `Route` fields.
+            fields (list): `Rte` fields.
 
         Returns:
             FunctionType: `add_route` method.
@@ -315,7 +315,7 @@ class GPXWriterMethodCreator:
         Create `add_track_segment` method.
 
         Args:
-            fields (list): `TrackSegment` fields.
+            fields (list): `Trkseg` fields.
 
         Returns:
             FunctionType: `add_track_segment` method.
@@ -345,7 +345,7 @@ class GPXWriterMethodCreator:
         Create `add_track` method.
 
         Args:
-            fields (list): `Track` fields.
+            fields (list): `Trk` fields.
 
         Returns:
             FunctionType: `add_track` method.
@@ -393,7 +393,7 @@ class GPXWriterMethodCreator:
         Create `add_waypoint` method.
 
         Args:
-            fields (list): `WayPoint` fields.
+            fields (list): `Wpt` fields.
 
         Returns:
             FunctionType: `add_waypoint` method.
@@ -414,7 +414,7 @@ class GPXWriterMethodCreator:
         if "magvar" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
         if "geoidheight" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geo_id_height, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
         if "name" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
         if "cmt" in fields:
@@ -440,7 +440,7 @@ class GPXWriterMethodCreator:
         if "pdop" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
         if "ageofgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.age_of_gps_data, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.ageofgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
         if "extensions" in fields:
@@ -458,7 +458,7 @@ class GPXWriterMethodCreator:
         Create `add_waypoint` method.
 
         Args:
-            fields (list): `WayPoint` fields.
+            fields (list): `Wpt` fields.
 
         Returns:
             FunctionType: `add_waypoint` method.
@@ -479,7 +479,7 @@ class GPXWriterMethodCreator:
         if "magvar" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
         if "geoidheight" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geo_id_height, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
         if "name" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
         if "cmt" in fields:
@@ -505,7 +505,7 @@ class GPXWriterMethodCreator:
         if "pdop" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
         if "ageofgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.age_of_gps_data, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.ageofgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
         if "extensions" in fields:

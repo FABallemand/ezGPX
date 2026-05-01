@@ -8,7 +8,7 @@ import warnings
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from ..gpx_elements import (
+from ..complex_types import (
     Bounds,
     Copyright,
     Email,
@@ -17,12 +17,12 @@ from ..gpx_elements import (
     Link,
     Metadata,
     Person,
-    Point,
-    PointSegment,
-    Route,
-    Track,
-    TrackSegment,
-    WayPoint,
+    Pt,
+    Ptseg,
+    Rte,
+    Trk,
+    Trkseg,
+    Wpt,
 )
 from .gpx_writer_method_creator import GPXWriterMethodCreator
 from .writer import Writer
@@ -223,21 +223,21 @@ class GPXWriter(Writer):
         return self._add_person(self, element, person)
 
     def add_point_segment(
-        self, element: ET.Element, point_segment: PointSegment
+        self, element: ET.Element, point_segment: Ptseg
     ) -> ET.Element:
         """
-        Add PointSegment instance element to GPX element.
+        Add Ptseg instance element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            point_segment (PointSegment): PointSegment instance to add.
+            point_segment (Ptseg): Ptseg instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_point_segment(self, element, point_segment)
 
-    def add_point(self, element: ET.Element, point: Point) -> ET.Element:
+    def add_point(self, element: ET.Element, point: Pt) -> ET.Element:
         """
         Add Point instance element to GPX element.
 
@@ -250,13 +250,13 @@ class GPXWriter(Writer):
         """
         return self._add_point(self, element, point)
 
-    def add_route(self, element: ET.Element, route: Route) -> ET.Element:
+    def add_route(self, element: ET.Element, route: Rte) -> ET.Element:
         """
-        Add Route instance element to GPX element.
+        Add Rte instance element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            route (Route): Route instance to add.
+            route (Rte): Rte instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
@@ -264,53 +264,53 @@ class GPXWriter(Writer):
         return self._add_route(self, element, route)
 
     def add_track_segment(
-        self, element: ET.Element, track_segment: TrackSegment
+        self, element: ET.Element, track_segment: Trkseg
     ) -> ET.Element:
         """
-        Add TrackSegment instance element to GPX element.
+        Add Trkseg instance element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            track_segment (TrackSegment): TrackSegment instance to add.
+            track_segment (Trkseg): Trkseg instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_track_segment(self, element, track_segment)
 
-    def add_track(self, element: ET.Element, track: Track) -> ET.Element:
+    def add_track(self, element: ET.Element, track: Trk) -> ET.Element:
         """
-        Add Track instance element to GPX element.
+        Add Trk instance element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            track (Track): Track instance to add.
+            track (Trk): Trk instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_track(self, element, track)
 
-    def add_waypoint(self, element: ET.Element, waypoint: WayPoint) -> ET.Element:
+    def add_waypoint(self, element: ET.Element, waypoint: Wpt) -> ET.Element:
         """
-        Add WayPoint instance element to GPX element.
+        Add Wpt instance element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            waypoint (WayPoint): WayPoint instance to add.
+            waypoint (Wpt): Wpt instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
         """
         return self._add_waypoint(self, element, waypoint)
 
-    def add_track_point(self, element: ET.Element, waypoint: WayPoint) -> ET.Element:
+    def add_track_point(self, element: ET.Element, waypoint: Wpt) -> ET.Element:
         """
-        Add WayPoint instance (with trkpt tag) element to GPX element.
+        Add Wpt instance (with trkpt tag) element to GPX element.
 
         Args:
             element (ET.Element): GPX element.
-            waypoint (WayPoint): WayPoint instance to add.
+            waypoint (Wpt): Wpt instance to add.
 
         Returns:
             xml.etree.ElementTree.Element: GPX element.
@@ -416,11 +416,11 @@ class GPXWriter(Writer):
         if self.waypoint_fields:
             self.add_root_waypoints()
 
-        # Routes
+        # Rtes
         if self.route_fields:
             self.add_root_routes()
 
-        # Tracks
+        # Trks
         if self.track_fields:
             self.add_root_tracks()
 
@@ -492,41 +492,37 @@ class GPXWriter(Writer):
         # Set parameters
         self.properties = properties
         self.bounds_fields = (
-            bounds_fields if bounds_fields is not None else Bounds.fields
+            bounds_fields if bounds_fields is not None else Bounds._fields
         )
         self.copyright_fields = (
-            copyright_fields if copyright_fields is not None else Copyright.fields
+            copyright_fields if copyright_fields is not None else Copyright._fields
         )
-        self.email_fields = email_fields if email_fields is not None else Email.fields
+        self.email_fields = email_fields if email_fields is not None else Email._fields
         self.extensions_fields = (
             extensions_fields if extensions_fields is not None else {}
         )
-        self.gpx_fields = gpx_fields if gpx_fields is not None else Gpx.fields
-        self.link_fields = link_fields if link_fields is not None else Link.fields
+        self.gpx_fields = gpx_fields if gpx_fields is not None else Gpx._fields
+        self.link_fields = link_fields if link_fields is not None else Link._fields
         self.metadata_fields = (
-            metadata_fields if metadata_fields is not None else Metadata.fields
+            metadata_fields if metadata_fields is not None else Metadata._fields
         )
         self.person_fields = (
-            person_fields if person_fields is not None else Person.fields
+            person_fields if person_fields is not None else Person._fields
         )
         self.point_segment_fields = (
-            point_segment_fields
-            if point_segment_fields is not None
-            else PointSegment.fields
+            point_segment_fields if point_segment_fields is not None else Ptseg._fields
         )
-        self.point_fields = point_fields if point_fields is not None else Point.fields
-        self.route_fields = route_fields if route_fields is not None else Route.fields
+        self.point_fields = point_fields if point_fields is not None else Pt._fields
+        self.route_fields = route_fields if route_fields is not None else Rte._fields
         self.track_segment_fields = (
-            track_segment_fields
-            if track_segment_fields is not None
-            else TrackSegment.fields
+            track_segment_fields if track_segment_fields is not None else Trkseg._fields
         )
-        self.track_fields = track_fields if track_fields is not None else Track.fields
+        self.track_fields = track_fields if track_fields is not None else Trk._fields
         self.waypoint_fields = (
-            waypoint_fields if waypoint_fields is not None else WayPoint.fields
+            waypoint_fields if waypoint_fields is not None else Wpt._fields
         )
         self.track_point_fields = (
-            track_point_fields if track_point_fields is not None else WayPoint.fields
+            track_point_fields if track_point_fields is not None else Wpt._fields
         )
 
         # Check mandatory fields
@@ -542,46 +538,46 @@ class GPXWriter(Writer):
                 return fields
 
             self.bounds_fields = check_mandatory_fields(
-                "Bounds", self.bounds_fields, Bounds.mandatory_fields
+                "Bounds", self.bounds_fields, Bounds._mandatory_fields
             )
             self.copyright_fields = check_mandatory_fields(
-                "Copyright", self.copyright_fields, Copyright.mandatory_fields
+                "Copyright", self.copyright_fields, Copyright._mandatory_fields
             )
             self.email_fields = check_mandatory_fields(
-                "Email", self.email_fields, Email.mandatory_fields
+                "Email", self.email_fields, Email._mandatory_fields
             )
             self.gpx_fields = check_mandatory_fields(
-                "Gpx", self.gpx_fields, Gpx.mandatory_fields
+                "Gpx", self.gpx_fields, Gpx._mandatory_fields
             )
             self.link_fields = check_mandatory_fields(
-                "Link", self.link_fields, Link.mandatory_fields
+                "Link", self.link_fields, Link._mandatory_fields
             )
             self.metadata_fields = check_mandatory_fields(
-                "Metadata", self.metadata_fields, Metadata.mandatory_fields
+                "Metadata", self.metadata_fields, Metadata._mandatory_fields
             )
             self.person_fields = check_mandatory_fields(
-                "Person", self.person_fields, Person.mandatory_fields
+                "Person", self.person_fields, Person._mandatory_fields
             )
             self.point_segment_fields = check_mandatory_fields(
-                "PointSegment", self.point_segment_fields, PointSegment.mandatory_fields
+                "Ptseg", self.point_segment_fields, Ptseg._mandatory_fields
             )
             self.point_fields = check_mandatory_fields(
-                "Point", self.point_fields, Point.mandatory_fields
+                "Pt", self.point_fields, Pt._mandatory_fields
             )
             self.route_fields = check_mandatory_fields(
-                "Route", self.route_fields, Route.mandatory_fields
+                "Rte", self.route_fields, Rte._mandatory_fields
             )
             self.track_segment_fields = check_mandatory_fields(
-                "TrackSegment", self.track_segment_fields, TrackSegment.mandatory_fields
+                "Trkseg", self.track_segment_fields, Trkseg._mandatory_fields
             )
             self.track_fields = check_mandatory_fields(
-                "Track", self.track_fields, Track.mandatory_fields
+                "Trk", self.track_fields, Trk._mandatory_fields
             )
             self.waypoint_fields = check_mandatory_fields(
-                "WayPoint", self.waypoint_fields, WayPoint.mandatory_fields
+                "Wpt", self.waypoint_fields, Wpt._mandatory_fields
             )
             self.track_point_fields = check_mandatory_fields(
-                "TrackPoint", self.track_point_fields, WayPoint.mandatory_fields
+                "Trkpt", self.track_point_fields, Wpt._mandatory_fields
             )
 
         # Create methods behaviors

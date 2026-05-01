@@ -7,8 +7,8 @@ from typing import IO
 
 from fitparse import FitFile
 
+from ..complex_types import Gpx, Trk, Trkseg, Wpt
 from ..constants.precisions import DEFAULT_PRECISION
-from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
 from .parser import Parser
 
 
@@ -90,11 +90,11 @@ class FitParser(Parser):
 
         # Store FIT data in Gpx element
         trkpt = [
-            WayPoint("trkpt", lat, lon, alt, time)
+            Wpt("trkpt", lat, lon, alt, time)
             for lat, lon, alt, time in zip(lat_data, lon_data, alt_data, time_data)
         ]
-        trkseg = TrackSegment(trkpt=trkpt)
-        trk = Track(trkseg=[trkseg])
+        trkseg = Trkseg(trkpt=trkpt)
+        trk = Trk(trkseg=[trkseg])
         self.gpx.trk = [trk]
 
     def _add_properties(self):

@@ -41,7 +41,7 @@ class Fix:
                 self.value = FixType(self.value.lower())
             except ValueError as e:
                 raise ValueError(
-                    'value must be one of "none", "2d", "3d", "dgps", "pps".'
+                    '`value` must be one of "none", "2d", "3d", "dgps", "pps".'
                 ) from e
         elif not isinstance(self.value, FixType):
-            raise TypeError("value must be a string or FixType")
+            raise TypeError("`value` must be of type string or FixType")

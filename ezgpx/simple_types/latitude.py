@@ -21,7 +21,7 @@ class Latitude:
         try:
             self.value = float(self.value)
         except (TypeError, ValueError) as e:
-            raise TypeError("value must be convertible to float") from e
+            raise TypeError("`value` must be convertible to float") from e
 
         if not -90 <= self.value <= 90:
-            raise ValueError("value must be in [-90.0, 90.0]")
+            raise ValueError("`value` must be in [-90.0, 90.0]")

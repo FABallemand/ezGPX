@@ -1,5 +1,5 @@
+from .complex_types import *
 from .gpx import *
-from .gpx_elements import *
 from .parsers import *
 from .plotters import *
 from .simple_types import *

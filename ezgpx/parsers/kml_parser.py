@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import IO
 
-from ..gpx_elements import Gpx, Track, TrackSegment, WayPoint
+from ..complex_types import Gpx, Trk, Trkseg, Wpt
 from .xml_parser import XMLParser
 
 
@@ -158,16 +158,16 @@ class KMLParser(XMLParser):
                     for point_coord in coordinates:
                         point_coord = point_coord.split(",")
                         trkpt.append(
-                            WayPoint(
+                            Wpt(
                                 tag="trkpt",
                                 lat=float(point_coord[1]),
                                 lon=float(point_coord[0]),
                                 ele=float(point_coord[2]),
                             )
                         )
-                    trkseg.append(TrackSegment(trkpt=trkpt))
+                    trkseg.append(Trkseg(trkpt=trkpt))
 
-                tracks = [Track(name=placemark_data["name"], trkseg=trkseg)]
+                tracks = [Trk(name=placemark_data["name"], trkseg=trkseg)]
                 self.gpx.trk = tracks
             else:
                 warnings.warn("Oops, not yet implemented...")

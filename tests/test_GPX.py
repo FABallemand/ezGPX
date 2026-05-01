@@ -28,14 +28,15 @@ TMP_DIR = os.path.join(FILE_DIR, "tmp")
 
 
 class TestGPX:
-    # ==== Init ===============================================================#
+
+    # ==== Init ================================================================
 
     def test_init(self):
         # Create temporary folder
         rmtree(TMP_DIR, True)
         os.makedirs(TMP_DIR)
 
-    # ==== Parsing ============================================================#
+    # ==== Parsing =============================================================
 
     @pytest.mark.parametrize(
         "file",
@@ -85,7 +86,7 @@ class TestGPX:
             xml_extensions_schemas=False,
         )
 
-    # ==== Check Schemas ======================================================#
+    # ==== Check Schemas =======================================================
 
     @pytest.mark.parametrize(
         "file,expected",
@@ -103,7 +104,7 @@ class TestGPX:
         result = benchmark(gpx.check_xml_schema)
         assert result is expected
 
-    # ==== Properties =========================================================#
+    # ==== Properties ==========================================================
 
     def test_name(self, benchmark):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
@@ -123,9 +124,9 @@ class TestGPX:
     @pytest.mark.parametrize(
         "trkpt_index,expected",
         [
-            pytest.param(0, "WayPoint[trkpt](44.043332, 4.453089)", id="first_point"),
-            pytest.param(-1, "WayPoint[trkpt](44.043391, 4.453165)", id="last_point"),
-            pytest.param(42, "WayPoint[trkpt](44.046162, 4.449441)", id="random_point"),
+            pytest.param(0, "Wpt[trkpt](44.043332, 4.453089)", id="first_point"),
+            pytest.param(-1, "Wpt[trkpt](44.043391, 4.453165)", id="last_point"),
+            pytest.param(42, "Wpt[trkpt](44.046162, 4.449441)", id="random_point"),
         ],
     )
     def test_get_trkpt(self, benchmark, trkpt_index, expected):
@@ -273,9 +274,9 @@ class TestGPX:
         result = benchmark(gpx.max_ascent_speed)
         assert result == 2159.9999999999797
 
-    # ==== Modifications ======================================================#
+    # ==== Modifications =======================================================
 
-    # ==== Conversion and Saving ==============================================#
+    # ==== Conversion and Saving ===============================================
 
     def test_to_pandas(self, benchmark):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
@@ -324,7 +325,7 @@ class TestGPX:
             False,
         )
 
-    # ==== Plots ==============================================================#
+    # ==== Plots ===============================================================
 
     # def _test_matplotlib_plot_1(self):
     #     # Plot
@@ -425,14 +426,14 @@ class TestGPX:
     #     # self._test_folium_plot_3()
     #     # self._test_folium_plot_4()
 
-    # ==== Destroy ============================================================#
+    # ==== Destroy =============================================================
 
     def test_destroy(self, remove_tmp: bool = True):
         # Remove temporary folder
         if remove_tmp:
             rmtree(TMP_DIR, True)
 
-    # ==== Test ===============================================================#
+    # ==== Test ================================================================
 
     @pytest.mark.skip(
         reason="test"

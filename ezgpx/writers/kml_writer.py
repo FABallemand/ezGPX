@@ -7,7 +7,7 @@ import warnings
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from ..gpx_elements import Gpx
+from ..complex_types import Gpx
 from .writer import Writer
 
 DEFAULT_NORMAL_STYLE = {"color": "ff0000ff", "width": 2, "fill": 0}

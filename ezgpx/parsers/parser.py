@@ -8,13 +8,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import IO
 
+from ..complex_types import Gpx
 from ..constants.precisions import (
     DEFAULT_PRECISION,
     DEFAULT_PRECISION_DICT,
     DEFAULT_TIME_FORMAT,
     POSSIBLE_TIME_FORMATS,
 )
-from ..gpx_elements import Gpx
 
 
 class Parser:

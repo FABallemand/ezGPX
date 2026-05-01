@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import IO
 
-from ..gpx_elements import (
+from ..complex_types import (
     Bounds,
     Copyright,
     Email,
@@ -16,12 +16,12 @@ from ..gpx_elements import (
     Link,
     Metadata,
     Person,
-    Point,
-    PointSegment,
-    Route,
-    Track,
-    TrackSegment,
-    WayPoint,
+    Pt,
+    Ptseg,
+    Rte,
+    Trk,
+    Trkseg,
+    Wpt,
 )
 from .xml_parser import XMLParser
 
@@ -267,7 +267,7 @@ class GPXParser(XMLParser):
 
     def _parse_point_segment(
         self, point_segment: ET.Element, tag: str = "ptseg"
-    ) -> PointSegment | None:
+    ) -> Ptseg | None:
         """
         Parse ptsegType element from GPX file.
 
@@ -276,16 +276,14 @@ class GPXParser(XMLParser):
             tag (str, optional): XML tag. Defaults to "ptseg".
 
         Returns:
-            PointSegment | None: PointSegment instance.
+            Ptseg | None: Ptseg instance.
         """
         if point_segment is None:
             return None
 
-        return PointSegment(
-            tag, [self._parse_point(p) for p in point_segment.findall("pt")]
-        )
+        return Ptseg(tag, [self._parse_point(p) for p in point_segment.findall("pt")])
 
-    def _parse_point(self, point: ET.Element, tag: str = "pt") -> Point | None:
+    def _parse_point(self, point: ET.Element, tag: str = "pt") -> Pt | None:
         """
         Parse ptType element from GPX file.
 
@@ -299,7 +297,7 @@ class GPXParser(XMLParser):
         if point is None:
             return None
 
-        return Point(
+        return Pt(
             tag,
             self.get_float(point, "lat"),
             self.get_float(point, "lon"),
@@ -307,7 +305,7 @@ class GPXParser(XMLParser):
             self.find_time(point, "time"),
         )
 
-    def _parse_route(self, route: ET.Element, tag: str = "rte") -> Route | None:
+    def _parse_route(self, route: ET.Element, tag: str = "rte") -> Rte | None:
         """
         Parse rteType element from GPX file.
 
@@ -316,12 +314,12 @@ class GPXParser(XMLParser):
             tag (str, Optional): XML tag. Defaults to "rte".
 
         Returns:
-            Route | None: Route instance.
+            Rte | None: Rte instance.
         """
         if route is None:
             return None
 
-        return Route(
+        return Rte(
             tag,
             route.findtext("name", namespaces=self.name_spaces),
             route.findtext("cmt", namespaces=self.name_spaces),
@@ -339,7 +337,7 @@ class GPXParser(XMLParser):
 
     def _parse_track_segment(
         self, track_segment: ET.Element, tag: str = "trkseg"
-    ) -> TrackSegment | None:
+    ) -> Trkseg | None:
         """
         Parse trksegType element from GPX file.
 
@@ -349,12 +347,12 @@ class GPXParser(XMLParser):
             tag (str, Optional): XML tag. Defaults to "trkseg".
 
         Returns:
-            TrackSegment | None: TrackSegment instance.
+            Trkseg | None: Trkseg instance.
         """
         if track_segment is None:
             return None
 
-        return TrackSegment(
+        return Trkseg(
             tag,
             [
                 self._parse_waypoint(track_point, "trkpt")
@@ -365,7 +363,7 @@ class GPXParser(XMLParser):
             ),
         )
 
-    def _parse_track(self, track: ET.Element, tag: str = "trk") -> Track | None:
+    def _parse_track(self, track: ET.Element, tag: str = "trk") -> Trk | None:
         """
         Parse trkType element from GPX file.
 
@@ -374,12 +372,12 @@ class GPXParser(XMLParser):
             tag (str, Optional): XML tag. Defaults to "trk".
 
         Returns:
-            Track | None: Track instance.
+            Trk | None: Trk instance.
         """
         if track is None:
             return None
 
-        return Track(
+        return Trk(
             tag,
             track.findtext("name", namespaces=self.name_spaces),
             track.findtext("cmt", namespaces=self.name_spaces),
@@ -395,9 +393,7 @@ class GPXParser(XMLParser):
             ],
         )
 
-    def _parse_waypoint(
-        self, waypoint: ET.Element, tag: str = "wpt"
-    ) -> WayPoint | None:
+    def _parse_waypoint(self, waypoint: ET.Element, tag: str = "wpt") -> Wpt | None:
         """
         Parse wptType element from GPX file.
 
@@ -406,12 +402,12 @@ class GPXParser(XMLParser):
             tag (str, Optional): XML tag. Defaults to "wpt".
 
         Returns:
-            WayPoint | None: WayPoint instance.
+            Wpt | None: Wpt instance.
         """
         if waypoint is None:
             return None
 
-        return WayPoint(
+        return Wpt(
             tag,
             self.get_float(waypoint, "lat"),
             self.get_float(waypoint, "lon"),
