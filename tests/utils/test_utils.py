@@ -23,8 +23,8 @@ class TestUtils:
     def test_haversine_distance(self, benchmark):
         result = benchmark(
             utils.haversine_distance,
-            Wpt("wpt", 48.0, 2.0),
-            Wpt("wpt", 43.0, 5.0),
+            Wpt(48.0, 2.0),
+            Wpt(43.0, 5.0),
         )
         assert result == pytest.approx(603020.0)
 
@@ -32,30 +32,30 @@ class TestUtils:
         "start,end,point,expected",
         [
             pytest.param(
-                Wpt("wpt", 0, 0),
-                Wpt("wpt", 0, 2),
-                Wpt("wpt", 1, 1),
+                Wpt(0, 0),
+                Wpt(0, 2),
+                Wpt(1, 1),
                 1.0,
                 id="horizontal_line",
             ),
             pytest.param(
-                Wpt("wpt", 0, 0),
-                Wpt("wpt", 2, 0),
-                Wpt("wpt", 1, 1),
+                Wpt(0, 0),
+                Wpt(2, 0),
+                Wpt(1, 1),
                 1.0,
                 id="vertical_line",
             ),
             pytest.param(
-                Wpt("wpt", 0, 0),
-                Wpt("wpt", 1, 1),
-                Wpt("wpt", 1, 0),
+                Wpt(0, 0),
+                Wpt(1, 1),
+                Wpt(1, 0),
                 math.sqrt(2) / 2,
                 id="diagonal_line",
             ),
             pytest.param(
-                Wpt("wpt", 0, 0),
-                Wpt("wpt", 1, 1),
-                Wpt("wpt", 2, 2),
+                Wpt(0, 0),
+                Wpt(1, 1),
+                Wpt(2, 2),
                 0.0,
                 id="point_on_line",
             ),

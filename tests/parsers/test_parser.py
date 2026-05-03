@@ -40,7 +40,7 @@ class TestParser:
         ],
     )
     def test_find_precision(self, benchmark, number, expected):
-        parser = Parser("", None)
+        parser = Parser("")
         result = benchmark(parser._find_precision, number)
         assert result == expected
 

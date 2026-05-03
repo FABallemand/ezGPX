@@ -46,7 +46,6 @@ class TestDgpsStation:
         "value",
         [
             pytest.param(None, id="none"),
-            pytest.param(0.0, id="float"),
             pytest.param("a", id="str"),
             pytest.param([], id="list"),
         ],

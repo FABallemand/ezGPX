@@ -7,9 +7,13 @@
         <cmt>test-cmt</cmt>
         <desc>test-desc</desc>
         <src>test-src</src>
-        <link href="test-href">
-            <text>test-text</text>
-            <type>test-type</type>
+        <link href="test-href-0">
+            <text>test-text-0</text>
+            <type>test-type-0</type>
+        </link>
+        <link href="test-href-1">
+            <text>test-text-1</text>
+            <type>test-type-1</type>
         </link>
         <number>0</number>
         <type>test-type</type>
@@ -19,16 +23,20 @@
                 <time>2000-01-01T00:00:00Z</time>
                 <magvar>0.0</magvar>
                 <geoidheight>0.0</geoidheight>
-                <name>test-name</name>
-                <cmt>test-cmt</cmt>
-                <desc>test-desc</desc>
-                <src>test-src</src>
-                <link href="test-href">
-                    <text>test-text</text>
-                    <type>test-type</type>
+                <name>test-name-0</name>
+                <cmt>test-cmt-0</cmt>
+                <desc>test-desc-0</desc>
+                <src>test-src-0</src>
+                <link href="test-href-0-0">
+                    <text>test-text-0-0</text>
+                    <type>test-type-0-0</type>
                 </link>
-                <sym>test-sym</sym>
-                <type>test-type</type>
+                <link href="test-href-0-1">
+                    <text>test-text-0-1</text>
+                    <type>test-type-0-1</type>
+                </link>
+                <sym>test-sym-0</sym>
+                <type>test-type-0</type>
                 <fix>none</fix>
                 <sat>0</sat>
                 <hdop>0.0</hdop>
@@ -36,6 +44,35 @@
                 <pdop>0.0</pdop>
                 <ageofdgpsdata>0.0</ageofdgpsdata>
                 <dgpsid>0</dgpsid>
+            </trkpt>
+        </trkseg>
+        <trkseg>
+            <trkpt lat="1.0" lon="1.0">
+                <ele>1.0</ele>
+                <time>2000-01-01T01:01:01Z</time>
+                <magvar>1.0</magvar>
+                <geoidheight>1.0</geoidheight>
+                <name>test-name-1</name>
+                <cmt>test-cmt-1</cmt>
+                <desc>test-desc-1</desc>
+                <src>test-src-1</src>
+                <link href="test-href-1-0">
+                    <text>test-text-1-0</text>
+                    <type>test-type-1-0</type>
+                </link>
+                <link href="test-href-1-1">
+                    <text>test-text-1-1</text>
+                    <type>test-type-1-1</type>
+                </link>
+                <sym>test-sym-1</sym>
+                <type>test-type-1</type>
+                <fix>2d</fix>
+                <sat>1</sat>
+                <hdop>1.0</hdop>
+                <vdop>1.0</vdop>
+                <pdop>1.0</pdop>
+                <ageofdgpsdata>1.0</ageofdgpsdata>
+                <dgpsid>1</dgpsid>
             </trkpt>
         </trkseg>
     </trk>
