@@ -22,9 +22,7 @@ class Parser:
     File parser.
     """
 
-    def __init__(
-        self, source: str | Path | IO[str] | IO[bytes] | bytes, name_spaces: dict = None
-    ) -> None:
+    def __init__(self, source: str | Path | IO[str] | IO[bytes] | bytes) -> None:
         """
         Initialise Parser instance.
 
@@ -42,7 +40,7 @@ class Parser:
         self.precisions: dict = DEFAULT_PRECISION_DICT
         self.time_format: str = DEFAULT_TIME_FORMAT
 
-        self.gpx: Gpx = Gpx(xmlns=name_spaces)
+        self.gpx: Gpx = Gpx("1.1", "ezGPX")
 
     def _find_precision(self, number: str | None) -> int:
         """

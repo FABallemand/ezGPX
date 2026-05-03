@@ -46,7 +46,7 @@ class XMLParser(Parser):
         }
         self.extensions_fields: dict = {}
 
-        super().__init__(source, self.name_spaces)
+        super().__init__(source)
 
         self.xml_schema: bool = xml_schema
         self.xml_extensions_schemas: bool = xml_extensions_schemas
@@ -108,7 +108,7 @@ class XMLParser(Parser):
 
     def find_sub_element(
         self, element: ET.Element, sub_element: str
-    ) -> ET.Element | None:
+    ) -> ET.Element | None:  # TODO Why use this function?
         """
         Find sub-element.
 

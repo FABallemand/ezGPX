@@ -17,7 +17,7 @@ import pandas as pd
 import polars as pl
 from narwhals.typing import IntoFrameT
 
-from ..complex_types import (
+from .complex_types import (
     Bounds,
     Copyright,
     Email,
@@ -33,20 +33,20 @@ from ..complex_types import (
     Trkseg,
     Wpt,
 )
-from ..constants.precisions import DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
-from ..parsers.fit_parser import FitParser
-from ..parsers.gpx_parser import GPXParser
-from ..parsers.kml_parser import KMLParser
-from ..utils import (
+from .constants.precisions import DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
+from .parsers.fit_parser import FitParser
+from .parsers.gpx_parser import GPXParser
+from .parsers.kml_parser import KMLParser
+from .utils import (
     EARTH_RADIUS,
     check_xml_extensions_schemas,
     check_xml_schema,
     haversine_distance,
     ramer_douglas_peucker,
 )
-from ..utils.dataframe import is_dataframe
-from ..writers.gpx_writer import GPXWriter
-from ..writers.kml_writer import KMLWriter
+from .utils.dataframe import is_dataframe
+from .writers.gpx_writer import GPXWriter
+from .writers.kml_writer import KMLWriter
 
 
 class GPX:
@@ -153,7 +153,7 @@ class GPX:
         warnings.warn(
             "No file path provided, creating an empty GPX instance.", UserWarning
         )
-        self.gpx = Gpx()
+        self.gpx = Gpx("1.1", "ezGPX")
 
         # Writers
         self._gpx_writer = GPXWriter(self.gpx)
@@ -260,7 +260,7 @@ class GPX:
         ]
         trkseg = Trkseg(trkpt=trkpt)
         trk = Trk(trkseg=[trkseg])
-        return Gpx(trk=[trk])
+        return Gpx("1.1", "ezGPX", trk=[trk])
 
     def __str__(self) -> str:
         return self._gpx_writer.gpx_to_string()
