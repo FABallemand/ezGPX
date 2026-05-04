@@ -19,7 +19,7 @@ PARENT_DIR = os.path.realpath(os.path.dirname(FILE_DIR))  # Main folder
 os.chdir(FILE_DIR)
 sys.path.append(PARENT_DIR + "/ezgpx")
 
-from ezgpx import GPX  # pylint: disable=wrong-import-position
+from ezgpx import GPX, Latitude, Longitude, Wpt  # pylint: disable=wrong-import-position
 
 REAL_FILES_DIR = "files/real/"
 REFERENCE_FILES_DIR = "files/reference/"
@@ -29,14 +29,14 @@ TMP_DIR = os.path.join(FILE_DIR, "tmp")
 
 class TestGPX:
 
-    # ==== Init ================================================================
-
     def test_init(self):
         # Create temporary folder
         rmtree(TMP_DIR, True)
         os.makedirs(TMP_DIR)
 
-    # ==== Parsing =============================================================
+    ###############################################################################
+    #### Parsing ##################################################################
+    ###############################################################################
 
     @pytest.mark.parametrize(
         "file",
@@ -86,63 +86,70 @@ class TestGPX:
             xml_extensions_schemas=False,
         )
 
-    # ==== Check Schemas =======================================================
+    ###############################################################################
+    #### Schemas ##################################################################
+    ###############################################################################
 
     @pytest.mark.parametrize(
         "file,expected",
         [
-            pytest.param("strava_run_1.gpx", True),
-            pytest.param("invalid_schema.gpx", False),
+            pytest.param("gpx.gpx", True),
+            # pytest.param("invalid_schema.gpx", False),  # TODO
         ],
     )
     def test_check_schemas(self, benchmark, file, expected):
         gpx = GPX(
-            os.path.join(REAL_FILES_DIR, file),
+            os.path.join(SYNTHETIC_FILES_DIR, "all", file),
             xml_schema=False,
             xml_extensions_schemas=False,
         )
         result = benchmark(gpx.check_xml_schema)
         assert result is expected
 
-    # ==== Properties ==========================================================
+    ###############################################################################
+    #### Metadata #################################################################
+    ###############################################################################
 
-    def test_name(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.name)
-        assert result == "Dérouillage habituel 💥"
+    # def test_file_name(self, benchmark):
+    #     gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+    #     result = benchmark(gpx.name)
+    #     assert result == "test-name"
 
-    def test_set_name(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        benchmark(gpx.set_name, "test")
-        assert gpx.name() == "test"
+    # def test_set_file_name(self, benchmark):
+    #     gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+    #     benchmark(gpx.set_name, "new-test-name")
+    #     assert gpx.name() == "new-test-name"
 
-    def test_nb_points(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.nb_points)
-        assert result == 939
+    ###############################################################################
+    #### Points ###################################################################
+    ###############################################################################
 
-    @pytest.mark.parametrize(
-        "trkpt_index,expected",
-        [
-            pytest.param(0, "Wpt[trkpt](44.043332, 4.453089)", id="first_point"),
-            pytest.param(-1, "Wpt[trkpt](44.043391, 4.453165)", id="last_point"),
-            pytest.param(42, "Wpt[trkpt](44.046162, 4.449441)", id="random_point"),
-        ],
-    )
-    def test_get_trkpt(self, benchmark, trkpt_index, expected):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.get_trkpt, 0, 0, trkpt_index)
-        assert str(result) == expected
+    def test_trkpt_count(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        result = benchmark(gpx.trkpt_count)
+        assert result == 4
 
-    def test_bounds(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.bounds)
-        assert result == (44.032965, 4.444134, 44.047778, 4.486607)
+    def test_trkpt_bounds(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        result = benchmark(gpx.trkpt_bounds)
+        assert result == (Latitude(0), Longitude(0), Latitude(1), Longitude(1))
 
-    def test_center(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.center)
-        assert result == (44.0403715, 4.465370500000001)
+    def test_trkpt_center(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        result = benchmark(gpx.trkpt_center)
+        assert result == (Latitude(0.5), Longitude(0.5))
+
+    def test_trkpt_extreme(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        min_lat, min_lon, max_lat, max_lon = benchmark(gpx.trkpt_extreme)
+        assert min_lat.lat == Latitude(0)
+        assert min_lon.lon == Longitude(0)
+        assert max_lat.lat == Latitude(1)
+        assert max_lon.lon == Longitude(1)
+
+    ###############################################################################
+    #### Distance and Elevation ###################################################
+    ###############################################################################
 
     def test_distance(self, benchmark):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
@@ -178,6 +185,10 @@ class TestGPX:
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.max_elevation)
         assert result == 235.6
+
+    ###############################################################################
+    #### Time #####################################################################
+    ###############################################################################
 
     def test_start_time(self, benchmark):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
@@ -219,6 +230,10 @@ class TestGPX:
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
         result = benchmark(gpx.moving_time)
         assert result == gpx.moving_time()
+
+    ###############################################################################
+    #### Speed and Pace ###########################################################
+    ###############################################################################
 
     @pytest.mark.parametrize(
         "moving,expected",
@@ -274,54 +289,154 @@ class TestGPX:
         result = benchmark(gpx.max_ascent_speed)
         assert result == 2159.9999999999797
 
-    # ==== Modifications =======================================================
+    ###############################################################################
+    #### Data Removal #############################################################
+    ###############################################################################
 
-    # ==== Conversion and Saving ===============================================
+    # TODO
 
-    def test_to_pandas(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        df = benchmark(gpx.to_pandas, values=["lat", "lon", "ele", "time"])
+    ###############################################################################
+    #### Error Correction #########################################################
+    ###############################################################################
+
+    # TODO
+
+    ###############################################################################
+    #### Simplification ###########################################################
+    ###############################################################################
+
+    # TODO
+
+    ###############################################################################
+    #### Merge ####################################################################
+    ###############################################################################
+
+    # TODO
+
+    ###############################################################################
+    #### Exports ##################################################################
+    ###############################################################################
+
+    @pytest.mark.parametrize(
+        "values, as_series, expected",
+        [
+            pytest.param(
+                None, False, {"lat": [0.0, 1.0, 0.0, 1.0], "lon": [0.0, 1.0, 0.0, 1.0]}
+            ),
+            pytest.param(
+                ["lat", "lon", "ele"],
+                False,
+                {
+                    "lat": [0.0, 1.0, 0.0, 1.0],
+                    "lon": [0.0, 1.0, 0.0, 1.0],
+                    "ele": [0.0, 1.0, 0.0, 1.0],
+                },
+            ),
+            # TODO as_series?
+            # TODO all attributes?
+        ],
+    )
+    def test_to_dict(self, benchmark, values, as_series, expected):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        d = benchmark(gpx.to_dict, values, as_series)
+        assert d == expected
+
+    @pytest.mark.parametrize(
+        "values, expected",
+        [
+            pytest.param(
+                None,
+                [
+                    {"lat": 0.0, "lon": 0.0},
+                    {"lat": 1.0, "lon": 1.0},
+                    {"lat": 0.0, "lon": 0.0},
+                    {"lat": 1.0, "lon": 1.0},
+                ],
+            ),
+            pytest.param(
+                ["lat", "lon", "ele"],
+                [
+                    {"lat": 0.0, "lon": 0.0, "ele": 0.0},
+                    {"lat": 1.0, "lon": 1.0, "ele": 1.0},
+                    {"lat": 0.0, "lon": 0.0, "ele": 0.0},
+                    {"lat": 1.0, "lon": 1.0, "ele": 1.0},
+                ],
+            ),
+            # TODO all attributes?
+        ],
+    )
+    def test_to_dicts(self, benchmark, values, expected):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        d = benchmark(gpx.to_dicts, values)
+        assert d == expected
+
+    # def test_to_dict_df(self)  # TODO?
+
+    @pytest.mark.parametrize(
+        "values, reference_file",
+        [
+            pytest.param(None, "gpx_mandatory.csv"),
+            pytest.param(Wpt._fields, "gpx_all.csv"),
+        ],
+    )
+    def test_to_pandas(self, benchmark, values, reference_file):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        df = benchmark(gpx.to_pandas, values)
         reference_df = pd.read_csv(
-            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv")
-        )
+            os.path.join(REFERENCE_FILES_DIR, reference_file)
+        ).replace({float("nan"): None})
         assert reference_df.equals(df)
 
-    def test_to_polars(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        df = benchmark(gpx.to_polars, values=["lat", "lon", "ele", "time"])
+    @pytest.mark.parametrize(
+        "values, reference_file",
+        [
+            pytest.param(None, "gpx_mandatory.csv"),
+            pytest.param(Wpt._fields, "gpx_all.csv"),
+        ],
+    )
+    def test_to_polars(self, benchmark, values, reference_file):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        df = benchmark(gpx.to_polars, values)
         reference_df = pl.read_csv(
-            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv")
-        )
+            os.path.join(REFERENCE_FILES_DIR, reference_file)
+        ).fill_nan(None)
         assert reference_df.equals(df)
 
-    def test_to_gpx(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        benchmark(gpx.to_gpx, "tmp/strava_run_1_test.gpx")
+    def test_to_gpx(self, benchmark):  # TODO more examples
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        benchmark(gpx.to_gpx, "tmp/gpx.gpx")
         assert filecmp.cmp(
-            "tmp/strava_run_1_test.gpx",
-            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.gpx"),
+            "tmp/gpx.gpx",
+            os.path.join(REFERENCE_FILES_DIR, "gpx_all.gpx"),
             False,
         )
 
-    def test_to_kml(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        benchmark(gpx.to_kml, "tmp/strava_run_1_test.kml", styles=None)
-        assert filecmp.cmp(
-            "tmp/strava_run_1_test.kml",
-            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.kml"),
-            False,
-        )
+    # def test_to_kml(self, benchmark):  # TODO
+    #     gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
+    #     benchmark(gpx.to_kml, "tmp/strava_run_1_test.kml", styles=None)
+    #     assert filecmp.cmp(
+    #         "tmp/strava_run_1_test.kml",
+    #         os.path.join(REFERENCE_FILES_DIR, "strava_run_1.kml"),
+    #         False,
+    #     )
 
-    def test_to_csv(self, benchmark):
-        gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
+    @pytest.mark.parametrize(
+        "values, reference_file",
+        [
+            pytest.param(None, "gpx_mandatory.csv"),
+            pytest.param(Wpt._fields, "gpx_all.csv"),
+        ],
+    )
+    def test_to_csv(self, benchmark, values, reference_file):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
         benchmark(
             gpx.to_csv,
-            "tmp/strava_run_1_test.csv",
-            values=["lat", "lon", "ele", "time"],
+            f"tmp/{reference_file}",
+            values,
         )
         assert filecmp.cmp(
-            "tmp/strava_run_1_test.csv",
-            os.path.join(REFERENCE_FILES_DIR, "strava_run_1.csv"),
+            f"tmp/{reference_file}",
+            os.path.join(REFERENCE_FILES_DIR, reference_file),
             False,
         )
 

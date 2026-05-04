@@ -5,7 +5,7 @@ This module contains the Degrees class.
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(order=True)
 class Degrees:
     """
     degreesType.

@@ -13,7 +13,9 @@ class GPXWriterMethodCreator:
     GPXWriter method creator.
     """
 
-    def add_bounds_creator(self, fields: list) -> FunctionType:
+    def add_bounds_creator(
+        self, fields: list
+    ) -> FunctionType:  # TODO only mandatory fields -> overhead?
         """
         Create `add_bounds` method.
 
@@ -29,13 +31,13 @@ class GPXWriterMethodCreator:
             "\n\t\tbounds_ = ET.SubElement(element, bounds.tag)"
         )
         if "minlat" in fields:
-            code += '\n\t\tbounds_, _ = writer.add_subelement_number(bounds_, "minlat", bounds.minlat, writer.precisions["lat_lon"])'
+            code += '\n\t\twriter.set_not_none(bounds_, "minlat", f"{bounds.minlat.value:.{writer.precisions["lat_lon"]}f}")'
         if "minlon" in fields:
-            code += '\n\t\tbounds_, _ = writer.add_subelement_number(bounds_, "minlon", bounds.minlon, writer.precisions["lat_lon"])'
+            code += '\n\t\twriter.set_not_none(bounds_, "minlon", f"{bounds.minlon.value:.{writer.precisions["lat_lon"]}f}")'
         if "maxlat" in fields:
-            code += '\n\t\tbounds_, _ = writer.add_subelement_number(bounds_, "maxlat", bounds.maxlat, writer.precisions["lat_lon"])'
+            code += '\n\t\twriter.set_not_none(bounds_, "maxlat", f"{bounds.maxlat.value:.{writer.precisions["lat_lon"]}f}")'
         if "maxlon" in fields:
-            code += '\n\t\tbounds_, _ = writer.add_subelement_number(bounds_, "maxlon", bounds.maxlon, writer.precisions["lat_lon"])'
+            code += '\n\t\twriter.set_not_none(bounds_, "maxlon", f"{bounds.maxlon.value:.{writer.precisions["lat_lon"]}f}")'
         code += "\n\treturn element"
         return FunctionType(
             compile(code, "<_add_bounds>", "exec").co_consts[0],
@@ -62,8 +64,8 @@ class GPXWriterMethodCreator:
             code += '\n\t\twriter.set_not_none(copyright_, "author", copyright.author)'
         if "year" in fields:
             code += '\n\t\tcopyright_, _ = writer.add_subelement(copyright_, "year", str(copyright.year))'
-        if "licence" in fields:
-            code += '\n\t\tcopyright_, _ = writer.add_subelement(copyright_, "licence", str(copyright.licence))'
+        if "license" in fields:
+            code += '\n\t\tcopyright_, _ = writer.add_subelement(copyright_, "license", str(copyright.license))'
         code += "\n\treturn element"
         return FunctionType(
             compile(code, "<_add_copyright>", "exec").co_consts[0],
@@ -160,7 +162,8 @@ class GPXWriterMethodCreator:
                 "\n\t\tmetadata_ = writer.add_copyright(metadata_, metadata.copyright)"
             )
         if "link" in fields:
-            code += "\n\t\tmetadata_ = writer.add_link(metadata_, metadata.link)"
+            code += "\n\t\tfor l in metadata.link:"
+            code += "\n\t\t\tmetadata_ = writer.add_link(metadata_, l)"
         if "time" in fields:
             code += '\n\t\tmetadata_, _ = writer.add_subelement_time(metadata_, "time", metadata.time, writer.time_format)'
         if "keywords" in fields:
@@ -250,9 +253,9 @@ class GPXWriterMethodCreator:
             "\n\t\tpoint_ = ET.SubElement(element, point.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(point_, "lat", "{:.{}f}".format(point.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(point_, "lat", "{:.{}f}".format(point.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(point_, "lon", "{:.{}f}".format(point.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(point_, "lon", "{:.{}f}".format(point.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
             code += '\n\t\tpoint_ = writer.add_subelement_number(point_, "ele", point.ele, writer.precisions["elevation"])'
         if "time" in fields:
@@ -290,9 +293,10 @@ class GPXWriterMethodCreator:
         if "src" in fields:
             code += '\n\t\troute_, _ = writer.add_subelement(route_, "src", route.src)'
         if "link" in fields:
-            code += "\n\t\troute_ = writer.add_link(route_, route.link)"
+            code += "\n\t\tfor l in route.link:"
+            code += "\n\t\t\troute_ = writer.add_link(route_, l)"
         if "number" in fields:
-            code += '\n\t\troute_, _ = writer.add_subelement_number(route_, "number", route.src, 0)'
+            code += '\n\t\troute_, _ = writer.add_subelement_number(route_, "number", route.number)'
         if "type" in fields:
             code += (
                 '\n\t\troute_, _ = writer.add_subelement(route_, "type", route.type)'
@@ -368,9 +372,10 @@ class GPXWriterMethodCreator:
         if "src" in fields:
             code += '\n\t\ttrack_, _ = writer.add_subelement(track_, "src", track.src)'
         if "link" in fields:
-            code += "\n\t\ttrack_ = writer.add_link(track_, track.link)"
+            code += "\n\t\tfor l in track.link:"
+            code += "\n\t\t\ttrack_ = writer.add_link(track_, l)"
         if "number" in fields:
-            code += '\n\t\ttrack_, _ = writer.add_subelement_number(track_, "number", track.src, 0)'
+            code += '\n\t\ttrack_, _ = writer.add_subelement_number(track_, "number", track.number)'
         if "type" in fields:
             code += (
                 '\n\t\ttrack_, _ = writer.add_subelement(track_, "type", track.type)'
@@ -404,15 +409,15 @@ class GPXWriterMethodCreator:
             "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
         if "time" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
         if "magvar" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.magvar.value, writer.precisions["default"])'
         if "geoidheight" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
         if "name" in fields:
@@ -424,13 +429,14 @@ class GPXWriterMethodCreator:
         if "src" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
         if "link" in fields:
-            code += "\n\t\twaypoint_ = writer.add_link(waypoint_, waypoint.link)"
+            code += "\n\t\tfor l in waypoint.link:"
+            code += "\n\t\t\twaypoint_ = writer.add_link(waypoint_, l)"
         if "sym" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
         if "type" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
         if "fix" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix)'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix.value)'
         if "sat" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
         if "hdop" in fields:
@@ -439,10 +445,10 @@ class GPXWriterMethodCreator:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
         if "pdop" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
-        if "ageofgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.ageofgpsdata, writer.precisions["default"])'
+        if "ageofdgpsdata" in fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofdgpsdata", waypoint.ageofdgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid.value, 0)'
         if "extensions" in fields:
             # code += '\n\t\twaypoint_ = writer.add_wpt_extensions(waypoint_, waypoint.extensions)'
             code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("wpt"))'
@@ -469,15 +475,15 @@ class GPXWriterMethodCreator:
             "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
         if "time" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
         if "magvar" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.mag_var, writer.precisions["default"])'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.magvar.value, writer.precisions["default"])'
         if "geoidheight" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
         if "name" in fields:
@@ -489,13 +495,14 @@ class GPXWriterMethodCreator:
         if "src" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
         if "link" in fields:
-            code += "\n\t\twaypoint_ = writer.add_link(waypoint_, waypoint.link)"
+            code += "\n\t\tfor l in waypoint.link:"
+            code += "\n\t\t\twaypoint_ = writer.add_link(waypoint_, l)"
         if "sym" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
         if "type" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
         if "fix" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix)'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix.value)'
         if "sat" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
         if "hdop" in fields:
@@ -504,10 +511,10 @@ class GPXWriterMethodCreator:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
         if "pdop" in fields:
             code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
-        if "ageofgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofgpsdata", waypoint.ageofgpsdata, writer.precisions["default"])'
+        if "ageofdgpsdata" in fields:
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofdgpsdata", waypoint.ageofdgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid, 0)'
+            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid.value, 0)'
         if "extensions" in fields:
             # code += '\n\t\twaypoint_ = writer.add_trkpt_extensions(waypoint_, waypoint.extensions)'
             code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("trkpt"))'

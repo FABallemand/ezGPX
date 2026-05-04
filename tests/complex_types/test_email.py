@@ -22,7 +22,7 @@ class TestEmail:
     @pytest.mark.parametrize(
         "id, domain, tag",
         [
-            pytest.param("test_id", "test_domain", "t", id="1"),
+            pytest.param("test-id", "test-domain", "t", id="1"),
         ],
     )
     def test_valid_values(self, id, domain, tag):  # pylint: disable=redefined-builtin
@@ -30,14 +30,14 @@ class TestEmail:
         assert isinstance(e.id, str)
         assert isinstance(e.domain, str)
         assert isinstance(e.tag, str)
-        assert e.id == "test_id"
-        assert e.domain == "test_domain"
+        assert e.id == "test-id"
+        assert e.domain == "test-domain"
         assert e.tag == "t"
 
     # @pytest.mark.parametrize(
     #     "id, domain, tag",
     #     [
-    #         pytest.param("test_id", "test_domain", "t", id="none"),
+    #         pytest.param("test-id", "test-domain", "t", id="none"),
     #     ],
     # )
     # def test_invalid_values_raise(self, id, domain, tag):  # pylint: disable=redefined-builtin
@@ -46,8 +46,8 @@ class TestEmail:
 
     def test_default_tag(self):
         e = Email(
-            id="test_id",
-            domain="test_domain",
+            id="test-id",
+            domain="test-domain",
         )
         assert e.tag == "email"
 

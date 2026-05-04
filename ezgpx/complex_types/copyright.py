@@ -17,7 +17,7 @@ class Copyright:
     Args:
         author (str): Copyright holder.
         year (int, optional): Year of copyright. Defaults to None.
-        licence (str, optional): Link to external file containing
+        license (str, optional): Link to external file containing
             license text. Defaults to None.
         tag (str, optional): XML tag. Defaults to "copyright".
     """
@@ -27,7 +27,7 @@ class Copyright:
     license: str = None
     tag: str = "copyright"
 
-    _fields: ClassVar[list[str]] = ["author", "year", "licence"]
+    _fields: ClassVar[list[str]] = ["author", "year", "license"]
     _mandatory_fields: ClassVar[list[str]] = ["author"]
 
     def __post_init__(self):

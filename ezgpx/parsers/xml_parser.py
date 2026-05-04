@@ -3,13 +3,12 @@ This module contains the XMLParser class.
 """
 
 import io
-import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from typing import IO
 
-from dateutil import parser
+import dateutil
 
 from ..utils import check_xml_extensions_schemas, check_xml_schema
 from .parser import Parser
@@ -41,7 +40,7 @@ class XMLParser(Parser):
         # Bytes object
         if isinstance(source, bytes):
             source = io.BytesIO(source)
-        self.name_spaces: dict = {
+        self.xmlns: dict = {
             node[0]: node[1] for _, node in ET.iterparse(source, events=["start-ns"])
         }
         self.extensions_fields: dict = {}
@@ -53,58 +52,6 @@ class XMLParser(Parser):
 
         self.xml_tree: ET.ElementTree = None
         self.xml_root: ET.Element = None
-
-    def get_text(self, element: ET.Element, sub_element: str) -> str | None:
-        """
-        Get text from sub-element.
-
-        Args:
-            element (ET.Element): Parsed element from GPX file.
-            sub_element (str): Sub-element name.
-
-        Returns:
-            str | None: Text from sub-element.
-        """
-        text_ = element.get(sub_element)
-        if text_ is None:
-            warnings.warn(f"{element} has no attribute {sub_element}.")
-        return text_
-
-    def get_int(self, element: ET.Element, sub_element: str) -> int | None:
-        """
-        Get integer value from sub-element.
-
-        Args:
-            element (ET.Element): Parsed element from GPX file.
-            sub_element (str): Sub-element name.
-
-        Returns:
-            int | None: Integer value from sub-element.
-        """
-        int_ = element.get(sub_element)
-        if int_ is None:
-            warnings.warn(f"{element} has no attribute {sub_element}.")
-        else:
-            int_ = int(int_)
-        return int_
-
-    def get_float(self, element: ET.Element, sub_element: str) -> float | None:
-        """
-        Get floating point value from sub-element.
-
-        Args:
-            element (ET.Element): Parsed element from GPX file.
-            sub_element (str): Sub-element name.
-
-        Returns:
-            float | None: Floating point value from sub-element.
-        """
-        float_ = element.get(sub_element)
-        if float_ is None:
-            warnings.warn(f"{element} has no attribute {sub_element}.")
-        else:
-            float_ = float(float_)
-        return float_
 
     def find_sub_element(
         self, element: ET.Element, sub_element: str
@@ -119,10 +66,7 @@ class XMLParser(Parser):
         Returns:
             ET.Element | None: Sub-element.
         """
-        sub_element_ = element.find(sub_element, self.name_spaces)
-        if sub_element_ is None:
-            warnings.warn(f"{element} has no attribute {sub_element}.")
-        return sub_element_
+        return element.find(sub_element, self.xmlns)
 
     def find_text(self, element: ET.Element, sub_element: str) -> str | None:
         """
@@ -178,7 +122,9 @@ class XMLParser(Parser):
             datetime | None: Floating point value from sub-element.
         """
         sub_element_ = self.find_sub_element(element, sub_element)
-        return None if sub_element_ is None else parser.parse(sub_element_.text)
+        return (
+            None if sub_element_ is None else dateutil.parser.parse(sub_element_.text)
+        )
 
     def xml_schemas(self):
         """

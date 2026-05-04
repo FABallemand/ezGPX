@@ -31,11 +31,11 @@ class TestMetadata:
         "name, desc, author, copyright, link, time, keywords, bounds, extensions, tag",
         [
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
-                Copyright("test_author"),
-                Link("test_href"),
+                Copyright("test-author"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 Bounds(0, 0, 0, 0),
@@ -65,17 +65,18 @@ class TestMetadata:
         assert isinstance(m.desc, str)
         assert isinstance(m.author, Person)
         assert isinstance(m.copyright, Copyright)
-        assert isinstance(m.link, Link)
+        assert isinstance(m.link, list)
+        assert all(isinstance(ll, Link) for ll in m.link)
         assert isinstance(m.time, datetime)
         assert isinstance(m.keywords, str)
         assert isinstance(m.bounds, Bounds)
         assert isinstance(m.extensions, Extensions)
         assert isinstance(m.tag, str)
-        assert m.name == "test_name"
-        assert m.desc == "test_desc"
+        assert m.name == "test-name"
+        assert m.desc == "test-desc"
         # assert m.author == ...
         # assert m.copyright == ...
-        # assert m.link == ...
+        assert len(m.link) == 2
         assert m.time == datetime(2000, 1, 1)
         assert m.keywords == "test_keywords"
         # assert m.bounds == ...
@@ -86,11 +87,11 @@ class TestMetadata:
         "name, desc, author, copyright, link, time, keywords, bounds, extensions, tag",
         [
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 42,
-                Copyright("test_author"),
-                Link("test_href"),
+                Copyright("test-author"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 Bounds(0, 0, 0, 0),
@@ -99,11 +100,11 @@ class TestMetadata:
                 id="not_person",
             ),
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
                 42,
-                Link("test_href"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 Bounds(0, 0, 0, 0),
@@ -112,11 +113,24 @@ class TestMetadata:
                 id="not_copyright",
             ),
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
-                Copyright("test_author"),
+                Copyright("test-author"),
                 42,
+                datetime(2000, 1, 1),
+                "test_keywords",
+                Bounds(0, 0, 0, 0),
+                Extensions(),
+                "t",
+                id="not_list",
+            ),
+            pytest.param(
+                "test-name",
+                "test-desc",
+                Person(),
+                Copyright("test-author"),
+                [42, Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 Bounds(0, 0, 0, 0),
@@ -125,11 +139,11 @@ class TestMetadata:
                 id="not_link",
             ),
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
-                Copyright("test_author"),
-                Link("test_href"),
+                Copyright("test-author"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 42,
                 "test_keywords",
                 Bounds(0, 0, 0, 0),
@@ -138,11 +152,11 @@ class TestMetadata:
                 id="not_datetime",
             ),
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
-                Copyright("test_author"),
-                Link("test_href"),
+                Copyright("test-author"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 42,
@@ -151,11 +165,11 @@ class TestMetadata:
                 id="not_bounds",
             ),
             pytest.param(
-                "test_name",
-                "test_desc",
+                "test-name",
+                "test-desc",
                 Person(),
-                Copyright("test_author"),
-                Link("test_href"),
+                Copyright("test-author"),
+                [Link("test-href-0"), Link("test-href-1"),],
                 datetime(2000, 1, 1),
                 "test_keywords",
                 Bounds(0, 0, 0, 0),

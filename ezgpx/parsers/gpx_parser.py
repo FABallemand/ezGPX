@@ -61,11 +61,11 @@ class GPXParser(XMLParser):
         # TODO use lat/lon from waypoints, points, track points?
         # TODO store coordinates as string to avoid precision?
         # Point
-        tracks = self.xml_root.findall("trk", self.name_spaces)
-        segments = tracks[0].findall("trkseg", self.name_spaces) if tracks else []
-        points = segments[0].findall("trkpt", self.name_spaces) if segments else []
+        tracks = self.xml_root.findall("trk", self.xmlns)
+        segments = tracks[0].findall("trkseg", self.xmlns) if tracks else []
+        points = segments[0].findall("trkpt", self.xmlns) if segments else []
         if points:
-            ele_text = points[0].findtext("ele", namespaces=self.name_spaces)
+            ele_text = points[0].findtext("ele", namespaces=self.xmlns)
             self.ele_data = ele_text is not None
             self.precisions["lat_lon"] = self._find_precision(points[0].get("lat"))
             self.precisions["elevation"] = self._find_precision(ele_text)
@@ -80,18 +80,18 @@ class GPXParser(XMLParser):
         # TODO use time from metadata, waypoints, points, track points, other?
         # TODO store times as string to avoid formar?
         # Use time from metadata
-        metadata = self.xml_root.find("metadata", self.name_spaces)
+        metadata = self.xml_root.find("metadata", self.xmlns)
         if metadata is not None:
-            time_str = metadata.findtext("time", namespaces=self.name_spaces)
+            time_str = metadata.findtext("time", namespaces=self.xmlns)
             if time_str is not None:
                 return time_str
 
         # Use time from track point
-        tracks = self.xml_root.findall("trk", self.name_spaces)
-        segments = tracks[0].findall("trkseg", self.name_spaces) if tracks else []
-        points = segments[0].findall("trkpt", self.name_spaces) if segments else []
+        tracks = self.xml_root.findall("trk", self.xmlns)
+        segments = tracks[0].findall("trkseg", self.xmlns) if tracks else []
+        points = segments[0].findall("trkpt", self.xmlns) if segments else []
         if points:
-            time_str = points[0].findtext("time", namespaces=self.name_spaces)
+            time_str = points[0].findtext("time", namespaces=self.xmlns)
             if time_str is not None:
                 return time_str
 
@@ -138,8 +138,8 @@ class GPXParser(XMLParser):
             return None
         return Copyright(
             copyright.get("author"),
-            copyright.findtext("year", namespaces=self.name_spaces),
-            copyright.findtext("licence", namespaces=self.name_spaces),
+            copyright.findtext("year", namespaces=self.xmlns),
+            copyright.findtext("license", namespaces=self.xmlns),
             tag,
         )
 
@@ -208,8 +208,8 @@ class GPXParser(XMLParser):
             return None
         return Link(
             link.get("href"),
-            link.findtext("text", namespaces=self.name_spaces),
-            link.findtext("type", namespaces=self.name_spaces),
+            link.findtext("text", namespaces=self.xmlns),
+            link.findtext("type", namespaces=self.xmlns),
             tag,
         )
 
@@ -229,19 +229,19 @@ class GPXParser(XMLParser):
         if metadata is None:
             return None
         return Metadata(
-            metadata.findtext("name", namespaces=self.name_spaces),
-            metadata.findtext("desc", namespaces=self.name_spaces),
-            self._parse_person(metadata.find("author", self.name_spaces)),
-            self._parse_copyright(metadata.find("copyright", self.name_spaces)),
-            self._parse_link(metadata.find("link", self.name_spaces)),
+            metadata.findtext("name", namespaces=self.xmlns),
+            metadata.findtext("desc", namespaces=self.xmlns),
+            self._parse_person(metadata.find("author", self.xmlns)),
+            self._parse_copyright(metadata.find("copyright", self.xmlns)),
+            [self._parse_link(ll) for ll in metadata.findall("link", self.xmlns)],
             self.find_time(metadata, "time"),
-            metadata.findtext("keywords", namespaces=self.name_spaces),
-            self._parse_bounds(metadata.find("bounds", self.name_spaces)),
-            self._parse_extensions(metadata.find("extensions", self.name_spaces), tag),
+            metadata.findtext("keywords", namespaces=self.xmlns),
+            self._parse_bounds(metadata.find("bounds", self.xmlns)),
+            self._parse_extensions(metadata.find("extensions", self.xmlns), tag),
             tag,
         )
 
-    def _parse_person(self, person: ET.Element, tag: str = "person") -> Person | None:
+    def _parse_person(self, person: ET.Element, tag: str = "author") -> Person | None:
         """
         Parse personType element.
 
@@ -255,9 +255,9 @@ class GPXParser(XMLParser):
         if person is None:
             return None
         return Person(
-            person.findtext("name", namespaces=self.name_spaces),
-            self._parse_email(person.find("email", self.name_spaces)),
-            self._parse_link(person.find("link", self.name_spaces)),
+            person.findtext("name", namespaces=self.xmlns),
+            self._parse_email(person.find("email", self.xmlns)),
+            self._parse_link(person.find("link", self.xmlns)),
             tag,
         )
 
@@ -292,8 +292,8 @@ class GPXParser(XMLParser):
         if point is None:
             return None
         return Pt(
-            self.get_float(point, "lat"),
-            self.get_float(point, "lon"),
+            point.get("lat"),
+            point.get("lon"),
             self.find_float(point, "ele"),
             self.find_time(point, "time"),
             tag,
@@ -313,15 +313,18 @@ class GPXParser(XMLParser):
         if route is None:
             return None
         return Rte(
-            route.findtext("name", namespaces=self.name_spaces),
-            route.findtext("cmt", namespaces=self.name_spaces),
-            route.findtext("desc", namespaces=self.name_spaces),
-            route.findtext("src", namespaces=self.name_spaces),
-            [self._parse_link(ll) for ll in route.findall("link", self.name_spaces)],
+            route.findtext("name", namespaces=self.xmlns),
+            route.findtext("cmt", namespaces=self.xmlns),
+            route.findtext("desc", namespaces=self.xmlns),
+            route.findtext("src", namespaces=self.xmlns),
+            [self._parse_link(ll) for ll in route.findall("link", self.xmlns)],
             self.find_int(route, "number"),
-            route.findtext("type", namespaces=self.name_spaces),
-            self._parse_extensions(route.find("extensions", self.name_spaces), tag),
-            [self._parse_waypoint(w) for w in route.findall("rtept", self.name_spaces)],
+            route.findtext("type", namespaces=self.xmlns),
+            self._parse_extensions(route.find("extensions", self.xmlns), tag),
+            [
+                self._parse_waypoint(w, "rtept")
+                for w in route.findall("rtept", self.xmlns)
+            ],
             tag,
         )
 
@@ -344,11 +347,9 @@ class GPXParser(XMLParser):
         return Trkseg(
             [
                 self._parse_waypoint(track_point, "trkpt")
-                for track_point in track_segment.findall("trkpt", self.name_spaces)
+                for track_point in track_segment.findall("trkpt", self.xmlns)
             ],
-            self._parse_extensions(
-                track_segment.find("extensions", self.name_spaces), tag
-            ),
+            self._parse_extensions(track_segment.find("extensions", self.xmlns), tag),
             tag,
         )
 
@@ -366,18 +367,15 @@ class GPXParser(XMLParser):
         if track is None:
             return None
         return Trk(
-            track.findtext("name", namespaces=self.name_spaces),
-            track.findtext("cmt", namespaces=self.name_spaces),
-            track.findtext("desc", namespaces=self.name_spaces),
-            track.findtext("src", namespaces=self.name_spaces),
-            [self._parse_link(ll) for ll in track.findall("link", self.name_spaces)],
+            track.findtext("name", namespaces=self.xmlns),
+            track.findtext("cmt", namespaces=self.xmlns),
+            track.findtext("desc", namespaces=self.xmlns),
+            track.findtext("src", namespaces=self.xmlns),
+            [self._parse_link(ll) for ll in track.findall("link", self.xmlns)],
             self.find_int(track, "number"),
-            track.findtext("type", namespaces=self.name_spaces),
-            self._parse_extensions(track.find("extensions", self.name_spaces), tag),
-            [
-                self._parse_track_segment(t)
-                for t in track.findall("trkseg", self.name_spaces)
-            ],
+            track.findtext("type", namespaces=self.xmlns),
+            self._parse_extensions(track.find("extensions", self.xmlns), tag),
+            [self._parse_track_segment(t) for t in track.findall("trkseg", self.xmlns)],
             tag,
         )
 
@@ -395,27 +393,27 @@ class GPXParser(XMLParser):
         if waypoint is None:
             return None
         return Wpt(
-            self.get_float(waypoint, "lat"),
-            self.get_float(waypoint, "lon"),
+            waypoint.get("lat"),
+            waypoint.get("lon"),
             self.find_float(waypoint, "ele"),
             self.find_time(waypoint, "time"),
             self.find_float(waypoint, "magvar"),
             self.find_float(waypoint, "geoidheight"),
-            waypoint.findtext("name", namespaces=self.name_spaces),
-            waypoint.findtext("cmt", namespaces=self.name_spaces),
-            waypoint.findtext("desc", namespaces=self.name_spaces),
-            waypoint.findtext("src", namespaces=self.name_spaces),
-            [self._parse_link(ll) for ll in waypoint.findall("link", self.name_spaces)],
-            waypoint.findtext("sym", namespaces=self.name_spaces),
-            waypoint.findtext("type", namespaces=self.name_spaces),
-            waypoint.findtext("fix", namespaces=self.name_spaces),
+            waypoint.findtext("name", namespaces=self.xmlns),
+            waypoint.findtext("cmt", namespaces=self.xmlns),
+            waypoint.findtext("desc", namespaces=self.xmlns),
+            waypoint.findtext("src", namespaces=self.xmlns),
+            [self._parse_link(ll) for ll in waypoint.findall("link", self.xmlns)],
+            waypoint.findtext("sym", namespaces=self.xmlns),
+            waypoint.findtext("type", namespaces=self.xmlns),
+            waypoint.findtext("fix", namespaces=self.xmlns),
             self.find_int(waypoint, "sat"),
             self.find_float(waypoint, "hdop"),
             self.find_float(waypoint, "vdop"),
             self.find_float(waypoint, "pdop"),
-            self.find_float(waypoint, "ageofgpsdata"),
+            self.find_float(waypoint, "ageofdgpsdata"),
             self.find_float(waypoint, "dgpsid"),
-            self._parse_extensions(waypoint.find("extensions", self.name_spaces), tag),
+            self._parse_extensions(waypoint.find("extensions", self.xmlns), tag),
             tag,
         )
 
@@ -435,7 +433,7 @@ class GPXParser(XMLParser):
         Parse metadataType elements.
         """
         self.gpx.metadata = self._parse_metadata(
-            self.xml_root.find("metadata", self.name_spaces)
+            self.xml_root.find("metadata", self.xmlns)
         )
 
     def _parse_root_waypoints(self):
@@ -443,8 +441,7 @@ class GPXParser(XMLParser):
         Parse wptType elements.
         """
         self.gpx.wpt = [
-            self._parse_waypoint(w)
-            for w in self.xml_root.findall("wpt", self.name_spaces)
+            self._parse_waypoint(w) for w in self.xml_root.findall("wpt", self.xmlns)
         ]
 
     def _parse_root_routes(self):
@@ -452,7 +449,7 @@ class GPXParser(XMLParser):
         Parse rteType elements from GPX file
         """
         self.gpx.rte = [
-            self._parse_route(r) for r in self.xml_root.findall("rte", self.name_spaces)
+            self._parse_route(r) for r in self.xml_root.findall("rte", self.xmlns)
         ]
 
     def _parse_root_tracks(self):
@@ -460,14 +457,14 @@ class GPXParser(XMLParser):
         Parse trkType elements.
         """
         self.gpx.trk = [
-            self._parse_track(t) for t in self.xml_root.findall("trk", self.name_spaces)
+            self._parse_track(t) for t in self.xml_root.findall("trk", self.xmlns)
         ]
 
     def _parse_root_extensions(self):
         """
         Parse extensionsType elements.
         """
-        extensions = self.xml_root.find("extensions", self.name_spaces)
+        extensions = self.xml_root.find("extensions", self.xmlns)
         self.gpx.extensions = self._parse_extensions(extensions, "gpx")
 
     def parse(self) -> Gpx:

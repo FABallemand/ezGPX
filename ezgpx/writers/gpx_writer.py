@@ -340,7 +340,7 @@ class GPXWriter(Writer):
         """
         self.set_not_none(self.gpx_root, "version", self.gpx.version)
         self.set_not_none(self.gpx_root, "creator", "ezGPX")
-        for k, v in self.gpx.xmlns.items():
+        for k, v in self.xmlns.items():
             ET.register_namespace(k, v)  # prefix, URI
             if k in ["", "xsi"]:
                 self.set_not_none(
@@ -405,8 +405,7 @@ class GPXWriter(Writer):
         self.gpx_root = ET.Element("gpx")
 
         # Properties
-        if self.properties:
-            self.add_root_properties()
+        self.add_root_properties()
 
         # Metadata
         if self.metadata_fields:
@@ -438,7 +437,7 @@ class GPXWriter(Writer):
         self,
         file_path: str,
         *,
-        properties: bool = True,
+        xmlns: dict,
         bounds_fields: Optional[list[str]] = None,
         copyright_fields: Optional[list[str]] = None,
         email_fields: Optional[list[str]] = None,
@@ -459,12 +458,12 @@ class GPXWriter(Writer):
         xml_extensions_schemas: bool = False,
     ) -> bool:
         """
-        TO UPDATE
+        TODO update
         Handle writing.
 
         Args:
             path (str): Path to write the GPX file.
-            properties (bool, optional): Toggle properties writting. Defaults to True.
+            xmlns (dict): TODO
             metadata (bool, optional): Toggle metadata writting. Defaults to True.
             waypoint (bool, optional): Toggle way points writting. Defaults to True.
             routes (bool, optional): Toggle routes writting. Defaults to True.
@@ -488,9 +487,9 @@ class GPXWriter(Writer):
                 errno.ENOENT, os.strerror(errno.ENOENT), directory_path
             )
         self.file_path = file_path
+        self.xmlns = xmlns
 
         # Set parameters
-        self.properties = properties
         self.bounds_fields = (
             bounds_fields if bounds_fields is not None else Bounds._fields
         )

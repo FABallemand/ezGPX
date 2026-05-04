@@ -64,7 +64,7 @@ class Wpt:  # pylint: disable=too-many-instance-attributes
             Defaults to None.
         pdop (float, optional): Position dilution of precision.
             Defaults to None.
-        ageofgpsdata (float, optional): Number of seconds since
+        ageofdgpsdata (float, optional): Number of seconds since
             last DGPS update. Defaults to None.
         dgpsid (DgpsStation, optional): ID of DGPS station used in
             differential correction. Defaults to None.
@@ -92,7 +92,7 @@ class Wpt:  # pylint: disable=too-many-instance-attributes
     hdop: float = None
     vdop: float = None
     pdop: float = None
-    ageofgpsdata: float = None
+    ageofdgpsdata: float = None
     dgpsid: DgpsStation = None
     extensions: Extensions = None
     tag: str = "wpt"
@@ -124,7 +124,7 @@ class Wpt:  # pylint: disable=too-many-instance-attributes
         "hdop",
         "vdop",
         "pdop",
-        "ageofgpsdata",
+        "ageofdgpsdata",
         "dgpsid",
         "extensions",
     ]
@@ -170,8 +170,8 @@ class Wpt:  # pylint: disable=too-many-instance-attributes
             self.vdop = float(self.vdop)
         if self.pdop is not None and not isinstance(self.pdop, float):
             self.pdop = float(self.pdop)
-        if self.ageofgpsdata is not None and not isinstance(self.ageofgpsdata, float):
-            self.ageofgpsdata = float(self.ageofgpsdata)
+        if self.ageofdgpsdata is not None and not isinstance(self.ageofdgpsdata, float):
+            self.ageofdgpsdata = float(self.ageofdgpsdata)
         if self.dgpsid is not None and not isinstance(self.dgpsid, DgpsStation):
             self.dgpsid = DgpsStation(self.dgpsid)
         if self.extensions is not None and not isinstance(self.extensions, Extensions):

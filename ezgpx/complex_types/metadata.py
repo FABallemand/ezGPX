@@ -29,7 +29,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             the GPX file. Defaults to None.
         copyright (str, optional): Copyright and license information
             governing use of the file. Defaults to None.
-        link (Link, optional): URLs associated with the location
+        link (list[Link], optional): URLs associated with the location
             described in the file. Defaults to None.
         time (datetime, optional): Creation date of the file.
             Defaults to None.
@@ -49,7 +49,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     desc: str = None
     author: Person = None
     copyright: Copyright = None
-    link: Link = None
+    link: list[Link] = None
     time: datetime = None
     keywords: str = None
     bounds: Bounds = None
@@ -78,8 +78,11 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             raise TypeError("`author` must be of type Person")
         if self.copyright is not None and not isinstance(self.copyright, Copyright):
             raise TypeError("`copyright` must be of type Copyright")
-        if self.link is not None and not isinstance(self.link, Link):
-            raise TypeError("`link` must be of type Link")
+        if self.link is not None and (
+            not isinstance(self.link, list)
+            or not all(isinstance(ll, Link) for ll in self.link)
+        ):
+            raise TypeError("`link` must be of type list[Link]")
         if self.time is not None and not isinstance(self.time, datetime):
             raise TypeError("`time` must be of type datetime")
         if self.keywords is not None and not isinstance(self.keywords, str):

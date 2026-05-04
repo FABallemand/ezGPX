@@ -28,9 +28,9 @@ class TestPerson:
         "name, email, link, tag",
         [
             pytest.param(
-                "test_name",
-                Email("test_id", "test_domain"),
-                Link("test_href"),
+                "test-name",
+                Email("test-id", "test-domain"),
+                Link("test-href"),
                 "t",
                 id="valid",
             ),
@@ -42,7 +42,7 @@ class TestPerson:
         assert isinstance(m.email, Email)
         assert isinstance(m.link, Link)
         assert isinstance(m.tag, str)
-        assert m.name == "test_name"
+        assert m.name == "test-name"
         # assert m.email == ...
         # assert m.link == ...
         assert m.tag == "t"
@@ -51,15 +51,15 @@ class TestPerson:
         "name, email, link, tag",
         [
             pytest.param(
-                "test_name",
+                "test-name",
                 42,
-                Link("test_href"),
+                Link("test-href"),
                 "t",
                 id="not_email",
             ),
             pytest.param(
-                "test_name",
-                Email("test_id", "test_domain"),
+                "test-name",
+                Email("test-id", "test-domain"),
                 42,
                 "t",
                 id="not_link",

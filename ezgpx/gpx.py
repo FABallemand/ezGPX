@@ -37,6 +37,7 @@ from .constants.precisions import DEFAULT_PRECISION_DICT, DEFAULT_TIME_FORMAT
 from .parsers.fit_parser import FitParser
 from .parsers.gpx_parser import GPXParser
 from .parsers.kml_parser import KMLParser
+from .simple_types import Latitude, Longitude
 from .utils import (
     EARTH_RADIUS,
     check_xml_extensions_schemas,
@@ -54,8 +55,8 @@ class GPX:
     High level GPX object.
     """
 
-    TIME_RELATED_VALUES = ["time", "speed", "pace", "ascent_speed"]
-    ELEVATION_RELATED_VALUES = ["ele", "ascent_rate", "ascent_speed"]
+    TIME_VALUES = ["time", "speed", "pace", "ascent_speed"]
+    ELEVATION_VALUES = ["ele", "ascent_rate", "ascent_speed"]
 
     def __init__(
         self,
@@ -96,14 +97,15 @@ class GPX:
 
         # Markers
         self._dist_from_start = False
-        self.ascent_rate = False
+        self._ascent_rate = False
         self._speed: bool = False
         self._pace: bool = False
         self._ascent_speed: bool = False
 
-        # Empty source - Create empty GPX instance for advanced use only
+        # Empty source - Create empty GPX instance for advanced use
         if source is None:
             self._init_from_none()
+
         # Valid file
         elif isinstance(source, (str, Path)):
             self.source = Path(source)
@@ -124,6 +126,12 @@ class GPX:
             elif self.source.suffix == ".fit":
                 self._init_from_fit()
 
+            # CSV
+            elif self.source.suffix == ".csv":
+                raise NotImplementedError(
+                    "Initialising GPX from CSV file is not implemented yet."
+                )
+
             # Invalid file or file path
             else:
                 raise ValueError(
@@ -135,6 +143,13 @@ class GPX:
             self._gpx_writer = GPXWriter(self.gpx, self._precisions, self._time_format)
             self._kml_writer = KMLWriter(
                 self.gpx, precisions=self._precisions, time_format=self._time_format
+            )
+
+        # Bytes
+        elif isinstance(source, (IO[str], IO[bytes], bytes)):
+            # TODO
+            raise NotImplementedError(
+                "Initialising GPX from byte-like object is not implemented yet."
             )
 
         # Dataframe
@@ -174,6 +189,7 @@ class GPX:
         """
         parser = GPXParser(self.source, xml_schema, xml_extensions_schemas)
         self.gpx = parser.gpx
+        self.xmlns = parser.xmlns
         self._ele_data = parser.ele_data
         self._time_data = parser.time_data
         self._precisions = parser.precisions
@@ -240,21 +256,37 @@ class GPX:
 
     def _init_from_dataframe(self, source: IntoFrameT):
         """
-        Initialize Gpx from dataframe.
+        Initialize GPX instance from dataframe.
 
         Args:
-            df (IntoFrameT): Dataframe with "lat", "lon" columns. Also
-                supports "ele", "time" columns.
+            df (IntoFrameT): Dataframe with "lat", "lon" columns.
         """
         df = nw.from_native(source)
 
         trkpt = [
             Wpt(
-                tag="trkpt",
                 lat=row["lat"],
                 lon=row["lon"],
                 ele=row.get("ele"),
                 time=row.get("time"),
+                magvar=row.get("magvar"),
+                geoidheight=row.get("geoidheight"),
+                name=row.get("name"),
+                cmt=row.get("cmt"),
+                desc=row.get("desc"),
+                src=row.get("src"),
+                link=row.get("link"),
+                sym=row.get("sym"),
+                type=row.get("type"),
+                fix=row.get("fix"),
+                sat=row.get("sat"),
+                hdop=row.get("hdop"),
+                vdop=row.get("vdop"),
+                pdop=row.get("pdop"),
+                ageofdgpsdata=row.get("ageofdgpsdata"),
+                dgpsid=row.get("dgpsid"),
+                extensions=row.get("extensions"),
+                tag="trkpt",
             )
             for row in df.iter_rows(named=True)
         ]
@@ -265,8 +297,8 @@ class GPX:
     def __str__(self) -> str:
         return self._gpx_writer.gpx_to_string()
 
-    def __repr__(self):
-        return f"source = {self.source}\ngpx = {self.gpx}"
+    # def __repr__(self):
+    #     return f"source = {self.source}\ngpx = {self.gpx}"
 
     ###############################################################################
     #### Schemas ##################################################################
@@ -291,51 +323,54 @@ class GPX:
         return check_xml_extensions_schemas(self.source)
 
     ###############################################################################
-    #### Name #####################################################################
+    #### Metadata #################################################################
     ###############################################################################
 
-    def name(self) -> str:
-        """
-        Return activity name.
-        """
-        return self.gpx.metadata.name
+    # def get_file_name(self) -> str | None:
+    #     """
+    #     Return the name of the GPX file.
+    #     """
+    #     if self.gpx.metadata:
+    #         return self.gpx.metadata.name
+    #     return None
 
-    def set_name(self, new_name: str) -> None:
-        """
-        Set activity name.
+    # def set_file_name(self, new_name: str) -> None:
+    #     """
+    #     Set the name of the GPX file.
 
-        Args:
-            new_name (str): New activity name.
-        """
-        self.gpx.metadata.name = new_name
+    #     Args:
+    #         new_name (str): New name of the GPX file.
+    #     """
+    #     if self.gpx.metadata:
+    #         self.gpx.metadata.name = new_name
+    #     self.gpx.metadata = Metadata(name=new_name)
 
     ###############################################################################
     #### Points ###################################################################
     ###############################################################################
 
-    def nb_points(self) -> int:
+    def trkpt_count(self) -> int:
         """
-        Return the number of points in the GPX.
+        Return the number of track points.
         """
-        nb_pts = 0
+        n = 0
         for track in self.gpx.trk:
             for track_segment in track.trkseg:
-                nb_pts += len(track_segment.trkpt)
-        return nb_pts
+                n += len(track_segment.trkpt)
+        return n
 
-    def bounds(self) -> tuple[float, float, float, float]:
+    def trkpt_bounds(self) -> tuple[Latitude, Longitude, Latitude, Longitude]:
         """
         Return minimum and maximum latitude and longitude.
 
         Returns:
-            Tuple[float, float, float, float]: Min latitude, min
-                longitude, max latitude, max longitude.
+            Tuple[Latitude, Longitude, Latitude, Longitude]: Min
+                latitude, min longitude, max latitude, max longitude.
         """
         min_lat = self.gpx.trk[0].trkseg[0].trkpt[0].lat
         min_lon = self.gpx.trk[0].trkseg[0].trkpt[0].lon
         max_lat = min_lat
         max_lon = min_lon
-
         for track in self.gpx.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
@@ -345,31 +380,16 @@ class GPX:
                     max_lon = max(max_lon, track_point.lon)
         return min_lat, min_lon, max_lat, max_lon
 
-    def center(self) -> tuple[float, float]:
+    def trkpt_center(self) -> tuple[Latitude, Longitude]:
         """
         Return latitude and longitude of the center point.
         """
-        min_lat, min_lon, max_lat, max_lon = self.bounds()
-        center_lat = min_lat + (max_lat - min_lat) / 2
-        center_lon = min_lon + (max_lon - min_lon) / 2
-        return center_lat, center_lon
+        min_lat, min_lon, max_lat, max_lon = self.trkpt_bounds()
+        center_lat = min_lat.value + (max_lat.value - min_lat.value) / 2
+        center_lon = min_lon.value + (max_lon.value - min_lon.value) / 2
+        return Latitude(center_lat), Longitude(center_lon)
 
-    def get_trkpt(self, trk_index: int, trkseg_index: int, trkpt_index: int) -> Wpt:
-        """
-        Return track point based on track, track segment and track
-        point indexes.
-
-        Args:
-            trk_index (int): Track index.
-            trkseg_index (int): Track segment index.
-            trkpt_index (int): Track point index.
-
-        Returns:
-            Wpt: Track point.
-        """
-        return self.gpx.trk[trk_index].trkseg[trkseg_index].trkpt[trkpt_index]
-
-    def extreme_points(
+    def trkpt_extreme(
         self,
     ) -> tuple[Wpt, Wpt, Wpt, Wpt]:
         """
@@ -385,7 +405,6 @@ class GPX:
         min_lon_point = self.gpx.trk[0].trkseg[0].trkpt[0]
         max_lat_point = self.gpx.trk[0].trkseg[0].trkpt[0]
         max_lon_point = self.gpx.trk[0].trkseg[0].trkpt[0]
-
         for track in self.gpx.trk:
             for track_segment in track.trkseg:
                 for track_point in track_segment.trkpt:
@@ -487,7 +506,7 @@ class GPX:
         """
         Compute ascent rate at each point.
         """
-        if self.ascent_rate:
+        if self._ascent_rate:
             return
         previous_point = self.gpx.trk[0].trkseg[0].trkpt[0]
         for track in self.gpx.trk:
@@ -500,7 +519,7 @@ class GPX:
                     except ZeroDivisionError:
                         track_point.ascent_rate = 0.0
                     previous_point = track_point
-        self.ascent_rate = True
+        self._ascent_rate = True
 
     def max_descent_rate(self) -> float:
         """
@@ -1065,8 +1084,22 @@ class GPX:
         # Create dataframe
         gpx_data = {}
         for v in values:
-            if v == "time":
+            if v in ["lat", "lon", "magvar", "fix", "dgpsid"]:
                 gpx_data[v] = [
+                    getattr(trkpt, v).value
+                    for trk in self.gpx.trk
+                    for trkseg in trk.trkseg
+                    for trkpt in trkseg.trkpt
+                ]
+            elif v == "link":
+                gpx_data["link"] = [
+                    ", ".join(map(str, trkpt.link))
+                    for trk in self.gpx.trk
+                    for trkseg in trk.trkseg
+                    for trkpt in trkseg.trkpt
+                ]  # TODO improve?
+            elif v == "time":
+                gpx_data["time"] = [
                     str(trkpt.time.replace(tzinfo=timezone.utc).astimezone(tz=None))
                     for trk in self.gpx.trk
                     for trkseg in trk.trkseg
@@ -1102,7 +1135,7 @@ class GPX:
 
         # Disable time related values if no time data available
         if not self._time_data:
-            if any(v in GPX.TIME_RELATED_VALUES for v in values):
+            if any(v in GPX.TIME_VALUES for v in values):
                 warnings.warn(
                     f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain time data. Time related values
@@ -1110,13 +1143,13 @@ class GPX:
                         the dataframe.""",
                     UserWarning,
                 )
-            for v in GPX.TIME_RELATED_VALUES:
+            for v in GPX.TIME_VALUES:
                 if v in values:
                     values.remove(v)
 
         # Disable elevation related values if no elevation data available
         if not self._ele_data:
-            if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
+            if any(v in GPX.ELEVATION_VALUES for v in values):
                 warnings.warn(
                     f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain elevation data. Time related
@@ -1124,7 +1157,7 @@ class GPX:
                         be present in the dataframe.""",
                     UserWarning,
                 )
-            for v in GPX.ELEVATION_RELATED_VALUES:
+            for v in GPX.ELEVATION_VALUES:
                 if v in values:
                     values.remove(v)
 
@@ -1151,7 +1184,7 @@ class GPX:
 
         # Disable time related values if no time data available
         if not self._time_data:
-            if any(v in GPX.TIME_RELATED_VALUES for v in values):
+            if any(v in GPX.TIME_VALUES for v in values):
                 warnings.warn(
                     f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain time data. Time related values
@@ -1159,13 +1192,13 @@ class GPX:
                         the dataframe.""",
                     UserWarning,
                 )
-            for v in GPX.TIME_RELATED_VALUES:
+            for v in GPX.TIME_VALUES:
                 if v in values:
                     values.remove(v)
 
         # Disable elevation related values if no elevation data available
         if not self._ele_data:
-            if any(v in GPX.ELEVATION_RELATED_VALUES for v in values):
+            if any(v in GPX.ELEVATION_VALUES for v in values):
                 warnings.warn(
                     f"""Trying to create dataframe from GPX file {self.source}
                         which does not contain elevation data. Time related
@@ -1173,7 +1206,7 @@ class GPX:
                         be present in the dataframe.""",
                     UserWarning,
                 )
-            for v in GPX.ELEVATION_RELATED_VALUES:
+            for v in GPX.ELEVATION_VALUES:
                 if v in values:
                     values.remove(v)
 
@@ -1213,7 +1246,6 @@ class GPX:
         self,
         dest: Optional[str | Path | IO[str] | IO[bytes] | bytes] = None,
         *,
-        properties: bool = True,
         bounds_fields: Optional[list[str]] = None,
         copyright_fields: Optional[list[str]] = None,
         email_fields: Optional[list[str]] = None,
@@ -1238,7 +1270,6 @@ class GPX:
             dest (str | Path | IO[str] | IO[bytes] | bytes, optional):
                 Path to a file or a file-like object to write in.
                 Defaults to None.
-            properties (bool, optional): _description_. Defaults to True.
             bounds_fields (Optional[list[str]], optional): _description_. Defaults to None.
             copyright_fields (Optional[list[str]], optional): _description_. Defaults to None.
             email_fields (Optional[list[str]], optional): _description_. Defaults to None.
@@ -1292,7 +1323,7 @@ class GPX:
         )
         return self._gpx_writer.write(
             file_path=dest,
-            properties=properties,
+            xmlns=self.xmlns,
             bounds_fields=bounds_fields,
             copyright_fields=copyright_fields,
             email_fields=email_fields,

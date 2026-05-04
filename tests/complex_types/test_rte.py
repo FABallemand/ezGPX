@@ -30,13 +30,13 @@ class TestRte:
         "name, cmt, desc, src, link, number, type, extensions, rtept, tag",
         [
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Wpt(Latitude(0), Longitude(1)), Wpt(Latitude(2), Longitude(3))],
                 "t",
@@ -70,13 +70,13 @@ class TestRte:
         assert isinstance(r.rtept, list)
         assert all(isinstance(w, Wpt) for w in r.rtept)
         assert isinstance(r.tag, str)
-        assert r.name == "test_name"
-        assert r.cmt == "test_cmt"
-        assert r.desc == "test_desc"
-        assert r.src == "test_src"
+        assert r.name == "test-name"
+        assert r.cmt == "test-cmt"
+        assert r.desc == "test-desc"
+        assert r.src == "test-src"
         assert len(r.link) == 2
         assert r.number == 42
-        assert r.type == "test_type"
+        assert r.type == "test-type"
         # assert r.extensions == ...
         assert len(r.rtept) == 2
         assert r.tag == "t"
@@ -85,78 +85,78 @@ class TestRte:
         "name, cmt, desc, src, link, number, type, extensions, rtept, tag",
         [
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
                 42,
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Wpt(Latitude(0), Longitude(1)), Wpt(Latitude(2), Longitude(3))],
                 "t",
                 id="not_list_1",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [42, Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [42, Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Wpt(Latitude(0), Longitude(1)), Wpt(Latitude(2), Longitude(3))],
                 "t",
                 id="not_link",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 "a",
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Wpt(Latitude(0), Longitude(1)), Wpt(Latitude(2), Longitude(3))],
                 "t",
                 id="not_int",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 42,
                 [Wpt(Latitude(0), Longitude(1)), Wpt(Latitude(2), Longitude(3))],
                 "t",
                 id="not_extensions",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 42,
                 "t",
                 id="not_list_2",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [42, Wpt(Latitude(2), Longitude(3))],
                 "t",

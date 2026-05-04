@@ -5,7 +5,7 @@ This module contains the Longitude class.
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(order=True)
 class Longitude:
     """
     latitudeType.

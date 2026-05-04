@@ -22,7 +22,7 @@ class TestLink:
     @pytest.mark.parametrize(
         "href, text, type, tag",
         [
-            pytest.param("test_href", "test_text", "test_type", "t", id="valid"),
+            pytest.param("test-href", "test-text", "test-type", "t", id="valid"),
         ],
     )
     def test_valid_values(
@@ -33,13 +33,13 @@ class TestLink:
         assert isinstance(l.text, str)
         assert isinstance(l.type, str)
         assert isinstance(l.tag, str)
-        assert l.href == "test_href"
-        assert l.text == "test_text"
-        assert l.type == "test_type"
+        assert l.href == "test-href"
+        assert l.text == "test-text"
+        assert l.type == "test-type"
         assert l.tag == "t"
 
     def test_default_values(self):
-        l = Link(href="test_href")
+        l = Link(href="test-href")
         assert l.text is None
         assert l.type is None
         assert l.tag == "link"

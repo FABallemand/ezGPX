@@ -5,7 +5,6 @@ This module contains the Writer class.
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from typing import Dict, Tuple
 
 from ..complex_types import Gpx
 from ..constants.precisions import (
@@ -21,19 +20,19 @@ class Writer:
     """
 
     def __init__(
-        self, gpx: Gpx = None, precisions: Dict = None, time_format: str = None
+        self, gpx: Gpx = None, precisions: dict = None, time_format: str = None
     ) -> None:
         """
         Initialise Writer instance.
 
         Args:
             gpx (Gpx, optional): Gpx instance to write. Defaults to None.
-            precisions (Dict, optional): _description_. Defaults to None.
+            precisions (dict, optional): _description_. Defaults to None.
             time_format (str, optional): _description_. Defaults to None.
         """
         self.gpx: Gpx = gpx
 
-        self.precisions: Dict = (
+        self.precisions: dict = (
             precisions if precisions is not None else DEFAULT_PRECISION_DICT
         )
         self.time_format: str = (
@@ -56,7 +55,7 @@ class Writer:
 
     def add_subelement(
         self, element: ET.Element, sub_element: str, text: str
-    ) -> Tuple[ET.Element, ET.Element | None]:
+    ) -> tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
@@ -66,7 +65,7 @@ class Writer:
             text (str): GPX sub-element text.
 
         Returns:
-            Tuple[ET.Element, ET.Element | None]: GPX element and
+            tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None
@@ -81,7 +80,7 @@ class Writer:
         sub_element: str,
         number: int | float,
         precision: int = DEFAULT_PRECISION,
-    ) -> Tuple[ET.Element, ET.Element | None]:
+    ) -> tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
@@ -92,7 +91,7 @@ class Writer:
             precision (int, optional): Precision. Defaults to DEFAULT_PRECISION.
 
         Returns:
-            Tuple[ET.Element, ET.Element | None]: GPX element and
+            tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None
@@ -112,7 +111,7 @@ class Writer:
         sub_element: str,
         time: datetime,
         format_: str = DEFAULT_TIME_FORMAT,
-    ) -> Tuple[ET.Element, ET.Element | None]:
+    ) -> tuple[ET.Element, ET.Element | None]:
         """
         Add sub-element to GPX element.
 
@@ -123,7 +122,7 @@ class Writer:
             format (str, optional): Format. Defaults to DEFAULT_TIME_FORMAT.
 
         Returns:
-            Tuple[ET.Element, ET.Element | None]: GPX element and
+            tuple[ET.Element, ET.Element | None]: GPX element and
                 GPX sub-element (if not None).
         """
         sub_element_ = None

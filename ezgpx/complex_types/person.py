@@ -26,7 +26,7 @@ class Person:
     name: str = None
     email: Email = None
     link: Link = None
-    tag: str = "person"  # TODO "author"?
+    tag: str = "author"
 
     _fields: ClassVar[list[str]] = ["name", "email", "link"]
     _mandatory_fields: ClassVar[list[str]] = []

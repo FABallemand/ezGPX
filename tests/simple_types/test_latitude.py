@@ -69,3 +69,69 @@ class TestLatitude:
     def test_repr_contains_value(self):
         d = Latitude(42.0)
         assert "42.0" in repr(d)
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, True),
+            pytest.param(1, 0, False),
+            pytest.param(0, 0, False),
+        ],
+    )
+    def test_lt(self, value_1, value_2, expected):
+        assert (Latitude(value_1) < Latitude(value_2)) == expected
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, False),
+            pytest.param(1, 0, True),
+            pytest.param(0, 0, False),
+        ],
+    )
+    def test_gt(self, value_1, value_2, expected):
+        assert (Latitude(value_1) > Latitude(value_2)) == expected
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, True),
+            pytest.param(1, 0, False),
+            pytest.param(0, 0, True),
+        ],
+    )
+    def test_le(self, value_1, value_2, expected):
+        assert (Latitude(value_1) <= Latitude(value_2)) == expected
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, False),
+            pytest.param(1, 0, True),
+            pytest.param(0, 0, True),
+        ],
+    )
+    def test_ge(self, value_1, value_2, expected):
+        assert (Latitude(value_1) >= Latitude(value_2)) == expected
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, False),
+            pytest.param(1, 0, False),
+            pytest.param(0, 0, True),
+        ],
+    )
+    def test_eq(self, value_1, value_2, expected):
+        assert (Latitude(value_1) == Latitude(value_2)) == expected
+
+    @pytest.mark.parametrize(
+        "value_1, value_2, expected",
+        [
+            pytest.param(0, 1, True),
+            pytest.param(1, 0, True),
+            pytest.param(0, 0, False),
+        ],
+    )
+    def test_ne(self, value_1, value_2, expected):
+        assert (Latitude(value_1) != Latitude(value_2)) == expected

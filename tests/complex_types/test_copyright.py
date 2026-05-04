@@ -22,7 +22,7 @@ class TestCopyright:
     @pytest.mark.parametrize(
         "author, year, license, tag",
         [
-            pytest.param("test_author", 2000, "test_license", "t", id="1"),
+            pytest.param("test-author", 2000, "test-license", "t", id="1"),
         ],
     )
     def test_valid_values(self, author, year, license, tag):  # pylint: disable=redefined-builtin
@@ -31,16 +31,16 @@ class TestCopyright:
         assert isinstance(c.year, int)
         assert isinstance(c.license, str)
         assert isinstance(c.tag, str)
-        assert c.author == "test_author"
+        assert c.author == "test-author"
         assert c.year == 2000
-        assert c.license == "test_license"
+        assert c.license == "test-license"
         assert c.tag == "t"
 
     @pytest.mark.parametrize(
         "author, year, license, tag",
         [
-            pytest.param("test_author", "a", "test_license", "t", id="str"),
-            pytest.param("test_author", [], "test_license", "t", id="list"),
+            pytest.param("test-author", "a", "test-license", "t", id="str"),
+            pytest.param("test-author", [], "test-license", "t", id="list"),
         ],
     )
     def test_invalid_values_raise(self, author, year, license, tag):  # pylint: disable=redefined-builtin
@@ -49,14 +49,14 @@ class TestCopyright:
 
     def test_default_values(self):
         c = Copyright(
-            author="test_author",
+            author="test-author",
         )
         assert c.year is None
         assert c.license is None
         assert c.tag == "copyright"
 
     def test_fields(self):
-        assert Copyright._fields == ["author", "year", "licence"]
+        assert Copyright._fields == ["author", "year", "license"]
 
     def test_mandatory_fields(self):
         assert Copyright._mandatory_fields == ["author"]

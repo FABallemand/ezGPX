@@ -28,13 +28,13 @@ class TestTrk:
         "name, cmt, desc, src, link, number, type, extensions, trkseg, tag",
         [
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Trkseg(), Trkseg()],
                 "t",
@@ -68,13 +68,13 @@ class TestTrk:
         assert isinstance(t.trkseg, list)
         assert all(isinstance(tt, Trkseg) for tt in t.trkseg)
         assert isinstance(t.tag, str)
-        assert t.name == "test_name"
-        assert t.cmt == "test_cmt"
-        assert t.desc == "test_desc"
-        assert t.src == "test_src"
+        assert t.name == "test-name"
+        assert t.cmt == "test-cmt"
+        assert t.desc == "test-desc"
+        assert t.src == "test-src"
         assert len(t.link) == 2
         assert t.number == 42
-        assert t.type == "test_type"
+        assert t.type == "test-type"
         # assert t.extensions == ...
         assert len(t.trkseg) == 2
         assert t.tag == "t"
@@ -83,78 +83,78 @@ class TestTrk:
         "name, cmt, desc, src, link, number, type, extensions, trkseg, tag",
         [
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
                 42,
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Trkseg(), Trkseg()],
                 "t",
                 id="not_list_1",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [42, Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [42, Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Trkseg(), Trkseg()],
                 "t",
                 id="not_link",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 "a",
-                "test_type",
+                "test-type",
                 Extensions(),
                 [Trkseg(), Trkseg()],
                 "t",
                 id="not_int",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 42,
                 [Trkseg(), Trkseg()],
                 "t",
                 id="not_extensions",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 42,
                 "t",
                 id="not_list_2",
             ),
             pytest.param(
-                "test_name",
-                "test_cmt",
-                "test_desc",
-                "test_src",
-                [Link("test_href_1"), Link("test_href_2")],
+                "test-name",
+                "test-cmt",
+                "test-desc",
+                "test-src",
+                [Link("test-href-1"), Link("test-href-2")],
                 42,
-                "test_type",
+                "test-type",
                 Extensions(),
                 [42, Trkseg()],
                 "t",
