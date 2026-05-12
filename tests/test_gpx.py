@@ -13,17 +13,16 @@ import pandas as pd
 import polars as pl
 import pytest
 
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = os.path.realpath(os.path.dirname(__file__))
 PARENT_DIR = os.path.realpath(os.path.dirname(FILE_DIR))  # Main folder
 
-os.chdir(FILE_DIR)
 sys.path.append(PARENT_DIR + "/ezgpx")
 
 from ezgpx import GPX, Latitude, Longitude, Wpt  # pylint: disable=wrong-import-position
 
-REAL_FILES_DIR = "files/real/"
-REFERENCE_FILES_DIR = "files/reference/"
-SYNTHETIC_FILES_DIR = "files/synthetic/"
+REAL_FILES_DIR = os.path.join(FILE_DIR, "files/real/")
+REFERENCE_FILES_DIR = os.path.join(FILE_DIR, "files/reference/")
+SYNTHETIC_FILES_DIR = os.path.join(FILE_DIR, "files/synthetic/")
 TMP_DIR = os.path.join(FILE_DIR, "tmp")
 
 
@@ -404,9 +403,9 @@ class TestGPX:
 
     def test_to_gpx(self, benchmark):  # TODO more examples
         gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
-        benchmark(gpx.to_gpx, "tmp/gpx.gpx")
+        benchmark(gpx.to_gpx, os.path.join(TMP_DIR, "gpx.gpx"))
         assert filecmp.cmp(
-            "tmp/gpx.gpx",
+            os.path.join(TMP_DIR, "gpx.gpx"),
             os.path.join(REFERENCE_FILES_DIR, "gpx_all.gpx"),
             False,
         )
@@ -431,11 +430,11 @@ class TestGPX:
         gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
         benchmark(
             gpx.to_csv,
-            f"tmp/{reference_file}",
+            os.path.join(TMP_DIR, reference_file),
             values,
         )
         assert filecmp.cmp(
-            f"tmp/{reference_file}",
+            os.path.join(TMP_DIR, reference_file),
             os.path.join(REFERENCE_FILES_DIR, reference_file),
             False,
         )
@@ -543,7 +542,7 @@ class TestGPX:
 
     # ==== Destroy =============================================================
 
-    def test_destroy(self, remove_tmp: bool = True):
+    def test_destroy(self, remove_tmp: bool = False):
         # Remove temporary folder
         if remove_tmp:
             rmtree(TMP_DIR, True)

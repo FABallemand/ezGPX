@@ -23,6 +23,6 @@ repos:
 exclude: |
     (?x)(
         ^ezgpx/schemas/|
-        ^tests/test_files/|
+        ^tests/files/|
         ^tests/dev_tests
     )

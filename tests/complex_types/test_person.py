@@ -75,7 +75,7 @@ class TestPerson:
         assert m.name is None
         assert m.email is None
         assert m.link is None
-        assert m.tag == "person"
+        assert m.tag == "author"
 
     def test_fields(self):
         assert Person._fields == ["name", "email", "link"]
