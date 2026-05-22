@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import IO
 
-from ..complex_types import Gpx, Trk, Trkseg, Wpt
+from ..complex_types import Trk, Trkseg, Wpt
 from .xml_parser import XMLParser
 
 
@@ -186,12 +186,15 @@ class KMLParser(XMLParser):
             "http://www.topografix.com/GPX/1/1/gpx.xsd",
         ]
 
-    def parse(self) -> Gpx:
+    def parse(self) -> dict:
         """
         Parse KML file.
 
         Returns:
-            Gpx: Gpx instance.
+            dict: Gpx, precisions and time_format.
+
+        Example:
+        >>> # TODO
         """
         # Parse KML file
         try:
@@ -219,4 +222,8 @@ class KMLParser(XMLParser):
             warnings.warn("Unable to parse tracks in GPX file.")
             raise
 
-        return self.gpx
+        return {
+            "gpx": self.gpx,
+            "precisions": self.precisions,
+            "time_format": self.time_format,
+        }

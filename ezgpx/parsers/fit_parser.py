@@ -7,7 +7,7 @@ from typing import IO
 
 from fitparse import FitFile
 
-from ..complex_types import Gpx, Trk, Trkseg, Wpt
+from ..complex_types import Trk, Trkseg, Wpt
 from ..constants.precisions import DEFAULT_PRECISION
 from .parser import Parser
 
@@ -107,12 +107,14 @@ class FitParser(Parser):
             "http://www.topografix.com/GPX/1/1/gpx.xsd",
         ]
 
-    def parse(self) -> Gpx:
+    def parse(self) -> dict:
         """
         Parse Fit file.
 
-        Returns:
-            Gpx: Gpx instance.
+        dict: Gpx, precisions and time_format.
+
+        Example:
+        >>> # TODO
         """
         # Parse FIT file
         self._parse()
@@ -120,4 +122,8 @@ class FitParser(Parser):
         # Add properties
         self._add_properties()
 
-        return self.gpx
+        return {
+            "gpx": self.gpx,
+            "precisions": self.precisions,
+            "time_format": self.time_format,
+        }

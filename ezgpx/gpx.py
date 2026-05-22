@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import io
 import warnings
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 from math import degrees
 from pathlib import Path
 from typing import IO, Any, Optional
@@ -43,9 +43,11 @@ from .utils import (
     check_xml_extensions_schemas,
     check_xml_schema,
     haversine_distance,
+    instance_from_str,
+    is_dataframe,
     ramer_douglas_peucker,
+    split_attributes,
 )
-from .utils.dataframe import is_dataframe
 from .writers.gpx_writer import GPXWriter
 from .writers.kml_writer import KMLWriter
 
@@ -91,10 +93,6 @@ class GPX:
         self._time_format: str = DEFAULT_TIME_FORMAT
         self._extensions_fields: dict = {}
 
-        # Writers
-        self._gpx_writer: GPXWriter = None
-        self._kml_writer: KMLWriter = None
-
         # Markers
         self._dist_from_start = False
         self._ascent_rate = False
@@ -111,26 +109,24 @@ class GPX:
             self.source = Path(source)
 
             # GPX
-            if self.source.suffix == ".gpx":
+            if self.source.suffix.lower() == ".gpx":
                 self._init_from_gpx(xml_schema, xml_extensions_schemas)
 
             # KML
-            elif self.source.suffix == ".kml":
+            elif self.source.suffix.lower() == ".kml":
                 self._init_from_kml()
 
             # KMZ
-            elif self.source.suffix == ".kmz":
+            elif self.source.suffix.lower() == ".kmz":
                 self._init_from_kmz(xml_schema, xml_extensions_schemas)
 
             # FIT
-            elif self.source.suffix == ".fit":
+            elif self.source.suffix.lower() == ".fit":
                 self._init_from_fit()
 
             # CSV
-            elif self.source.suffix == ".csv":
-                raise NotImplementedError(
-                    "Initialising GPX from CSV file is not implemented yet."
-                )
+            elif self.source.suffix.lower() == ".csv":
+                self._init_from_csv()
 
             # Invalid file or file path
             else:
@@ -139,22 +135,19 @@ class GPX:
                     "Consider renaming your file with the proper file extension."
                 )
 
-            # Writers
-            self._gpx_writer = GPXWriter(self.gpx, self._precisions, self._time_format)
-            self._kml_writer = KMLWriter(
-                self.gpx, precisions=self._precisions, time_format=self._time_format
-            )
-
         # Bytes
-        elif isinstance(source, (IO[str], IO[bytes], bytes)):
-            # TODO
+        elif isinstance(
+            source, (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, bytes)
+        ):  # TODO treat each case independantly
             raise NotImplementedError(
                 "Initialising GPX from byte-like object is not implemented yet."
-            )
+            )  # TODO
 
         # Dataframe
         elif is_dataframe(source):
             self._init_from_dataframe(source)
+
+        # Invalid
         else:
             raise TypeError(
                 f"Invalid source type: {type(source)}. "
@@ -169,10 +162,12 @@ class GPX:
             "No file path provided, creating an empty GPX instance.", UserWarning
         )
         self.gpx = Gpx("1.1", "ezGPX")
-
-        # Writers
-        self._gpx_writer = GPXWriter(self.gpx)
-        self._kml_writer = KMLWriter(self.gpx)
+        self.xmlns = {}
+        self._ele_data = False
+        self._time_data = False
+        self._precisions = DEFAULT_PRECISION_DICT
+        self._time_format = DEFAULT_TIME_FORMAT
+        self._extensions_fields = None
 
     def _init_from_gpx(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -187,14 +182,14 @@ class GPX:
                 schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
         """
-        parser = GPXParser(self.source, xml_schema, xml_extensions_schemas)
-        self.gpx = parser.gpx
-        self.xmlns = parser.xmlns
-        self._ele_data = parser.ele_data
-        self._time_data = parser.time_data
-        self._precisions = parser.precisions
-        self._time_format = parser.time_format
-        self._extensions_fields = parser.extensions_fields
+        d = GPXParser(self.source, xml_schema, xml_extensions_schemas).parse()
+        self.gpx = d["gpx"]
+        self.xmlns = d["xmlns"]
+        self._ele_data = d["ele_data"]
+        self._time_data = d["time_data"]
+        self._precisions = d["precisions"]
+        self._time_format = d["time_format"]
+        self._extensions_fields = d["extensions_fields"]
 
     def _init_from_kml(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -209,10 +204,14 @@ class GPX:
                 schema verificaton durign parsing. Requires internet connection
                 connection and is not guaranted to work. Defaults to False.
         """
-        parser = KMLParser(self.source, xml_schema, xml_extensions_schemas)
-        self.gpx = parser.gpx
-        self._precisions = parser.precisions
-        self._time_format = parser.time_format
+        d = KMLParser(self.source, xml_schema, xml_extensions_schemas).parse()
+        self.gpx = d["gpx"]
+        self.xmlns = {}
+        self._ele_data = False
+        self._time_data = False
+        self._precisions = d["precisions"]
+        self._time_format = d["time_format"]
+        self._extensions_fields = None
 
     def _init_from_kmz(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -239,20 +238,27 @@ class GPX:
                     "Expected to find doc.kml inside KMZ file."
                 )
             with kmz.open("doc.kml", "r") as kml_file:
-                kml = io.BytesIO(kml_file.read())
-        parser = KMLParser(kml, xml_schema, xml_extensions_schemas)
-        self.gpx = parser.gpx
-        self._precisions = parser.precisions
-        self._time_format = parser.time_format
+                self.source = io.BytesIO(kml_file.read())
+        self._init_from_kml(xml_schema, xml_extensions_schemas)
 
     def _init_from_fit(self):
         """
         Initialise GPX instance from FIT file.
         """
-        parser = FitParser(self.source)
-        self.gpx = parser.gpx
-        self._precisions = parser.precisions
-        self._time_format = parser.time_format
+        d = FitParser(self.source).parse()
+        self.gpx = d["gpx"]
+        self.xmlns = {}
+        self._ele_data = False
+        self._time_data = False
+        self._precisions = d["precisions"]
+        self._time_format = d["time_format"]
+        self._extensions_fields = None
+
+    def _init_from_csv(self):
+        """
+        Initialise GPX instance from CSV file.
+        """
+        self._init_from_dataframe(pl.read_csv(self.source))
 
     def _init_from_dataframe(self, source: IntoFrameT):
         """
@@ -262,6 +268,22 @@ class GPX:
             df (IntoFrameT): Dataframe with "lat", "lon" columns.
         """
         df = nw.from_native(source)
+
+        if "time" in df.columns:
+            df.with_columns(nw.col("time").str.to_datetime())
+            # try:
+            #     df.with_columns(nw.col("time").str.to_datetime())
+            # except:
+            #     df.with_columns(nw.col("time").str.to_datetime(DEFAULT_TIME_FORMAT))
+
+        if "link" in df.columns:
+
+            def str_to_links(s: str) -> list[Link]:
+                if s.startswith("[") and s.endswith("]"):
+                    s = s[1:-1]
+                return list(map(instance_from_str, split_attributes(s)))
+
+            df.with_columns(nw.col("link").map_batches(str_to_links))
 
         trkpt = [
             Wpt(
@@ -292,13 +314,13 @@ class GPX:
         ]
         trkseg = Trkseg(trkpt=trkpt)
         trk = Trk(trkseg=[trkseg])
-        return Gpx("1.1", "ezGPX", trk=[trk])
-
-    def __str__(self) -> str:
-        return self._gpx_writer.gpx_to_string()
-
-    # def __repr__(self):
-    #     return f"source = {self.source}\ngpx = {self.gpx}"
+        self.gpx = Gpx("1.1", "ezGPX", trk=[trk])
+        self.xmlns = {}
+        self._ele_data = "ele" in df.columns
+        self._time_data = "time" in df.columns
+        self._precisions = DEFAULT_PRECISION_DICT
+        self._time_format = DEFAULT_TIME_FORMAT  # TODO change
+        self._extensions_fields = None
 
     ###############################################################################
     #### Schemas ##################################################################
@@ -619,9 +641,7 @@ class GPX:
         Returns:
             datetime: Stopped time.
         """
-        stopped_time = (
-            self.start_time() - self.start_time()
-        )  # TODO Better way to do it?
+        stopped_time = timedelta()
         previous_point = self.gpx.trk[0].trkseg[0].trkpt[0]
         for track in self.gpx.trk:
             for segment in track.trkseg:
@@ -1097,13 +1117,6 @@ class GPX:
                     for trk in self.gpx.trk
                     for trkseg in trk.trkseg
                     for trkpt in trkseg.trkpt
-                ]  # TODO improve?
-            elif v == "time":
-                gpx_data["time"] = [
-                    str(trkpt.time.replace(tzinfo=timezone.utc).astimezone(tz=None))
-                    for trk in self.gpx.trk
-                    for trkseg in trk.trkseg
-                    for trkpt in trkseg.trkpt
                 ]
             else:
                 gpx_data[v] = [
@@ -1240,7 +1253,11 @@ class GPX:
             dest = io.BytesIO(dest)
 
         # Argument columns is required for KML writer (keep values order)
-        return self.to_polars(values).select(values).write_csv(dest, **kwargs)
+        return (
+            self.to_polars(values)
+            .select(values)
+            .write_csv(dest, datetime_format=self._time_format, **kwargs)
+        )
 
     def to_gpx(
         self,
@@ -1321,7 +1338,7 @@ class GPX:
         track_point_fields = (
             track_point_fields if track_point_fields is not None else Wpt._fields
         )
-        return self._gpx_writer.write(
+        return GPXWriter(self.gpx, self._precisions, self._time_format).write(
             file_path=dest,
             xmlns=self.xmlns,
             bounds_fields=bounds_fields,
@@ -1361,4 +1378,6 @@ class GPX:
         Returns:
             str | None: KML like string if path is set to None.
         """
-        return self._kml_writer.write(dest, styles)
+        return KMLWriter(
+            self.gpx, precisions=self._precisions, time_format=self._time_format
+        ).write(dest, styles)

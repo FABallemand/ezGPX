@@ -472,7 +472,7 @@ class GPXParser(XMLParser):
         Parse GPX file.
 
         Returns:
-            Gpx: Gpx instance.
+            dict: Gpx instance, precisions and time format.
         """
         # Parse GPX file
         try:
@@ -532,4 +532,12 @@ class GPXParser(XMLParser):
             warnings.warn("Unable to parse extensions in GPX file.")
             raise
 
-        return self.gpx
+        return {
+            "gpx": self.gpx,
+            "xmlns": self.xmlns,
+            "ele_data": self.ele_data,
+            "time_data": self.time_data,
+            "precisions": self.precisions,
+            "time_format": self.time_format,
+            "extensions_fields": self.extensions_fields,
+        }

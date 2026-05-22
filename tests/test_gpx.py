@@ -374,8 +374,8 @@ class TestGPX:
     @pytest.mark.parametrize(
         "values, reference_file",
         [
-            pytest.param(None, "gpx_mandatory.csv"),
-            pytest.param(Wpt._fields, "gpx_all.csv"),
+            pytest.param(None, "gpx_mandatory.csv", id="mandatory"),
+            pytest.param(Wpt._fields, "gpx_all.csv", id="all"),
         ],
     )
     def test_to_pandas(self, benchmark, values, reference_file):
@@ -384,13 +384,15 @@ class TestGPX:
         reference_df = pd.read_csv(
             os.path.join(REFERENCE_FILES_DIR, reference_file)
         ).replace({float("nan"): None})
+        if "time" in reference_df.columns:
+            reference_df["time"] = pd.to_datetime(reference_df["time"], format="%Y-%m-%dT%H:%M:%SZ", utc=True)
         assert reference_df.equals(df)
 
     @pytest.mark.parametrize(
         "values, reference_file",
         [
-            pytest.param(None, "gpx_mandatory.csv"),
-            pytest.param(Wpt._fields, "gpx_all.csv"),
+            pytest.param(None, "gpx_mandatory.csv", id="mandatory"),
+            pytest.param(Wpt._fields, "gpx_all.csv", id="all"),
         ],
     )
     def test_to_polars(self, benchmark, values, reference_file):
@@ -399,6 +401,10 @@ class TestGPX:
         reference_df = pl.read_csv(
             os.path.join(REFERENCE_FILES_DIR, reference_file)
         ).fill_nan(None)
+        if "time" in reference_df.columns:
+            reference_df = reference_df.with_columns(
+                pl.col("time").str.to_datetime("%Y-%m-%dT%H:%M:%S%Z", time_zone="UTC")
+            )
         assert reference_df.equals(df)
 
     def test_to_gpx(self, benchmark):  # TODO more examples
