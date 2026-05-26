@@ -30,18 +30,16 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 dependencies = [
-  "narwhals>=2.18.1",
-  "plotly>=6.6.0",
+
+
   "lxml>=6.0.2",
   "xmlschema>=4.2.0",
   "importlib-resources>=6.5.2",
   "python-dateutil>=2.9.0.post0",
+  "timezonefinder>=8.2.4",
+  "narwhals>=2.18.1",
   "pandas>=3.0.2",
   "polars>=1.39.3",
-  "matplotlib>=3.10.8",
-  "basemap>=2.0.0",
-  "gmplot>=1.4.1",
-  "folium>=0.20.0",
   "fitparse>=1.2.0",
 ]
 
@@ -67,6 +65,11 @@ utils = [
   "scipy>=1.17.1",
   "setuptools>=82.0.1",
   "build>=1.4.2",
+  "plotly>=6.6.0",
+  "matplotlib>=3.10.8",
+  "basemap>=2.0.0",
+  "gmplot>=1.4.1",
+  "folium>=0.20.0",
 ]
 tests = ["pytest>=9.0.2", "pytest-benchmark>=5.2.3"]
 doc = ["Sphinx>=9.0.4"]

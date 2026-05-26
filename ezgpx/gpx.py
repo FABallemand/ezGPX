@@ -11,11 +11,13 @@ from math import degrees
 from pathlib import Path
 from typing import IO, Any, Optional
 from zipfile import ZipFile
+from zoneinfo import ZoneInfo
 
 import narwhals as nw
 import pandas as pd
 import polars as pl
 from narwhals.typing import IntoFrameT
+from timezonefinder import TimezoneFinder
 
 from .complex_types import (
     Bounds,
@@ -89,6 +91,7 @@ class GPX:
         self.gpx: Gpx = None
         self._ele_data: bool = False
         self._time_data: bool = False
+        self._time_zone: str = None
         self._precisions: dict = DEFAULT_PRECISION_DICT
         self._time_format: str = DEFAULT_TIME_FORMAT
         self._extensions_fields: dict = {}
@@ -138,10 +141,10 @@ class GPX:
         # Bytes
         elif isinstance(
             source, (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, bytes)
-        ):  # TODO treat each case independantly
+        ):
             raise NotImplementedError(
                 "Initialising GPX from byte-like object is not implemented yet."
-            )  # TODO
+            )  # TODO treat each case independantly
 
         # Dataframe
         elif is_dataframe(source):
@@ -319,7 +322,7 @@ class GPX:
         self._ele_data = "ele" in df.columns
         self._time_data = "time" in df.columns
         self._precisions = DEFAULT_PRECISION_DICT
-        self._time_format = DEFAULT_TIME_FORMAT  # TODO change
+        self._time_format = DEFAULT_TIME_FORMAT  # TODO change?
         self._extensions_fields = None
 
     ###############################################################################
@@ -571,53 +574,52 @@ class GPX:
     #### Time #####################################################################
     ###############################################################################
 
-    def start_time(self) -> datetime:
+    def _compute_time_zone(self) -> str:
         """
-        Return the UTC start time.
+        Return the time zone based on geographic coordinates.
         """
-        return self.gpx.trk[0].trkseg[0].trkpt[0].time
+        self._time_zone = TimezoneFinder().timezone_at(
+            lat=self.gpx.trk[0].trkseg[0].trkpt[0].lat.value,
+            lng=self.gpx.trk[0].trkseg[0].trkpt[0].lon.value,
+        )
 
-    def stop_time(self) -> datetime:
+    def time_zone(self) -> str:
         """
-        Return the UTC stop time.
+        Return the time zone based on geographic coordinates.
         """
-        return self.gpx.trk[-1].trkseg[-1].trkpt[-1].time
+        if not self._time_zone:
+            self._compute_time_zone()
+        return self._time_zone
 
-    # TODO
-    # def start_time(self) -> datetime:
-    #     """
-    #     Return the activity start time.
-    #     """
-    #     start_time = None
-    #     try:
-    #         start_time = (
-    #             self.trk[0]
-    #             .trkseg[0]
-    #             .trkpt[0]
-    #             .time.replace(tzinfo=timezone.utc)
-    #             .astimezone(tz=None)
-    #         )
-    #     except AttributeError:
-    #         warnings.warn("Unable to find activity start time")
-    #     return start_time
+    def start_time(self, utc: bool = False) -> datetime | None:
+        """
+        Return start time.
 
-    # TODO
-    # def stop_time(self) -> datetime:
-    #     """
-    #     Return the activity stop time.
-    #     """
-    #     stop_time = None
-    #     try:
-    #         stop_time = (
-    #             self.trk[-1]
-    #             .trkseg[-1]
-    #             .trkpt[-1]
-    #             .time.replace(tzinfo=timezone.utc)
-    #             .astimezone(tz=None)
-    #         )
-    #     except AttributeError:
-    #         warnings.warn("Unable to find activity stop time")
-    #     return stop_time
+        Args:
+            utc (bool, optional): Toggle UTC standard. Defaults to False.
+
+        Returns:
+            datetime | None: Start time or None if no time data.
+        """
+        start_time = self.gpx.trk[0].trkseg[0].trkpt[0].time
+        if start_time and not utc:
+            start_time = start_time.astimezone(ZoneInfo(self.time_zone()))
+        return start_time
+
+    def stop_time(self, utc: bool = False) -> datetime | None:
+        """
+        Return stop time.
+
+        Args:
+            utc (bool, optional): Toggle UTC standard. Defaults to False.
+
+        Returns:
+            datetime | None: Start time or None if no time data.
+        """
+        stop_time = self.gpx.trk[0].trkseg[0].trkpt[0].time
+        if stop_time and not utc:
+            stop_time = stop_time.astimezone(ZoneInfo(self.time_zone()))
+        return stop_time
 
     def total_elapsed_time(self) -> datetime:
         """

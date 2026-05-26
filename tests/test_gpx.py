@@ -90,7 +90,7 @@ class TestGPX:
     ###############################################################################
 
     @pytest.mark.parametrize(
-        "file,expected",
+        "file, expected",
         [
             pytest.param("gpx.gpx", True),
             # pytest.param("invalid_schema.gpx", False),  # TODO
@@ -189,31 +189,45 @@ class TestGPX:
     #### Time #####################################################################
     ###############################################################################
 
-    def test_start_time(self, benchmark):
+    @pytest.mark.parametrize(
+        "utc, expected",
+        [
+            pytest.param(
+                True,
+                datetime.datetime.fromisoformat("2023-05-22 06:04:58+00:00"),
+                id="utc",
+            ),
+            pytest.param(
+                False,
+                datetime.datetime.fromisoformat("2023-05-22 08:04:58+02:00"),
+                id="not_utc",
+            ),
+        ],
+    )
+    def test_start_time(self, benchmark, utc, expected):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.start_time)
-        assert result == datetime.datetime(
-            2023,
-            5,
-            22,
-            8,
-            4,
-            58,
-            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
-        )
+        result = benchmark(gpx.start_time, utc)
+        assert result == expected
 
-    def test_stop_time(self, benchmark):
+    @pytest.mark.parametrize(
+        "utc, expected",
+        [
+            pytest.param(
+                True,
+                datetime.datetime.fromisoformat("2023-05-22 06:04:58+00:00"),
+                id="utc",
+            ),
+            pytest.param(
+                False,
+                datetime.datetime.fromisoformat("2023-05-22 08:04:58+02:00"),
+                id="not_utc",
+            ),
+        ],
+    )
+    def test_stop_time(self, benchmark, utc, expected):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-        result = benchmark(gpx.stop_time)
-        assert result == datetime.datetime(
-            2023,
-            5,
-            22,
-            9,
-            6,
-            25,
-            tzinfo=datetime.timezone(datetime.timedelta(seconds=7200), "CEST"),
-        )
+        result = benchmark(gpx.stop_time, utc)
+        assert result == expected
 
     def test_total_elapsed_time(self, benchmark):
         gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
@@ -385,7 +399,9 @@ class TestGPX:
             os.path.join(REFERENCE_FILES_DIR, reference_file)
         ).replace({float("nan"): None})
         if "time" in reference_df.columns:
-            reference_df["time"] = pd.to_datetime(reference_df["time"], format="%Y-%m-%dT%H:%M:%SZ", utc=True)
+            reference_df["time"] = pd.to_datetime(
+                reference_df["time"], format="%Y-%m-%dT%H:%M:%SZ", utc=True
+            )
         assert reference_df.equals(df)
 
     @pytest.mark.parametrize(
