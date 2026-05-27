@@ -5,7 +5,7 @@ This module contains utility functions for distances.
 import math as m
 import warnings
 from dataclasses import dataclass
-from typing import Protocol, Tuple
+from typing import Protocol
 
 # latitude/longitude in GPX files is always in WGS84 datum
 # WGS84 defined the Earth semi-major axis with 6378.137 km
@@ -76,7 +76,7 @@ def perpendicular_distance(
 
     def line_coefficients(
         point_1: HasLatLon, point_2: HasLatLon
-    ) -> Tuple[float, float, float]:
+    ) -> tuple[float, float, float]:
         """
         Compute the coefficients of a line equation of the form: ax+by+c=0.
 
@@ -84,7 +84,7 @@ def perpendicular_distance(
             point_1 (HasLatLon): A point on the line.
             point_2 (HasLatLon): A point on the line.
         Returns:
-            Tuple[float, float, float]: Coefficients of the line equation.
+            tuple[float, float, float]: Coefficients of the line equation.
         """
         delta_x = point_1.lon.value - point_2.lon.value
         delta_y = point_1.lat.value - point_2.lat.value

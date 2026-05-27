@@ -5,13 +5,16 @@ This module contains the Writer class.
 import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from typing import Any, Protocol
 
-from ..complex_types import Gpx
 from ..constants.precisions import (
     DEFAULT_PRECISION,
-    DEFAULT_PRECISION_DICT,
     DEFAULT_TIME_FORMAT,
 )
+
+
+class GPXLike(Protocol):
+    """Protocol for GPX objects."""
 
 
 class Writer:
@@ -19,27 +22,26 @@ class Writer:
     File writer.
     """
 
-    def __init__(
-        self, gpx: Gpx = None, precisions: dict = None, time_format: str = None
-    ) -> None:
+    def __init__(self, gpx: GPXLike) -> None:
         """
         Initialise Writer instance.
 
         Args:
-            gpx (Gpx, optional): Gpx instance to write. Defaults to None.
-            precisions (dict, optional): _description_. Defaults to None.
-            time_format (str, optional): _description_. Defaults to None.
+            gpx (GPXLike): GPX instance to write.
         """
-        self.gpx: Gpx = gpx
-
-        self.precisions: dict = (
-            precisions if precisions is not None else DEFAULT_PRECISION_DICT
-        )
-        self.time_format: str = (
-            time_format if time_format is not None else DEFAULT_TIME_FORMAT
-        )
-
+        self.gpx: GPXLike = gpx
+        self.precisions: dict = gpx._precisions
+        self.time_format: str = gpx._time_format
         self.file_path: str = None
+
+    def get_value(self, attribute: Any) -> Any | None:
+        """
+        Safely get attribute value.
+        """
+        try:
+            return attribute.value
+        except AttributeError:
+            return None
 
     def set_not_none(self, element: ET.Element, field: str, value):
         """
@@ -131,35 +133,3 @@ class Writer:
             time_utc = time.astimezone(timezone.utc)  # Convert to UTC
             sub_element_.text = time_utc.strftime(format_)
         return element, sub_element_
-
-    def xml_schemas(
-        self, xml_schema: bool = False, xml_extensions_schemas: bool = False
-    ) -> bool:
-        """
-        Check XML schemas after writting.
-
-        Args:
-            xml_schema (bool, optional): Toggle XML schema verification.
-                Defaults to False.
-            xml_extensions_schemas (bool, optional): Toggle XML
-                extensions schemas verification. Defaults to False.
-
-        Returns:
-            bool: True if the written file follows all verified schemas.
-        """
-        # TODO Check for file_path
-        # Check XML schema
-        if xml_schema:
-            if not self.gpx.check_xml_schema(self.file_path):
-                warnings.warn("Invalid GPX file (does not follow XML schema).")
-                return False
-
-        # Check XML extension schemas
-        if xml_extensions_schemas:
-            if not self.gpx.check_xml_extensions_schemas(self.file_path):
-                warnings.warn(
-                    "Invalid GPX file (does not follow XML extensions schemas)."
-                )
-                return False
-
-        return True

@@ -2,7 +2,6 @@
 This module contains the XMLParser class.
 """
 
-import io
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
@@ -37,15 +36,18 @@ class XMLParser(Parser):
                 schema verificaton durign parsing. Requires internet
                 connection and is not guaranted to work. Defaults to False.
         """
-        # Bytes object
-        if isinstance(source, bytes):
-            source = io.BytesIO(source)
-        self.xmlns: dict = {
-            node[0]: node[1] for _, node in ET.iterparse(source, events=["start-ns"])
-        }
-        self.extensions_fields: dict = {}
+        # # Bytes object
+        # if isinstance(source, bytes):
+        #     source = io.BytesIO(source)
+        # self.xmlns: dict = {
+        #     node[0]: node[1] for _, node in ET.iterparse(source, events=["start-ns"])
+        # }  # TODO moved to parse_gpx
 
         super().__init__(source)
+
+        self.xmlns: dict = {}
+        self.xsi_schema_location: dict = {}
+        self.extensions_fields: dict = {}
 
         self.xml_schema: bool = xml_schema
         self.xml_extensions_schemas: bool = xml_extensions_schemas

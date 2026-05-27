@@ -2,8 +2,8 @@
 This module contains the GPXParser class.
 """
 
-import warnings
 import xml.etree.ElementTree as ET
+from itertools import pairwise
 from pathlib import Path
 from typing import IO
 
@@ -12,7 +12,6 @@ from ..complex_types import (
     Copyright,
     Email,
     Extensions,
-    Gpx,
     Link,
     Metadata,
     Person,
@@ -417,57 +416,39 @@ class GPXParser(XMLParser):
             tag,
         )
 
-    def _parse_root_properties(self):
+    def _parse_gpx(self):
         """
         Parse XML properties.
         """
-        self.gpx.creator = self.xml_root.attrib["creator"]
-        self.gpx.version = self.xml_root.attrib["version"]
-        schema_location = self.xml_root.get(
+        self.xmlns = {
+            node[0]: node[1]
+            for _, node in ET.iterparse(self.source, events=["start-ns"])
+        }
+        schema_loc = self.xml_root.get(
             "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
         ).split(" ")
-        self.gpx.xsi_schema_location = [x for x in schema_location if x != ""]
+        schema_loc = [v for v in schema_loc if v != ""]
+        self.xsi_schema_location = dict(pairwise(schema_loc))
 
-    def _parse_root_metadata(self):
-        """
-        Parse metadataType elements.
-        """
+        self.gpx.creator = self.xml_root.attrib["creator"]
+        self.gpx.version = self.xml_root.attrib["version"]
         self.gpx.metadata = self._parse_metadata(
             self.xml_root.find("metadata", self.xmlns)
         )
-
-    def _parse_root_waypoints(self):
-        """
-        Parse wptType elements.
-        """
         self.gpx.wpt = [
             self._parse_waypoint(w) for w in self.xml_root.findall("wpt", self.xmlns)
         ]
-
-    def _parse_root_routes(self):
-        """
-        Parse rteType elements from GPX file
-        """
         self.gpx.rte = [
             self._parse_route(r) for r in self.xml_root.findall("rte", self.xmlns)
         ]
-
-    def _parse_root_tracks(self):
-        """
-        Parse trkType elements.
-        """
         self.gpx.trk = [
             self._parse_track(t) for t in self.xml_root.findall("trk", self.xmlns)
         ]
+        self.gpx.extensions = self._parse_extensions(
+            self.xml_root.find("extensions", self.xmlns), "gpx"
+        )
 
-    def _parse_root_extensions(self):
-        """
-        Parse extensionsType elements.
-        """
-        extensions = self.xml_root.find("extensions", self.xmlns)
-        self.gpx.extensions = self._parse_extensions(extensions, "gpx")
-
-    def parse(self) -> Gpx:
+    def parse(self) -> dict:
         """
         Parse GPX file.
 
@@ -478,15 +459,9 @@ class GPXParser(XMLParser):
         try:
             self.xml_tree = ET.parse(self.source)
             self.xml_root = self.xml_tree.getroot()
-        except Exception as err:
-            warnings.warn(f"Unexpected {err}, {type(err)}.\nUnable to parse GPX file.")
-            raise
-
-        # Parse properties
-        try:
-            self._parse_root_properties()
+            self._parse_gpx()
         except Exception as e:
-            raise ValueError("Unable to parse properties in GPX file.") from e
+            raise Exception("Unable to parse GPX file.") from e
 
         # Check XML schemas
         self.xml_schemas()
@@ -497,44 +472,10 @@ class GPXParser(XMLParser):
         # Find time format
         self._find_time_format(self._find_time_element())
 
-        # Parse metadata
-        try:
-            self._parse_root_metadata()
-        except:
-            warnings.warn("Unable to parse metadata in GPX file.")
-            raise
-
-        # Parse way points
-        try:
-            self._parse_root_waypoints()
-        except:
-            warnings.warn("Unable to parse waypoints in GPX file.")
-            raise
-
-        # Parse routes
-        try:
-            self._parse_root_routes()
-        except:
-            warnings.warn("Unable to parse routes in GPX file.")
-            raise
-
-        # Parse tracks
-        try:
-            self._parse_root_tracks()
-        except:
-            warnings.warn("Unable to parse tracks in GPX file.")
-            raise
-
-        # Parse extensions
-        try:
-            self._parse_root_extensions()
-        except:
-            warnings.warn("Unable to parse extensions in GPX file.")
-            raise
-
         return {
             "gpx": self.gpx,
             "xmlns": self.xmlns,
+            "xsi_schema_location": self.xsi_schema_location,
             "ele_data": self.ele_data,
             "time_data": self.time_data,
             "precisions": self.precisions,

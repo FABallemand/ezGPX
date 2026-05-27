@@ -20,17 +20,9 @@ from narwhals.typing import IntoFrameT
 from timezonefinder import TimezoneFinder
 
 from .complex_types import (
-    Bounds,
-    Copyright,
-    Email,
     Extensions,
     Gpx,
     Link,
-    Metadata,
-    Person,
-    Pt,
-    Ptseg,
-    Rte,
     Trk,
     Trkseg,
     Wpt,
@@ -89,6 +81,8 @@ class GPX:
 
         # GPX file content
         self.gpx: Gpx = None
+        self.xmlns: dict = {}
+        self.xsi_schema_location: dict = {}
         self._ele_data: bool = False
         self._time_data: bool = False
         self._time_zone: str = None
@@ -165,12 +159,6 @@ class GPX:
             "No file path provided, creating an empty GPX instance.", UserWarning
         )
         self.gpx = Gpx("1.1", "ezGPX")
-        self.xmlns = {}
-        self._ele_data = False
-        self._time_data = False
-        self._precisions = DEFAULT_PRECISION_DICT
-        self._time_format = DEFAULT_TIME_FORMAT
-        self._extensions_fields = None
 
     def _init_from_gpx(
         self, xml_schema: bool = True, xml_extensions_schemas: bool = False
@@ -188,6 +176,7 @@ class GPX:
         d = GPXParser(self.source, xml_schema, xml_extensions_schemas).parse()
         self.gpx = d["gpx"]
         self.xmlns = d["xmlns"]
+        self.xsi_schema_location = d["xsi_schema_location"]
         self._ele_data = d["ele_data"]
         self._time_data = d["time_data"]
         self._precisions = d["precisions"]
@@ -460,6 +449,15 @@ class GPX:
                     previous_point = track_point
         return dst
 
+    # from itertools import pairwise
+    # def distance_bis(self) -> float:
+    #     dst = 0.0
+    #     for track in self.gpx.trk:
+    #         for track_segment in track.trkseg:
+    #             for p1, p2 in  self.pairwise(track_segment.trkpt):
+    #                 dst += haversine_distance(p1, p2)
+    #     return dst
+
     def _compute_distance_from_start(self):
         """
         Return distance from start at each point.
@@ -616,7 +614,7 @@ class GPX:
         Returns:
             datetime | None: Start time or None if no time data.
         """
-        stop_time = self.gpx.trk[0].trkseg[0].trkpt[0].time
+        stop_time = self.gpx.trk[-1].trkseg[-1].trkpt[-1].time
         if stop_time and not utc:
             stop_time = stop_time.astimezone(ZoneInfo(self.time_zone()))
         return stop_time
@@ -886,22 +884,6 @@ class GPX:
     #### Error Correction #########################################################
     ###############################################################################
 
-    # TODO
-    # def remove_points(self, remove_factor: int = 2):
-    #     """
-    #     TODO
-
-    #     Args:
-    #         remove_factor (int, optional): _description_. Defaults to 2.
-    #     """
-    #     count = 0
-    #     for track in self.trk:
-    #         for track_segment in track.trkseg:
-    #             for track_point in track_segment.trkpt:
-    #                 if count % remove_factor == 0:
-    #                     track_segment.trkpt.remove(track_point)
-    #                     count += 1
-
     def remove_gps_errors(self, error_distance: float = 100) -> list:
         """
         Remove GPS errors.
@@ -932,42 +914,30 @@ class GPX:
                 track_segment.trkpt = new_trkpt
         return gps_errors
 
-    def remove_close_points(self, min_dist: float = 1, max_dist: float = 10):
-        """
-        Remove points that are to close together.
-
-        Args:
-            min_dist (float, optional): Minimal distance between two
-                points. Defaults to 1.
-            max_dist (float, optional): Maximal distance between two
-                points. Defaults to 10.
-        """
-        point_1 = None
-        point_2 = None
-        for track in self.gpx.trk:
-            for segment in track.trkseg:
-                new_trkpt = []
-                for point in segment.trkpt:
-                    if point_1 is None:
-                        point_1 = point
-                        new_trkpt.append(point_1)
-                    elif point_2 is None:
-                        point_2 = point
-                    else:
-                        if (
-                            haversine_distance(point_1, point_2) < min_dist
-                            or haversine_distance(point_2, point) < min_dist
-                        ) and haversine_distance(point_1, point) < max_dist:
-                            point_2 = point
-                        else:
-                            new_trkpt.append(point_2)
-                            point_1 = point_2
-                            point_2 = point
-                segment.trkpt = new_trkpt
-
     ###############################################################################
     #### Simplification ###########################################################
     ###############################################################################
+
+    def remove_points(self, reduction_factor: int = 2):
+        """
+        Remove track points naively, i.e.: keep 1 point for every
+        `reduction_factor` points.
+
+        Note: For a more advanced processing, consider using the
+        `simplify` method.
+
+        Args:
+            reduction_factor (int, optional): Reduction factor.
+            The number of points will be divided by this value.
+            Defaults to 2.
+        """
+        for trk in self.gpx.trk:
+            for trkseg in trk.trkseg:
+                trkseg.trkpt = [
+                    p
+                    for i, p in enumerate(trkseg.trkpt, 1)
+                    if i % reduction_factor == 0
+                ]
 
     def simplify(self, tolerance: float = 2):
         """
@@ -975,8 +945,8 @@ class GPX:
 
         Args:
             tolerance (float, optional): Minimum distance (in meters)
-            between the point and the track before the point is
-            removed. Defaults to 2.
+            between the point and the track if the point were removed.
+            Defaults to 2.
         """
         epsilon = degrees(tolerance / EARTH_RADIUS)
         for track in self.gpx.trk:
@@ -984,49 +954,56 @@ class GPX:
                 segment.trkpt = ramer_douglas_peucker(segment.trkpt, epsilon)
 
     ###############################################################################
+    #### Reverse ##################################################################
+    ###############################################################################
+
+    def reverse(self):
+        """
+        Reverse GPX.
+        """
+        self.gpx.trk.reverse()
+        for trk in self.gpx.trk:
+            trk.trkseg.reverse()
+            for trkseg in trk.trkseg:
+                trkseg.trkpt.reverse()
+
+    ###############################################################################
     #### Merge ####################################################################
     ###############################################################################
 
     @staticmethod
-    def merge(gpx_1: GPX, gpx_2: GPX) -> GPX:
+    def merge(*gpxs: GPX) -> GPX:
         """
         Merge GPX objects into a new instance.
 
-        Args:
-            gpx_1 (GPX): First GPX object.
-            gpx_2 (GPX): Second GPX object.
-
         Returns:
-            GPX: Merged GPX (new instance).
+            GPX: GPX: Merged GPX (new instance).
         """
-        topo = [
-            "http://www.topografix.com/GPX/1/1",
-            "http://www.topografix.com/GPX/1/1/gpx.xsd",
-        ]
-
-        # Create new GPX instance
-        merged_gpx = GPX()
-
-        # Fill new GPX instance
-        merged_gpx.gpx.tag = "gpx"
-        merged_gpx.gpx.xmlns = "http://www.topografix.com/GPX/1/1"
-        merged_gpx.gpx.xsi_schema_location = list(
-            set(topo + gpx_1.gpx.xsi_schema_location + gpx_2.gpx.xsi_schema_location)
-        )
-        merged_gpx.gpx.version = "1.1"
-        merged_gpx.gpx.creator = "ezGPX"
-        merged_gpx.gpx.metadata = (
-            gpx_2.gpx.metadata if gpx_1.gpx.metadata is None else gpx_1.gpx.metadata
-        )
-        merged_gpx.gpx.wpt = gpx_1.gpx.wpt + gpx_2.gpx.wpt
-        merged_gpx.gpx.rte = gpx_1.gpx.rte + gpx_2.gpx.rte
-        merged_gpx.gpx.trk = gpx_1.gpx.trk + gpx_2.gpx.trk
-        merged_gpx.gpx.extensions = Extensions(
-            "extensions", gpx_1.gpx.metadata | gpx_2.gpx.metadata
-        )
-
-        # Return new GPX instance
-        return merged_gpx
+        new_gpx = GPX()  # New GPX instance
+        new_gpx.xmlns = {"": "http://www.topografix.com/GPX/1/1"}
+        new_gpx.xsi_schema_location = {
+            "http://www.topografix.com/GPX/1/1": "http://www.topografix.com/GPX/1/1/gpx.xsd"
+        }
+        new_gpx.gpx.version = "1.1"
+        new_gpx.gpx.creator = "ezGPX"
+        new_gpx.gpx.wpt = []
+        new_gpx.gpx.rte = []
+        new_gpx.gpx.trk = []
+        new_extensions = {}
+        for gpx in gpxs:
+            new_gpx.xmlns |= gpx.xmlns
+            new_gpx.xsi_schema_location |= gpx.xsi_schema_location
+            # new_gpx.gpx.metadata = new_gpx.gpx.metadata if new_gpx.gpx.metadata else gpx.gpx.metadata  # TODO how to merge metadata?
+            if gpx.gpx.wpt:
+                new_gpx.gpx.wpt.extend(gpx.gpx.wpt)
+            if gpx.gpx.rte:
+                new_gpx.gpx.rte.extend(gpx.gpx.rte)
+            if gpx.gpx.trk:
+                new_gpx.gpx.trk.extend(gpx.gpx.trk)
+            if gpx.gpx.extensions:
+                new_extensions |= gpx.gpx.extensions.values
+        new_gpx.gpx.extensions = Extensions(new_extensions)
+        return new_gpx
 
     ###############################################################################
     #### Exports ##################################################################
@@ -1273,13 +1250,13 @@ class GPX:
         link_fields: Optional[list[str]] = None,
         metadata_fields: Optional[list[str]] = None,
         person_fields: Optional[list[str]] = None,
-        point_segment_fields: Optional[list[str]] = None,
-        point_fields: Optional[list[str]] = None,
-        route_fields: Optional[list[str]] = None,
-        track_segment_fields: Optional[list[str]] = None,
-        track_fields: Optional[list[str]] = None,
-        waypoint_fields: Optional[list[str]] = None,
-        track_point_fields: Optional[list[str]] = None,
+        ptseg_fields: Optional[list[str]] = None,
+        pt_fields: Optional[list[str]] = None,
+        rte_fields: Optional[list[str]] = None,
+        trkseg_fields: Optional[list[str]] = None,
+        trk_fields: Optional[list[str]] = None,
+        wpt_fields: Optional[list[str]] = None,
+        trkpt_fields: Optional[list[str]] = None,
         mandatory_fields: bool = True,
     ) -> str | None:
         """
@@ -1297,52 +1274,20 @@ class GPX:
             link_fields (Optional[list[str]], optional): _description_. Defaults to None.
             metadata_fields (Optional[list[str]], optional): _description_. Defaults to None.
             person_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            point_segment_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            point_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            route_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            track_segment_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            track_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            waypoint_fields (Optional[list[str]], optional): _description_. Defaults to None.
-            track_point_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            ptseg_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            pt_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            rte_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            trkseg_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            trk_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            wpt_fields (Optional[list[str]], optional): _description_. Defaults to None.
+            trkpt_fields (Optional[list[str]], optional): _description_. Defaults to None.
             mandatory_fields (bool, optional): _description_. Defaults to True.
 
         Returns:
             str | None: GPX like string if path is set to None.
         """
-        bounds_fields = bounds_fields if bounds_fields is not None else Bounds._fields
-        copyright_fields = (
-            copyright_fields if copyright_fields is not None else Copyright._fields
-        )
-        email_fields = email_fields if email_fields is not None else Email._fields
-        extensions_fields = (
-            extensions_fields
-            if extensions_fields is not None
-            else self._extensions_fields
-        )
-        gpx_fields = gpx_fields if gpx_fields is not None else Gpx._fields
-        link_fields = link_fields if link_fields is not None else Link._fields
-        metadata_fields = (
-            metadata_fields if metadata_fields is not None else Metadata._fields
-        )
-        person_fields = person_fields if person_fields is not None else Person._fields
-        point_segment_fields = (
-            point_segment_fields if point_segment_fields is not None else Ptseg._fields
-        )
-        point_fields = point_fields if point_fields is not None else Pt._fields
-        route_fields = route_fields if route_fields is not None else Rte._fields
-        track_segment_fields = (
-            track_segment_fields if track_segment_fields is not None else Trkseg._fields
-        )
-        track_fields = track_fields if track_fields is not None else Trk._fields
-        waypoint_fields = (
-            waypoint_fields if waypoint_fields is not None else Wpt._fields
-        )
-        track_point_fields = (
-            track_point_fields if track_point_fields is not None else Wpt._fields
-        )
-        return GPXWriter(self.gpx, self._precisions, self._time_format).write(
+        return GPXWriter(self).write(
             file_path=dest,
-            xmlns=self.xmlns,
             bounds_fields=bounds_fields,
             copyright_fields=copyright_fields,
             email_fields=email_fields,
@@ -1351,13 +1296,13 @@ class GPX:
             link_fields=link_fields,
             metadata_fields=metadata_fields,
             person_fields=person_fields,
-            point_segment_fields=point_segment_fields,
-            point_fields=point_fields,
-            route_fields=route_fields,
-            track_segment_fields=track_segment_fields,
-            track_fields=track_fields,
-            waypoint_fields=waypoint_fields,
-            track_point_fields=track_point_fields,
+            ptseg_fields=ptseg_fields,
+            pt_fields=pt_fields,
+            rte_fields=rte_fields,
+            trkseg_fields=trkseg_fields,
+            trk_fields=trk_fields,
+            wpt_fields=wpt_fields,
+            trkpt_fields=trkpt_fields,
             mandatory_fields=mandatory_fields,
         )
 

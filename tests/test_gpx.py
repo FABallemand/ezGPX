@@ -214,12 +214,12 @@ class TestGPX:
         [
             pytest.param(
                 True,
-                datetime.datetime.fromisoformat("2023-05-22 06:04:58+00:00"),
+                datetime.datetime.fromisoformat("2023-05-22 07:06:25+00:00"),
                 id="utc",
             ),
             pytest.param(
                 False,
-                datetime.datetime.fromisoformat("2023-05-22 08:04:58+02:00"),
+                datetime.datetime.fromisoformat("2023-05-22 09:06:25+02:00"),
                 id="not_utc",
             ),
         ],
@@ -249,7 +249,7 @@ class TestGPX:
     ###############################################################################
 
     @pytest.mark.parametrize(
-        "moving,expected",
+        "moving, expected",
         [
             pytest.param(False, 10.66505004775145),
             pytest.param(True, 10.974613320139435),
@@ -321,10 +321,57 @@ class TestGPX:
     # TODO
 
     ###############################################################################
+    #### Reverse ##################################################################
+    ###############################################################################
+
+    def test_reverse(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        benchmark(gpx.reverse)
+        assert gpx.trkpt_count() == 4
+        assert gpx.gpx.trk[0].trkseg[0].trkpt[0].lat.value == 1.0
+        assert gpx.gpx.trk[-1].trkseg[-1].trkpt[-1].lat.value == 0.0
+
+    ###############################################################################
     #### Merge ####################################################################
     ###############################################################################
 
-    # TODO
+    @pytest.mark.parametrize(
+        "files, reference_file",
+        [
+            pytest.param(
+                [os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx")],
+                "merge_single.gpx",
+                id="single_gpx",
+            ),
+            pytest.param(
+                [
+                    os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"),
+                    os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"),
+                ],
+                "merge_double.gpx",
+                id="double_gpx",
+            ),
+            pytest.param(
+                [
+                    os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"),
+                    os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"),
+                    os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"),
+                ],
+                "merge_triple.gpx",
+                id="triple_gpx",
+            ),
+            # TODO add test for extensions
+        ],
+    )
+    def test_merge(self, benchmark, files, reference_file):
+        gpxs = [GPX(f) for f in files]
+        res = benchmark(GPX.merge, *gpxs)
+        res.to_gpx(os.path.join(TMP_DIR, reference_file))
+        assert filecmp.cmp(
+            os.path.join(TMP_DIR, reference_file),
+            os.path.join(REFERENCE_FILES_DIR, reference_file),
+            False,
+        )
 
     ###############################################################################
     #### Exports ##################################################################
@@ -573,7 +620,7 @@ class TestGPX:
 
     @pytest.mark.skip(
         reason="test"
-    )  # https://docs.pytest.org/en/7.3.x/how-to/skipping.html
+    )
     def test_test(self, remove_tmp: bool = True):
         # Create temporary folder
         rmtree("tmp", True)

@@ -97,16 +97,6 @@ class GPXWriterMethodCreator:
             compile(code, "<_add_email>", "exec").co_consts[0], globals(), "_add_email"
         )
 
-    # def add_extensions_creator(self, extensions_fields):
-    #     code = ('def _add_extensions(writer, element, extensions):'
-    #             '\n\tif extensions is not None:'
-    #             '\n\t\textensions_ = ET.SubElement(element, extensions.tag)')
-    #     if extensions_fields is not None:
-    #         for k, v in extensions_fields:
-    #             code += f'\n\t\textensions_, _ = writer.add_extensions_element(extensions_, "{k}", extensions.values["{field}"])'
-    #     code += '\n\treturn element'
-    #     return FunctionType(compile(code, "<_add_extensions>", "exec").co_consts[0], globals(), "_add_extensions")
-
     def add_link_creator(self, fields: list) -> FunctionType:
         """
         Create `add_link` method.
@@ -210,317 +200,306 @@ class GPXWriterMethodCreator:
             "_add_person",
         )
 
-    def add_point_segment_creator(self, fields: list) -> FunctionType:
+    def add_ptseg_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_point_segment` method.
+        Create `add_ptseg` method.
 
         Args:
             fields (list): `Ptseg` fields.
 
         Returns:
-            FunctionType: `add_point_segment` method.
+            FunctionType: `add_ptseg` method.
         """
         code = (
-            "def _add_point_segment(writer, element, point_segment):"
-            "\n\tif point_segment is not None:"
-            "\n\t\tpoint_segment_ = ET.SubElement(element, point_segment.tag)"
+            "def _add_ptseg(writer, element, ptseg):"
+            "\n\tif ptseg is not None:"
+            "\n\t\tptseg_ = ET.SubElement(element, ptseg.tag)"
         )
         if "pt" in fields:
             code += (
-                "\n\t\tfor point in point_segment.pt:"
-                "\n\t\t\tpoint_segment_ = writer.add_point(point_segment_, point)"
+                "\n\t\tfor pt in ptseg.pt:\n\t\t\tptseg_ = writer.add_pt(ptseg_, pt)"
             )
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_point_segment>", "exec").co_consts[0],
+            compile(code, "<_add_ptseg>", "exec").co_consts[0],
             globals(),
-            "_add_point_segment",
+            "_add_ptseg",
         )
 
-    def add_point_creator(self, fields: list) -> FunctionType:
+    def add_pt_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_point` method.
+        Create `add_pt` method.
 
         Args:
             fields (list): `Pt` fields.
 
         Returns:
-            FunctionType: `add_point` method.
+            FunctionType: `add_pt` method.
         """
         code = (
-            "def _add_point(writer, element, point):"
-            "\n\tif point is not None:"
-            "\n\t\tpoint_ = ET.SubElement(element, point.tag)"
+            "def _add_pt(writer, element, pt):"
+            "\n\tif pt is not None:"
+            "\n\t\tpt_ = ET.SubElement(element, pt.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(point_, "lat", "{:.{}f}".format(point.lat.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(pt_, "lat", "{:.{}f}".format(pt.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(point_, "lon", "{:.{}f}".format(point.lon.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(pt_, "lon", "{:.{}f}".format(pt.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
-            code += '\n\t\tpoint_ = writer.add_subelement_number(point_, "ele", point.ele, writer.precisions["elevation"])'
+            code += '\n\t\tpt_ = writer.add_subelement_number(pt_, "ele", pt.ele, writer.precisions["elevation"])'
         if "time" in fields:
-            code += '\n\t\tpoint_, _ = writer.add_subelement_time(point_, "time", point.time, writer.time_format)'
+            code += '\n\t\tpt_, _ = writer.add_subelement_time(pt_, "time", pt.time, writer.time_format)'
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_point>", "exec").co_consts[0], globals(), "_add_point"
+            compile(code, "<_add_pt>", "exec").co_consts[0], globals(), "_add_pt"
         )
 
-    def add_route_creator(self, fields: list) -> FunctionType:
+    def add_rte_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_route` method.
+        Create `add_rte` method.
 
         Args:
             fields (list): `Rte` fields.
 
         Returns:
-            FunctionType: `add_route` method.
+            FunctionType: `add_rte` method.
         """
         code = (
-            "def _add_route(writer, element, route):"
-            "\n\tif route is not None:"
-            "\n\t\troute_ = ET.SubElement(element, route.tag)"
+            "def _add_rte(writer, element, rte):"
+            "\n\tif rte is not None:"
+            "\n\t\trte_ = ET.SubElement(element, rte.tag)"
         )
         if "name" in fields:
-            code += (
-                '\n\t\troute_, _ = writer.add_subelement(route_, "name", route.name)'
-            )
+            code += '\n\t\trte_, _ = writer.add_subelement(rte_, "name", rte.name)'
         if "cmt" in fields:
-            code += '\n\t\troute_, _ = writer.add_subelement(route_, "cmt", route.cmt)'
+            code += '\n\t\trte_, _ = writer.add_subelement(rte_, "cmt", rte.cmt)'
         if "desc" in fields:
-            code += (
-                '\n\t\troute_, _ = writer.add_subelement(route_, "desc", route.desc)'
-            )
+            code += '\n\t\trte_, _ = writer.add_subelement(rte_, "desc", rte.desc)'
         if "src" in fields:
-            code += '\n\t\troute_, _ = writer.add_subelement(route_, "src", route.src)'
+            code += '\n\t\trte_, _ = writer.add_subelement(rte_, "src", rte.src)'
         if "link" in fields:
-            code += "\n\t\tfor l in route.link:"
-            code += "\n\t\t\troute_ = writer.add_link(route_, l)"
+            code += "\n\t\tfor l in rte.link:"
+            code += "\n\t\t\trte_ = writer.add_link(rte_, l)"
         if "number" in fields:
-            code += '\n\t\troute_, _ = writer.add_subelement_number(route_, "number", route.number)'
+            code += '\n\t\trte_, _ = writer.add_subelement_number(rte_, "number", rte.number)'
         if "type" in fields:
-            code += (
-                '\n\t\troute_, _ = writer.add_subelement(route_, "type", route.type)'
-            )
+            code += '\n\t\trte_, _ = writer.add_subelement(rte_, "type", rte.type)'
         if "extensions" in fields:
-            # code += '\n\t\troute_ = writer.add_rte_extensions(route_, route.extensions)'
-            code += '\n\t\troute_ = writer.add_extensions(route_, route.extensions, writer.extensions_fields.get("rte"))'
+            # code += '\n\t\trte_ = writer.add_rte_extensions(rte_, rte.extensions)'
+            code += '\n\t\trte_ = writer.add_extensions(rte_, rte.extensions, writer.extensions_fields.get("rte"))'
         if "rtept" in fields:
             code += (
-                "\n\t\tfor waypoint in route.rtept:"
-                "\n\t\t\troute_ = writer.add_waypoint(route_, waypoint)"
+                "\n\t\tfor wpt in rte.rtept:\n\t\t\trte_ = writer.add_wpt(rte_, wpt)"
             )
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_route>", "exec").co_consts[0], globals(), "_add_route"
+            compile(code, "<_add_rte>", "exec").co_consts[0], globals(), "_add_rte"
         )
 
-    def add_track_segment_creator(self, fields: list) -> FunctionType:
+    def add_trkseg_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_track_segment` method.
+        Create `add_trkseg` method.
 
         Args:
             fields (list): `Trkseg` fields.
 
         Returns:
-            FunctionType: `add_track_segment` method.
+            FunctionType: `add_trkseg` method.
         """
         code = (
-            "def _add_track_segment(writer, element, track_segment):"
-            "\n\tif track_segment is not None:"
-            "\n\t\ttrack_segment_ = ET.SubElement(element, track_segment.tag)"
+            "def _add_trkseg(writer, element, trkseg):"
+            "\n\tif trkseg is not None:"
+            "\n\t\ttrkseg_ = ET.SubElement(element, trkseg.tag)"
         )
         if "extensions" in fields:
-            # code += '\n\t\ttrack_segment_ = writer.add_trkseg_extensions(track_segment_, track_segment.extensions)'
-            code += '\n\t\ttrack_segment_ = writer.add_extensions(track_segment_, track_segment.extensions, writer.extensions_fields.get("trkseg"))'
+            # code += '\n\t\ttrkseg_ = writer.add_trkseg_extensions(trkseg_, trkseg.extensions)'
+            code += '\n\t\ttrkseg_ = writer.add_extensions(trkseg_, trkseg.extensions, writer.extensions_fields.get("trkseg"))'
         if "trkpt" in fields:
             code += (
-                "\n\t\tfor track_point in track_segment.trkpt:"
-                "\n\t\t\ttrack_segment_ = writer.add_track_point(track_segment_, track_point)"
+                "\n\t\tfor trkpt in trkseg.trkpt:"
+                "\n\t\t\ttrkseg_ = writer.add_trkpt(trkseg_, trkpt)"
             )
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_track_segment>", "exec").co_consts[0],
+            compile(code, "<_add_trkseg>", "exec").co_consts[0],
             globals(),
-            "_add_track_segment",
+            "_add_trkseg",
         )
 
-    def add_track_creator(self, fields: list) -> FunctionType:
+    def add_trk_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_track` method.
+        Create `add_trk` method.
 
         Args:
             fields (list): `Trk` fields.
 
         Returns:
-            FunctionType: `add_track` method.
+            FunctionType: `add_trk` method.
         """
         code = (
-            "def _add_track(writer, element, track):"
-            "\n\tif track is not None:"
-            "\n\t\ttrack_ = ET.SubElement(element, track.tag)"
+            "def _add_trk(writer, element, trk):"
+            "\n\tif trk is not None:"
+            "\n\t\ttrk_ = ET.SubElement(element, trk.tag)"
         )
         if "name" in fields:
-            code += (
-                '\n\t\ttrack_, _ = writer.add_subelement(track_, "name", track.name)'
-            )
+            code += '\n\t\ttrk_, _ = writer.add_subelement(trk_, "name", trk.name)'
         if "cmt" in fields:
-            code += '\n\t\ttrack_, _ = writer.add_subelement(track_, "cmt", track.cmt)'
+            code += '\n\t\ttrk_, _ = writer.add_subelement(trk_, "cmt", trk.cmt)'
         if "desc" in fields:
-            code += (
-                '\n\t\ttrack_, _ = writer.add_subelement(track_, "desc", track.desc)'
-            )
+            code += '\n\t\ttrk_, _ = writer.add_subelement(trk_, "desc", trk.desc)'
         if "src" in fields:
-            code += '\n\t\ttrack_, _ = writer.add_subelement(track_, "src", track.src)'
+            code += '\n\t\ttrk_, _ = writer.add_subelement(trk_, "src", trk.src)'
         if "link" in fields:
-            code += "\n\t\tfor l in track.link:"
-            code += "\n\t\t\ttrack_ = writer.add_link(track_, l)"
+            code += "\n\t\tfor l in trk.link:"
+            code += "\n\t\t\ttrk_ = writer.add_link(trk_, l)"
         if "number" in fields:
-            code += '\n\t\ttrack_, _ = writer.add_subelement_number(track_, "number", track.number)'
+            code += '\n\t\ttrk_, _ = writer.add_subelement_number(trk_, "number", trk.number)'
         if "type" in fields:
-            code += (
-                '\n\t\ttrack_, _ = writer.add_subelement(track_, "type", track.type)'
-            )
+            code += '\n\t\ttrk_, _ = writer.add_subelement(trk_, "type", trk.type)'
         if "extensions" in fields:
-            # code += '\n\t\ttrack_ = writer.add_trk_extensions(track_, track.extensions)'
-            code += '\n\t\ttrack_ = writer.add_extensions(track_, track.extensions, writer.extensions_fields.get("trk"))'
+            # code += '\n\t\ttrk_ = writer.add_trk_extensions(trk_, trk.extensions)'
+            code += '\n\t\ttrk_ = writer.add_extensions(trk_, trk.extensions, writer.extensions_fields.get("trk"))'
         if "trkseg" in fields:
             code += (
-                "\n\t\tfor track_seg in track.trkseg:"
-                "\n\t\t\ttrack_ = writer.add_track_segment(track_, track_seg)"
+                "\n\t\tfor trk_seg in trk.trkseg:"
+                "\n\t\t\ttrk_ = writer.add_trkseg(trk_, trk_seg)"
             )
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_track>", "exec").co_consts[0], globals(), "_add_track"
+            compile(code, "<_add_trk>", "exec").co_consts[0], globals(), "_add_trk"
         )
 
-    def add_waypoint_creator(self, fields: list) -> FunctionType:
+    def add_wpt_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_waypoint` method.
+        Create `add_wpt` method.
 
         Args:
             fields (list): `Wpt` fields.
 
         Returns:
-            FunctionType: `add_waypoint` method.
+            FunctionType: `add_wpt` method.
         """
         code = (
-            "def _add_waypoint(writer, element, waypoint):"
-            "\n\tif waypoint is not None:"
-            "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
+            "def _add_wpt(writer, element, wpt):"
+            "\n\tif wpt is not None:"
+            "\n\t\twpt_ = ET.SubElement(element, wpt.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(wpt_, "lat", "{:.{}f}".format(wpt.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(wpt_, "lon", "{:.{}f}".format(wpt.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "ele", wpt.ele, writer.precisions["elevation"])'
         if "time" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
+            code += '\n\t\twpt_, _ = writer.add_subelement_time(wpt_, "time", wpt.time, writer.time_format)'
         if "magvar" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.magvar.value, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "magvar", writer.get_value(wpt.magvar), writer.precisions["default"])'
         if "geoidheight" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "geoidheight", wpt.geoidheight, writer.precisions["default"])'
         if "name" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "name", wpt.name)'
         if "cmt" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "cmt", waypoint.cmt)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "cmt", wpt.cmt)'
         if "desc" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "desc", waypoint.desc)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "desc", wpt.desc)'
         if "src" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "src", wpt.src)'
         if "link" in fields:
-            code += "\n\t\tfor l in waypoint.link:"
-            code += "\n\t\t\twaypoint_ = writer.add_link(waypoint_, l)"
+            code += "\n\t\tfor l in wpt.link:"
+            code += "\n\t\t\twpt_ = writer.add_link(wpt_, l)"
         if "sym" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "sym", wpt.sym)'
         if "type" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "type", wpt.type)'
         if "fix" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix.value)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "fix", writer.get_value(wpt.fix))'
         if "sat" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
+            code += (
+                '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "sat", wpt.sat, 0)'
+            )
         if "hdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "hdop", waypoint.hdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "hdop", wpt.hdop, writer.precisions["default"])'
         if "vdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "vdop", wpt.vdop, writer.precisions["default"])'
         if "pdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "pdop", wpt.pdop, writer.precisions["default"])'
         if "ageofdgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofdgpsdata", waypoint.ageofdgpsdata, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "ageofdgpsdata", wpt.ageofdgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid.value, 0)'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "dgpsid", writer.get_value(wpt.dgpsid), 0)'
         if "extensions" in fields:
-            # code += '\n\t\twaypoint_ = writer.add_wpt_extensions(waypoint_, waypoint.extensions)'
-            code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("wpt"))'
+            # code += '\n\t\twpt_ = writer.add_wpt_extensions(wpt_, wpt.extensions)'
+            code += '\n\t\twpt_ = writer.add_extensions(wpt_, wpt.extensions, writer.extensions_fields.get("wpt"))'
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_waypoint>", "exec").co_consts[0],
+            compile(code, "<_add_wpt>", "exec").co_consts[0],
             globals(),
-            "_add_waypoint",
+            "_add_wpt",
         )
 
-    def add_track_point_creator(self, fields: list) -> FunctionType:
+    def add_trkpt_creator(self, fields: list) -> FunctionType:
         """
-        Create `add_waypoint` method.
+        Create `add_wpt` method.
 
         Args:
             fields (list): `Wpt` fields.
 
         Returns:
-            FunctionType: `add_waypoint` method.
+            FunctionType: `add_wpt` method.
         """
         code = (
-            "def _add_track_point(writer, element, waypoint):"
-            "\n\tif waypoint is not None:"
-            "\n\t\twaypoint_ = ET.SubElement(element, waypoint.tag)"
+            "def _add_trkpt(writer, element, wpt):"
+            "\n\tif wpt is not None:"
+            "\n\t\twpt_ = ET.SubElement(element, wpt.tag)"
         )
         if "lat" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lat", "{:.{}f}".format(waypoint.lat.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(wpt_, "lat", "{:.{}f}".format(wpt.lat.value, writer.precisions["lat_lon"]))'
         if "lon" in fields:
-            code += '\n\t\twriter.set_not_none(waypoint_, "lon", "{:.{}f}".format(waypoint.lon.value, writer.precisions["lat_lon"]))'
+            code += '\n\t\twriter.set_not_none(wpt_, "lon", "{:.{}f}".format(wpt.lon.value, writer.precisions["lat_lon"]))'
         if "ele" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ele", waypoint.ele, writer.precisions["elevation"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "ele", wpt.ele, writer.precisions["elevation"])'
         if "time" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_time(waypoint_, "time", waypoint.time, writer.time_format)'
+            code += '\n\t\twpt_, _ = writer.add_subelement_time(wpt_, "time", wpt.time, writer.time_format)'
         if "magvar" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "magvar", waypoint.magvar.value, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "magvar", writer.get_value(wpt.magvar), writer.precisions["default"])'
         if "geoidheight" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "geoidheight", waypoint.geoidheight, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "geoidheight", wpt.geoidheight, writer.precisions["default"])'
         if "name" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "name", waypoint.name)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "name", wpt.name)'
         if "cmt" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "cmt", waypoint.cmt)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "cmt", wpt.cmt)'
         if "desc" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "desc", waypoint.desc)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "desc", wpt.desc)'
         if "src" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "src", waypoint.src)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "src", wpt.src)'
         if "link" in fields:
-            code += "\n\t\tfor l in waypoint.link:"
-            code += "\n\t\t\twaypoint_ = writer.add_link(waypoint_, l)"
+            code += "\n\t\tfor l in wpt.link:"
+            code += "\n\t\t\twpt_ = writer.add_link(wpt_, l)"
         if "sym" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "sym", waypoint.sym)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "sym", wpt.sym)'
         if "type" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "type", waypoint.type)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "type", wpt.type)'
         if "fix" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement(waypoint_, "fix", waypoint.fix.value)'
+            code += '\n\t\twpt_, _ = writer.add_subelement(wpt_, "fix", writer.get_value(wpt.fix))'
         if "sat" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "sat", waypoint.sat, 0)'
+            code += (
+                '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "sat", wpt.sat, 0)'
+            )
         if "hdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "hdop", waypoint.hdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "hdop", wpt.hdop, writer.precisions["default"])'
         if "vdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "vdop", waypoint.vdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "vdop", wpt.vdop, writer.precisions["default"])'
         if "pdop" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "pdop", waypoint.pdop, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "pdop", wpt.pdop, writer.precisions["default"])'
         if "ageofdgpsdata" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "ageofdgpsdata", waypoint.ageofdgpsdata, writer.precisions["default"])'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "ageofdgpsdata", wpt.ageofdgpsdata, writer.precisions["default"])'
         if "dgpsid" in fields:
-            code += '\n\t\twaypoint_, _ = writer.add_subelement_number(waypoint_, "dgpsid", waypoint.dgpsid.value, 0)'
+            code += '\n\t\twpt_, _ = writer.add_subelement_number(wpt_, "dgpsid", writer.get_value(wpt.dgpsid), 0)'
         if "extensions" in fields:
-            # code += '\n\t\twaypoint_ = writer.add_trkpt_extensions(waypoint_, waypoint.extensions)'
-            code += '\n\t\twaypoint_ = writer.add_extensions(waypoint_, waypoint.extensions, writer.extensions_fields.get("trkpt"))'
+            code += '\n\t\twpt_ = writer.add_extensions(wpt_, wpt.extensions, writer.extensions_fields.get("trkpt"))'
         code += "\n\treturn element"
         return FunctionType(
-            compile(code, "<_add_track_point>", "exec").co_consts[0],
+            compile(code, "<_add_trkpt>", "exec").co_consts[0],
             globals(),
-            "_add_track_point",
+            "_add_trkpt",
         )
