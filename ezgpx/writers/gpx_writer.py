@@ -127,35 +127,30 @@ class GPXWriter(Writer):
         """
         return self._add_email(self, element, email)
 
-    def _add_extensions_rec(self, extensions_, values, extensions_fields) -> ET.Element:
+    def _add_extensions_rec(
+        self, extensions_: ET.Element, values: dict, extensions_fields: dict
+    ) -> ET.Element:
         if extensions_ is not None:
             # Add n-th level extensions
             for k0, v0 in values.items():
                 if k0 in extensions_fields.keys():
+                    # Set attributes
+                    for k1, v1 in v0["attrib"].items():
+                        if k1 in extensions_fields[k0]["attrib"].keys():
+                            self.set_not_none(extensions_, k1, v1)
                     # If k0 contains sub-elements
                     if isinstance(v0["elmts"], dict):
-                        # Create sub-element
-                        sub_extensions_ = ET.SubElement(extensions_, k0)
-
-                        # Set attributes
-                        for k1, v1 in v0["attrib"].items():
-                            if k1 in extensions_fields[k0]["attrib"].keys():
-                                self.set_not_none(extensions_, k1, v1)
-
-                        # Add (n+1)-th level extensions
+                        sub_extensions_ = ET.SubElement(
+                            extensions_, k0
+                        )  # Create sub-element
                         sub_extensions_ = self._add_extensions_rec(
                             sub_extensions_, v0["elmts"], extensions_fields[k0]["elmts"]
-                        )
+                        )  # Add (n+1)-th level extensions
                     # Else, k0 contains a value
                     else:
                         extensions_, sub_extensions_ = self.add_subelement(
                             extensions_, k0, v0["elmts"]
                         )
-
-                        # Set attributes
-                        for k1, v1 in v0["attrib"].items():
-                            if k1 in extensions_fields[k0]["attrib"].keys():
-                                self.set_not_none(sub_extensions_, k1, v1)
         return extensions_
 
     def add_extensions(
@@ -327,44 +322,6 @@ class GPXWriter(Writer):
             " ".join(f"{k} {v}" for k, v in self.gpx.xsi_schema_location.items()),
         )
 
-    def add_root_metadata(self) -> None:
-        """
-        Add metadata element to the GPX root element.
-        """
-        self.gpx_root = self.add_metadata(self.gpx_root, self.gpx.gpx.metadata)
-
-    def add_root_wpts(self) -> None:
-        """
-        Add wpt elements to the GPX root element.
-        """
-        for wpt in self.gpx.gpx.wpt:
-            self.gpx_root = self.add_wpt(self.gpx_root, wpt)
-
-    def add_root_rtes(self) -> None:
-        """
-        Add rte elements to the GPX root element.
-        """
-        for rte in self.gpx.gpx.rte:
-            self.gpx_root = self.add_rte(self.gpx_root, rte)
-
-    def add_root_trks(self) -> None:
-        """
-        Add trck elements to the GPX root element.
-        """
-        for trk in self.gpx.gpx.trk:
-            self.gpx_root = self.add_trk(self.gpx_root, trk)
-
-    def add_root_extensions(self) -> None:
-        """
-        Add extensions element to the GPX root element.
-        """
-        if self.gpx.gpx.extensions is not None:
-            self.gpx_root = self.add_extensions(
-                self.gpx_root,
-                self.gpx.gpx.extensions,
-                self.extensions_fields.get("gpx"),
-            )
-
     def gpx_to_string(self) -> str | None:
         """
         Convert Gpx instance to a string (the content of a .gpx file).
@@ -386,23 +343,31 @@ class GPXWriter(Writer):
 
         # Metadata
         if self.metadata_fields:
-            self.add_root_metadata()
+            self.gpx_root = self.add_metadata(self.gpx_root, self.gpx.gpx.metadata)
 
         # Way points
         if self.wpt_fields:
-            self.add_root_wpts()
+            for wpt in self.gpx.gpx.wpt:
+                self.gpx_root = self.add_wpt(self.gpx_root, wpt)
 
         # Rtes
         if self.rte_fields:
-            self.add_root_rtes()
+            for rte in self.gpx.gpx.rte:
+                self.gpx_root = self.add_rte(self.gpx_root, rte)
 
         # Trks
         if self.trk_fields:
-            self.add_root_trks()
+            for trk in self.gpx.gpx.trk:
+                self.gpx_root = self.add_trk(self.gpx_root, trk)
 
         # Extensions
         if self.extensions_fields.get("gpx"):
-            self.add_root_extensions()
+            if self.gpx.gpx.extensions is not None:
+                self.gpx_root = self.add_extensions(
+                    self.gpx_root,
+                    self.gpx.gpx.extensions,
+                    self.extensions_fields.get("gpx"),
+                )
 
         # Convert data to string
         self.gpx_string = ET.tostring(self.gpx_root, encoding="unicode")

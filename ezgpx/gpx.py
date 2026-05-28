@@ -984,6 +984,7 @@ class GPX:
         new_gpx.xsi_schema_location = {
             "http://www.topografix.com/GPX/1/1": "http://www.topografix.com/GPX/1/1/gpx.xsd"
         }
+        new_gpx._extensions_fields = {}
         new_gpx.gpx.version = "1.1"
         new_gpx.gpx.creator = "ezGPX"
         new_gpx.gpx.wpt = []
@@ -993,6 +994,7 @@ class GPX:
         for gpx in gpxs:
             new_gpx.xmlns |= gpx.xmlns
             new_gpx.xsi_schema_location |= gpx.xsi_schema_location
+            new_gpx._extensions_fields |= gpx._extensions_fields
             # new_gpx.gpx.metadata = new_gpx.gpx.metadata if new_gpx.gpx.metadata else gpx.gpx.metadata  # TODO how to merge metadata?
             if gpx.gpx.wpt:
                 new_gpx.gpx.wpt.extend(gpx.gpx.wpt)
@@ -1291,7 +1293,9 @@ class GPX:
             bounds_fields=bounds_fields,
             copyright_fields=copyright_fields,
             email_fields=email_fields,
-            extensions_fields=extensions_fields,
+            extensions_fields=(
+                extensions_fields if extensions_fields else self._extensions_fields
+            ),
             gpx_fields=gpx_fields,
             link_fields=link_fields,
             metadata_fields=metadata_fields,

@@ -44,16 +44,15 @@ class KMLParser(XMLParser):
 
         # Initialise XMLParser and parse KML file
         super().__init__(source, xml_schemas, xml_extensions_schemas)
-        self.parse()
 
     def find_precisions(self):
         """
         Find decimal precision of any type of value in a KML file (latitude, elevation...).
         """
         # Point
-        documents = self.xml_root.findall("Document", self.name_spaces)
-        placemarks = documents[0].findall("Placemark", self.name_spaces)
-        linestrings = placemarks[0].findall("LineString", self.name_spaces)
+        documents = self.xml_root.findall("Document", self.xmlns)
+        placemarks = documents[0].findall("Placemark", self.xmlns)
+        linestrings = placemarks[0].findall("LineString", self.xmlns)
         coordinates = self.find_text(linestrings[0], "coordinates")
 
         coordinates = coordinates.replace("\n", "").replace("\t", "")
@@ -106,7 +105,7 @@ class KMLParser(XMLParser):
         placemark_data["name"] = self.find_text(placemark, "name")
 
         placemark_data["linestrings_data"] = []
-        linestrings = placemark.findall("LineString", self.name_spaces)
+        linestrings = placemark.findall("LineString", self.xmlns)
         for linestring in linestrings:
             placemark_data["linestrings_data"].append(
                 self.find_text(linestring, "coordinates")
@@ -131,7 +130,7 @@ class KMLParser(XMLParser):
         # name = self.find_text(document, "name")
 
         placemmarks_data = []
-        placemarks = document.findall("Placemark", self.name_spaces)
+        placemarks = document.findall("Placemark", self.xmlns)
         for placemark in placemarks:
             placemmarks_data.append(self.parse_placemark(placemark))
 
@@ -141,7 +140,7 @@ class KMLParser(XMLParser):
         """
         Parse Document elements from KML file.
         """
-        documents = self.xml_root.findall("Document", self.name_spaces)
+        documents = self.xml_root.findall("Document", self.xmlns)
         for document in documents:
             placemarks_data = self.parse_document(document)
 

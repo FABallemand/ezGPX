@@ -88,7 +88,7 @@ class MatplotlibAnimPlotter(Plotter):
         ax = fig.gca()
 
         # Compute track boundaries
-        min_lat, min_lon, max_lat, max_lon = self._gpx.bounds()
+        min_lat, min_lon, max_lat, max_lon = [b.value for b in self._gpx.trkpt_bounds()]
 
         # Compute default offset
         delta_lat = abs(max_lat - min_lat)

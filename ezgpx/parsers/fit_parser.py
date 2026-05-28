@@ -29,7 +29,6 @@ class FitParser(Parser):
         """
         # Initialise Parser and parse FIT file
         super().__init__(source)
-        self.parse()
 
     def _semicircles_to_deg(self, semicircle_coord: list) -> list:
         """

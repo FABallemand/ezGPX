@@ -50,7 +50,6 @@ class GPXParser(XMLParser):
         """
         # Initialise XMLParser and parse GPX file
         super().__init__(source, xml_schemas, xml_extensions_schemas)
-        self.parse()
 
     def _find_precisions(self):
         """
@@ -183,10 +182,9 @@ class GPXParser(XMLParser):
             return {"attrib": {}, "elmts": e0.text}
 
         ext = list(extensions.iter())[1]
-        values = {ext.tag: {}}
-        values[ext.tag] = construct_dict(ext)
+        values = {ext.tag: construct_dict(ext)}
 
-        # Etensions fields are based on the first occurance of a type encountered in the file
+        # Etensions fields are based on the first occurence of a type encountered in the file
         if self.extensions_fields.get(element_type) is None:
             self.extensions_fields[element_type] = values
 
