@@ -30,8 +30,6 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 dependencies = [
-
-
   "lxml>=6.0.2",
   "xmlschema>=4.2.0",
   "importlib-resources>=6.5.2",
@@ -72,7 +70,7 @@ utils = [
   "folium>=0.20.0",
 ]
 tests = ["pytest>=9.0.2", "pytest-benchmark>=5.2.3"]
-doc = ["Sphinx>=9.0.4"]
+doc = ["Sphinx>=9.0.4", "sphinx-rtd-theme>=3.1.0"]
 
 [project.urls]
 Documentation = "https://ezgpx.readthedocs.io/en/latest/"

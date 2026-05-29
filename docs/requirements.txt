@@ -11,3 +11,4 @@ gmplot
 folium
 fitparse
 pytest
+sphinx-rtd-theme
