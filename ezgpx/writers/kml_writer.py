@@ -2,13 +2,13 @@
 This module contains the KMLWriter class.
 """
 
+import errno
 import os
 import warnings
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from ..complex_types import Gpx
-from .writer import Writer
+from .writer import GPXLike, Writer
 
 DEFAULT_NORMAL_STYLE = {"color": "ff0000ff", "width": 2, "fill": 0}
 
@@ -27,7 +27,7 @@ class KMLWriter(Writer):
 
     def __init__(
         self,
-        gpx: Gpx = None,
+        gpx: GPXLike = None,
         *,
         properties: bool = True,
         metadata: bool = True,  # unused
@@ -36,14 +36,12 @@ class KMLWriter(Writer):
         extensions: bool = True,
         ele: bool = True,
         time: bool = True,
-        precisions: dict = None,
-        time_format: str = None,
         styles: list[tuple[str, dict]] = None,
     ) -> None:
         """
         Initialise GPXWriter instance.
         """
-        super().__init__(gpx, precisions, time_format)
+        super().__init__(gpx)
 
         # Parameters
         self.properties: bool = properties
@@ -180,12 +178,16 @@ class KMLWriter(Writer):
         linestring_, _ = self.add_subelement_number(linestring_, "tessellate", 1)
         if self.ele:
             coordinates = self.gpx.to_csv(
-                dest=None, values=["lon", "lat", "ele"]
+                dest=None,
+                values=["lon", "lat", "ele"],
+                include_header=False,
             ).replace("\n", " ")
         else:
-            coordinates = self.gpx.to_csv(dest=None, values=["lon", "lat"]).replace(
-                "\n", " "
-            )
+            coordinates = self.gpx.to_csv(
+                dest=None,
+                values=["lon", "lat"],
+                include_header=False,
+            ).replace("\n", " ")
         linestring_, _ = self.add_subelement(linestring_, "coordinates", coordinates)
         return element
 
@@ -199,8 +201,16 @@ class KMLWriter(Writer):
         Returns:
             ET.Element: KML element.
         """
+        name = None
+        if self.gpx.gpx.metadata.name:
+            name = self.gpx.gpx.metadata.name
+        elif self.gpx.gpx.trk:
+            if self.gpx.gpx.trk[0].name:
+                name = self.gpx.gpx.trk[0].name
+
         placemark_ = ET.SubElement(element, "Placemark")
-        placemark_, _ = self.add_subelement(placemark_, "name", self.gpx.name())
+        if name:
+            placemark_, _ = self.add_subelement(placemark_, "name", name)
         placemark_, _ = self.add_subelement(placemark_, "styleUrl", "#stylemap")
         placemark_ = self.add_linestring(placemark_)
         return element
@@ -268,7 +278,6 @@ class KMLWriter(Writer):
 
         # Convert data to string
         self.kml_string = ET.tostring(self.kml_root, encoding="unicode")
-        # self.kml_string = ET.tostring(kml_root, encoding="utf-8")
 
         return self.kml_string
 
@@ -279,9 +288,8 @@ class KMLWriter(Writer):
         # Open/create KML file
         try:
             f = open(self.file_path, "w", encoding="utf-8")
-        except OSError:
-            warnings.warn("Could not open/read file: %s", self.file_path)
-            raise
+        except OSError as e:
+            raise OSError(f"Could not open or read file: {self.file_path}") from e
         # Write KML file
         with f:
             f.write('<?xml version="1.0" encoding="UTF-8"?>')
@@ -291,9 +299,7 @@ class KMLWriter(Writer):
         self,
         file_path: str,
         styles: Optional[list[tuple[str, dict]]] = None,
-        xml_schema: bool = False,
-        xml_extensions_schemas: bool = False,
-    ) -> bool:
+    ) -> None:
         """
         Handle writing.
 
@@ -301,20 +307,16 @@ class KMLWriter(Writer):
             file_path (str): Path to write the KML file.
             styles (Optional[list[tuple[str, dict]]], optional): List of
                 (style_id, style) tuples. Defaults to None.
-            xml_schema (bool, optional): Toggle schema verification
-                after writting. Defaults to False.
-            xml_extensions_schemas (bool, optional): TODO.
-                Defaults to False.
 
         Returns:
             bool: Return True if written file follows checked schemas,
                 False otherwise.
         """
-        # Handle path
         directory_path = os.path.dirname(os.path.realpath(file_path))
         if not os.path.exists(directory_path):
-            warnings.warn("Provided path does not exist")
-            return False
+            raise NotADirectoryError(
+                errno.ENOENT, os.strerror(errno.ENOENT), directory_path
+            )
         self.file_path = file_path
 
         # Update style
@@ -324,10 +326,3 @@ class KMLWriter(Writer):
         # Write .kml file
         self.gpx_to_string()
         self.write_gpx()
-
-        # Check XML schemas
-        res = True
-        if xml_schema or xml_extensions_schemas:
-            res = self.xml_schemas(xml_schema, xml_extensions_schemas)
-
-        return res

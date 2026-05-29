@@ -4,6 +4,7 @@ This module contains the Writer class.
 
 import warnings
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Protocol
 
@@ -13,6 +14,7 @@ from ..constants.precisions import (
 )
 
 
+@dataclass
 class GPXLike(Protocol):
     """Protocol for GPX objects."""
 

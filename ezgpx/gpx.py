@@ -311,7 +311,7 @@ class GPX:
         self._ele_data = "ele" in df.columns
         self._time_data = "time" in df.columns
         self._precisions = DEFAULT_PRECISION_DICT
-        self._time_format = DEFAULT_TIME_FORMAT  # TODO change?
+        self._time_format = DEFAULT_TIME_FORMAT
         self._extensions_fields = None
 
     ###############################################################################
@@ -862,23 +862,23 @@ class GPX:
         self.gpx.extensions = None  # Remove extensions from gpx
         self.gpx.metadata.extensions = None  # Remove extensions from metadata
         # Remove extensions from waypoints
-        if self.gpx.wpt is not None:
-            for pt in self.gpx.wpt:
-                pt.extensions = None
+        if self.gpx.wpt:
+            for wpt in self.gpx.wpt:
+                wpt.extensions = None
         # Remove extensions from routes
-        if self.gpx.rte is not None:
-            for rt in self.gpx.rte:
-                rt.extensions = None
+        if self.gpx.rte:
+            for rte in self.gpx.rte:
+                rte.extensions = None
         # Remove extensions from tracks, track segments and track points
-        if self.gpx.trk is not None:
-            for track in self.gpx.trk:
-                track.extensions = None
-                if track.trkseg is not None:
-                    for track_segment in track.trkseg:
-                        track_segment.extensions = None
-                        if track_segment.trkpt is not None:
-                            for track_point in track_segment.trkpt:
-                                track_point.extensions = None
+        if self.gpx.trk:
+            for trk in self.gpx.trk:
+                trk.extensions = None
+                if trk.trkseg:
+                    for trkseg in trk.trkseg:
+                        trkseg.extensions = None
+                        if trkseg.trkpt:
+                            for trkpt in trkseg.trkpt:
+                                trkpt.extensions = None
 
     ###############################################################################
     #### Error Correction #########################################################
@@ -995,7 +995,9 @@ class GPX:
             new_gpx.xmlns |= gpx.xmlns
             new_gpx.xsi_schema_location |= gpx.xsi_schema_location
             new_gpx._extensions_fields |= gpx._extensions_fields
-            # new_gpx.gpx.metadata = new_gpx.gpx.metadata if new_gpx.gpx.metadata else gpx.gpx.metadata  # TODO how to merge metadata?
+            # new_gpx.gpx.metadata = (
+            #     new_gpx.gpx.metadata if new_gpx.gpx.metadata else gpx.gpx.metadata
+            # )  # TODO how to merge metadata?
             if gpx.gpx.wpt:
                 new_gpx.gpx.wpt.extend(gpx.gpx.wpt)
             if gpx.gpx.rte:
@@ -1329,6 +1331,4 @@ class GPX:
         Returns:
             str | None: KML like string if path is set to None.
         """
-        return KMLWriter(
-            self.gpx, precisions=self._precisions, time_format=self._time_format
-        ).write(dest, styles)
+        return KMLWriter(self).write(dest, styles)

@@ -479,14 +479,14 @@ class TestGPX:
             False,
         )
 
-    # def test_to_kml(self, benchmark):  # TODO
-    #     gpx = GPX(os.path.join(REAL_FILES_DIR, "strava_run_1.gpx"))
-    #     benchmark(gpx.to_kml, "tmp/strava_run_1_test.kml", styles=None)
-    #     assert filecmp.cmp(
-    #         "tmp/strava_run_1_test.kml",
-    #         os.path.join(REFERENCE_FILES_DIR, "strava_run_1.kml"),
-    #         False,
-    #     )
+    def test_to_kml(self, benchmark):
+        gpx = GPX(os.path.join(SYNTHETIC_FILES_DIR, "all", "gpx.gpx"))
+        benchmark(gpx.to_kml, os.path.join(TMP_DIR, "gpx.kml"), styles=None)
+        assert filecmp.cmp(
+            os.path.join(TMP_DIR, "gpx.kml"),
+            os.path.join(REFERENCE_FILES_DIR, "gpx_all.kml"),
+            False,
+        )
 
     @pytest.mark.parametrize(
         "values, reference_file",
@@ -618,9 +618,7 @@ class TestGPX:
 
     # ==== Test ================================================================
 
-    @pytest.mark.skip(
-        reason="test"
-    )
+    @pytest.mark.skip(reason="test")
     def test_test(self, remove_tmp: bool = True):
         # Create temporary folder
         rmtree("tmp", True)

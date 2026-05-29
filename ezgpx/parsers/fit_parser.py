@@ -27,7 +27,6 @@ class FitParser(Parser):
             source (str | Path | IO[str] | IO[bytes] | bytes): Path to a
                 file or a file-like object to parse.
         """
-        # Initialise Parser and parse FIT file
         super().__init__(source)
 
     def _semicircles_to_deg(self, semicircle_coord: list) -> list:
